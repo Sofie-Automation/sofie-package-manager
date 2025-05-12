@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.52.0-alpha.4](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
+
+
+### Bug Fixes
+
+* add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/tv-automation-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
+* clean up logging ([9a5fc59](https://github.com/nrkno/tv-automation-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+* patch windows-drive-letter, replace wmic with fsutil ([bf1c016](https://github.com/nrkno/tv-automation-package-manager/commit/bf1c016c1de6a2037a91876db0051f2bfef44878))
+* replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/tv-automation-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
+
+
+
+
+
 # [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
 
 
