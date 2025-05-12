@@ -83,5 +83,8 @@
 			"eslint"
 		]
 	},
-	"packageManager": "yarn@4.1.1"
+	"packageManager": "yarn@4.1.1",
+	"resolutions": {
+		"windows-drive-letters@npm:^4.0.0": "patch:windows-drive-letters@npm%3A4.0.0#~/.yarn/patches/windows-drive-letters-npm-4.0.0-7868bcf5a2.patch"
+	}
 }

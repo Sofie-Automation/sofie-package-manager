@@ -13604,12 +13604,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"windows-drive-letters@npm:^4.0.0":
+"windows-drive-letters@npm:4.0.0":
   version: 4.0.0
   resolution: "windows-drive-letters@npm:4.0.0"
   dependencies:
     array-differ: "npm:^3.0.0"
   checksum: 10/82992a05e1f38211c5c338021f1d2a25d4e5eb7d5c5e407d421b7ee8d83e2d8b60d8d05f8601651fdbc0d447bc16cb6d03868086e5de4a8134c650e5844d1099
+  languageName: node
+  linkType: hard
+
+"windows-drive-letters@patch:windows-drive-letters@npm%3A4.0.0#~/.yarn/patches/windows-drive-letters-npm-4.0.0-7868bcf5a2.patch":
+  version: 4.0.0
+  resolution: "windows-drive-letters@patch:windows-drive-letters@npm%3A4.0.0#~/.yarn/patches/windows-drive-letters-npm-4.0.0-7868bcf5a2.patch::version=4.0.0&hash=3ac1c6"
+  dependencies:
+    array-differ: "npm:^3.0.0"
+  checksum: 10/b51ce7a3b5e0e5805739d944fcade0b2905d01f4d93b2cefa4f7238daf5e5ab999a54fd6dbb22e11c695a3e6f8ba6b5b57c3c21376f56c94b2e9249fbc55db2f
   languageName: node
   linkType: hard
 
