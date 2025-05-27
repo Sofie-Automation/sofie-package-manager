@@ -1,16 +1,16 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     reviewers:
-      - "@nrkno/sofie-ops"
-  - package-ecosystem: "npm"
-    directory: "/"
+      - '@Sofie-Automation/operations'
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     reviewers:
-      - "@nrkno/sofie-ops"
+      - '@Sofie-Automation/operations'
     # Only create security updates
     open-pull-requests-limit: 0

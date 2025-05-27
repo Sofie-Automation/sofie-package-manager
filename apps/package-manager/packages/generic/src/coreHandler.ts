@@ -233,7 +233,7 @@ export class CoreHandler {
 
 			configManifest: PACKAGE_MANAGER_DEVICE_CONFIG,
 
-			documentationUrl: 'https://github.com/nrkno/sofie-package-manager',
+			documentationUrl: 'https://github.com/Sofie-Automation/sofie-package-manager',
 
 			versions: this._getVersions(),
 		}

@@ -20,8 +20,8 @@ jobs:
       - name: Determine if images should be published to DockerHub
         id: dockerhub
         run: |
-          # check if a release branch, or master, or a tag
-          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == refs/tags/* ]]
+          # check if a release branch, or main, or a tag
+          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == refs/tags/* ]]
           then
             DOCKERHUB_PUBLISH="1"
           else
@@ -132,7 +132,7 @@ jobs:
           push: true
           provenance: false
           labels: ${{ steps.http-server-ghcr-tag.outputs.labels }}
-          tags: "${{ steps.http-server-ghcr-tag.outputs.tags }}"
+          tags: '${{ steps.http-server-ghcr-tag.outputs.tags }}'
 
       - name: Build and push http-server to DockerHub
         if: steps.check-build-and-push.outputs.enable == 'true' && steps.dockerhub.outputs.dockerhub-publish == '1'
@@ -143,7 +143,7 @@ jobs:
           push: true
           provenance: false
           labels: ${{ steps.http-server-dockerhub-tag.outputs.labels }}
-          tags: "${{ steps.http-server-dockerhub-tag.outputs.tags }}"
+          tags: '${{ steps.http-server-dockerhub-tag.outputs.tags }}'
 
       - name: Build and push quantel-http-transformer-proxy to GHCR
         if: steps.check-build-and-push.outputs.enable == 'true' && steps.check-ghcr.outputs.enable == 'true'
@@ -154,7 +154,7 @@ jobs:
           push: true
           provenance: false
           labels: ${{ steps.quantel-ghcr-tag.outputs.labels }}
-          tags: "${{ steps.quantel-ghcr-tag.outputs.tags }}"
+          tags: '${{ steps.quantel-ghcr-tag.outputs.tags }}'
 
       - name: Build and push quantel-http-transformer-proxy to DockerHub
         if: steps.check-build-and-push.outputs.enable == 'true' && steps.dockerhub.outputs.dockerhub-publish == '1'
@@ -165,17 +165,17 @@ jobs:
           push: true
           provenance: false
           labels: ${{ steps.quantel-dockerhub-tag.outputs.labels }}
-          tags: "${{ steps.quantel-dockerhub-tag.outputs.tags }}"
+          tags: '${{ steps.quantel-dockerhub-tag.outputs.tags }}'
 
   trivy-scanning-http-server:
     uses: nrkno/github-workflow-docker-build-push/.github/workflows/workflow.yaml@v4.3.0
     with:
       runs-on: "['ubuntu-latest']"
       registry-url: ghcr.io
-      name: nrkno/sofie-package-manager
+      name: sofie-automation/sofie-package-manager
       # Don't actually push any images, this is just for trivy scanning for now
       push: false
-      trivy-severity: "CRITICAL"
+      trivy-severity: 'CRITICAL'
       trivy-summary-enabled: true
       trivy-sbom-enabled: true
       dockerfile: apps/http-server/app/Dockerfile
@@ -189,10 +189,10 @@ jobs:
     with:
       runs-on: "['ubuntu-latest']"
       registry-url: ghcr.io
-      name: nrkno/sofie-package-manager
+      name: sofie-automation/sofie-package-manager
       # Don't actually push any images, this is just for trivy scanning for now
       push: false
-      trivy-severity: "CRITICAL"
+      trivy-severity: 'CRITICAL'
       trivy-summary-enabled: true
       trivy-sbom-enabled: true
       dockerfile: apps/quantel-http-transformer-proxy/app/Dockerfile

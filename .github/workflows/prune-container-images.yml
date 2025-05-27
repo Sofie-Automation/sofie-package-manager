@@ -1,17 +1,17 @@
-name: "Prune container images"
+name: 'Prune container images'
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 15 * * *"
+    - cron: '0 15 * * *'
 
 jobs:
   prune-container-images:
-    uses: nrkno/sofie-github-workflows/.github/workflows/prune-container-images.yml@main
+    uses: Sofie-Automation/sofie-github-workflows/.github/workflows/prune-container-images.yml@main
     strategy:
       max-parallel: 1
       matrix:
-        repo: [ http-server, quantel-http-transformer-proxy ]
+        repo: [http-server, quantel-http-transformer-proxy]
     with:
       dry-run: false
       prune-untagged: true
