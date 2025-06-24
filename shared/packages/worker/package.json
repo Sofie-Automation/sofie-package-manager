@@ -40,7 +40,7 @@
 		"tv-automation-quantel-gateway-client": "4.0.0",
 		"type-fest": "3.13.1",
 		"windows-network-drive": "^4.0.1",
-		"ws": "^8.12.0",
+		"ws": "^8.17.1",
 		"xml-js": "^1.6.11"
 	},
 	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",

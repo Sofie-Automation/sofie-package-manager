@@ -699,7 +699,7 @@ __metadata:
     portfinder: "npm:^1.0.32"
     rimraf: "npm:^5.0.5"
     tslib: "npm:^2.1.0"
-    ws: "npm:^8.12.0"
+    ws: "npm:^8.17.1"
     yargs: "npm:^17.7.2"
   languageName: unknown
   linkType: soft
@@ -2150,7 +2150,7 @@ __metadata:
     rimraf: "npm:^5.0.5"
     underscore: "npm:^1.12.0"
     winston: "npm:^3.5.1"
-    ws: "npm:^8.12.0"
+    ws: "npm:^8.17.1"
     yargs: "npm:^17.7.2"
   peerDependencies:
     "@sofie-automation/shared-lib": "*"
@@ -2196,7 +2196,7 @@ __metadata:
     tv-automation-quantel-gateway-client: "npm:4.0.0"
     type-fest: "npm:3.13.1"
     windows-network-drive: "npm:^4.0.1"
-    ws: "npm:^8.12.0"
+    ws: "npm:^8.17.1"
     xml-js: "npm:^1.6.11"
   peerDependencies:
     "@sofie-automation/shared-lib": "*"
@@ -8275,7 +8275,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:*, jest@npm:^29.3.1":
+"jest@npm:*, jest@npm:^29.7.0":
   version: 29.7.0
   resolution: "jest@npm:29.7.0"
   dependencies:
@@ -9335,11 +9335,11 @@ __metadata:
 
 "micromatch@npm:4.0.5, micromatch@npm:^4.0.4, micromatch@npm:^4.0.5":
   version: 4.0.5
-  resolution: "micromatch@npm:4.0.5"
+  resolution: "micromatch@npm:4.0.8"
   dependencies:
     braces: "npm:^3.0.2"
     picomatch: "npm:^2.3.1"
-  checksum: 10/a749888789fc15cac0e03273844dbd749f9f8e8d64e70c564bcf06a033129554c789bb9e30d7566d7ff6596611a08e58ac12cf2a05f6e3c9c47c50c4c7e12fa2
+  checksum: 10/6bf2a01672e7965eb9941d1f02044fad2bd12486b5553dc1116ff24c09a8723157601dc992e74c911d896175918448762df3b3fd0a6b61037dd1a9766ddfbf58
   languageName: node
   linkType: hard
 
@@ -10610,7 +10610,7 @@ __metadata:
     find: "npm:^0.3.0"
     fs-extra: "npm:^11.1.0"
     glob: "npm:^10.3.10"
-    jest: "npm:^29.3.1"
+    jest: "npm:^29.7.0"
     json-schema-to-typescript: "npm:^10.1.5"
     lerna: "npm:^6.6.1"
     lint-staged: "npm:^15.2.2"
@@ -13785,9 +13785,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.12.0":
-  version: 8.18.0
-  resolution: "ws@npm:8.18.0"
+"ws@npm:^8.17.1":
+  version: 8.18.2
+  resolution: "ws@npm:8.18.2"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -13796,7 +13796,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10/70dfe53f23ff4368d46e4c0b1d4ca734db2c4149c6f68bc62cb16fc21f753c47b35fcc6e582f3bdfba0eaeb1c488cddab3c2255755a5c3eecb251431e42b3ff6
+  checksum: 10/018e04ec95561d88248d53a2eaf094b4ae131e9b062f2679e6e8a62f04649bc543448f1e038125225ac6bbb25f54c1e65d7a2cc9dbc1e28b43e5e6b7162ad88e
   languageName: node
   linkType: hard
 
