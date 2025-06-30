@@ -48,4 +48,4 @@ WORKDIR /src/apps/package-manager/app
 ENV package-manager_PORT=8070
 EXPOSE 8070
 
-CMD ["yarn", "start"]
+ENTRYPOINT ["yarn", "start"]

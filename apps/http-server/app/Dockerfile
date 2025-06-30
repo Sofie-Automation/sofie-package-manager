@@ -51,4 +51,4 @@ ENV HTTP_SERVER_PORT=8080
 ENV HTTP_SERVER_BASE_PATH="/data"
 EXPOSE 8080
 
-CMD ["yarn", "start"]
+ENTRYPOINT ["yarn", "start"]
