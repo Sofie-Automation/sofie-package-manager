@@ -20,17 +20,18 @@ import {
 	Expectation,
 	PackageContainerExpectation,
 	assertNever,
-	Reason,
 	MonitorId,
 	rebaseUrl,
 } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
-import { fetchWithController, fetchWithTimeout } from './lib/fetch'
-import FormData from 'form-data'
+import { fetchWithController } from './lib/fetch'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 
-/** Accessor handle for accessing files in a local folder */
+/**
+ * Accessor handle for accessing files at an HTTP endpoint
+ * Note: This class supports read-only access. For write, use HTTPProxy.
+ */
 export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
 	static readonly type = 'http'
 	private content: {
@@ -38,7 +39,7 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		onlyContainerAccess?: boolean
 		path?: string
 	}
-	private workOptions: Expectation.WorkOptions.RemoveDelay
+	// private workOptions: unknown // no workOptions supported
 	private accessor: AccessorOnPackage.HTTP
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.HTTP>) {
@@ -48,15 +49,12 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		})
 		this.accessor = arg.accessor
 		this.content = arg.content
-		this.workOptions = arg.workOptions
+		// this.workOptions = arg.workOptions
 
 		// Verify content data:
 		if (!this.content.onlyContainerAccess) {
 			if (!this._getFilePath()) throw new Error('Bad input data: neither content.path nor accessor.url are set!')
 		}
-
-		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
-			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
 		return defaultDoYouSupportAccess(worker, accessor)
@@ -132,20 +130,10 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 
 		return this.convertHeadersToVersion(header.headers)
 	}
-	async removePackage(reason: string): Promise<void> {
-		if (this.workOptions.removeDelay) {
-			await this.delayPackageRemoval(this.workOptions.removeDelay)
-			this.logOperation(
-				`Remove package: Delay remove package "${this.packageName}", delay: ${this.workOptions.removeDelay} (${reason})`
-			)
-		} else {
-			await this.removeMetadata()
-			if (await this.deletePackageIfExists(this.fullUrl)) {
-				this.logOperation(`Remove package: Removed file "${this.packageName}" (${reason})`)
-			} else {
-				this.logOperation(`Remove package: File already removed "${this.packageName}" (${reason})`)
-			}
-		}
+	async removePackage(_reason: string): Promise<void> {
+		await this.removeMetadata()
+
+		// Nothing to remove, HTTP is read-only
 	}
 	async getPackageReadStream(): Promise<PackageReadStream> {
 		const fetch = fetchWithController(this.fullUrl)
@@ -177,7 +165,6 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		await this.clearPackageRemoval()
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
@@ -195,27 +182,10 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		// Not supported
 	}
 
-	async runCronJob(packageContainerExp: PackageContainerExpectation): Promise<AccessorHandlerRunCronJobResult> {
-		let badReason: Reason | null = null
-		const cronjobs = Object.keys(packageContainerExp.cronjobs) as (keyof PackageContainerExpectation['cronjobs'])[]
-		for (const cronjob of cronjobs) {
-			if (cronjob === 'interval') {
-				// ignore
-			} else if (cronjob === 'cleanup') {
-				badReason = await this.removeDuePackages()
-				const options = packageContainerExp.cronjobs[cronjob]
-				badReason = await this.removeDuePackages()
-				if (!badReason && options?.cleanFileAge) {
-					// Not supported, since we aren't able to properly list all untracked files on a generic http-server
-				}
-			} else {
-				// Assert that cronjob is of type "never", to ensure that all types of cronjobs are handled:
-				assertNever(cronjob)
-			}
-		}
-
-		if (!badReason) return { success: true }
-		else return { success: false, knownReason: false, reason: badReason }
+	async runCronJob(_packageContainerExp: PackageContainerExpectation): Promise<AccessorHandlerRunCronJobResult> {
+		return {
+			success: true,
+		} // not applicable, since the HTTP Accessor is readonly
 	}
 	async setupPackageContainerMonitors(
 		packageContainerExp: PackageContainerExpectation
@@ -324,136 +294,6 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		}
 	}
 
-	async delayPackageRemoval(ttl: number): Promise<void> {
-		const packagesToRemove = await this.getPackagesToRemove()
-
-		const filePath = this.path
-
-		// Search for a pre-existing entry:
-		let found = false
-		for (const entry of packagesToRemove) {
-			if (entry.filePath === filePath) {
-				// extend the TTL if it was found:
-				entry.removeTime = Date.now() + ttl
-
-				found = true
-				break
-			}
-		}
-		if (!found) {
-			packagesToRemove.push({
-				filePath: filePath,
-				removeTime: Date.now() + ttl,
-			})
-		}
-
-		await this.storePackagesToRemove(packagesToRemove)
-	}
-	/** Clear a scheduled later removal of a package */
-	async clearPackageRemoval(): Promise<void> {
-		const packagesToRemove = await this.getPackagesToRemove()
-
-		const filePath = this.path
-
-		let found = false
-		for (let i = 0; i < packagesToRemove.length; i++) {
-			const entry = packagesToRemove[i]
-			if (entry.filePath === filePath) {
-				packagesToRemove.splice(i, 1)
-				found = true
-				break
-			}
-		}
-		if (found) {
-			await this.storePackagesToRemove(packagesToRemove)
-		}
-	}
-	/** Remove any packages that are due for removal */
-	async removeDuePackages(): Promise<Reason | null> {
-		let packagesToRemove = await this.getPackagesToRemove()
-
-		const removedFilePaths: string[] = []
-		for (const entry of packagesToRemove) {
-			// Check if it is time to remove the package:
-			if (entry.removeTime < Date.now()) {
-				// it is time to remove the package:
-				const fullUrl: string = rebaseUrl(this.baseUrl, entry.filePath)
-
-				await this.deletePackageIfExists(this.getMetadataPath(fullUrl))
-				await this.deletePackageIfExists(fullUrl)
-				removedFilePaths.push(entry.filePath)
-			}
-		}
-
-		// Fetch again, to decrease the risk of race-conditions:
-		packagesToRemove = await this.getPackagesToRemove()
-		let changed = false
-		// Remove paths from array:
-		for (let i = 0; i < packagesToRemove.length; i++) {
-			const entry = packagesToRemove[i]
-			if (removedFilePaths.includes(entry.filePath)) {
-				packagesToRemove.splice(i, 1)
-				changed = true
-				break
-			}
-		}
-		if (changed) {
-			await this.storePackagesToRemove(packagesToRemove)
-		}
-		return null
-	}
-	/** Returns false if it doesn't exist */
-	private async deletePackageIfExists(url: string): Promise<boolean> {
-		const result = await fetchWithTimeout(url, {
-			method: 'DELETE',
-		})
-		if (result.status === 404) return false // that's ok
-		if (this.isBadHTTPResponseCode(result.status)) {
-			const text = await result.text()
-			throw new Error(
-				`deletePackageIfExists: Bad response: [${result.status}]: ${result.statusText}, DELETE ${this.fullUrl}, ${text}`
-			)
-		}
-		return true
-	}
-	/** Full path to the file containing deferred removals */
-	private get deferRemovePackagesPath(): string {
-		return rebaseUrl(this.baseUrl, '__removePackages.json')
-	}
-	/** */
-	private async getPackagesToRemove(): Promise<DelayPackageRemovalEntry[]> {
-		return (await this.fetchJSON(this.deferRemovePackagesPath)) ?? []
-	}
-	private async storePackagesToRemove(packagesToRemove: DelayPackageRemovalEntry[]): Promise<void> {
-		await this.storeJSON(this.deferRemovePackagesPath, packagesToRemove)
-	}
-	private async fetchJSON(url: string): Promise<any | undefined> {
-		const result = await fetchWithTimeout(url)
-		if (result.status === 404) return undefined
-		if (this.isBadHTTPResponseCode(result.status)) {
-			const text = await result.text()
-			throw new Error(
-				`getPackagesToRemove: Bad response: [${result.status}]: ${result.statusText}, GET ${url}, ${text}`
-			)
-		}
-		return result.json()
-	}
-	private async storeJSON(url: string, data: any): Promise<void> {
-		const formData = new FormData()
-		formData.append('text', JSON.stringify(data))
-		const result = await fetchWithTimeout(url, {
-			method: 'POST',
-			body: formData,
-		})
-		if (this.isBadHTTPResponseCode(result.status)) {
-			const text = await result.text()
-			throw new Error(`storeJSON: Bad response: [${result.status}]: ${result.statusText}, POST ${url}, ${text}`)
-		}
-	}
-	/** Full path to the metadata file */
-	private getMetadataPath(fullUrl: string) {
-		return fullUrl + '_metadata.json'
-	}
 	private _getFilePath(): string | undefined {
 		return this.accessor.url || this.content.path
 	}
@@ -466,11 +306,4 @@ interface HTTPHeaders {
 	contentLength: string | null
 	lastModified: string | null
 	etags: string | null
-}
-
-interface DelayPackageRemovalEntry {
-	/** Local file path */
-	filePath: string
-	/** Unix timestamp for when it's clear to remove the file */
-	removeTime: number
 }
