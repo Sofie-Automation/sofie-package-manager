@@ -1,0 +1,69 @@
+diff --git a/out/index.js b/out/index.js
+index 38c1f7c23bc4e350a90de3c13b86a7b498371cb6..50051c1452be47b65ebef3f1fe9185b386f72b22 100644
+--- a/out/index.js
++++ b/out/index.js
+@@ -4,7 +4,7 @@ const cp = require("child_process");
+ const arrayDiff = require("array-differ");
+ const utils = require("./utils");
+ const ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+-const COMMAND = 'wmic logicaldisk get caption';
++const COMMAND = 'fsutil fsinfo drives';
+ const IS_WINDOWS = process.platform === 'win32';
+ async function free() {
+     validateWindowsPlatform();
+@@ -20,12 +20,12 @@ exports.freeSync = freeSync;
+ async function used() {
+     validateWindowsPlatform();
+     const stdout = await runCommand();
+-    return utils.getLettersFromTable(stdout);
++    return utils.getLettersFromCommandOutput(stdout);
+ }
+ exports.used = used;
+ function usedSync() {
+     validateWindowsPlatform();
+-    return utils.getLettersFromTable(runCommandSync());
++    return utils.getLettersFromCommandOutput(runCommandSync());
+ }
+ exports.usedSync = usedSync;
+ async function randomFree() {
+diff --git a/out/utils.d.ts b/out/utils.d.ts
+index 5d3d28da546ce557e0af22e4a7f77bdccb0f58d6..33f8ad483ae21da5e821508a101ad9386de14a5d 100644
+--- a/out/utils.d.ts
++++ b/out/utils.d.ts
+@@ -1 +1,2 @@
+ export declare function getLettersFromTable(stdout: string): string[];
++export declare function getLettersFromCommandOutput(stdout: string): string[];
+diff --git a/out/utils.js b/out/utils.js
+index 5be04ec23538c9f1e2f4479234ea21cb848bd2ca..7f7e7afc4424337bacd3fa85cda988711a0f903b 100644
+--- a/out/utils.js
++++ b/out/utils.js
+@@ -9,3 +9,17 @@ function getLettersFromTable(stdout) {
+     }, []);
+ }
+ exports.getLettersFromTable = getLettersFromTable;
++
++function getLettersFromCommandOutput(stdout) {
++	const letters = []
++	const matches = stdout.match(/\w:\\/g) ?? []
++
++	for (const match of matches) {
++		const m = match.match(/(\w):\\/)
++		if (!m) continue
++		letters.push(m[1])
++	}
++
++	return letters
++}
++exports.getLettersFromCommandOutput = getLettersFromCommandOutput;
+diff --git a/test.js b/test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..21468972acd35b15f7a2ba50d99758a8de326e28
+--- /dev/null
++++ b/test.js
+@@ -0,0 +1,6 @@
++
++const a = require('./out/index.js')
++
++
++console.log('freeSync', a.freeSync())
++console.log('usedSync', a.usedSync())

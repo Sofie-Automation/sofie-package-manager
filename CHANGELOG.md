@@ -3,6 +3,97 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
+
+**Note:** Version bump only for package package-manager-monorepo
+
+
+
+
+
+# [1.52.0-alpha.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
+
+**Note:** Version bump only for package package-manager-monorepo
+
+
+
+
+
+# [1.52.0-alpha.4](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
+
+
+### Bug Fixes
+
+* add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/tv-automation-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
+* clean up logging ([9a5fc59](https://github.com/nrkno/tv-automation-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+* patch windows-drive-letter, replace wmic with fsutil ([bf1c016](https://github.com/nrkno/tv-automation-package-manager/commit/bf1c016c1de6a2037a91876db0051f2bfef44878))
+* replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/tv-automation-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
+
+
+
+
+
+# [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
+
+
+### Bug Fixes
+
+* worker on linux ([e25b172](https://github.com/nrkno/tv-automation-package-manager/commit/e25b17271a53cdaad199aa89143f535d52ed3356))
+
+
+
+
+
+# [1.52.0-alpha.2](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
+
+
+### Bug Fixes
+
+* update koa to 2.16.1 to resolve CVE-2025-25200 ([7b4cf05](https://github.com/nrkno/tv-automation-package-manager/commit/7b4cf0527db46eb516b65ecb74845b3a8441811e))
+
+
+### Features
+
+* **worker:** when appContainerURL is not specified, run standalone, for external management ([7feb156](https://github.com/nrkno/tv-automation-package-manager/commit/7feb1569d1a3898186811731ff27c4bea209bc33))
+
+
+
+
+
+# [1.52.0-alpha.1](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* add .skipEvaluationCount property ([1b0246b](https://github.com/nrkno/tv-automation-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
+* add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/tv-automation-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
+* allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/tv-automation-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
+
+
+### Reverts
+
+* Revert "chore: modify MESSAGE_TIMEOUT to 30s, tor troubleshooting" ([61bf908](https://github.com/nrkno/tv-automation-package-manager/commit/61bf908d9031614a2e101ca6ae372aaaddfad3af))
+
+
+
+# [1.52.0-alpha.0](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
+
+
+### Bug Fixes
+
+* compatibility with Sofie Core R52 ([8864bfd](https://github.com/nrkno/tv-automation-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
+* package manager not following publication rules ([92c306c](https://github.com/nrkno/tv-automation-package-manager/commit/92c306c06d49e8d5debc423e49123306ee4dfa6b))
+
+
+### Features
+
+* add more dockerfiles ([46d34ff](https://github.com/nrkno/tv-automation-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
+* rework ci building to build additional packages and rely on build matrix ([420bb70](https://github.com/nrkno/tv-automation-package-manager/commit/420bb70c7d9b6b2ce5d4a7a3df63f119578d5b11))
+
+
+
+
+
 # [1.51.0-alpha.2](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 

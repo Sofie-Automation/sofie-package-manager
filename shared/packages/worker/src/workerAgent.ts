@@ -50,6 +50,7 @@ import { IWorkInProgress } from './worker/lib/workInProgress'
 import { BaseWorker } from './worker/worker'
 import { GenericWorker } from './worker/workers/genericWorker/genericWorker'
 import { WorkforceAPI } from './workforceApi'
+import { DummyAppContainerAPI, NoClientConnectionOptions } from './dummyAppContainerApi'
 
 /** The WorkerAgent is a front for a Worker (@see GenericWorker).
  * It is intended to be the main class in its worker-process, and handles things like communication with the WorkForce or the Expectation-Manager
@@ -64,7 +65,7 @@ export class WorkerAgent {
 	private currentJobs: CurrentJob[] = []
 	public readonly id: WorkerAgentId
 	private workForceConnectionOptions: ClientConnectionOptions
-	private appContainerConnectionOptions: ClientConnectionOptions
+	private appContainerConnectionOptions: ClientConnectionOptions | NoClientConnectionOptions
 
 	private expectationManagers: Map<
 		ExpectationManagerId,
@@ -100,6 +101,27 @@ export class WorkerAgent {
 		this.logger = logger.category('WorkerAgent')
 		this.id = config.worker.workerId
 
+		this.workForceConnectionOptions = this.config.worker.workforceURL
+			? {
+					type: 'websocket',
+					url: this.config.worker.workforceURL,
+			  }
+			: {
+					type: 'internal',
+			  }
+		this.appContainerConnectionOptions = !this.config.worker.appContainerURL
+			? {
+					type: 'none',
+			  }
+			: this.config.worker.appContainerURL === 'internal'
+			? {
+					type: 'internal',
+			  }
+			: {
+					type: 'websocket',
+					url: this.config.worker.appContainerURL,
+			  }
+
 		this.workforceAPI = new WorkforceAPI(this.id, this.logger)
 		this.workforceAPI.on('disconnected', () => {
 			this.logger.warn('Worker: Workforce disconnected')
@@ -127,34 +149,22 @@ export class WorkerAgent {
 			this.logger.error(`WorkerAgent: WorkforceAPI error event: ${stringifyError(err)}`)
 		})
 
-		this.appContainerAPI = new AppContainerAPI(this.id, this.logger)
-		this.appContainerAPI.on('disconnected', () => {
-			this.logger.warn('Worker: AppContainer disconnected')
-		})
-		this.appContainerAPI.on('connected', () => {
-			this.logger.info('Worker: AppContainer connected')
-			this.initAppContainerAPIPromise?.resolve() // To finish the init() function
-		})
-		this.appContainerAPI.on('error', (err) => {
-			this.logger.error(`WorkerAgent: AppContainerAPI error event: ${stringifyError(err)}`)
-		})
+		if (this.appContainerConnectionOptions.type === 'none') {
+			this.appContainerAPI = new DummyAppContainerAPI(this.id, this.logger)
+		} else {
+			this.appContainerAPI = new AppContainerAPI(this.id, this.logger)
+			this.appContainerAPI.on('disconnected', () => {
+				this.logger.warn('Worker: AppContainer disconnected')
+			})
+			this.appContainerAPI.on('connected', () => {
+				this.logger.info('Worker: AppContainer connected')
+				this.initAppContainerAPIPromise?.resolve() // To finish the init() function
+			})
+			this.appContainerAPI.on('error', (err) => {
+				this.logger.error(`WorkerAgent: AppContainerAPI error event: ${stringifyError(err)}`)
+			})
+		}
 
-		this.workForceConnectionOptions = this.config.worker.workforceURL
-			? {
-					type: 'websocket',
-					url: this.config.worker.workforceURL,
-			  }
-			: {
-					type: 'internal',
-			  }
-		this.appContainerConnectionOptions = this.config.worker.appContainerURL
-			? {
-					type: 'websocket',
-					url: this.config.worker.appContainerURL,
-			  }
-			: {
-					type: 'internal',
-			  }
 		this.isOnlyForCriticalExpectations = this.config.worker.pickUpCriticalExpectationsOnly
 		// Todo: Different types of workers:
 		this._worker = new GenericWorker(
@@ -176,7 +186,7 @@ export class WorkerAgent {
 					customTimeout: number | undefined,
 					cb: (current: any | undefined) => Promise<any> | any
 				) => {
-					// First, aquire a lock to the data, so that noone else can read/write to it:
+					// First, acquire a lock to the data, so that no-one else can read/write to it:
 					const { lockId, current } = await this.appContainerAPI.workerStorageWriteLock(dataId, customTimeout)
 					try {
 						// Then, execute the callback:
@@ -223,20 +233,26 @@ export class WorkerAgent {
 		if (this.appContainerConnectionOptions.type === 'websocket') {
 			this.logger.info(`Worker: Connecting to AppContainer at "${this.appContainerConnectionOptions.url}"`)
 		}
-		const pAppContainer = new Promise<void>((resolve, reject) => {
-			this.initAppContainerAPIPromise = { resolve, reject }
-		})
-		await this.appContainerAPI.init(this.appContainerConnectionOptions, {
-			setLogLevel: async (logLevel: LogLevel) => this.setLogLevel(logLevel),
-			_debugKill: async () => this._debugKill(),
 
-			doYouSupportExpectation: async (exp: Expectation.Any) => this.doesWorkerSupportExpectation(exp),
-			doYouSupportPackageContainer: async (packageContainer: PackageContainerExpectation) =>
-				this.doesWorkerSupportPackageContainer(packageContainer),
-			setSpinDownTime: async (spinDownTime: number) => this.setSpinDownTime(spinDownTime),
-		})
-		// Wait for this.appContainerAPI to be ready before continuing:
-		await pAppContainer
+		if (
+			this.appContainerConnectionOptions.type === 'internal' ||
+			this.appContainerConnectionOptions.type === 'websocket'
+		) {
+			const pAppContainer = new Promise<void>((resolve, reject) => {
+				this.initAppContainerAPIPromise = { resolve, reject }
+			})
+			await this.appContainerAPI.init(this.appContainerConnectionOptions, {
+				setLogLevel: async (logLevel: LogLevel) => this.setLogLevel(logLevel),
+				_debugKill: async () => this._debugKill(),
+
+				doYouSupportExpectation: async (exp: Expectation.Any) => this.doesWorkerSupportExpectation(exp),
+				doYouSupportPackageContainer: async (packageContainer: PackageContainerExpectation) =>
+					this.doesWorkerSupportPackageContainer(packageContainer),
+				setSpinDownTime: async (spinDownTime: number) => this.setSpinDownTime(spinDownTime),
+			})
+			// Wait for this.appContainerAPI to be ready before continuing:
+			await pAppContainer
+		}
 
 		// Connect to WorkForce:
 		if (this.workForceConnectionOptions.type === 'websocket') {
@@ -298,7 +314,7 @@ export class WorkerAgent {
 		this.appContainerAPI.hook(hook)
 	}
 
-	/** Keep track of the promise retorned by fcn and when it's resolved, to determine how busy we are */
+	/** Keep track of the promise returned by fcn and when it's resolved, to determine how busy we are */
 	// private async setBusy<T>(fcn: () => Promise<T>): Promise<T> {
 	// 	this._busyMethodCount++
 	// 	try {
@@ -427,7 +443,7 @@ export class WorkerAgent {
 		const expectationManager = this.expectationManagers.get(managerId)
 		if (!expectationManager) {
 			this.logger.error(
-				`Worker "${this.id}" could not start job for expectation (${exp.id}), because it could not find expecation manager "${managerId}"`
+				`Worker "${this.id}" could not start job for expectation (${exp.id}), because it could not find expectation manager "${managerId}"`
 			)
 
 			throw new Error(`ExpectationManager "${managerId}" not found`)
@@ -438,7 +454,7 @@ export class WorkerAgent {
 			this.logger.warn(
 				`createNewJobForExpectation called, even though there are ${
 					this.currentJobs.length
-				} current jobs. Startcost now: ${this.getStartCost(exp).cost}, spcified cost=${
+				} current jobs. StartCost now: ${this.getStartCost(exp).cost}, specified cost=${
 					cost.cost
 				}, specified startCost=${cost.startCost}`
 			)
@@ -502,14 +518,14 @@ export class WorkerAgent {
 		)
 
 		try {
-			const workInProgress = await this.makeWorkerWorkOnJobForExpecation(managerId, currentJob, exp, timeout)
+			const workInProgress = await this.makeWorkerWorkOnJobForExpectation(managerId, currentJob, exp, timeout)
 
 			return {
 				wipId: currentJob.wipId,
 				properties: workInProgress.properties,
 			}
 		} catch (err) {
-			// makeWorkerWorkOnExpecation() / _worker.workOnExpectation() failed.
+			// makeWorkerWorkOnExpectation() / _worker.workOnExpectation() failed.
 
 			this.removeJob(currentJob)
 			this.logger.warn(
@@ -520,7 +536,7 @@ export class WorkerAgent {
 		}
 	}
 
-	private async makeWorkerWorkOnJobForExpecation(
+	private async makeWorkerWorkOnJobForExpectation(
 		managerId: ExpectationManagerId,
 		job: CurrentJob,
 		exp: Expectation.Any,
@@ -790,10 +806,13 @@ export class WorkerAgent {
 						}, 200)
 					})
 				try {
-					const startTime = performance.now()
+					const operationStartTime = performance.now()
+
 					const result = await ((fcn as any)(...args) as ReturnType<typeof fcn>)
 
-					this.logger.debug(`Operation "${key}" took ${Math.floor(performance.now() - startTime)}ms`)
+					const operationDuration = Math.floor((performance.now() - operationStartTime) * 10) / 10
+
+					this.logger.silly(`Operation "${key}" took ${operationDuration}ms`)
 
 					let knownReason = true
 					if (result) {

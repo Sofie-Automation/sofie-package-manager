@@ -3,6 +3,65 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
+
+**Note:** Version bump only for package @sofie-package-manager/expectation-manager
+
+
+
+
+
+# [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
+
+**Note:** Version bump only for package @sofie-package-manager/expectation-manager
+
+
+
+
+
+# [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
+
+
+### Bug Fixes
+
+* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+
+
+
+
+
+# [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
+
+**Note:** Version bump only for package @sofie-package-manager/expectation-manager
+
+
+
+
+
+# [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
+
+**Note:** Version bump only for package @sofie-package-manager/expectation-manager
+
+
+
+
+
+# [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* add .skipEvaluationCount property ([1b0246b](https://github.com/nrkno/sofie-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
+* allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
+
+
+
+# [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
+
+
+
+
+
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 

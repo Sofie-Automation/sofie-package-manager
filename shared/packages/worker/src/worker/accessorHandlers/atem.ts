@@ -12,8 +12,9 @@ import {
 	AccessorHandlerRunCronJobResult,
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
+	AccessorConstructorProps,
 } from './genericHandle'
-import { Expectation, Accessor, AccessorOnPackage, AccessorId, escapeFilePath } from '@sofie-package-manager/api'
+import { Expectation, Accessor, AccessorOnPackage, escapeFilePath } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
 import { Atem, AtemConnectionStatus, Util as AtemUtil } from 'atem-connection'
 import { ClipBank } from 'atem-connection/dist/state/media'
@@ -38,17 +39,19 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		onlyContainerAccess?: boolean
 		filePath?: string
 	}
-	constructor(
-		worker: BaseWorker,
-		public readonly accessorId: AccessorId,
-		private accessor: AccessorOnPackage.AtemMediaStore,
-		content: any // eslint-disable-line  @typescript-eslint/explicit-module-boundary-types
-	) {
-		super(worker, accessorId, accessor, content, ATEMAccessorHandle.type)
+	private accessor: AccessorOnPackage.AtemMediaStore
 
-		this.content = content
+	constructor(arg: AccessorConstructorProps<AccessorOnPackage.AtemMediaStore>) {
+		super({
+			...arg,
+			type: ATEMAccessorHandle.type,
+		})
+
+		this.accessor = arg.accessor
+		this.content = arg.content
+
 		// Verify content data:
-		if (!content.onlyContainerAccess) {
+		if (!this.content.onlyContainerAccess) {
 			if (!this._getFilePath())
 				throw new Error('Bad input data: neither content.filePath nor accessor.filePath are set!')
 		}
@@ -141,7 +144,7 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 			}
 		}
 
-		// Reading actually not supprted, but oh well..
+		// Reading actually not supported, but oh well..
 		return {
 			success: false,
 			knownReason: true,
@@ -247,10 +250,10 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		if (this.accessor.mediaType && typeof this.accessor.bankIndex === 'number') {
 			if (this.accessor.mediaType === 'clip') {
 				await atem.clearMediaPoolClip(this.accessor.bankIndex)
-				this.worker.logOperation(`Remove package: Removed clip "${this.packageName}" (${reason})`)
+				this.logOperation(`Remove package: Removed clip "${this.packageName}" (${reason})`)
 			} else {
 				await atem.clearMediaPoolStill(this.accessor.bankIndex)
-				this.worker.logOperation(`Remove package: Removed still "${this.packageName}" (${reason})`)
+				this.logOperation(`Remove package: Removed still "${this.packageName}" (${reason})`)
 			}
 		} else {
 			throw new Error('mediaType or bankIndex were undefined')
@@ -282,9 +285,9 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 
 					streamWrapper.emit('progress', 0.1)
 
-					const tmpobj = tmp.dirSync({ unsafeCleanup: true })
+					const tmpObj = tmp.dirSync({ unsafeCleanup: true })
 					try {
-						const inputFile = path.join(tmpobj.name, 'input')
+						const inputFile = path.join(tmpObj.name, 'input')
 						const info = AtemUtil.getVideoModeInfo(atem.state.settings.videoMode)
 						if (!info) {
 							throw new Error('ATEM is running at an unknown video mode')
@@ -300,12 +303,12 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 							streamWrapper.emit('progress', 0.5)
 
 							const allTGAs = fs
-								.readdirSync(tmpobj.name)
+								.readdirSync(tmpObj.name)
 								.filter((filename) => {
 									return filename.endsWith('.tga')
 								})
 								.map((tga) => {
-									return path.join(tmpobj.name, tga)
+									return path.join(tmpObj.name, tga)
 								})
 
 							if (allTGAs.length > 1) {
@@ -341,12 +344,12 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 							streamWrapper.emit('progress', 0.4)
 
 							const allTGAs = fs
-								.readdirSync(tmpobj.name)
+								.readdirSync(tmpObj.name)
 								.filter((filename) => {
 									return filename.endsWith('.tga')
 								})
 								.map((tga) => {
-									return path.join(tmpobj.name, tga)
+									return path.join(tmpObj.name, tga)
 								})
 
 							streamWrapper.emit('progress', 0.5)
@@ -380,8 +383,8 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 							}
 							if (aborted) return
 
-							const audioStreamIndicies = await getStreamIndicies(inputFile, 'audio')
-							if (audioStreamIndicies.length > 0) {
+							const audioStreamIndices = await getStreamIndices(inputFile, 'audio')
+							if (audioStreamIndices.length > 0) {
 								await convertAudio(inputFile)
 								await sleep(1000) // Helps avoid a lock-related "Code 5" error from the ATEM.
 
@@ -395,7 +398,7 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 					} catch (err) {
 						streamWrapper.emit('error', err)
 					} finally {
-						tmpobj.removeCallback()
+						tmpObj.removeCallback()
 					}
 
 					streamWrapper.emit('close')
@@ -424,7 +427,7 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
 		// do nothing
-		return this.worker.logWorkOperation(operationName, source, this.packageName)
+		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
 		// do nothing
@@ -568,7 +571,7 @@ export async function countFrames(inputFile: string): Promise<number> {
 	return parseInt(resultParts[1], 10)
 }
 
-export async function getStreamIndicies(inputFile: string, type: 'video' | 'audio'): Promise<number[]> {
+export async function getStreamIndices(inputFile: string, type: 'video' | 'audio'): Promise<number[]> {
 	const args = [
 		'-i',
 		escapeFilePath(inputFile),

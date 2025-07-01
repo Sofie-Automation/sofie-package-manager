@@ -57,10 +57,10 @@
 		"find": "^0.3.0",
 		"fs-extra": "^11.1.0",
 		"glob": "^10.3.10",
-		"jest": "^29.3.1",
+		"jest": "^29.7.0",
 		"json-schema-to-typescript": "^10.1.5",
 		"lerna": "^6.6.1",
-		"lint-staged": "^15.2.2",
+		"lint-staged": "^16.1.2",
 		"node-fetch": "^2.6.9",
 		"rimraf": "^5.0.5",
 		"ts-jest": "^29.0.3",
@@ -71,8 +71,8 @@
 		"node": ">=18"
 	},
 	"dependencies": {
-		"@sofie-automation/server-core-integration": "1.51.5",
-		"@sofie-automation/shared-lib": "1.51.5"
+		"@sofie-automation/server-core-integration": "1.52.0-nightly-release52-20250110-120624-cb59dd9.0",
+		"@sofie-automation/shared-lib": "1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
 	},
 	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
 	"lint-staged": {
@@ -83,5 +83,8 @@
 			"eslint"
 		]
 	},
-	"packageManager": "yarn@4.1.1"
+	"packageManager": "yarn@4.1.1",
+	"resolutions": {
+		"windows-drive-letters@npm:^4.0.0": "patch:windows-drive-letters@npm%3A4.0.0#~/.yarn/patches/windows-drive-letters-npm-4.0.0-7868bcf5a2.patch"
+	}
 }

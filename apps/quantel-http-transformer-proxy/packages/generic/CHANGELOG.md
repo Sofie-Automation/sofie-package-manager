@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
+
+**Note:** Version bump only for package @quantel-http-transformer-proxy/generic
+
+
+
+
+
+# [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
+
+**Note:** Version bump only for package @quantel-http-transformer-proxy/generic
+
+
+
+
+
+# [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
+
+
+### Bug Fixes
+
+* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+
+
+
+
+
+# [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
+
+
+### Bug Fixes
+
+* update koa to 2.16.1 to resolve CVE-2025-25200 ([7b4cf05](https://github.com/nrkno/sofie-package-manager/commit/7b4cf0527db46eb516b65ecb74845b3a8441811e))
+
+
+
+
+
+# [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
+
+
+
+# [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
+
+**Note:** Version bump only for package @quantel-http-transformer-proxy/generic
+
+
+
+
+
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 **Note:** Version bump only for package @quantel-http-transformer-proxy/generic

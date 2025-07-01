@@ -15,6 +15,7 @@ import {
 	AccessorHandlerRunCronJobResult,
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
+	AccessorConstructorProps,
 } from './genericHandle'
 import {
 	Accessor,
@@ -23,7 +24,6 @@ import {
 	literal,
 	Reason,
 	INNER_ACTION_TIMEOUT,
-	AccessorId,
 	rebaseUrl,
 	KnownReason,
 } from '@sofie-package-manager/api'
@@ -31,7 +31,7 @@ import { BaseWorker } from '../worker'
 import { ClipData, ClipDataSummary, ServerInfo, ZoneInfo } from 'tv-automation-quantel-gateway-client/dist/quantelTypes'
 import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
 
-/** The minimum amount of frames where a clip is minimumly playable */
+/** The minimum amount of frames where a clip is playable */
 const RESERVED_CLIP_MINIMUM_FRAMES = 10
 /** How long to wait for a response from Quantel Gateway before failing */
 const QUANTEL_TIMEOUT = INNER_ACTION_TIMEOUT - 500
@@ -48,25 +48,24 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 	}
 	// @ts-expect-error unused variable
 	private workOptions: any
-	constructor(
-		worker: BaseWorker,
-		accessorId: AccessorId,
-		private accessor: AccessorOnPackage.Quantel,
-		content: any, // eslint-disable-line  @typescript-eslint/explicit-module-boundary-types
-		workOptions: any // eslint-disable-line  @typescript-eslint/explicit-module-boundary-types
-	) {
-		super(worker, accessorId, accessor, content, QuantelAccessorHandle.type)
+	private accessor: AccessorOnPackage.Quantel
+
+	constructor(arg: AccessorConstructorProps<AccessorOnPackage.Quantel>) {
+		super({
+			...arg,
+			type: QuantelAccessorHandle.type,
+		})
+		this.accessor = arg.accessor
+		this.workOptions = arg.workOptions
+		this.content = arg.content
 
 		// Verify content data:
-		if (!content.onlyContainerAccess) {
-			if (content.guid && typeof content.guid !== 'string')
+		if (!this.content.onlyContainerAccess) {
+			if (this.content.guid && typeof this.content.guid !== 'string')
 				throw new Error('Bad input data: content.guid must be a string!')
-			if (content.title && typeof content.title !== 'string')
+			if (this.content.title && typeof this.content.title !== 'string')
 				throw new Error('Bad input data: content.title must be a string!')
 		}
-		this.content = content
-
-		this.workOptions = workOptions
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
 		const accessor = accessor0 as AccessorOnPackage.Quantel
@@ -258,7 +257,7 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		// Perhaps in the future, we could have an opt-in feature to remove clips?
 		const content = this.getContent()
 
-		this.worker.logOperation(`(Not) removing quantel clip "${content.guid || content.title}" (${reason})`)
+		this.logOperation(`(Not) removing quantel clip "${content.guid || content.title}" (${reason})`)
 		return undefined // that's ok
 	}
 
@@ -360,7 +359,7 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
 		// do nothing
-		return this.worker.logWorkOperation(operationName, source, this.packageName)
+		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
 		// do nothing
@@ -438,11 +437,11 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		return this.accessor.zoneId
 	}
 
-	get fileflowURL(): string | undefined {
+	get fileFlowURL(): string | undefined {
 		return this.accessor.fileflowURL
 	}
 
-	get fileflowProfile(): string | undefined {
+	get fileFlowProfile(): string | undefined {
 		return this.accessor.fileflowProfile
 	}
 
@@ -491,7 +490,7 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		}
 	}
 	private async getQuantelGateway(): Promise<CachedQuantelGateway> {
-		/** Persistant store for Quantel gatews */
+		/** Persistent store for Quantel gateways */
 		const cacheGateways = this.ensureCache<Record<string, Promise<CachedQuantelGateway>>>('gateways', {})
 
 		// These errors are just for types. User-facing checks are done in this.checkAccessor()
@@ -550,11 +549,11 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 
 		// Verify that the cached gateway matches what we want:
 		// The reason for this is that a Quantel gateway is pointed at an ISA-setup on startup,
-		// and shouldn't be changed without restarting aftewards.
+		// and shouldn't be changed without restarting afterwards.
 		// So if you want to have multiple ISA:s, you should spin up multiple Quantel-gateways.
 		if (this.accessor.quantelGatewayUrl !== gateway.gatewayUrl)
 			throw new Error(
-				`Cached QuantelGateway.quantelGatewayUrl doesnt match accessor ("${this.accessor.quantelGatewayUrl}" vs "${gateway.gatewayUrl}")`
+				`Cached QuantelGateway.quantelGatewayUrl doesn't match accessor ("${this.accessor.quantelGatewayUrl}" vs "${gateway.gatewayUrl}")`
 			)
 		if (this.accessor.ISAUrls.join(',') !== gateway.ISAUrls.join(','))
 			throw new Error(

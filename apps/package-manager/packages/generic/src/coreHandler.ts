@@ -97,7 +97,6 @@ export class CoreHandler {
 	}
 
 	async init(config: PackageManagerConfig, processHandler: ProcessHandler): Promise<void> {
-		// this.logger.info('========')
 		this._statusInitialized = false
 		this._coreConfig = {
 			host: config.packageManager.coreHost,
@@ -160,17 +159,12 @@ export class CoreHandler {
 		await Promise.all([
 			this.core.autoSubscribe(PeripheralDevicePubSub.peripheralDeviceForDevice, this.core.deviceId),
 			this.core.autoSubscribe(PeripheralDevicePubSub.peripheralDeviceCommands, this.core.deviceId),
-			this.core.autoSubscribe(PeripheralDevicePubSub.packageManagerPlayoutContext, this.core.deviceId, undefined),
-			this.core.autoSubscribe(
-				PeripheralDevicePubSub.packageManagerPackageContainers,
-				this.core.deviceId,
-				undefined
-			),
+			this.core.autoSubscribe(PeripheralDevicePubSub.packageManagerPlayoutContext, this.core.deviceId),
+			this.core.autoSubscribe(PeripheralDevicePubSub.packageManagerPackageContainers, this.core.deviceId),
 			this.core.autoSubscribe(
 				PeripheralDevicePubSub.packageManagerExpectedPackages,
 				this.core.deviceId,
-				undefined,
-				undefined
+				undefined // filterPlayoutDeviceIds
 			),
 		])
 

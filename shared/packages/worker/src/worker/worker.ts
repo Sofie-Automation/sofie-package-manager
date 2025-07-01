@@ -11,6 +11,7 @@ import {
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
 	ReturnTypeRunPackageContainerCronJob,
+	stringMaxLength,
 	WorkerAgentConfig,
 } from '@sofie-package-manager/api'
 import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from './accessorHandlers/genericHandle'
@@ -20,7 +21,7 @@ export interface GenericWorkerAgentAPI {
 	config: WorkerAgentConfig
 	location: WorkerLocation
 	/**
-	 * Aquire a read/write lock to a data point, then write the result of the callback to it.
+	 * Acquire a read/write lock to a data point, then write the result of the callback to it.
 	 * This is used to prevent multiple workers from working on the same data point at the same time.
 	 */
 	workerStorageWrite: <T>(
@@ -35,7 +36,7 @@ export interface GenericWorkerAgentAPI {
  * A Worker runs static stateless/lambda functions.
  */
 export abstract class BaseWorker {
-	/** A space where the AccessorHandlers can store various things, such as persistant connections, etc.. */
+	/** A space where the AccessorHandlers can store various things, such as persistent connections, etc.. */
 	public accessorCache: { [accessorType: string]: unknown } = {}
 	private _uniqueId = 0
 
@@ -76,14 +77,14 @@ export abstract class BaseWorker {
 	): Promise<ReturnTypeIsExpectationReadyToStartWorkingOn>
 	/**
 	 * Check if the expectation is fulfilled or not.
-	 * (If the exopectation is already fulfilled, theres no need to workOnExpectation().)
+	 * (If the expectation is already fulfilled, theres no need to workOnExpectation().)
 	 */
 	abstract isExpectationFulfilled(
 		exp: Expectation.Any,
 		wasFulfilled: boolean
 	): Promise<ReturnTypeIsExpectationFulfilled>
 	/**
-	 * Start working on fullfilling an expectation.
+	 * Start working on fulfilling an expectation.
 	 * @returns a WorkInProgress, upon beginning of the work. WorkInProgress then handles signalling of the work progress.
 	 */
 	abstract workOnExpectation(
@@ -128,13 +129,14 @@ export abstract class BaseWorker {
 	 * @returns
 	 */
 	logWorkOperation(
+		expectationId: string,
 		operationName: string,
 		source: string | GenericAccessorHandle<any>,
 		target: string | GenericAccessorHandle<any>
 	): { logDone: () => void } {
-		const msg = `${operationName} from "${typeof source === 'string' ? source : source.packageName}" to "${
-			typeof target === 'string' ? target : target.packageName
-		}"`
+		const msg = `${stringMaxLength(expectationId, 16)}: ${operationName} from "${
+			typeof source === 'string' ? source : source.packageName
+		}" to "${typeof target === 'string' ? target : target.packageName}"`
 
 		this.logger.verbose(`${msg}...`)
 		return {

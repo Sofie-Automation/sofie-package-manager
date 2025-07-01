@@ -1,6 +1,6 @@
 {
     "name": "@sofie-package-manager/api",
-    "version": "1.51.0-alpha.2",
+    "version": "1.52.0",
     "main": "dist/index",
     "types": "dist/index",
     "files": [
@@ -16,6 +16,7 @@
         "@sofie-automation/shared-lib": "*"
     },
     "devDependencies": {
+        "@types/underscore": "^1.10.24",
         "@types/winston": "^2.3.9",
         "@types/ws": "^8.5.4",
         "jest": "*",
@@ -24,7 +25,7 @@
     "dependencies": {
         "underscore": "^1.12.0",
         "winston": "^3.5.1",
-        "ws": "^8.12.0",
+        "ws": "^8.17.1",
         "yargs": "^17.7.2"
     },
     "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",

@@ -98,7 +98,7 @@ async function lookupPackageContainer(
 		checks.read = true
 	} else if (forWhat === 'cronjob') {
 		checks.read = true
-		// If no cronjobs are setup, no need to check writeability:
+		// If no cronjobs are setup, no need to check writability:
 		if (Object.keys(packageContainer.cronjobs).length > 1) {
 			checks.write = true
 			checks.writePackageContainer = true
@@ -110,6 +110,7 @@ async function lookupPackageContainer(
 	return (await lookupAccessorHandles(
 		worker,
 		packageContainers,
+		{ packageContainerId: packageContainer.id },
 		{
 			// This is somewhat of a hack, it makes the AccessorHandlers to not look to close on the package-related content data,
 			// in order to still be able to use them as-is for PackageContainer-related stuff.

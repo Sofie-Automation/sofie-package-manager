@@ -3,6 +3,65 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
+
+
+### Bug Fixes
+
+* add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/sofie-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
+* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+
+
+
+
+
+# [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
+
+
+
+# [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
+
+
+### Bug Fixes
+
+* compatibility with Sofie Core R52 ([8864bfd](https://github.com/nrkno/sofie-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
+
+
+
+
+
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 **Note:** Version bump only for package @package-manager/generic
