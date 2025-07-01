@@ -38,7 +38,7 @@ import { exec } from 'child_process'
 import { FileShareAccessorHandleType, GenericFileAccessorHandle } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import * as path from 'path'
 
 const fsStat = promisify(fs.stat)
@@ -111,9 +111,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	get fullPath(): string {
 		return this.getFullPath(this.filePath)
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.FileShare
-		return !accessor.networkId || worker.agentAPI.location.localNetworkIds.includes(accessor.networkId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		return this.fullPath

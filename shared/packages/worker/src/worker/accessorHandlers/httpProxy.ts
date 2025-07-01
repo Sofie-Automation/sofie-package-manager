@@ -28,7 +28,7 @@ import { BaseWorker } from '../worker'
 import FormData from 'form-data'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { fetchWithController, fetchWithTimeout } from './lib/fetch'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 
 /** Accessor handle for accessing files in HTTP- */
 export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
@@ -59,9 +59,8 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
 			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.HTTP
-		return !accessor.networkId || worker.agentAPI.location.localNetworkIds.includes(accessor.networkId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		return this.fullUrl

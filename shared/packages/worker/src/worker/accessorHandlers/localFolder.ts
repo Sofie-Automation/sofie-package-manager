@@ -32,8 +32,7 @@ import {
 import { BaseWorker } from '../worker'
 import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
-import { compareResourceIds } from '../workers/genericWorker/lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -79,9 +78,8 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		if (this.workOptions.useTemporaryFilePath && typeof this.workOptions.useTemporaryFilePath !== 'boolean')
 			throw new Error('Bad input data: workOptions.useTemporaryFilePath is not a boolean!')
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.LocalFolder
-		return compareResourceIds(accessor.resourceId, worker.agentAPI.location.localComputerId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		return this.fullPath

@@ -26,7 +26,7 @@ import * as path from 'path'
 import { promisify } from 'util'
 import { UniversalVersion } from '../workers/genericWorker/lib/lib'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import { getFFMpegExecutable, getFFProbeExecutable } from '../workers/genericWorker/expectationHandlers/lib/ffmpeg'
 
 const fsReadFile = promisify(fs.readFile)
@@ -56,9 +56,8 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 				throw new Error('Bad input data: neither content.filePath nor accessor.filePath are set!')
 		}
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.AtemMediaStore
-		return !accessor.networkId || worker.agentAPI.location.localNetworkIds.includes(accessor.networkId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		return this.getAtemClipName()
