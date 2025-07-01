@@ -23,7 +23,7 @@ The `AppContainer` is reponsible for spinning up/down `Workers`, and restarting 
 
 _Note: There can be multiple Package Managers in a setup (usually one per Sofie-Core)_
 
-The Package Manager receives [Packages](#packages) from [Sofie Core](https://github.com/nrkno/sofie-core) and generates [Expectations](#expectations) from them.
+The Package Manager receives [Packages](#packages) from [Sofie Core](https://github.com/Sofie-Automation/sofie-core) and generates [Expectations](#expectations) from them.
 
 The [Expectations](#expectations) are then piped into the `ExpectationManager`.
 

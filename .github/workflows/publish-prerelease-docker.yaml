@@ -25,8 +25,8 @@ jobs:
       - name: Determine if images should be published to DockerHub
         id: dockerhub
         run: |
-          # check if a release branch, or master, or a tag
-          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == refs/tags/* ]]
+          # check if a release branch, or main, or a tag
+          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == refs/tags/* ]]
           then
             DOCKERHUB_PUBLISH="1"
           else
@@ -147,7 +147,7 @@ jobs:
     with:
       runs-on: "['ubuntu-latest']"
       registry-url: ghcr.io
-      name: nrkno/sofie-package-manager
+      name: sofie-automation/sofie-package-manager
       # Don't actually push any images, this is just for trivy scanning for now
       push: false
       trivy-severity: 'CRITICAL'
