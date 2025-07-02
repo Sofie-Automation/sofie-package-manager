@@ -307,7 +307,15 @@ export interface PackageContainer {
  */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Accessor {
-	export type Any = LocalFolder | FileShare | HTTP | HTTPProxy | Quantel | CorePackageCollection | AtemMediaStore
+	export type Any =
+		| LocalFolder
+		| FileShare
+		| HTTP
+		| HTTPProxy
+		| Quantel
+		| CorePackageCollection
+		| AtemMediaStore
+		| FTP
 
 	export enum AccessType {
 		LOCAL_FOLDER = 'local_folder',
@@ -317,6 +325,7 @@ export namespace Accessor {
 		QUANTEL = 'quantel',
 		CORE_PACKAGE_INFO = 'core_package_info',
 		ATEM_MEDIA_STORE = 'atem_media_store',
+		FTP = 'ftp',
 	}
 
 	/** Generic (used in extends) */
@@ -424,6 +433,38 @@ export namespace Accessor {
 		/** What type of bank */
 		mediaType: 'clip' | 'still'
 	}
+	/** Definition of access to a generic FTP/SFTP endpoint. (Read-access only) */
+	export interface FTP extends Base {
+		type: AccessType.FTP
+
+		/** The type of FTP server:
+		 * - 'ftp' for unsecure FTP
+		 * - 'ftps' for FTP over TLS
+		 * - 'sftp' for SFTP/SSH
+		 */
+		serverType: 'ftp' | 'ftps' | 'sftp'
+
+		/** Hostname/IP Address to the host server */
+		host: string
+
+		/** Port to the host server */
+		port?: number
+
+		/** Username to the server */
+		username: string
+
+		/** Password to the server */
+		password: string
+
+		/** If true, allows any certificates (like self-signed certificates) */
+		allowAnyCertificate?: boolean
+
+		/** Path to base folder at the server, (defaults to '/')*/
+		basePath?: string
+
+		/** Name/Id of the network the share exists on. Used to differ between different local networks. Leave empty if globally accessible. */
+		networkId?: string
+	}
 }
 /**
  * AccessorOnPackage contains interfaces for Accessor definitions that are put ON the Package.
@@ -431,7 +472,15 @@ export namespace Accessor {
  */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AccessorOnPackage {
-	export type Any = LocalFolder | FileShare | HTTP | HTTPProxy | Quantel | CorePackageCollection | AtemMediaStore
+	export type Any =
+		| LocalFolder
+		| FileShare
+		| HTTP
+		| HTTPProxy
+		| Quantel
+		| CorePackageCollection
+		| AtemMediaStore
+		| FTP
 
 	export interface LocalFolder extends Partial<Accessor.LocalFolder> {
 		/** Path to the file (starting from .folderPath). If not set, the filePath of the ExpectedPackage will be used */
@@ -459,6 +508,10 @@ export namespace AccessorOnPackage {
 	}
 	export interface AtemMediaStore extends Partial<Accessor.AtemMediaStore> {
 		filePath?: string
+	}
+	export interface FTP extends Partial<Accessor.FTP> {
+		/** path to resource (combined with .basePath gives the full path), for example: /folder/myFile */
+		path?: string
 	}
 }
 

@@ -29,6 +29,7 @@ import FormData from 'form-data'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { fetchWithController, fetchWithTimeout } from './lib/fetch'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
+import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 
 /** Accessor handle for accessing files in HTTP- */
 export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
@@ -40,6 +41,8 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 	}
 	private workOptions: Expectation.WorkOptions.RemoveDelay
 	private accessor: AccessorOnPackage.HTTPProxy
+
+	public fileHandler: GenericFileOperationsHandler
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.HTTPProxy>) {
 		super({
@@ -58,6 +61,25 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 
 		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
 			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
+
+		this.fileHandler = new GenericFileOperationsHandler(
+			{
+				logOperation: this.logOperation.bind(this),
+				logger: this.worker.logger,
+				getMetadataPath: this.getMetadataPath.bind(this),
+				unlinkIfExists: this.deletePackageIfExists.bind(this),
+				getFullPath: this.getFullPath.bind(this),
+				fileExists: this.fileExists.bind(this),
+				readFile: this.readFile.bind(this),
+				writeFile: this.writeFile.bind(this),
+				listFilesInDir: this.listFilesInDir.bind(this),
+				removeDirIfExists: this.removeDirIfExists.bind(this),
+
+				getPackagesToRemove: this.getPackagesToRemove?.bind(this),
+				storePackagesToRemove: this.storePackagesToRemove?.bind(this),
+			},
+			this.workOptions
+		)
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
 		return defaultDoYouSupportAccess(worker, accessor)
@@ -137,19 +159,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		return this.convertHeadersToVersion(header.headers)
 	}
 	async removePackage(reason: string): Promise<void> {
-		if (this.workOptions.removeDelay) {
-			this.logOperation(
-				`Remove package: Delay remove package "${this.packageName}", delay: ${this.workOptions.removeDelay} (${reason})`
-			)
-			await this.delayPackageRemoval(this.filePath, this.workOptions.removeDelay)
-		} else {
-			await this.removeMetadata()
-			if (await this.deletePackageIfExists(this.fullUrl)) {
-				this.logOperation(`Remove package: Removed file "${this.packageName}" (${reason})`)
-			} else {
-				this.logOperation(`Remove package: File already removed "${this.packageName}" (${reason})`)
-			}
-		}
+		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 	async getPackageReadStream(): Promise<PackageReadStream> {
 		const fetch = fetchWithController(this.fullUrl)
@@ -169,7 +179,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
-		await this.clearPackageRemoval()
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const formData = new FormData()
 		formData.append('file', sourceStream)
@@ -210,7 +220,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		await this.clearPackageRemoval()
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
@@ -236,7 +246,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 				// ignore
 			} else if (cronjob === 'cleanup') {
 				const options = packageContainerExp.cronjobs[cronjob]
-				badReason = await this.removeDuePackages()
+				badReason = await this.fileHandler.removeDuePackages()
 				if (!badReason && options?.cleanFileAge) {
 					// Not supported, however the http-server has its own cleanup routine
 				}
@@ -269,7 +279,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		return { success: true, monitors: resultingMonitors }
 	}
 	get fullUrl(): string {
-		return rebaseUrl(this.baseUrl, this.filePath)
+		return this.getFullPath(this.filePath)
 	}
 
 	private get baseUrl(): string {
@@ -316,82 +326,82 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		}
 	}
 
-	async delayPackageRemoval(filePath: string, ttl: number): Promise<void> {
-		const packagesToRemove = await this.getPackagesToRemove()
+	// async delayPackageRemoval(filePath: string, ttl: number): Promise<void> {
+	// 	const packagesToRemove = await this.getPackagesToRemove()
 
-		// Search for a pre-existing entry:
-		let found = false
-		for (const entry of packagesToRemove) {
-			if (entry.filePath === filePath) {
-				// extend the TTL if it was found:
-				entry.removeTime = Date.now() + ttl
+	// 	// Search for a pre-existing entry:
+	// 	let found = false
+	// 	for (const entry of packagesToRemove) {
+	// 		if (entry.filePath === filePath) {
+	// 			// extend the TTL if it was found:
+	// 			entry.removeTime = Date.now() + ttl
 
-				found = true
-				break
-			}
-		}
-		if (!found) {
-			packagesToRemove.push({
-				filePath: filePath,
-				removeTime: Date.now() + ttl,
-			})
-		}
+	// 			found = true
+	// 			break
+	// 		}
+	// 	}
+	// 	if (!found) {
+	// 		packagesToRemove.push({
+	// 			filePath: filePath,
+	// 			removeTime: Date.now() + ttl,
+	// 		})
+	// 	}
 
-		await this.storePackagesToRemove(packagesToRemove)
-	}
-	/** Clear a scheduled later removal of a package */
-	async clearPackageRemoval(): Promise<void> {
-		const packagesToRemove = await this.getPackagesToRemove()
+	// 	await this.storePackagesToRemove(packagesToRemove)
+	// }
+	// /** Clear a scheduled later removal of a package */
+	// async clearPackageRemoval(): Promise<void> {
+	// 	const packagesToRemove = await this.getPackagesToRemove()
 
-		const filePath = this.filePath
+	// 	const filePath = this.filePath
 
-		let found = false
-		for (let i = 0; i < packagesToRemove.length; i++) {
-			const entry = packagesToRemove[i]
-			if (entry.filePath === filePath) {
-				packagesToRemove.splice(i, 1)
-				found = true
-				break
-			}
-		}
-		if (found) {
-			await this.storePackagesToRemove(packagesToRemove)
-		}
-	}
+	// 	let found = false
+	// 	for (let i = 0; i < packagesToRemove.length; i++) {
+	// 		const entry = packagesToRemove[i]
+	// 		if (entry.filePath === filePath) {
+	// 			packagesToRemove.splice(i, 1)
+	// 			found = true
+	// 			break
+	// 		}
+	// 	}
+	// 	if (found) {
+	// 		await this.storePackagesToRemove(packagesToRemove)
+	// 	}
+	// }
 	/** Remove any packages that are due for removal */
-	async removeDuePackages(): Promise<Reason | null> {
-		let packagesToRemove = await this.getPackagesToRemove()
+	// async removeDuePackages(): Promise<Reason | null> {
+	// 	let packagesToRemove = await this.getPackagesToRemove()
 
-		const removedFilePaths: string[] = []
-		for (const entry of packagesToRemove) {
-			// Check if it is time to remove the package:
-			if (entry.removeTime < Date.now()) {
-				// it is time to remove the package:
-				const fullUrl: string = rebaseUrl(this.baseUrl, entry.filePath)
+	// 	const removedFilePaths: string[] = []
+	// 	for (const entry of packagesToRemove) {
+	// 		// Check if it is time to remove the package:
+	// 		if (entry.removeTime < Date.now()) {
+	// 			// it is time to remove the package:
+	// 			const fullUrl: string = this.getFullPath(entry.filePath)
 
-				await this.deletePackageIfExists(this.getMetadataPath(fullUrl))
-				await this.deletePackageIfExists(fullUrl)
-				removedFilePaths.push(entry.filePath)
-			}
-		}
+	// 			await this.deletePackageIfExists(this.getMetadataPath(fullUrl))
+	// 			await this.deletePackageIfExists(fullUrl)
+	// 			removedFilePaths.push(entry.filePath)
+	// 		}
+	// 	}
 
-		// Fetch again, to decrease the risk of race-conditions:
-		packagesToRemove = await this.getPackagesToRemove()
-		let changed = false
-		// Remove paths from array:
-		for (let i = 0; i < packagesToRemove.length; i++) {
-			const entry = packagesToRemove[i]
-			if (removedFilePaths.includes(entry.filePath)) {
-				packagesToRemove.splice(i, 1)
-				changed = true
-				break
-			}
-		}
-		if (changed) {
-			await this.storePackagesToRemove(packagesToRemove)
-		}
-		return null
-	}
+	// 	// Fetch again, to decrease the risk of race-conditions:
+	// 	packagesToRemove = await this.getPackagesToRemove()
+	// 	let changed = false
+	// 	// Remove paths from array:
+	// 	for (let i = 0; i < packagesToRemove.length; i++) {
+	// 		const entry = packagesToRemove[i]
+	// 		if (removedFilePaths.includes(entry.filePath)) {
+	// 			packagesToRemove.splice(i, 1)
+	// 			changed = true
+	// 			break
+	// 		}
+	// 	}
+	// 	if (changed) {
+	// 		await this.storePackagesToRemove(packagesToRemove)
+	// 	}
+	// 	return null
+	// }
 	/** Returns false if nothing was removed */
 	private async deletePackageIfExists(url: string): Promise<boolean> {
 		const result = await fetchWithTimeout(url, {
@@ -408,7 +418,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 	}
 	/** Full path to the file containing deferred removals */
 	private get deferRemovePackagesPath(): string {
-		return rebaseUrl(this.baseUrl, '__removePackages.json')
+		return this.getFullPath('__removePackages.json')
 	}
 	/** */
 	private async getPackagesToRemove(): Promise<DelayPackageRemovalEntry[]> {
@@ -449,6 +459,94 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 	}
 	private isBadHTTPResponseCode(code: number) {
 		return code >= 400
+	}
+
+	private getFullPath(filePath: string): string {
+		return rebaseUrl(this.baseUrl, filePath)
+	}
+
+	private async fileExists(fullPath: string): Promise<boolean> {
+		const header = await this.fetchHeader()
+
+		if (header.status === 200) return true
+		else if (header.status === 404) return false
+		else
+			throw new Error(
+				`Error when checking if file exists: [${header.status}]: ${header.statusText}, at ${fullPath}`
+			)
+	}
+	private async readFile(fullPath: string): Promise<Buffer> {
+		const result = await fetchWithTimeout(fullPath)
+		if (this.isBadHTTPResponseCode(result.status)) {
+			const text = await result.text()
+			throw new Error(
+				`getPackagesToRemove: Bad response: [${result.status}]: ${result.statusText}, GET ${fullPath}, ${text}`
+			)
+		}
+		return result.buffer()
+	}
+	private async writeFile(fullPath: string, content: Buffer): Promise<void> {
+		const formData = new FormData()
+		formData.append('myFile', content)
+		const result = await fetchWithTimeout(fullPath, {
+			method: 'POST',
+			body: formData,
+		})
+		if (this.isBadHTTPResponseCode(result.status)) {
+			const text = await result.text()
+			throw new Error(
+				`storeJSON: Bad response: [${result.status}]: ${result.statusText}, POST ${fullPath}, ${text}`
+			)
+		}
+	}
+	private async listFilesInDir(fullPath: string): Promise<
+		{
+			name: string
+			isDirectory: boolean
+			lastModified: number | undefined
+		}[]
+	> {
+		// http-server doesn't support listing inner directories, so we'll just list the root and filter:
+
+		const result = await fetchWithTimeout(this.getFullPath('packages'), {
+			method: 'GET',
+		})
+		if (this.isBadHTTPResponseCode(result.status)) {
+			const text = await result.text()
+			throw new Error(`storeJSON: Bad response: [${result.status}]: ${result.statusText}, GET /packages ${text}`)
+		}
+
+		// from http-server:
+		type PackageInfo = {
+			path: string
+			size: string
+			modified: string
+		}
+		const json = (await result.json()) as { packages: PackageInfo[] }
+
+		const files: {
+			name: string
+			isDirectory: boolean
+			lastModified: number | undefined
+		}[] = []
+
+		// Clever trick: We can omit directories, but return ALL files in the directory, including subdirectories!.
+		for (const pkg of json.packages) {
+			if (pkg.path.startsWith(fullPath)) {
+				const name = pkg.path.slice(fullPath.length)
+
+				files.push({
+					name,
+					isDirectory: false,
+					lastModified: pkg.modified ? new Date(pkg.modified).getTime() : undefined,
+				})
+			}
+		}
+		return files
+	}
+	private async removeDirIfExists(_fullPath: string): Promise<boolean> {
+		// not supported
+		return false
 	}
 }
 interface HTTPHeaders {
