@@ -21,6 +21,8 @@ import {
 import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
 import {
 	checkWorkerHasAccessToPackageContainersOnPackage,
+	DEFAULT_MEDIA_PREVIEW_BITRATE,
+	DEFAULT_MEDIA_PREVIEW_WIDTH,
 	lookupAccessorHandles,
 	LookupPackageContainer,
 	previewFFMpegArguments,
@@ -218,8 +220,8 @@ export const QuantelClipPreview: ExpectationHandlerGenericWorker = {
 						...{
 							// Default values:
 							type: Expectation.Version.Type.MEDIA_FILE_PREVIEW,
-							bitrate: '40k',
-							width: 320,
+							bitrate: DEFAULT_MEDIA_PREVIEW_BITRATE,
+							width: DEFAULT_MEDIA_PREVIEW_WIDTH,
 							height: -1,
 						},
 						...exp.endRequirement.version,

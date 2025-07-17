@@ -26,6 +26,9 @@ import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder
 import { FileShareAccessorHandle } from '../../../accessorHandlers/fileShare'
 import { HTTPProxyAccessorHandle } from '../../../accessorHandlers/httpProxy'
 
+export const DEFAULT_MEDIA_PREVIEW_WIDTH = 480
+export const DEFAULT_MEDIA_PREVIEW_BITRATE = '175k'
+
 /** Check that a worker has access to the packageContainers through its accessors */
 export function checkWorkerHasAccessToPackageContainersOnPackage(
 	genericWorker: BaseWorker,
