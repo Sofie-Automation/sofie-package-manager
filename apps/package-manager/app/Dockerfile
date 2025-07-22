@@ -43,9 +43,13 @@ FROM node:18-alpine
 
 COPY --from=builder /src /src
 
+RUN apk add --no-cache dumb-init
 
+# Run as non-root user
+USER 1000
 WORKDIR /src/apps/package-manager/app
 ENV package-manager_PORT=8070
 EXPOSE 8070
 
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["yarn", "start"]
