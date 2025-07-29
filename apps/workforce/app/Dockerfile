@@ -48,4 +48,4 @@ WORKDIR /src/apps/workforce/app
 ENV WORKFORCE_PORT=8070
 EXPOSE 8070
 
-CMD ["yarn", "start"]
+ENTRYPOINT ["yarn", "start"]
