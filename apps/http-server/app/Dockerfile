@@ -43,7 +43,10 @@ FROM node:18-alpine
 
 COPY --from=builder /src /src
 
+RUN apk add --no-cache dumb-init
 
+# Run as non-root user
+USER 1000
 WORKDIR /src/apps/http-server/app
 ENV HTTP_SERVER_PORT=8080
 # ENV HTTP_SERVER_API_KEY_READ=
@@ -51,4 +54,5 @@ ENV HTTP_SERVER_PORT=8080
 ENV HTTP_SERVER_BASE_PATH="/data"
 EXPOSE 8080
 
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["yarn", "start"]
