@@ -18,7 +18,7 @@ jobs:
       build-and-push-enable: ${{ steps.check-build-and-push.outputs.enable }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -65,7 +65,7 @@ jobs:
         repo: [package-manager, workforce, http-server, quantel-http-transformer-proxy]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
