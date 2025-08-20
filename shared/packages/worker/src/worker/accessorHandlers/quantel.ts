@@ -250,6 +250,9 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 			return this.convertClipSummaryToVersion(clipSummary)
 		} else throw new Error(`Clip not found`)
 	}
+	async ensurePackageFulfilled(): Promise<void> {
+		// Nothing
+	}
 	async removePackage(reason: string): Promise<void> {
 		await this.removeMetadata()
 		// We don't really do this, instead we let the quantel management delete old clip.

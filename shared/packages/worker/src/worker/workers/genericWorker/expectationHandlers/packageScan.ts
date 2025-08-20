@@ -136,6 +136,9 @@ export const PackageScan: ExpectationHandlerGenericWorker = {
 			}
 			return { fulfilled: false, knownReason: true, reason: packageInfoSynced.reason }
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},

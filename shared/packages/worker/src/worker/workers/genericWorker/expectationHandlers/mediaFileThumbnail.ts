@@ -15,6 +15,7 @@ import { getStandardCost } from '../lib/lib'
 import { BaseWorker } from '../../../worker'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -157,6 +158,9 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				},
 			}
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -183,10 +187,12 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 					lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 					lookupTarget.accessor.type === Accessor.AccessType.HTTP ||
-					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY) &&
+					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+					lookupSource.accessor.type === Accessor.AccessType.FTP) &&
 				(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 					lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+					lookupTarget.accessor.type === Accessor.AccessType.FTP)
 			) {
 				const sourceHandle = lookupSource.handle
 				const targetHandle = lookupTarget.handle
@@ -194,13 +200,15 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 					!isLocalFolderAccessorHandle(sourceHandle) &&
 					!isHTTPAccessorHandle(sourceHandle) &&
 					!isFileShareAccessorHandle(sourceHandle) &&
-					!isHTTPProxyAccessorHandle(sourceHandle)
+					!isHTTPProxyAccessorHandle(sourceHandle) &&
+					!isFTPAccessorHandle(sourceHandle)
 				)
 					throw new Error(`Source AccessHandler type is wrong`)
 				if (
 					!isLocalFolderAccessorHandle(targetHandle) &&
 					!isFileShareAccessorHandle(targetHandle) &&
-					!isHTTPProxyAccessorHandle(targetHandle)
+					!isHTTPProxyAccessorHandle(targetHandle) &&
+					!isFTPAccessorHandle(targetHandle)
 				)
 					throw new Error(`Target AccessHandler type is wrong`)
 
@@ -242,6 +250,8 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 					inputPath = sourceHandle.fullUrl
 				} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullUrl
+				} else if (isFTPAccessorHandle(sourceHandle)) {
+					inputPath = sourceHandle.ftpUrl.url
 				} else {
 					assertNever(sourceHandle)
 					throw new Error(`Unsupported Target AccessHandler`)

@@ -15,6 +15,7 @@ import {
 } from '@sofie-package-manager/api'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -157,6 +158,9 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				},
 			}
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return {
 				fulfilled: true,
 				// reason: { user: `Preview already matches preview file`, tech: `Preview already matches preview file` },
@@ -182,23 +186,27 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 			(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				lookupSource.accessor.type === Accessor.AccessType.HTTP ||
-				lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY) &&
+				lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupSource.accessor.type === Accessor.AccessType.FTP) &&
 			(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupTarget.accessor.type === Accessor.AccessType.FTP)
 		) {
 			// We can read the source and write the preview directly.
 			if (
 				!isLocalFolderAccessorHandle(sourceHandle) &&
 				!isFileShareAccessorHandle(sourceHandle) &&
 				!isHTTPAccessorHandle(sourceHandle) &&
-				!isHTTPProxyAccessorHandle(sourceHandle)
+				!isHTTPProxyAccessorHandle(sourceHandle) &&
+				!isFTPAccessorHandle(sourceHandle)
 			)
 				throw new Error(`Source AccessHandler type is wrong`)
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
-				!isHTTPProxyAccessorHandle(targetHandle)
+				!isHTTPProxyAccessorHandle(targetHandle) &&
+				!isFTPAccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
@@ -242,6 +250,8 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 					inputPath = sourceHandle.fullUrl
 				} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullUrl
+				} else if (isFTPAccessorHandle(sourceHandle)) {
+					inputPath = sourceHandle.ftpUrl.url
 				} else {
 					assertNever(sourceHandle)
 					throw new Error(`Unsupported Target AccessHandler`)

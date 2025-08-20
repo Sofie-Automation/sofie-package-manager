@@ -68,6 +68,7 @@ export function makeUniversalVersion(
 	if (
 		![
 			Expectation.Version.Type.FILE_ON_DISK,
+			Expectation.Version.Type.FTP_FILE,
 			Expectation.Version.Type.HTTP_FILE,
 			Expectation.Version.Type.QUANTEL_CLIP,
 			Expectation.Version.Type.JSON_DATA,
@@ -84,6 +85,8 @@ export function makeUniversalVersion(
 			value:
 				version.type === Expectation.Version.Type.FILE_ON_DISK
 					? version.fileSize
+					: version.type === Expectation.Version.Type.FTP_FILE
+					? version.fileSize
 					: version.type === Expectation.Version.Type.HTTP_FILE
 					? version.contentLength
 					: version.type === Expectation.Version.Type.JSON_DATA
@@ -95,6 +98,8 @@ export function makeUniversalVersion(
 			name: 'Modified date',
 			value:
 				version.type === Expectation.Version.Type.FILE_ON_DISK
+					? version.modifiedDate
+					: version.type === Expectation.Version.Type.FTP_FILE
 					? version.modifiedDate
 					: version.type === Expectation.Version.Type.HTTP_FILE
 					? version.modified

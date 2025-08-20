@@ -11,7 +11,6 @@ import {
 	literal,
 	PackageContainerExpectation,
 	assertNever,
-	Reason,
 	stringifyError,
 	ExpectedPackageId,
 	protectString,
@@ -23,7 +22,9 @@ import {
 import { AccessorConstructorProps, GenericAccessorHandle } from '../genericHandle'
 import { MonitorInProgress } from '../../lib/monitorInProgress'
 import { FileEvent, FileWatcher, IFileWatcher } from './FileWatcher'
-import { updateJSONFileBatch } from './json-write-file'
+import { GenericFileOperationsHandler } from './GenericFileOperations'
+import { GenericFileHandler } from './GenericFileHandler'
+import { JSONWriteFilesLockHandler } from './json-write-file'
 
 export const LocalFolderAccessorHandleType = 'localFolder'
 export const FileShareAccessorHandleType = 'fileShare'
@@ -31,10 +32,12 @@ export const FileShareAccessorHandleType = 'fileShare'
 const fsAccess = promisify(fs.access)
 const fsReadFile = promisify(fs.readFile)
 const fsReaddir = promisify(fs.readdir)
+const fsWriteFile = promisify(fs.writeFile)
 const fsRmDir = promisify(fs.rmdir)
 const fsStat = promisify(fs.stat)
 const fsUnlink = promisify(fs.unlink)
 const fsLstat = promisify(fs.lstat)
+const fsRename = promisify(fs.rename)
 
 /**
  * This class handles things that are common between the LocalFolder and FileShare classes
@@ -49,82 +52,110 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 	) {
 		super(arg)
 		this._type = arg.type
+		this.workOptions = arg.workOptions
+
+		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
+			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
+
+		const fileHandler: GenericFileHandler = {
+			logOperation: this.logOperation.bind(this),
+			unlinkIfExists: this.unlinkIfExists.bind(this),
+			getFullPath: this.getFullPath.bind(this),
+			getMetadataPath: this.getMetadataPath.bind(this),
+			fileExists: this.fileExists.bind(this),
+			readFile: this.readFile.bind(this),
+			readFileIfExists: this.readFileIfExists.bind(this),
+			writeFile: this.writeFile.bind(this),
+			listFilesInDir: this.listFilesInDir.bind(this),
+			removeDirIfExists: this.removeDirIfExists.bind(this),
+			rename: this.rename.bind(this),
+		}
+
+		const jsonWriter = this.worker.cacheData(this.type, 'jsonWriter', () => {
+			return new JSONWriteFilesLockHandler(fileHandler, this.worker.logger)
+		})
+
+		this.fileHandler = new GenericFileOperationsHandler(
+			fileHandler,
+			jsonWriter,
+			this.workOptions,
+			this.worker.logger
+		)
 	}
+	protected workOptions: Expectation.WorkOptions.RemoveDelay
 	/** Path to the PackageContainer, ie the folder */
 	protected abstract get folderPath(): string
 	protected abstract get orgFolderPath(): string
 
-	/** Schedule the package for later removal */
-	async delayPackageRemoval(filePath: string, ttl: number): Promise<void> {
-		await this.updatePackagesToRemove((packagesToRemove) => {
-			// Search for a pre-existing entry:
-			let alreadyExists = false
-			for (const entry of packagesToRemove) {
-				if (entry.filePath === filePath) {
-					// extend the TTL if it was found:
-					entry.removeTime = Date.now() + ttl
+	public fileHandler: GenericFileOperationsHandler
 
-					alreadyExists = true
-					break
-				}
-			}
-			if (!alreadyExists) {
-				packagesToRemove.push({
-					filePath: filePath,
-					removeTime: Date.now() + ttl,
-				})
-			}
-			return packagesToRemove
-		})
-	}
-	/** Clear a scheduled later removal of a package */
-	async clearPackageRemoval(filePath: string): Promise<void> {
-		await this.updatePackagesToRemove((packagesToRemove) => {
-			return packagesToRemove.filter((entry) => entry.filePath !== filePath)
-		})
-	}
-	/** Remove any packages that are due for removal */
-	async removeDuePackages(): Promise<Reason | null> {
-		const packagesToRemove = await this.getPackagesToRemove()
-
-		const removedFilePaths: string[] = []
-		for (const entry of packagesToRemove) {
-			// Check if it is time to remove the package:
-			if (entry.removeTime < Date.now()) {
-				// it is time to remove this package
-				const fullPath = this.getFullPath(entry.filePath)
-				const metadataPath = this.getMetadataPath(entry.filePath)
-
-				if (await this.unlinkIfExists(fullPath))
-					this.logOperation(`Remove due packages: Removed file "${fullPath}"`)
-				await this.unlinkIfExists(metadataPath)
-
-				removedFilePaths.push(entry.filePath)
-			}
-		}
-
-		if (removedFilePaths.length > 0) {
-			// Update the list of packages to remove:
-			await this.updatePackagesToRemove((packagesToRemove) => {
-				// Remove the entries of the files we removed:
-				return packagesToRemove.filter((entry) => !removedFilePaths.includes(entry.filePath))
-			})
-		}
-
-		return null
-	}
 	/** Unlink (remove) a file, if it exists. Returns true if it did exist */
 	async unlinkIfExists(filePath: string): Promise<boolean> {
+		if (!(await this.fileExists(filePath))) return false
+		await fsUnlink(filePath)
+		return true
+	}
+	async removeDirIfExists(filePath: string): Promise<boolean> {
+		if (!(await this.fileExists(filePath))) return false
+		await fsRmDir(filePath)
+		return true
+	}
+	async rename(from: string, to: string): Promise<void> {
+		await fsRename(from, to)
+	}
+
+	async fileExists(filePath: string): Promise<boolean> {
 		let exists = false
 		try {
 			await fsAccess(filePath, fs.constants.R_OK)
 			// The file exists
 			exists = true
 		} catch (err) {
-			// Ignore
+			// Ignore errors
 		}
-		if (exists) await fsUnlink(filePath)
 		return exists
+	}
+	async readFile(fullPath: string): Promise<Buffer> {
+		return fsReadFile(fullPath)
+	}
+	async readFileIfExists(fullPath: string): Promise<Buffer | undefined> {
+		try {
+			return this.readFile(fullPath)
+		} catch (e) {
+			if ((e as NodeJS.ErrnoException).code === 'ENOENT') return undefined // File does not exist
+			throw e // Some other error
+		}
+	}
+	async writeFile(fullPath: string, content: Buffer): Promise<void> {
+		await fsWriteFile(fullPath, content)
+	}
+	async listFilesInDir(fullPath: string): Promise<
+		{
+			name: string
+			isDirectory: boolean
+			lastModified: number
+		}[]
+	> {
+		const files = await fsReaddir(fullPath)
+
+		return Promise.all(
+			files.map(async (filename) => {
+				const fullFilePath = path.join(fullPath, filename)
+
+				const stat = await fsLstat(fullFilePath)
+				const lastModified = Math.max(
+					stat.mtimeMs, // modified
+					stat.ctimeMs, // created
+					stat.birthtimeMs // birthtime (when a file is copied, this changes but the others are kept from the original file)
+				)
+
+				return {
+					name: filename,
+					isDirectory: stat.isDirectory(),
+					lastModified: lastModified,
+				}
+			})
+		)
 	}
 	getFullPath(filePath: string): string {
 		filePath = removeBasePath(this.orgFolderPath, filePath)
@@ -337,122 +368,6 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 			// checkSumType?: 'sha' | 'md5' | 'whatever'
 		}
 	}
-
-	/** Clean up (remove) files older than a certain time */
-	public async cleanupOldFiles(
-		/** Remove files older than this age (in seconde) */
-		cleanFileAge: number
-	): Promise<Reason | null> {
-		// Check the config. 0 or -1 means it's disabled:
-		if (cleanFileAge <= 0) {
-			return {
-				user: 'Internal error',
-				tech: `cleanFileAge is ${cleanFileAge}`,
-			}
-		}
-
-		const cleanUpDirectory = async (dirPath: string, removeEmptyDir: boolean) => {
-			const now = Date.now()
-			const files = await fsReaddir(path.join(this.folderPath, dirPath))
-
-			if (files.length === 0) {
-				if (removeEmptyDir) {
-					const dirFullPath = path.join(this.folderPath, dirPath)
-					this.logOperation(`Clean up old files: Remove empty dir "${dirFullPath}"`)
-					await fsRmDir(dirFullPath)
-				}
-			} else {
-				for (const fileName of files) {
-					const filePath = path.join(dirPath, fileName)
-					const fullPath = path.join(this.folderPath, filePath)
-					const lStat = await fsLstat(fullPath)
-					if (lStat.isDirectory()) {
-						await cleanUpDirectory(filePath, true)
-					} else {
-						const lastModified = Math.max(
-							lStat.mtimeMs, // modified
-							lStat.ctimeMs, // created
-							lStat.birthtimeMs // birthtime (when a file is copied, this changes but the others are kept from the original file)
-						)
-						const age = Math.floor((now - lastModified) / 1000) // in seconds
-
-						if (age > cleanFileAge) {
-							await fsUnlink(fullPath)
-							this.logOperation(`Clean up old files: Remove file "${fullPath}" (age: ${age})`)
-						}
-					}
-				}
-			}
-		}
-
-		try {
-			await cleanUpDirectory('', false)
-		} catch (error) {
-			return {
-				user: 'Error when cleaning up files',
-				tech: stringifyError(error),
-			}
-		}
-		return null
-	}
-
-	/** Full path to the file containing deferred removals */
-	private get deferRemovePackagesPath(): string {
-		return path.join(this.folderPath, '__removePackages.json')
-	}
-	/** */
-	private async getPackagesToRemove(): Promise<DelayPackageRemovalEntry[]> {
-		let packagesToRemove: DelayPackageRemovalEntry[] = []
-		try {
-			await fsAccess(this.deferRemovePackagesPath, fs.constants.R_OK)
-			// The file exists
-
-			const text = await fsReadFile(this.deferRemovePackagesPath, {
-				encoding: 'utf-8',
-			})
-			packagesToRemove = JSON.parse(text)
-		} catch (err) {
-			// File doesn't exist
-			packagesToRemove = []
-		}
-		return packagesToRemove
-	}
-	/** Update the deferred-remove-packages list */
-	private async updatePackagesToRemove(
-		cbManipulateList: (list: DelayPackageRemovalEntry[]) => DelayPackageRemovalEntry[]
-	): Promise<void> {
-		// Note: It is high likelihood that several processes will try to write to this file at the same time
-		// Therefore, we need to lock the file while writing to it.
-
-		const LOCK_ATTEMPTS_COUNT = 10
-		const RETRY_TIMEOUT = 100 // ms
-
-		try {
-			await updateJSONFileBatch<DelayPackageRemovalEntry[]>(
-				this.deferRemovePackagesPath,
-				(list) => {
-					return cbManipulateList(list ?? [])
-				},
-				{
-					retryCount: LOCK_ATTEMPTS_COUNT,
-					retryTimeout: RETRY_TIMEOUT,
-					logError: (error) => this.worker.logger.error(stringifyError(error)),
-					logWarning: (message) => this.worker.logger.warn(message),
-				}
-			)
-		} catch (e) {
-			// Not much we can do about it..
-			// Log and continue:
-			this.worker.logger.error(stringifyError(e))
-		}
-	}
-}
-
-interface DelayPackageRemovalEntry {
-	/** Local file path */
-	filePath: string
-	/** Unix timestamp for when it's clear to remove the file */
-	removeTime: number
 }
 
 enum StatusCategory {

@@ -72,6 +72,21 @@
                 }
             }
         },
+        "ftp": {
+            "label": "FTP",
+            "accessors": {
+                "ftp": {
+                    "type": "ftp",
+                    "label": "FTP",
+                    "host": "127.0.0.1",
+                    "serverType": "sftp",
+                    "allowRead": true,
+                    "allowWrite": true,
+                    "username": "test",
+                    "password": "test"
+                }
+            }
+        },
         "theinternet": {
             "label": "HTTP",
             "accessors": {

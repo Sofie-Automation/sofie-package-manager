@@ -127,6 +127,12 @@ export abstract class GenericAccessorHandle<Metadata> {
 	abstract getPackageActualVersion(): Promise<Expectation.Version.Any>
 
 	/**
+	 * Ensures that the Package is stable, meaning that it is in place and is not queued for removal or similar.
+	 * This operation assumes that the Package is already in place.
+	 */
+	abstract ensurePackageFulfilled(): Promise<void>
+
+	/**
 	 * Removes the package from the PackageContainer (if the package exists)
 	 * Also removes any Metadata associated with the package
 	 * @param logReason string describing why the package is removed (for logging)

@@ -15,6 +15,7 @@ import {
 import {
 	isCorePackageInfoAccessorHandle,
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -151,6 +152,9 @@ export const JsonDataCopy: ExpectationHandlerGenericWorker = {
 			}
 		}
 
+		// Ensure that the target Package is staying Fulfilled:
+		await lookupTarget.handle.ensurePackageFulfilled()
+
 		return {
 			fulfilled: true,
 		}
@@ -177,13 +181,15 @@ export const JsonDataCopy: ExpectationHandlerGenericWorker = {
 			lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupSource.accessor.type === Accessor.AccessType.HTTP ||
-			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY
+			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+			lookupSource.accessor.type === Accessor.AccessType.FTP
 		) {
 			if (
 				!isLocalFolderAccessorHandle(lookupSource.handle) &&
 				!isFileShareAccessorHandle(lookupSource.handle) &&
 				!isHTTPAccessorHandle(lookupSource.handle) &&
-				!isHTTPProxyAccessorHandle(lookupSource.handle)
+				!isHTTPProxyAccessorHandle(lookupSource.handle) &&
+				!isFTPAccessorHandle(lookupSource.handle)
 			)
 				throw new Error(`Source AccessHandler type is wrong`)
 
@@ -211,7 +217,7 @@ export const JsonDataCopy: ExpectationHandlerGenericWorker = {
 					workInProgress._reportProgress(actualSourceVersionHash, 0.5)
 
 					// Special: read the stream into memory and create JSON from it:
-					const readChunks: Buffer[] = []
+					const readChunks: Uint8Array[] = []
 					sourceStream.readStream.on('data', (data) => {
 						if (wasCancelled) return
 						workInProgress._reportProgress(actualSourceVersionHash, 0.6)
@@ -271,13 +277,15 @@ export const JsonDataCopy: ExpectationHandlerGenericWorker = {
 			} else if (
 				lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY
+				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupTarget.accessor.type === Accessor.AccessType.FTP
 			) {
 				// We can copy by using streams.
 				if (
 					!isLocalFolderAccessorHandle(targetHandle) &&
 					!isFileShareAccessorHandle(targetHandle) &&
-					!isHTTPProxyAccessorHandle(targetHandle)
+					!isHTTPProxyAccessorHandle(targetHandle) &&
+					!isFTPAccessorHandle(targetHandle)
 				) {
 					throw new Error(`Target AccessHandler type is wrong`)
 				}

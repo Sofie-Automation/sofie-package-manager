@@ -244,6 +244,9 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 			}
 		}
 	}
+	async ensurePackageFulfilled(): Promise<void> {
+		// Nothing
+	}
 	async removePackage(reason: string): Promise<void> {
 		const atem = await this.getAtem()
 		if (this.accessor.mediaType && typeof this.accessor.bankIndex === 'number') {

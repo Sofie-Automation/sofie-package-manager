@@ -94,6 +94,9 @@ export class CorePackageInfoAccessorHandle<Metadata> extends GenericAccessorHand
 	async getPackageActualVersion(): Promise<Expectation.Version.CorePackageInfo> {
 		throw new Error('getPackageActualVersion not applicable for CorePackageInfo')
 	}
+	async ensurePackageFulfilled(): Promise<void> {
+		// Nothing
+	}
 	async removePackage(_reason: string): Promise<void> {
 		await this.removeMetadata()
 

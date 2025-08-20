@@ -69,7 +69,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	public disableDriveMapping = false
 
 	private content: Content
-	private workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
+	protected workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
 	private accessor: AccessorOnPackage.FileShare
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.FileShare>) {
@@ -89,8 +89,6 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 				throw new Error('Bad input data: neither content.filePath nor accessor.filePath are set!')
 		}
 
-		if (arg.workOptions.removeDelay && typeof arg.workOptions.removeDelay !== 'number')
-			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
 		if (arg.workOptions.useTemporaryFilePath && typeof arg.workOptions.useTemporaryFilePath !== 'boolean')
 			throw new Error('Bad input data: workOptions.useTemporaryFilePath is not a boolean!')
 	}
@@ -271,21 +269,12 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		const stat = await fsStat(this.fullPath)
 		return this.convertStatToVersion(stat)
 	}
+	async ensurePackageFulfilled(): Promise<void> {
+		await this.fileHandler.clearPackageRemoval(this.filePath)
+	}
 	async removePackage(reason: string): Promise<void> {
 		await this.prepareFileAccess()
-		if (this.workOptions.removeDelay) {
-			this.logOperation(
-				`Remove package: Delay remove file "${this.packageName}", delay: ${this.workOptions.removeDelay} (${reason})`
-			)
-			await this.delayPackageRemoval(this.filePath, this.workOptions.removeDelay)
-		} else {
-			await this.removeMetadata()
-			if (await this.unlinkIfExists(this.fullPath)) {
-				this.logOperation(`Remove package: Removed file "${this.packageName}", ${reason}`)
-			} else {
-				this.logOperation(`Remove package: File already removed "${this.packageName}" (${reason})`)
-			}
-		}
+		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 
 	async getPackageReadStream(): Promise<{ readStream: NodeJS.ReadableStream; cancel: () => void }> {
@@ -306,7 +295,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
 		await this.prepareFileAccess()
-		await this.clearPackageRemoval(this.filePath)
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
 
@@ -388,8 +377,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 			} else if (cronjob === 'cleanup') {
 				const options = packageContainerExp.cronjobs[cronjob]
 
-				badReason = await this.removeDuePackages()
-				if (!badReason && options?.cleanFileAge) badReason = await this.cleanupOldFiles(options.cleanFileAge)
+				badReason = await this.fileHandler.removeDuePackages()
+				if (!badReason && options?.cleanFileAge)
+					badReason = await this.fileHandler.cleanupOldFiles(options.cleanFileAge, this.folderPath)
 			} else {
 				// Assert that cronjob is of type "never", to ensure that all types of cronjobs are handled:
 				assertNever(cronjob)
@@ -425,7 +415,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		await this.clearPackageRemoval(this.filePath)
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 

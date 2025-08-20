@@ -37,6 +37,7 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 	private content: {
 		/** This is set when the class-instance is only going to be used for PackageContainer access.*/
 		onlyContainerAccess?: boolean
+		filePath?: string
 		path?: string
 	}
 	// private workOptions: unknown // no workOptions supported
@@ -129,6 +130,9 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		const header = await this.fetchHeader()
 
 		return this.convertHeadersToVersion(header.headers)
+	}
+	async ensurePackageFulfilled(): Promise<void> {
+		// Nothing, HTTP is read only
 	}
 	async removePackage(_reason: string): Promise<void> {
 		await this.removeMetadata()
@@ -295,7 +299,7 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 	}
 
 	private _getFilePath(): string | undefined {
-		return this.accessor.url || this.content.path
+		return this.accessor.url || this.content.filePath || this.content.path
 	}
 	private isBadHTTPResponseCode(code: number) {
 		return code >= 400
