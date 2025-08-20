@@ -209,5 +209,8 @@
             ],
             "sideEffect": {}
         }
-    ]
+    ],
+    "settings": {
+        "delayRemoval": 5000
+    }
 }

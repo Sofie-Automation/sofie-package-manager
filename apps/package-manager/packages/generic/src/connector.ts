@@ -5,7 +5,6 @@ import {
 	ProcessHandler,
 	stringifyError,
 	ExpectedPackage,
-	literal,
 	Accessor,
 	protectString,
 	ExpectationManagerId,
@@ -20,6 +19,7 @@ import { PackageContainers, PackageManagerHandler } from './packageManager'
 import fs from 'fs'
 import { promisify } from 'util'
 import path from 'path'
+import { PackageManagerSettings } from './generated/options'
 
 const fsAccess = promisify(fs.access)
 const fsReadFile = promisify(fs.readFile)
@@ -128,87 +128,97 @@ export class Connector {
 	private async initFileWatcher(packageManagerHandler: PackageManagerHandler): Promise<void> {
 		const fileName = path.join(process.cwd(), './expectedPackages.json')
 
-		if (!(await fsExist(fileName))) {
-			// File does not exist, create it:
-			await fsWriteFile(
-				fileName,
-				JSON.stringify(
-					literal<WatchFile>({
-						description:
-							'This file is intended for debugging use. By passing the argument --watchFiles=true, the application will monitor this file as a second source of packages, so we can fiddle without going through Core',
-						packageContainers: {
-							[protectString<PackageContainerId>('source0')]: {
-								label: 'Source 0',
-								accessors: {
-									[protectString<AccessorId>('local')]: {
-										type: Accessor.AccessType.LOCAL_FOLDER,
-										label: 'Local',
-										folderPath: 'D:\\media\\source0',
-										allowRead: true,
-										allowWrite: false,
-									},
-								},
-							},
-							[protectString<PackageContainerId>('target0')]: {
-								label: 'Target 0',
-								accessors: {
-									[protectString<AccessorId>('local')]: {
-										type: Accessor.AccessType.LOCAL_FOLDER,
-										label: 'Local',
-										folderPath: 'D:\\media\\target0',
-										allowRead: true,
-										allowWrite: true,
-									},
-								},
-							},
-							[protectString<PackageContainerId>('internet')]: {
-								label: 'The Internet',
-								accessors: {
-									[protectString<AccessorId>('http')]: {
-										type: Accessor.AccessType.HTTP,
-										baseUrl: '',
-										allowRead: true,
-										allowWrite: false,
-										label: 'HTTP',
-									},
+		let existingFileContent: WatchFile | undefined = undefined
+		if (await fsExist(fileName)) {
+			existingFileContent = JSON.parse(await fsReadFile(fileName, { encoding: 'utf-8' }))
+		}
+
+		if (
+			!existingFileContent ||
+			!existingFileContent.settings ||
+			!existingFileContent?.description ||
+			!existingFileContent?.packageContainers ||
+			!existingFileContent?.expectedPackages
+		) {
+			if (!existingFileContent) existingFileContent = {} as any
+			if (existingFileContent) {
+				if (!existingFileContent.description)
+					existingFileContent.description =
+						'This file is intended for debugging use. By passing the argument --watchFiles=true, the application will monitor this file as a second source of packages, so we can fiddle without going through Core'
+				if (!existingFileContent.settings) existingFileContent.settings = { delayRemoval: 0 }
+
+				if (!existingFileContent.packageContainers)
+					existingFileContent.packageContainers = {
+						[protectString<PackageContainerId>('source0')]: {
+							label: 'Source 0',
+							accessors: {
+								[protectString<AccessorId>('local')]: {
+									type: Accessor.AccessType.LOCAL_FOLDER,
+									label: 'Local',
+									folderPath: 'D:\\media\\source0',
+									allowRead: true,
+									allowWrite: false,
 								},
 							},
 						},
-						expectedPackages: [
-							{
-								type: ExpectedPackage.PackageType.MEDIA_FILE,
-								_id: protectString<ExpectedPackageId>('test'),
-								contentVersionHash: 'abc1234',
-								content: {
-									filePath: 'amb.mp4',
-								},
-								version: {},
-								sources: [
-									{
-										containerId: protectString<PackageContainerId>('source0'),
-										accessors: {
-											[protectString<AccessorId>('local')]: {
-												type: Accessor.AccessType.LOCAL_FOLDER,
-												filePath: 'amb.mp4',
-											},
-										},
-									},
-								],
-								layers: ['target0'],
-								sideEffect: {
-									previewContainerId: null,
-									previewPackageSettings: null,
-									thumbnailContainerId: null,
-									thumbnailPackageSettings: null,
+						[protectString<PackageContainerId>('target0')]: {
+							label: 'Target 0',
+							accessors: {
+								[protectString<AccessorId>('local')]: {
+									type: Accessor.AccessType.LOCAL_FOLDER,
+									label: 'Local',
+									folderPath: 'D:\\media\\target0',
+									allowRead: true,
+									allowWrite: true,
 								},
 							},
-						],
-					}),
-					undefined,
-					2
-				),
-				'utf-8'
-			)
+						},
+						[protectString<PackageContainerId>('internet')]: {
+							label: 'The Internet',
+							accessors: {
+								[protectString<AccessorId>('http')]: {
+									type: Accessor.AccessType.HTTP,
+									baseUrl: '',
+									allowRead: true,
+									allowWrite: false,
+									label: 'HTTP',
+								},
+							},
+						},
+					}
+				if (!existingFileContent.expectedPackages)
+					existingFileContent.expectedPackages = [
+						{
+							type: ExpectedPackage.PackageType.MEDIA_FILE,
+							_id: protectString<ExpectedPackageId>('test'),
+							contentVersionHash: 'abc1234',
+							content: {
+								filePath: 'amb.mp4',
+							},
+							version: {},
+							sources: [
+								{
+									containerId: protectString<PackageContainerId>('source0'),
+									accessors: {
+										[protectString<AccessorId>('local')]: {
+											type: Accessor.AccessType.LOCAL_FOLDER,
+											filePath: 'amb.mp4',
+										},
+									},
+								},
+							],
+							layers: ['target0'],
+							sideEffect: {
+								previewContainerId: null,
+								previewPackageSettings: null,
+								thumbnailContainerId: null,
+								thumbnailPackageSettings: null,
+							},
+						},
+					]
+				// Update the file
+				await fsWriteFile(fileName, JSON.stringify(existingFileContent, undefined, 2), 'utf-8')
+			}
 		}
 		const triggerReloadInput = () => {
 			setTimeout(() => {
@@ -240,8 +250,15 @@ export class Connector {
 					packageContainers[id] = container
 				}
 
-				packageManagerHandler.setExternalData(packageContainers, o.expectedPackages)
+				packageManagerHandler.setExternalData(packageContainers, o.expectedPackages, o.settings)
 			}
+
+			// this.settings = {
+			// 	delayRemoval: this.coreHandler.delayRemoval,
+			// 	delayRemovalPackageInfo: this.coreHandler.delayRemovalPackageInfo,
+			// 	useTemporaryFilePath: this.coreHandler.useTemporaryFilePath,
+			// 	skipDeepScan: this.coreHandler.skipDeepScan,
+			// }
 		}
 	}
 	getExpectationManager(): ExpectationManager {
@@ -251,6 +268,7 @@ export class Connector {
 
 interface WatchFile {
 	description: string
+	settings: PackageManagerSettings
 	packageContainers: PackageContainers
 	expectedPackages: ExpectedPackage.Any[]
 }
