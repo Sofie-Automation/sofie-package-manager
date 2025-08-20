@@ -14,6 +14,7 @@ import {
 	isFileShareAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isHTTPAccessorHandle,
+	isFTPAccessorHandle,
 } from '../../../../accessorHandlers/accessor'
 import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
 import { QuantelAccessorHandle } from '../../../../accessorHandlers/quantel'
@@ -33,6 +34,7 @@ import { HTTPAccessorHandle } from '../../../../accessorHandlers/http'
 import { MAX_EXEC_BUFFER } from '../../../../lib/lib'
 import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg'
 import { GenericAccessorHandle } from '../../../../accessorHandlers/genericHandle'
+import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
 
 export interface FFProbeScanResultStream {
 	index: number
@@ -54,13 +56,15 @@ export function scanWithFFProbe(
 		| HTTPAccessorHandle<any>
 		| HTTPProxyAccessorHandle<any>
 		| QuantelAccessorHandle<any>
+		| FTPAccessorHandle<any>
 ): CancelablePromise<FFProbeScanResult> {
 	return new CancelablePromise<FFProbeScanResult>(async (resolve, reject, onCancel) => {
 		if (
 			isLocalFolderAccessorHandle(sourceHandle) ||
 			isFileShareAccessorHandle(sourceHandle) ||
 			isHTTPAccessorHandle(sourceHandle) ||
-			isHTTPProxyAccessorHandle(sourceHandle)
+			isHTTPProxyAccessorHandle(sourceHandle) ||
+			isFTPAccessorHandle(sourceHandle)
 		) {
 			let inputPath: string
 			let filePath: string
@@ -76,6 +80,9 @@ export function scanWithFFProbe(
 				filePath = sourceHandle.path
 			} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 				inputPath = sourceHandle.fullUrl
+				filePath = sourceHandle.filePath
+			} else if (isFTPAccessorHandle(sourceHandle)) {
+				inputPath = sourceHandle.ftpUrl.url
 				filePath = sourceHandle.filePath
 			} else {
 				assertNever(sourceHandle)
@@ -124,7 +131,7 @@ export function scanWithFFProbe(
 				}
 			)
 		} else if (isQuantelClipAccessorHandle(sourceHandle)) {
-			// Because we have no good way of using ffprobe to generate the into we want,
+			// Because we have no good way of using ffprobe to generate the info we want,
 			// we resort to faking it:
 
 			const clip = await sourceHandle.getClip()
@@ -169,12 +176,7 @@ function fixJSONResult(obj: any): void {
 }
 
 export function scanFieldOrder(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	targetVersion: Expectation.PackageDeepScan['endRequirement']['version']
 ): CancelablePromise<FieldOrder> {
 	return new CancelablePromise<FieldOrder>(async (resolve, reject, onCancel) => {
@@ -245,12 +247,7 @@ export interface ScanMoreInfoResult {
 }
 
 export function scanMoreInfo(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	previouslyScanned: FFProbeScanResult,
 	targetVersion: Expectation.PackageDeepScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
@@ -471,12 +468,7 @@ export function scanMoreInfo(
 }
 
 function scanLoudnessStream(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	_previouslyScanned: FFProbeScanResult,
 	channelSpec: string,
 	filter?: string
@@ -569,12 +561,7 @@ function scanLoudnessStream(
 }
 
 export function scanLoudness(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	previouslyScanned: FFProbeScanResult,
 	targetVersion: Expectation.PackageLoudnessScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
@@ -664,12 +651,7 @@ export function scanLoudness(
 }
 const EPSILON = 0.00001
 export function scanIframes(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	_targetVersion: Expectation.PackageIframesScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
 	onProgress: (
@@ -811,14 +793,15 @@ export function scanIframes(
 	})
 }
 
-async function getFFMpegInputArgsFromAccessorHandle(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>
-): Promise<string[]> {
+type FFMpegSupportedSourceHandles =
+	| LocalFolderAccessorHandle<any>
+	| FileShareAccessorHandle<any>
+	| HTTPAccessorHandle<any>
+	| HTTPProxyAccessorHandle<any>
+	| QuantelAccessorHandle<any>
+	| FTPAccessorHandle<any>
+
+async function getFFMpegInputArgsFromAccessorHandle(sourceHandle: FFMpegSupportedSourceHandles): Promise<string[]> {
 	const args: string[] = []
 	if (isLocalFolderAccessorHandle(sourceHandle)) {
 		args.push(`-i`, escapeFilePath(sourceHandle.fullPath))
@@ -829,6 +812,8 @@ async function getFFMpegInputArgsFromAccessorHandle(
 		args.push(`-i`, sourceHandle.fullUrl)
 	} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 		args.push(`-i`, sourceHandle.fullUrl)
+	} else if (isFTPAccessorHandle(sourceHandle)) {
+		args.push(`-i`, sourceHandle.ftpUrl.url)
 	} else if (isQuantelClipAccessorHandle(sourceHandle)) {
 		const httpStreamURL = await sourceHandle.getTransformerStreamURL()
 
@@ -849,6 +834,7 @@ const FFMPEG_SUPPORTED_SOURCE_ACCESSORS: Set<Accessor.AccessType | undefined> = 
 	Accessor.AccessType.HTTP,
 	Accessor.AccessType.HTTP_PROXY,
 	Accessor.AccessType.QUANTEL,
+	Accessor.AccessType.FTP,
 ])
 
 export function isAnFFMpegSupportedSourceAccessor(sourceAccessorOnPackage: AccessorOnPackage.Any): boolean {
@@ -862,12 +848,14 @@ export function isAnFFMpegSupportedSourceAccessorHandle(
 	| FileShareAccessorHandle<any>
 	| HTTPAccessorHandle<any>
 	| HTTPProxyAccessorHandle<any>
-	| QuantelAccessorHandle<any> {
+	| QuantelAccessorHandle<any>
+	| FTPAccessorHandle<any> {
 	return (
 		isLocalFolderAccessorHandle(sourceHandle) ||
 		isFileShareAccessorHandle(sourceHandle) ||
 		isHTTPAccessorHandle(sourceHandle) ||
 		isHTTPProxyAccessorHandle(sourceHandle) ||
-		isQuantelClipAccessorHandle(sourceHandle)
+		isQuantelClipAccessorHandle(sourceHandle) ||
+		isFTPAccessorHandle(sourceHandle)
 	)
 }

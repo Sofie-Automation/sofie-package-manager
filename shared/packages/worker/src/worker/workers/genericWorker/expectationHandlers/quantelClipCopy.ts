@@ -141,6 +141,8 @@ export const QuantelClipCopy: ExpectationHandlerGenericWorker = {
 			return { fulfilled: false, knownReason: issueVersions.knownReason, reason: issueVersions.reason }
 		}
 
+		await lookupTarget.handle.ensurePackageFulfilled()
+
 		return {
 			fulfilled: true,
 		}

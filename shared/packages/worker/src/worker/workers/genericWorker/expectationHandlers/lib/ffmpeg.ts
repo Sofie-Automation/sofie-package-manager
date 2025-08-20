@@ -3,6 +3,7 @@ import path from 'path'
 import { mkdir as fsMkDir } from 'fs/promises'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 } from '../../../../accessorHandlers/accessor'
@@ -20,6 +21,7 @@ import {
 	overrideFFMpegExecutables,
 	getFFProbeExecutable,
 } from '@sofie-package-manager/api'
+import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
 
 export { FFMpegProcess, testFFMpeg, testFFProbe, overrideFFMpegExecutables, getFFProbeExecutable, getFFMpegExecutable }
 
@@ -30,7 +32,8 @@ export async function spawnFFMpeg<Metadata>(
 	targetHandle:
 		| LocalFolderAccessorHandle<Metadata>
 		| FileShareAccessorHandle<Metadata>
-		| HTTPProxyAccessorHandle<Metadata>,
+		| HTTPProxyAccessorHandle<Metadata>
+		| FTPAccessorHandle<Metadata>,
 	onDone: () => Promise<void>,
 	onFail: (err?: any) => Promise<void>,
 	onProgress?: (progress: number) => Promise<void>,
@@ -59,6 +62,8 @@ export async function spawnFFMpeg<Metadata>(
 	} else if (isHTTPProxyAccessorHandle(targetHandle)) {
 		pipeStdOut = true
 		args.push('pipe:1') // pipe output to stdout
+	} else if (isFTPAccessorHandle(targetHandle)) {
+		args.push(escapeFilePath(targetHandle.ftpUrl.url))
 	} else {
 		assertNever(targetHandle)
 		throw new Error(`Unsupported Target AccessHandler`)

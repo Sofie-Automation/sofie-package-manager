@@ -12,6 +12,7 @@ import {
 } from '@sofie-package-manager/api'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 } from '../../../accessorHandlers/accessor'
@@ -111,12 +112,14 @@ export const FileVerify: ExpectationHandlerGenericWorker = {
 		if (
 			lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-			lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY
+			lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+			lookupTarget.accessor.type === Accessor.AccessType.FTP
 		) {
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
-				!isHTTPProxyAccessorHandle(targetHandle)
+				!isHTTPProxyAccessorHandle(targetHandle) &&
+				!isFTPAccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 

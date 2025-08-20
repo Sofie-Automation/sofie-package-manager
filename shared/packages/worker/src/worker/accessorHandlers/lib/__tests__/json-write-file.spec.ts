@@ -1,174 +1,383 @@
-import { getTmpPath, updateJSONFile, updateJSONFileBatch } from '../json-write-file'
+import { GenericFileHandler } from '../GenericFileHandler'
+import { JSONWriteHandler, JSONWriteFilesLockHandler, JSONWriteFilesBestEffortHandler } from '../json-write-file'
 import { promises as fs } from 'fs'
+import * as path from 'path'
 
-const logWarning = jest.fn((message: string) => console.log('WARNING', message))
-const logError = jest.fn((message: any) => console.log('ERROR', message))
-
-const FILE_A = 'file_a.json'
-async function cleanup() {
-	logWarning.mockClear()
-	logError.mockClear()
-
-	await Promise.all([unlinkIfExists(FILE_A), unlinkIfExists(getLockPath(FILE_A)), unlinkIfExists(getTmpPath(FILE_A))])
+const logger = {
+	error: jest.fn((message: string) => console.log('ERROR', message)),
+	warn: jest.fn((message: string) => console.log('WARNING', message)),
+	debug: jest.fn((message: string) => console.log('DEBUG', message)),
+	silly: jest.fn((message: string) => console.log('SILLY', message)),
+	category: () => logger,
 }
 
-const config = {
-	logError,
-	logWarning,
-}
-
-beforeEach(cleanup)
-afterEach(cleanup)
-
-test('updateJSONFile: single write', async () => {
-	const cbManipulate = jest.fn(() => {
-		return {
-			a: 1,
+const fileHandler: GenericFileHandler = {
+	logOperation: (_message: string) => {},
+	getFullPath: (filePath: string) => `${filePath}`,
+	unlinkIfExists: async (_fullPath: string) => {
+		try {
+			await fs.unlink(_fullPath)
+			return true
+		} catch (e) {
+			if ((e as any)?.code === 'ENOENT') {
+				// not found, that's okay
+				return false
+			} else throw e
 		}
+	},
+	getMetadataPath: (fullPath: string) => `${fullPath}.metadata`,
+	fileExists: async (_fullPath: string) => {
+		throw new Error('fileExists Not implemented')
+	},
+	readFile: async (_fullPath: string) => {
+		throw new Error('readFile Not implemented')
+	},
+	readFileIfExists: async (fullPath: string) => {
+		try {
+			await fs.access(fullPath)
+		} catch (e) {
+			if ((e as any)?.code === 'ENOENT') {
+				// not found
+				return undefined
+			} else throw e
+		}
+		return fs.readFile(fullPath)
+	},
+	writeFile: async (fullPath: string, content: Buffer) => {
+		await fs.writeFile(fullPath, content as any)
+	},
+	listFilesInDir: async (_fullPath: string) => {
+		throw new Error('listFilesInDir Not implemented')
+	},
+	removeDirIfExists: async (_fullPath: string) => {
+		throw new Error('removeDirIfExists Not implemented')
+	},
+	rename: async (from: string, to: string) => fs.rename(from, to),
+}
+
+describe('JSONWriteFilesLockHandler', () => {
+	const FILE_NAME = path.resolve('file_a.json')
+	beforeEach(async () => {
+		logger.error.mockClear()
+		logger.warn.mockClear()
+		logger.debug.mockClear()
+		logger.silly.mockClear()
 	})
-	await updateJSONFile(FILE_A, cbManipulate, config)
-
-	expect(cbManipulate).toBeCalledTimes(1)
-	expect(await readIfExists(FILE_A)).toBe(
-		JSON.stringify({
-			a: 1,
-		})
-	)
-	expect(logWarning).toBeCalledTimes(0)
-	expect(logError).toBeCalledTimes(0)
-})
-
-test('updateJSONFile: 2 writes', async () => {
-	const cbManipulate = jest.fn((o) => {
-		o = o || []
-		o.push('a')
-		return o
-	})
-
-	const p0 = updateJSONFile(FILE_A, cbManipulate, config)
-	await sleep(5)
-
-	const p1 = updateJSONFile(FILE_A, cbManipulate, config)
-
-	await Promise.all([p0, p1])
-
-	expect(cbManipulate).toBeCalledTimes(2)
-	expect(await readIfExists(FILE_A)).toBe(JSON.stringify(['a', 'a']))
-	expect(logWarning).toBeCalledTimes(0)
-	expect(logError).toBeCalledTimes(0)
-})
-test('updateJSONFile: 10 writes', async () => {
-	const cbManipulate = jest.fn((o) => {
-		o = o || []
-		o.push('b')
-		return o
-	})
-
-	const config = {
-		logError,
-		logWarning,
-		retryTimeout: 30,
-		retryCount: 3,
-	}
-
-	// This should be an impossible tasks, because there will be too many locks, and not enough time to resolve them:
-
-	let error: any
-	try {
+	afterEach(async () => {
 		await Promise.all([
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
-			updateJSONFile(FILE_A, cbManipulate, config),
+			unlinkIfExists(FILE_NAME),
+			unlinkIfExists(getLockPath(FILE_NAME)),
+			unlinkIfExists(JSONWriteHandler.getTmpPath(FILE_NAME)),
 		])
-	} catch (e) {
-		error = e
-	}
-	expect(error + '').toMatch(/Failed to lock file/)
-
-	// Wait for the lock functions to finish retrying:
-	await sleep(config.retryTimeout * config.retryCount)
-
-	expect(logWarning).toBeCalledTimes(0)
-	expect(logError).toBeCalledTimes(0)
-})
-
-test('updateJSONFileBatch: single write', async () => {
-	const cbManipulate = jest.fn(() => {
-		return {
-			b: 1,
-		}
 	})
-	await updateJSONFileBatch(FILE_A, cbManipulate, config)
 
-	expect(cbManipulate).toBeCalledTimes(1)
-	expect(await readIfExists(FILE_A)).toBe(
-		JSON.stringify({
-			b: 1,
+	const writeHandler = new JSONWriteFilesLockHandler(fileHandler, logger as any)
+
+	test('updateJSONFile: single write', async () => {
+		const cbManipulate = jest.fn(() => {
+			return {
+				a: 1,
+			}
 		})
-	)
-	expect(logWarning).toBeCalledTimes(0)
-	expect(logError).toBeCalledTimes(0)
-})
 
-test('updateJSONFileBatch: 3 writes', async () => {
-	const v = await readIfExists(FILE_A)
-	expect(v).toBe(undefined)
+		await writeHandler.updateJSONFile(FILE_NAME, cbManipulate)
 
-	const cbManipulate = jest.fn((o) => {
-		o = o || []
-		o.push('a')
-		return o
+		expect(cbManipulate).toHaveBeenCalledTimes(1)
+		expect(await readIfExists(FILE_NAME)).toBe(
+			JSON.stringify({
+				a: 1,
+			})
+		)
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
 	})
 
-	const p0 = updateJSONFileBatch(FILE_A, cbManipulate, config)
-	await sleep(5)
+	test('updateJSONFile: 2 writes', async () => {
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('a')
+			return o
+		})
 
-	const p1 = updateJSONFileBatch(FILE_A, cbManipulate, config)
-	const p2 = updateJSONFileBatch(FILE_A, cbManipulate, config)
+		const p0 = writeHandler.updateJSONFile(FILE_NAME, cbManipulate)
+		await sleep(5)
 
-	await Promise.all([p0, p1, p2])
+		const p1 = writeHandler.updateJSONFile(FILE_NAME, cbManipulate)
 
-	expect(cbManipulate).toBeCalledTimes(3)
-	expect(await readIfExists(FILE_A)).toBe(JSON.stringify(['a', 'a', 'a']))
+		await Promise.all([p0, p1])
 
-	expect(logWarning).toBeCalledTimes(0)
-	expect(logError).toBeCalledTimes(0)
-})
-test('updateJSONFileBatch: 20 writes', async () => {
-	const cbManipulate = jest.fn((o) => {
-		o = o || []
-		o.push('a')
-		return o
+		expect(cbManipulate).toHaveBeenCalledTimes(2)
+		expect(await readIfExists(FILE_NAME)).toBe(JSON.stringify(['a', 'a']))
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+	test('updateJSONFile: 15 writes', async () => {
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('b')
+			return o
+		})
+
+		// This should be an impossible task, because there will be too many locks, and not enough time to resolve them:
+
+		let error: any
+		try {
+			await Promise.all([
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+			])
+		} catch (e) {
+			error = e
+		}
+		expect(error + '').toMatch(/Failed to lock file/)
+
+		// Wait for the lock functions to finish retrying:
+		await sleep(writeHandler.RETRY_TIMEOUT * writeHandler.LOCK_ATTEMPTS_COUNT)
+
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
 	})
 
-	const config = {
-		logWarning,
-		logError,
-		retryTimeout: 30,
-		retryCount: 3,
-	}
+	test('updateJSONFileBatch: single write', async () => {
+		const cbManipulate = jest.fn(() => {
+			return {
+				b: 1,
+			}
+		})
+		await writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
 
-	const ps: Promise<void>[] = []
-	let expectResult: string[] = []
-	for (let i = 0; i < 20; i++) {
-		ps.push(updateJSONFileBatch(FILE_A, cbManipulate, config))
-		expectResult.push('a')
-	}
+		expect(cbManipulate).toHaveBeenCalledTimes(1)
+		expect(await readIfExists(FILE_NAME)).toBe(
+			JSON.stringify({
+				b: 1,
+			})
+		)
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
 
-	await Promise.all(ps)
+	test('updateJSONFileBatch: 3 writes', async () => {
+		const v = await readIfExists(FILE_NAME)
+		expect(v).toBe(undefined)
 
-	expect(cbManipulate).toBeCalledTimes(20)
-	expect(await readIfExists(FILE_A)).toBe(JSON.stringify(expectResult))
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('a')
+			return o
+		})
 
-	expect(logWarning).toBeCalledTimes(0)
-	expect(logError).toBeCalledTimes(0)
+		const p0 = writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+		await sleep(5)
+
+		const p1 = writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+		const p2 = writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+
+		await Promise.all([p0, p1, p2])
+
+		expect(cbManipulate).toHaveBeenCalledTimes(3)
+		expect(await readIfExists(FILE_NAME)).toBe(JSON.stringify(['a', 'a', 'a']))
+
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+	test('updateJSONFileBatch: 20 writes', async () => {
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('a')
+			return o
+		})
+
+		const ps: Promise<void>[] = []
+		let expectResult: string[] = []
+		for (let i = 0; i < 20; i++) {
+			ps.push(writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate))
+			expectResult.push('a')
+		}
+
+		await Promise.all(ps)
+
+		expect(cbManipulate).toHaveBeenCalledTimes(20)
+		expect(await readIfExists(FILE_NAME)).toBe(JSON.stringify(expectResult))
+
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+})
+
+describe('JSONWriteFilesBestEffortHandler', () => {
+	const FILE_NAME = path.resolve('file_b.json')
+	beforeEach(async () => {
+		logger.error.mockClear()
+		logger.warn.mockClear()
+		logger.debug.mockClear()
+		logger.silly.mockClear()
+	})
+	afterEach(async () => {
+		await Promise.all([
+			unlinkIfExists(FILE_NAME),
+			unlinkIfExists(getLockPath(FILE_NAME)),
+			unlinkIfExists(JSONWriteHandler.getTmpPath(FILE_NAME)),
+		])
+	})
+
+	const writeHandler = new JSONWriteFilesBestEffortHandler(fileHandler, logger as any)
+
+	test('updateJSONFile: single write', async () => {
+		const cbManipulate = jest.fn(() => {
+			return {
+				a: 1,
+			}
+		})
+
+		await writeHandler.updateJSONFile(FILE_NAME, cbManipulate)
+
+		expect(cbManipulate).toHaveBeenCalledTimes(2)
+		expect(await readIfExists(FILE_NAME)).toBe(
+			JSON.stringify({
+				a: 1,
+			})
+		)
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+
+	test('updateJSONFile: 2 writes', async () => {
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('a')
+			return o
+		})
+
+		const p0 = writeHandler.updateJSONFile(FILE_NAME, cbManipulate)
+		await sleep(5)
+
+		const p1 = writeHandler.updateJSONFile(FILE_NAME, cbManipulate)
+
+		await Promise.all([p0, p1])
+
+		expect(cbManipulate).toHaveBeenCalledTimes(4)
+		expect(await readIfExists(FILE_NAME)).toBe(JSON.stringify(['a', 'a']))
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+	test('updateJSONFile: 15 writes', async () => {
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('b')
+			return o
+		})
+
+		// This should be an impossible tasks, because there will be too many locks, and not enough time to resolve them:
+
+		let error: any
+		try {
+			await Promise.all([
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+				writeHandler.updateJSONFile(FILE_NAME, cbManipulate),
+			])
+		} catch (e) {
+			error = e
+		}
+
+		expect(error + '').toMatch(/Failed to lock file/)
+
+		// Wait for the lock functions to finish retrying:
+		await sleep(writeHandler.RETRY_TIMEOUT * writeHandler.LOCK_ATTEMPTS_COUNT)
+
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+
+	test('updateJSONFileBatch: single write', async () => {
+		const cbManipulate = jest.fn(() => {
+			return {
+				b: 1,
+			}
+		})
+		await writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+
+		expect(cbManipulate).toHaveBeenCalledTimes(2)
+		expect(await readIfExists(FILE_NAME)).toBe(
+			JSON.stringify({
+				b: 1,
+			})
+		)
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+
+	test('updateJSONFileBatch: 3 writes', async () => {
+		const v = await readIfExists(FILE_NAME)
+		expect(v).toBe(undefined)
+
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('a')
+			return o
+		})
+
+		const p0 = writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+		await sleep(5)
+
+		const p1 = writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+		const p2 = writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate)
+
+		await Promise.all([p0, p1, p2])
+
+		expect(cbManipulate).toHaveBeenCalledTimes(6)
+		expect(await readIfExists(FILE_NAME)).toBe(JSON.stringify(['a', 'a', 'a']))
+
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
+	test('updateJSONFileBatch: 20 writes', async () => {
+		const cbManipulate = jest.fn((o) => {
+			o = o || []
+			o.push('a')
+			return o
+		})
+
+		const ps: Promise<void>[] = []
+		let expectResult: string[] = []
+		for (let i = 0; i < 20; i++) {
+			ps.push(writeHandler.updateJSONFileBatch(FILE_NAME, cbManipulate))
+			expectResult.push('a')
+		}
+
+		await Promise.all(ps)
+
+		expect(cbManipulate).toHaveBeenCalledTimes(40)
+		expect(await readIfExists(FILE_NAME)).toBe(JSON.stringify(expectResult))
+
+		expect(logger.error).toHaveBeenCalledTimes(0)
+		expect(logger.warn).toHaveBeenCalledTimes(0)
+	})
 })
 
 async function readIfExists(filePath: string): Promise<string | undefined> {

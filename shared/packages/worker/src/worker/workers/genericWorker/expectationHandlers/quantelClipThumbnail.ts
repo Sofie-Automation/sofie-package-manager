@@ -17,6 +17,7 @@ import { getStandardCost } from '../lib/lib'
 import { BaseWorker } from '../../../worker'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
@@ -162,6 +163,9 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 				},
 			}
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -184,14 +188,16 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 			lookupSource.accessor.type === Accessor.AccessType.QUANTEL &&
 			(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupTarget.accessor.type === Accessor.AccessType.FTP)
 		) {
 			if (!isQuantelClipAccessorHandle(sourceHandle)) throw new Error(`Source AccessHandler type is wrong`)
 
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
-				!isHTTPProxyAccessorHandle(targetHandle)
+				!isHTTPProxyAccessorHandle(targetHandle) &&
+				!isFTPAccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 

@@ -13,6 +13,7 @@ import {
 import {
 	isATEMAccessorHandle,
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -235,25 +236,29 @@ export async function doFileCopyExpectation(
 		(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupSource.accessor.type === Accessor.AccessType.HTTP ||
-			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY) &&
+			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+			lookupSource.accessor.type === Accessor.AccessType.FTP) &&
 		(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-			lookupTarget.accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE)
+			lookupTarget.accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE ||
+			lookupTarget.accessor.type === Accessor.AccessType.FTP)
 	) {
 		// We can copy by using file streams
 		if (
 			!isLocalFolderAccessorHandle(lookupSource.handle) &&
 			!isFileShareAccessorHandle(lookupSource.handle) &&
 			!isHTTPAccessorHandle(lookupSource.handle) &&
-			!isHTTPProxyAccessorHandle(lookupSource.handle)
+			!isHTTPProxyAccessorHandle(lookupSource.handle) &&
+			!isFTPAccessorHandle(lookupSource.handle)
 		)
 			throw new Error(`Source AccessHandler type is wrong`)
 		if (
 			!isLocalFolderAccessorHandle(targetHandle) &&
 			!isFileShareAccessorHandle(targetHandle) &&
 			!isHTTPProxyAccessorHandle(targetHandle) &&
-			!isATEMAccessorHandle(targetHandle)
+			!isATEMAccessorHandle(targetHandle) &&
+			!isFTPAccessorHandle(targetHandle)
 		)
 			throw new Error(`Target AccessHandler type is wrong`)
 

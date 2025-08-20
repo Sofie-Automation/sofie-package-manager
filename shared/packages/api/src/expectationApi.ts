@@ -539,6 +539,7 @@ export namespace Expectation {
 			| ExpectedQuantelClip
 			| ExpectedATEMFile
 			| ExpectedJSONData
+			| ExpectedFTPFile
 		export type Any =
 			| FileOnDisk
 			| MediaFileThumbnail
@@ -547,6 +548,7 @@ export namespace Expectation {
 			| QuantelClip
 			| ATEMFile
 			| JSONData
+			| FTPFile
 		export interface Base {
 			type: Type
 		}
@@ -561,6 +563,7 @@ export namespace Expectation {
 			QUANTEL_CLIP_PREVIEW = 'quantel_clip_preview',
 			ATEM_FILE = 'atem_file',
 			JSON_DATA = 'json_data',
+			FTP_FILE = 'ftp_file',
 		}
 		type ExpectedType<T extends Base> = Partial<T> & Pick<T, 'type'>
 
@@ -652,5 +655,12 @@ export namespace Expectation {
 			size: string
 		}
 		export type ExpectedJSONData = ExpectedType<JSONData>
+
+		export interface FTPFile extends Base {
+			type: Type.FTP_FILE
+			fileSize: number // size in bytes
+			modifiedDate: number // timestamp (ms)
+		}
+		export type ExpectedFTPFile = ExpectedType<FTPFile>
 	}
 }

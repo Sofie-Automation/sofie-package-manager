@@ -58,7 +58,10 @@ export const FileCopy: ExpectationHandlerGenericWorker = {
 		const lookupTarget = await lookupCopyTargets(worker, exp)
 		const lookupSource = await lookupCopySources(worker, exp)
 
-		return isFileFulfilled(worker, lookupSource, lookupTarget)
+		const fulfilled = await isFileFulfilled(worker, lookupSource, lookupTarget)
+		// Ensure that the target Package is staying Fulfilled:
+		if (fulfilled.fulfilled && lookupTarget.ready) await lookupTarget.handle.ensurePackageFulfilled()
+		return fulfilled
 	},
 	workOnExpectation: async (exp: Expectation.Any, worker: BaseWorker): Promise<IWorkInProgress> => {
 		if (!isFileCopy(exp)) throw new Error(`Wrong exp.type: "${exp.type}"`)

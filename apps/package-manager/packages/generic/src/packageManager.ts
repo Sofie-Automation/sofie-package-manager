@@ -172,7 +172,11 @@ export class PackageManagerHandler {
 		return this.expectationManager
 	}
 
-	setExternalData(packageContainers: PackageContainers, expectedPackages: ExpectedPackage.Any[]): void {
+	setExternalData(
+		packageContainers: PackageContainers,
+		expectedPackages: ExpectedPackage.Any[],
+		settings: PackageManagerSettings
+	): void {
 		const expectedPackagesWraps: ExpectedPackageWrap[] = []
 
 		for (const expectedPackage of expectedPackages) {
@@ -182,6 +186,7 @@ export class PackageManagerHandler {
 			}
 		}
 
+		this.settings = settings
 		this.externalData = {
 			packageContainers: packageContainers,
 			expectedPackages: expectedPackagesWraps,
