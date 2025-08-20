@@ -120,7 +120,7 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 	}
 	async readFileIfExists(fullPath: string): Promise<Buffer | undefined> {
 		try {
-			return this.readFile(fullPath)
+			return await this.readFile(fullPath)
 		} catch (e) {
 			if ((e as NodeJS.ErrnoException).code === 'ENOENT') return undefined // File does not exist
 			throw e // Some other error

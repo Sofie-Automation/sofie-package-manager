@@ -9,7 +9,7 @@ export abstract class JSONWriteHandler {
 	/** How many times to wait a before trying again, in case of a failed write lock. Defaults to 10. */
 	public LOCK_ATTEMPTS_COUNT = 10
 
-	private updateJSONFileBatches = new Map<string, BatchOperation>()
+	private readonly updateJSONFileBatches = new Map<string, BatchOperation>()
 
 	protected logger: LoggerInstance
 
@@ -141,10 +141,6 @@ export abstract class JSONWriteHandler {
  * 2. Writing corrupt files due to process exit (write to temporary file and rename)
  */
 export class JSONWriteFilesLockHandler extends JSONWriteHandler {
-	constructor(fileHandler: GenericFileHandler, logger: LoggerInstance) {
-		super(fileHandler, logger)
-	}
-
 	/**
 	 * A "safe" way to write JSON data to a file. Takes measures to avoid writing corrupt data to a file due to
 	 * 1. Multiple processes writing to the same file (uses a lock file)
@@ -254,10 +250,6 @@ interface BatchOperation {
  * This class is worse but more generic/compatible than JSONWriteFilesLockHandler
  */
 export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
-	constructor(fileHandler: GenericFileHandler, logger: LoggerInstance) {
-		super(fileHandler, logger)
-	}
-
 	/**
 	 * A "safe" way to write JSON data to a file. Takes measures to avoid writing corrupt data to a file due to
 	 * 1. Multiple processes writing to the same file (uses a lock file)

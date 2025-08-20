@@ -45,9 +45,9 @@ export interface Content {
 /** Accessor handle for accessing files in a local folder */
 export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
 	static readonly type = 'ftp'
-	private content: Content
-	private workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
-	private accessor: AccessorOnPackage.FTP
+	private readonly content: Content
+	private readonly workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
+	private readonly accessor: AccessorOnPackage.FTP
 
 	public fileHandler: GenericFileOperationsHandler
 
@@ -59,12 +59,6 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		this.accessor = arg.accessor
 		this.content = arg.content
 		this.workOptions = arg.workOptions
-
-		// Verify content data:
-		if (!this.content.onlyContainerAccess) {
-			// if (!this.content.path)
-			// if (!this._getFilePath()) throw new Error('Bad input data: neither content.path nor accessor.url are set!')
-		}
 
 		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
 			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
@@ -167,11 +161,9 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 	}
 	async checkPackageContainerWriteAccess(): Promise<AccessorHandlerCheckPackageContainerWriteAccessResult> {
-		// todo: how to check this?
 		return { success: true }
 	}
 	private async checkPackageContainerReadAccess(): Promise<AccessorHandlerRunCronJobResult> {
-		// todo: how to check this?
 		return { success: true }
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FTPFile> {
@@ -192,19 +184,6 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 	}
 	async removePackage(reason: string): Promise<void> {
 		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
-		// if (this.workOptions.removeDelay) {
-		// 	await this.delay.delayPackageRemoval(this.workOptions.removeDelay)
-		// 	this.logOperation(
-		// 		`Remove package: Delay remove package "${this.packageName}", delay: ${this.workOptions.removeDelay} (${reason})`
-		// 	)
-		// } else {
-		// 	await this.removeMetadata()
-		// 	if (await this.deletePackageIfExists(this.fullPath)) {
-		// 		this.logOperation(`Remove package: Removed file "${this.packageName}" (${reason})`)
-		// 	} else {
-		// 		this.logOperation(`Remove package: File already removed "${this.packageName}" (${reason})`)
-		// 	}
-		// }
 	}
 	async getPackageReadStream(): Promise<PackageReadStream> {
 		const ftp = await this.prepareFTPClient()
@@ -352,7 +331,6 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		) as (keyof PackageContainerExpectation['monitors'])[]
 		for (const monitorIdStr of monitorIds) {
 			if (monitorIdStr === 'packages') {
-				// todo: implement monitors
 				throw new Error('Not implemented yet')
 			} else {
 				// Assert that cronjob is of type "never", to ensure that all types of monitors are handled:
@@ -468,7 +446,7 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 
 		let cachedClient = this.worker.accessorCache[cacheKey] as FTPClientBase | undefined
 
-		if (cachedClient && cachedClient.destroyed) {
+		if (cachedClient?.destroyed) {
 			delete this.worker.accessorCache[cacheKey]
 			cachedClient = undefined
 		}

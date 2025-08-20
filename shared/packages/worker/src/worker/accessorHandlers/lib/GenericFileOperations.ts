@@ -7,11 +7,11 @@ import * as path from 'path'
  * Provides a set of convenience methods for file-based operations
  */
 export class GenericFileOperationsHandler {
-	private logger: LoggerInstance
+	private readonly logger: LoggerInstance
 	constructor(
-		private fileHandler: GenericFileHandler,
-		private jsonWriter: JSONWriteHandler,
-		private workOptions: Expectation.WorkOptions.RemoveDelay,
+		private readonly fileHandler: GenericFileHandler,
+		private readonly jsonWriter: JSONWriteHandler,
+		private readonly workOptions: Expectation.WorkOptions.RemoveDelay,
 		logger: LoggerInstance
 	) {
 		this.logger = logger.category('GenericFileOperationsHandler')
@@ -105,16 +105,12 @@ export class GenericFileOperationsHandler {
 					const fullPath = path.join(folderPath, filePath)
 					if (file.isDirectory) {
 						await cleanUpDirectory(filePath, true)
-					} else {
-						if (file.lastModified && file.lastModified > 0) {
-							const age = Math.floor((now - file.lastModified) / 1000) // in seconds
+					} else if (file.lastModified && file.lastModified > 0) {
+						const age = Math.floor((now - file.lastModified) / 1000) // in seconds
 
-							if (age > cleanFileAge) {
-								await this.fileHandler.unlinkIfExists(fullPath)
-								this.fileHandler.logOperation(
-									`Clean up old files: Remove file "${fullPath}" (age: ${age})`
-								)
-							}
+						if (age > cleanFileAge) {
+							await this.fileHandler.unlinkIfExists(fullPath)
+							this.fileHandler.logOperation(`Clean up old files: Remove file "${fullPath}" (age: ${age})`)
 						}
 					}
 				}

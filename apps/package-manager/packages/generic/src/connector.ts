@@ -42,7 +42,7 @@ export interface Config {
 	packageManager: PackageManagerConfig
 }
 export interface ProcessConfig {
-	/** Will cause the Node applocation to blindly accept all certificates. Not recommenced unless in local, controlled networks. */
+	/** Will cause the Node application to blindly accept all certificates. Not recommenced unless in local, controlled networks. */
 	unsafeSSL: boolean
 	/** Paths to certificates to load, for SSL-connections */
 	certificates: string[]
@@ -134,13 +134,12 @@ export class Connector {
 		}
 
 		if (
-			!existingFileContent ||
-			!existingFileContent.settings ||
+			!existingFileContent?.settings ||
 			!existingFileContent?.description ||
 			!existingFileContent?.packageContainers ||
 			!existingFileContent?.expectedPackages
 		) {
-			if (!existingFileContent) existingFileContent = {} as any
+			existingFileContent ??= {} as any
 			if (existingFileContent) {
 				if (!existingFileContent.description)
 					existingFileContent.description =

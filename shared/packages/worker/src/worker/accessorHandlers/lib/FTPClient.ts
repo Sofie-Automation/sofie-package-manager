@@ -66,7 +66,7 @@ export class FTPClient extends FTPClientBase {
 	private initializing: Promise<void> | null = null
 	public destroyed = false
 
-	private logger: LoggerInstance
+	private readonly logger: LoggerInstance
 
 	constructor(logger: LoggerInstance, options: FTPOptions) {
 		super(options)
@@ -124,7 +124,7 @@ export class FTPClient extends FTPClientBase {
 					password: this.options.password,
 					secure: this.options.serverType !== 'ftp',
 					secureOptions: {
-						rejectUnauthorized: this.options.allowAnyCertificate ? false : true, // Allow self-signed certificates
+						rejectUnauthorized: !this.options.allowAnyCertificate, // Allow self-signed certificates
 					},
 				}
 				await this.client.access(options)
@@ -236,14 +236,6 @@ export class FTPClient extends FTPClientBase {
 
 		const response = await this.client.uploadFrom(Readable.from(sourceStream), fullPath)
 
-		// todo: handle progress?
-		// this.client.trackProgress((info) => {
-		// 	console.log('File', info.name)
-		// 	console.log('Type', info.type)
-		// 	console.log('Transferred', info.bytes)
-		// 	console.log('Transferred Overall', info.bytesOverall)
-		// })
-
 		if (response.code === 226) return null // 226 means "Transfer complete"
 		else return `[${response.code}]: ${response.message}`
 	}
@@ -298,10 +290,10 @@ export class FTPClient extends FTPClientBase {
 			download.readableStream.on('end', () => {
 				resolve(Buffer.concat(chunks))
 			})
-			download.readableStream.on('error', (err) => {
+			download.readableStream.on('error', (err: Error) => {
 				reject(err)
 			})
-			download.onComplete.catch((err) => {
+			download.onComplete.catch((err: Error) => {
 				reject(err)
 			})
 		})
@@ -371,7 +363,7 @@ export class SFTPClient extends FTPClientBase {
 	public connected = false
 	public destroyed = false
 
-	private logger: LoggerInstance
+	private readonly logger: LoggerInstance
 
 	constructor(logger: LoggerInstance, options: FTPOptions) {
 		super(options)
@@ -421,7 +413,7 @@ export class SFTPClient extends FTPClientBase {
 		await this._kill()
 	}
 
-	private _onClose = () => {
+	private readonly _onClose = () => {
 		// Called when the connection is closed
 		this.connected = false
 	}

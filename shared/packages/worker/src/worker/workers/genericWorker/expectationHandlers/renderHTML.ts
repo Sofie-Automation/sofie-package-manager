@@ -215,16 +215,10 @@ export const RenderHTML: ExpectationHandlerGenericWorker = {
 
 			let url: string
 			let safeUrl: string // safe for logging / labels
-			if (isLocalFolderAccessorHandle(sourceHandle)) {
+			if (isLocalFolderAccessorHandle(sourceHandle) || isFileShareAccessorHandle(sourceHandle)) {
 				url = `file://${sourceHandle.fullPath}`
 				safeUrl = url
-			} else if (isFileShareAccessorHandle(sourceHandle)) {
-				url = `file://${sourceHandle.fullPath}`
-				safeUrl = url
-			} else if (isHTTPAccessorHandle(sourceHandle)) {
-				url = `${sourceHandle.fullUrl}`
-				safeUrl = url
-			} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
+			} else if (isHTTPAccessorHandle(sourceHandle) || isHTTPProxyAccessorHandle(sourceHandle)) {
 				url = `${sourceHandle.fullUrl}`
 				safeUrl = url
 			} else if (isFTPAccessorHandle(sourceHandle)) {

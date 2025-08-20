@@ -408,7 +408,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 	}
 	private async readFileIfExists(fullPath: string): Promise<Buffer | undefined> {
 		try {
-			return this.readFile(fullPath)
+			return await this.readFile(fullPath)
 		} catch (e) {
 			if (e instanceof Error && e.message.includes('[404]')) return undefined // not found
 			throw e // some other error
