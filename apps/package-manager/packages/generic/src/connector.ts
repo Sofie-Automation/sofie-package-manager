@@ -124,13 +124,25 @@ export class Connector {
 			return
 		}
 	}
+	private async readWatchFile(fileName: string): Promise<WatchFile> {
+		let str = await fsReadFile(fileName, { encoding: 'utf-8' })
+		// Special: support comments in the JSON:
+		str = str.replace(/([ \t\n])\/\/.*/g, '$1')
 
+		return JSON.parse(str) as WatchFile
+	}
 	private async initFileWatcher(packageManagerHandler: PackageManagerHandler): Promise<void> {
 		const fileName = path.join(process.cwd(), './expectedPackages.json')
 
+		let errorReadingFile = false
 		let existingFileContent: WatchFile | undefined = undefined
 		if (await fsExist(fileName)) {
-			existingFileContent = JSON.parse(await fsReadFile(fileName, { encoding: 'utf-8' }))
+			try {
+				existingFileContent = await this.readWatchFile(fileName)
+			} catch (e) {
+				this.logger.error(`Error reading/parsing ${fileName}: ${stringifyError(e)}`)
+				errorReadingFile = true
+			}
 		}
 
 		if (
@@ -216,7 +228,9 @@ export class Connector {
 						},
 					]
 				// Update the file
-				await fsWriteFile(fileName, JSON.stringify(existingFileContent, undefined, 2), 'utf-8')
+				if (!errorReadingFile) {
+					await fsWriteFile(fileName, JSON.stringify(existingFileContent, undefined, 2), 'utf-8')
+				}
 			}
 		}
 		const triggerReloadInput = () => {
@@ -240,16 +254,19 @@ export class Connector {
 			// Check that the file exists:
 			if (!(await fsExist(fileName))) return
 
-			const str = await fsReadFile(fileName, { encoding: 'utf-8' })
-			const o: WatchFile = JSON.parse(str)
+			try {
+				const o = await this.readWatchFile(fileName)
 
-			if (o.packageContainers && o.expectedPackages) {
-				const packageContainers: PackageContainers = {}
-				for (const [id, container] of objectEntries(o.packageContainers)) {
-					packageContainers[id] = container
+				if (o.packageContainers && o.expectedPackages) {
+					const packageContainers: PackageContainers = {}
+					for (const [id, container] of objectEntries(o.packageContainers)) {
+						packageContainers[id] = container
+					}
+
+					packageManagerHandler.setExternalData(packageContainers, o.expectedPackages, o.settings)
 				}
-
-				packageManagerHandler.setExternalData(packageContainers, o.expectedPackages, o.settings)
+			} catch (e) {
+				this.logger.error(`Error reading/parsing ${fileName}: ${stringifyError(e)}`)
 			}
 
 			// this.settings = {
