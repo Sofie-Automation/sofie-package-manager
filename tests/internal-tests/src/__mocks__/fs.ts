@@ -588,7 +588,7 @@ export function utimes(
 	// This is currently a no-op, since there isn't any support for atime/mtime in this mock
 	callback(undefined, undefined)
 }
-fs.rename = utimes
+fs.utimes = utimes
 
 export function createReadStream(path: string, _options?: BufferEncoding | undefined): FSReadStream {
 	return new FSReadStream(path)

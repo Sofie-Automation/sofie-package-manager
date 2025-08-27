@@ -13,7 +13,46 @@ This is the _Package Manager_ application of the [**Sofie** TV News Studio Autom
 
 ---
 
-## Introduction and Quick Start
+## Introduction
+
+In generic terms (which are the best terms) the Package Manager performs _Operations_ on _Packages_ at various _locations_.
+
+In simpler terms (which makes more sense), the Package Manager can _Copy_ _Files_ across various _file systems (such as local folders, network shares, ftp etc)_, or perform other operations such as _Transcoding_ or _Creating Thumbnails_.
+
+The Package Manager also reports the status of all _Operations_ and monitors the results. For example, if a file is to be copied onto a location, the Package Manager will report whether the file is in place or not.
+
+In addition, the Package Manager supports _versioning_ of Packages (eg it'll copy a new file if it has changed), _chaining of operations_ (eg copy a file, then transcode it, then create a thumbnail).
+
+The input to Package Manager is a list of _Expected Packages_ which defines the target state of the Packages (ie which Packages (files) should be present on which locations). Internally, the Package Manager uses a restful API, which allows for distributed operations with Workers running on multiple different platforms with different capabilities, sharing the load.
+
+### Supported operations
+
+- Copy File
+- Copy Proxy file from Quantel (using Quantel transformer)
+- Verify a File exists (ie no operation, just a check)
+- Copy JSON-data into Sofie data store
+- Make a preview of a media file (using ffmpeg)
+- Make a thumbnail of a media file (using ffmpeg)
+- Scan a media file (using ffprobe)
+- "Deep scan" a media file (detect black frames, freeze frames, scenes) (using ffmpeg)
+- Scan media file to detect type of iframes (using ffmpeg)
+- Copy Quantel Clip (between Quantel servers only)
+- Create preview file from Quantel Clip (using Quantel transformer)
+- Create thumbnail from Quantel Clip (using Quantel transformer)
+- Render HTML to video file
+
+### Supported endpoints
+
+- Local files
+- Network shares
+- Atem media pool
+- Sofie data store (PackageInfo)
+- Generic HTTP (read only)
+- HTTP Proxy Server (read & upload)
+- FTP
+- Quantel server
+
+## Quick Start
 
 See the [Installing Package Manager](https://sofie-automation.github.io/sofie-core/docs/user-guide/installation/installing-package-manager) page of the [Sofie System Documentation](https://sofie-automation.github.io/sofie-core/) to learn how to get started with Package Manager in a demo environment with CasparCG.
 

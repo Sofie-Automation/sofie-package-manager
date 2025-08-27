@@ -1,6 +1,7 @@
 import {
 	getAccessorHandle,
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 } from '../../../accessorHandlers/accessor'
@@ -25,6 +26,7 @@ import {
 import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder'
 import { FileShareAccessorHandle } from '../../../accessorHandlers/fileShare'
 import { HTTPProxyAccessorHandle } from '../../../accessorHandlers/httpProxy'
+import { FTPAccessorHandle } from '../../../accessorHandlers/ftp'
 
 /** Check that a worker has access to the packageContainers through its accessors */
 export function checkWorkerHasAccessToPackageContainersOnPackage(
@@ -482,7 +484,11 @@ export function thumbnailFFMpegArguments(
 export function proxyFFMpegArguments(
 	input: string,
 	seekableSource: boolean,
-	targetHandle: LocalFolderAccessorHandle<any> | FileShareAccessorHandle<any> | HTTPProxyAccessorHandle<any>
+	targetHandle:
+		| LocalFolderAccessorHandle<any>
+		| FileShareAccessorHandle<any>
+		| HTTPProxyAccessorHandle<any>
+		| FTPAccessorHandle<any>
 ): string[] {
 	const args = [
 		'-hide_banner',
@@ -498,12 +504,14 @@ export function proxyFFMpegArguments(
 	]
 
 	// Check target to see if we should tell ffmpeg which format to use:
-	let targetPath = ''
+	let targetPath: string
 	if (isLocalFolderAccessorHandle(targetHandle)) {
 		targetPath = targetHandle.fullPath
 	} else if (isFileShareAccessorHandle(targetHandle)) {
 		targetPath = targetHandle.fullPath
 	} else if (isHTTPProxyAccessorHandle(targetHandle)) {
+		targetPath = ''
+	} else if (isFTPAccessorHandle(targetHandle)) {
 		targetPath = ''
 	} else {
 		assertNever(targetHandle)

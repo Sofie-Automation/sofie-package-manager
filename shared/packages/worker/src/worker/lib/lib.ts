@@ -23,11 +23,15 @@ function getAccessorTypePriority(accessor: AccessorOnPackage.Any): number {
 	} else if (accessor.type === Accessor.AccessType.HTTP_PROXY) {
 		// a local url should be preferred:
 		const isLocal = !!`${accessor.baseUrl}`.match(/localhost|127\.0\.0\.1/)
-		return 3 + (isLocal ? -0.1 : 0)
+		if (isLocal) return 2.9
+		return 3
 	} else if (accessor.type === Accessor.AccessType.HTTP) {
 		// a local url should be preferred:
 		const isLocal = !!`${accessor.baseUrl}`.match(/localhost|127\.0\.0\.1/)
-		return 4 + (isLocal ? -0.1 : 0)
+		if (isLocal) return 3.9
+		return 4
+	} else if (accessor.type === Accessor.AccessType.FTP) {
+		return 5
 	} else if (accessor.type === Accessor.AccessType.CORE_PACKAGE_INFO) {
 		return 99999
 	} else if (accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE) {
@@ -85,3 +89,30 @@ export interface AccessorWithPackageContainer<T extends PackageContainerOnPackag
  * process the incoming data.
  */
 export const MAX_EXEC_BUFFER = 10_486_750
+
+export function isEqual(a: unknown, b: unknown): boolean {
+	if (typeof a === 'object' && typeof b === 'object') {
+		if (Array.isArray(a)) {
+			if (!Array.isArray(b)) return false
+
+			// handle Arrays
+			if (a.length !== b.length) return false
+
+			for (let i = a.length - 1; i >= 0; i--) {
+				if (!isEqual(a[i], b[i])) return false
+			}
+			return true
+		} else {
+			if (a === null || b === null) return a === b // handle null
+
+			const allKeys = new Set([...Object.keys(a), ...Object.keys(b)])
+
+			for (const key of allKeys) {
+				if (!isEqual((a as any)[key], (b as any)[key])) return false
+			}
+			return true
+		}
+	} else {
+		return a === b
+	}
+}

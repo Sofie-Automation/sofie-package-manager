@@ -29,7 +29,7 @@ import {
 } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
 import { ClipData, ClipDataSummary, ServerInfo, ZoneInfo } from 'tv-automation-quantel-gateway-client/dist/quantelTypes'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 
 /** The minimum amount of frames where a clip is playable */
 const RESERVED_CLIP_MINIMUM_FRAMES = 10
@@ -67,9 +67,8 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 				throw new Error('Bad input data: content.title must be a string!')
 		}
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.Quantel
-		return !accessor.networkId || worker.agentAPI.location.localNetworkIds.includes(accessor.networkId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		const content = this.getContent()
@@ -250,6 +249,9 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		if (clipSummary) {
 			return this.convertClipSummaryToVersion(clipSummary)
 		} else throw new Error(`Clip not found`)
+	}
+	async ensurePackageFulfilled(): Promise<void> {
+		// Nothing
 	}
 	async removePackage(reason: string): Promise<void> {
 		await this.removeMetadata()
