@@ -88,15 +88,35 @@ export class FileStorage extends Storage {
 	private async getFileInfo(paramPath: string): Promise<
 		| {
 				found: false
+				code: number
+				reason: string
 		  }
 		| ({
 				found: true
 		  } & FileInfo)
 	> {
-		const fullPath = path.join(this._basePath, paramPath)
+		let fullPath = path.join(this._basePath, paramPath)
 
+		// If file does not exist, try to resolve by extension
 		if (!(await this.exists(fullPath))) {
-			return { found: false }
+			const dir = path.dirname(fullPath)
+			const base = path.basename(fullPath)
+
+			try {
+				const files = await fsReaddir(dir)
+				const matches = files.filter((f) => f.startsWith(base + '.'))
+
+				if (matches.length === 1) {
+					fullPath = path.join(dir, matches[0])
+				} else if (matches.length > 1) {
+					// HTTP 409 Conflict
+					return { found: false, code: 409, reason: 'Multiple files found' }
+				} else {
+					return { found: false, code: 404, reason: 'Package not found' }
+				}
+			} catch {
+				return { found: false, code: 500, reason: 'File system error' }
+			}
 		}
 		let mimeType = mime.lookup(fullPath)
 		if (!mimeType) {
@@ -119,7 +139,7 @@ export class FileStorage extends Storage {
 		const fileInfo = await this.getFileInfo(paramPath)
 
 		if (!fileInfo.found) {
-			return { code: 404, reason: 'Package not found' }
+			return { code: fileInfo.code, reason: fileInfo.reason }
 		}
 
 		const meta: ResponseMeta = {
@@ -133,7 +153,7 @@ export class FileStorage extends Storage {
 		const fileInfo = await this.getFileInfo(paramPath)
 
 		if (!fileInfo.found) {
-			return { code: 404, reason: 'Package not found' }
+			return { code: fileInfo.code, reason: fileInfo.reason }
 		}
 		const meta: ResponseMeta = {
 			statusCode: 200,
