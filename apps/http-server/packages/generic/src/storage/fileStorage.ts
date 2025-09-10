@@ -202,17 +202,17 @@ export class FileStorage extends Storage {
 		}
 	}
 	async deletePackage(paramPath: string): Promise<{ meta: ResponseMeta; body: any } | BadResponse> {
-		const fullPath = path.join(this._basePath, paramPath)
+		const fileInfo = await this.getFileInfo(paramPath)
 
-		if (!(await this.exists(fullPath))) {
-			return { code: 404, reason: 'Package not found' }
+		if (!fileInfo.found) {
+			return { code: fileInfo.code, reason: fileInfo.reason }
 		}
 		try {
-			await fsUnlink(fullPath)
+			await fsUnlink(fileInfo.fullPath)
 			const meta: ResponseMeta = {
 				statusCode: 200,
 			}
-			return { meta, body: { message: `Deleted "${paramPath}"` } }
+			return { meta, body: { message: `Deleted "${fileInfo.fullPath}"` } }
 		} catch (err) {
 			if (`${err}`.includes('ENOENT')) {
 				// File already deleted
