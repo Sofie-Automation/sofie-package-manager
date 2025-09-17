@@ -438,11 +438,16 @@ export namespace Accessor {
 		type: AccessType.FTP
 
 		/** The type of FTP server:
-		 * - 'ftp' for unsecure FTP
-		 * - 'ftps' for FTP over TLS
-		 * - 'sftp' for SFTP/SSH
+		 * - 'ftp': plain ftp
+		 * - 'ftps': FTP over TLS (explicit / "AUTH TLS" extension)
+		 * - 'ftp'-ssl: FTP over SSL (implicit)
+		 * - 'sftp': SFTP over SSH
 		 */
-		serverType: 'ftp' | 'ftps' | 'sftp'
+		serverType:
+			| 'ftp' // plain ftp
+			| 'ftps' // FTP over TLS (explicit / "AUTH TLS" extension)
+			| 'ftp-ssl' // FTP over SSL (implicit)
+			| 'sftp' // SFTP over SSH
 
 		/** Hostname/IP Address to the host server */
 		host: string

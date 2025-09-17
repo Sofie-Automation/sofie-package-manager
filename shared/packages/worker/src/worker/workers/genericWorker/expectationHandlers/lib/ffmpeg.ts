@@ -63,7 +63,13 @@ export async function spawnFFMpeg<Metadata>(
 		pipeStdOut = true
 		args.push('pipe:1') // pipe output to stdout
 	} else if (isFTPAccessorHandle(targetHandle)) {
-		args.push(escapeFilePath(targetHandle.ftpUrl.url))
+		if (targetHandle.ftpUrl.url.startsWith('ftps://')) {
+			// ffmpeg doesn't support ftps
+			pipeStdOut = true
+			args.push('pipe:1') // pipe output to stdout
+		} else {
+			args.push(escapeFilePath(targetHandle.ftpUrl.url))
+		}
 	} else {
 		assertNever(targetHandle)
 		throw new Error(`Unsupported Target AccessHandler`)

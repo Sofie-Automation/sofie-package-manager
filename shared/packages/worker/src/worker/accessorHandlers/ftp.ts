@@ -30,10 +30,10 @@ import { MonitorInProgress } from '../lib/monitorInProgress'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 
 import { isEqual } from '../lib/lib'
-import { FTPClient, FTPClientBase, FTPOptions, SFTPClient } from './lib/FTPClient'
 import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 import { GenericFileHandler } from './lib/GenericFileHandler'
 import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
+import { createFTPClient, FTPClientBase, FTPOptions } from './lib/FTPClient/index'
 
 export interface Content {
 	/** This is set when the class-instance is only going to be used for PackageContainer access.*/
@@ -221,21 +221,14 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		const pResponse = ftp.upload(sourceStream, fullPath)
 
 		pResponse
-			.then((response) => {
-				if (response !== null) {
-					streamWrapper.emit('error', new Error(`FTP upload failed: ${response}`))
-				} else {
-					// All good:
-					streamWrapper.emit('close')
-				}
+			.then(() => {
+				streamWrapper.emit('close')
 			})
 			.catch((err) => {
-				streamWrapper.emit('error', new Error(`FTP upload threw for path "${fullPath}": ${err}`))
+				const err2 = new Error(`FTP upload threw for path "${fullPath}": ${err}`)
+				if (err instanceof Error) err2.stack += `Original stack:\n${err.stack}`
+				streamWrapper.emit('error', err2)
 			})
-
-		// Pipe any events from the writeStream right into the wrapper:
-		// writeStream.on('error', (err) => streamWrapper.emit('error', err))
-		// writeStream.on('close', () => streamWrapper.emit('close'))
 
 		return streamWrapper
 	}
@@ -378,7 +371,13 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 	} {
 		const serverType = this.accessor.serverType
 		const host = this.accessor.host
-		const port = this.accessor.port ?? (this.accessor.serverType === 'ftp' ? 21 : 22) // default port for FTP is 21, SFTP is 22
+		const port =
+			this.accessor.port ??
+			(this.accessor.serverType === 'ftp' || this.accessor.serverType === 'ftps'
+				? 21
+				: this.accessor.serverType === 'sftp'
+				? 22
+				: 990) // default port for FTP (and FTP + AUTH TLS) is 21, SFTP is 22, FTPS (implicit FTP over TLS/SSL) is 990
 		const username = this.accessor.username
 		const password = this.accessor.password
 
@@ -411,10 +410,12 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		// Note: this is untested:
 		if (ftpOptions.serverType === 'ftp') {
 			url = `ftp://`
-		} else if (ftpOptions.serverType === 'sftp') {
-			url = `sftp://`
+		} else if (ftpOptions.serverType === 'ftp-ssl') {
+			url = `ftps://`
 		} else if (ftpOptions.serverType === 'ftps') {
 			url = `ftps://`
+		} else if (ftpOptions.serverType === 'sftp') {
+			url = `sftp://`
 		} else {
 			assertNever(ftpOptions.serverType)
 			throw new Error(`Unsupported FTP server type "${ftpOptions.serverType}"`)
@@ -460,13 +461,7 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 		if (!cachedClient) {
 			// Set up a new FTP client:
-			if (ftpOptions.serverType === 'ftp' || ftpOptions.serverType === 'ftps') {
-				cachedClient = new FTPClient(this.worker.logger, options)
-			} else if (ftpOptions.serverType === 'sftp') {
-				cachedClient = new SFTPClient(this.worker.logger, options)
-			} else {
-				assertNever(ftpOptions.serverType)
-			}
+			cachedClient = createFTPClient(ftpOptions.serverType, this.worker.logger, options)
 		}
 
 		if (cachedClient) {
