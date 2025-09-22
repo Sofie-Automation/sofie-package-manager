@@ -17,8 +17,8 @@ export class FTPClient extends FTPClientBase {
 	constructor(logger: LoggerInstance, options: FTPOptions) {
 		super(options)
 		this.logger = logger.category('FTPClient')
-		if (options.serverType !== 'ftp' && options.serverType !== 'ftps')
-			throw new Error('Internal Error: serverType must be "ftp" or "ftps"')
+		if (!['ftp', 'ftps', 'ftp-ssl'].includes(options.serverType))
+			throw new Error('Internal Error: serverType must be "ftp", "ftps" or "ftp-ssl"')
 
 		this.client = this.createFTPClient()
 	}

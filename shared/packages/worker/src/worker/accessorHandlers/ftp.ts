@@ -203,6 +203,7 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 	async getPackageReadStream(): Promise<PackageReadStream> {
+		// important that this is a 'read', so that it doesn't go into a deadlock with putPackageStream() in case of an upload/download to the same accessorPackageContainer
 		const ftp = await this.prepareFTPClient()
 
 		const response = await ftp.download(this.fullPath)
@@ -221,12 +222,13 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
-		const ftp = await this.prepareFTPClient()
+		// important that this is a 'write', so that it doesn't go into a deadlock with getPackageReadStream() in case of an upload/download to the same accessorPackageContainer
+		const ftp = await this.prepareFTPClient('write')
 
 		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
 
 		// Remove the file if it exists:
-		await this.unlinkIfExists(fullPath)
+		await ftp.removeFileIfExists(fullPath)
 
 		const streamWrapper: PutPackageHandler = new PutPackageHandler(() => {
 			// abort:
@@ -445,13 +447,22 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 	}
 
-	private async prepareFTPClient(): Promise<FTPClientBase> {
-		const cacheKey = `${this.accessor.serverType}-${this.accessor.host}-${this.accessor.port ?? 21}/${
-			this.accessor.basePath ?? '/'
-		}`
-
+	private async prepareFTPClient(
+		/**
+		 * If set, ensures that a cached client is used NOT used for another (set) purpose.
+		 * If undefined, any cached client can be used.
+		 */
+		purpose: 'read' | 'write' | undefined = undefined
+	): Promise<FTPClientBase> {
+		type CachedClients = {
+			clients: CachedClient[]
+			options: FTPOptions
+		}
+		type CachedClient = {
+			client: FTPClientBase
+			purpose: 'read' | 'write' | undefined
+		}
 		const ftpOptions = this.ftpOptions
-
 		const options: FTPOptions = {
 			type: Accessor.AccessType.FTP,
 			serverType: ftpOptions.serverType,
@@ -462,33 +473,76 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 			allowAnyCertificate: ftpOptions.allowAnyCertificate,
 		}
 
-		let cachedClient = this.worker.accessorCache[cacheKey] as FTPClientBase | undefined
-
-		if (cachedClient?.destroyed) {
-			delete this.worker.accessorCache[cacheKey]
-			cachedClient = undefined
+		const accessorCache = this.worker.accessorCache as {
+			[accessorType: string]: CachedClients | undefined
 		}
-		if (cachedClient) {
+
+		const cacheKey = JSON.stringify([
+			this.accessorId,
+			ftpOptions.serverType,
+			ftpOptions.host,
+			ftpOptions.port,
+			this.accessor.basePath ?? '/',
+		])
+
+		let cachedClients = accessorCache[cacheKey]
+		if (cachedClients) {
 			// Check that options matches:
-			if (!isEqual(cachedClient.options, options)) {
-				await cachedClient.destroy()
-				delete this.worker.accessorCache[cacheKey]
-				cachedClient = undefined
+			if (!isEqual(cachedClients.options, options)) {
+				for (const c of cachedClients.clients) {
+					await c.client.destroy()
+				}
+				cachedClients.clients.splice(0, cachedClients.clients.length) // empty the array
+				delete accessorCache[cacheKey]
+				cachedClients = undefined
 			}
 		}
+
+		if (!cachedClients) {
+			cachedClients = { clients: [], options }
+			accessorCache[cacheKey] = cachedClients
+		}
+
+		let cachedClient: CachedClient | undefined
+		for (const client of cachedClients.clients) {
+			let useThisClient: boolean
+
+			// If no purpose is set, we can use it for anything:
+			if (client.purpose === undefined) useThisClient = true
+			// If we don't have a purpose set, we can use any client:
+			else if (purpose === undefined) useThisClient = true
+			// If we have a matching purpose, we can use it:
+			else if (purpose === client.purpose) useThisClient = true
+			else useThisClient = false
+
+			if (useThisClient) {
+				cachedClient = client
+				break
+			}
+		}
+
+		if (cachedClient?.client.destroyed) {
+			cachedClients.clients = cachedClients.clients.filter((c) => c !== cachedClient) // remove the client
+			cachedClient = undefined
+		}
+
 		if (!cachedClient) {
 			// Set up a new FTP client:
-			cachedClient = createFTPClient(ftpOptions.serverType, this.worker.logger, options)
+			cachedClient = {
+				client: createFTPClient(ftpOptions.serverType, this.worker.logger, options),
+				purpose: purpose,
+			}
+			cachedClients.clients.push(cachedClient)
 		}
 
-		if (cachedClient) {
-			await cachedClient.init()
-
-			this.worker.accessorCache[cacheKey] = cachedClient
-			return cachedClient
-		} else {
-			throw new Error(`FTPAccessorHandle: Could not create FTP client for ${ftpOptions.serverType}`)
+		if (purpose && cachedClient.purpose === undefined) {
+			// If we're using a generic client but for a specific purpose, set that purpose:
+			cachedClient.purpose = purpose
 		}
+
+		await cachedClient.client.init()
+
+		return cachedClient.client
 	}
 	/** Full path to the metadata file */
 	private getMetadataPath(fullUrl: string) {
