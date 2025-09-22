@@ -216,7 +216,7 @@ export function generatePackageScan(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -264,7 +264,7 @@ export function generatePackageDeepScan(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -320,7 +320,7 @@ export function generatePackageLoudness(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -374,7 +374,7 @@ export function generatePackageIframes(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -426,7 +426,7 @@ export function generateMediaFileThumbnail(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -480,7 +480,7 @@ export function generateMediaFilePreview(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -534,7 +534,7 @@ export function generateQuantelClipThumbnail(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -587,7 +587,7 @@ export function generateQuantelClipPreview(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},

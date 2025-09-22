@@ -35,6 +35,7 @@ import { isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -148,6 +149,14 @@ export const RenderHTML: ExpectationHandlerGenericWorker = {
 				}
 			}
 		}
+
+		// Ensure that the target Package is staying Fulfilled:
+		if (mainLookupTarget.ready) await mainLookupTarget.handle.ensurePackageFulfilled()
+		for (const fileName of fileNames) {
+			const lookupTarget = await lookupTargets(worker, exp, fileName)
+			if (lookupTarget.ready) await lookupTarget.handle.ensurePackageFulfilled()
+		}
+
 		return {
 			fulfilled: true,
 		}
@@ -181,40 +190,47 @@ export const RenderHTML: ExpectationHandlerGenericWorker = {
 			(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				lookupSource.accessor.type === Accessor.AccessType.HTTP ||
-				lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY) &&
+				lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupSource.accessor.type === Accessor.AccessType.FTP) &&
 			(mainLookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				mainLookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-				mainLookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+				mainLookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				mainLookupTarget.accessor.type === Accessor.AccessType.FTP)
 		) {
 			if (
 				!isLocalFolderAccessorHandle(sourceHandle) &&
 				!isFileShareAccessorHandle(sourceHandle) &&
 				!isHTTPAccessorHandle(sourceHandle) &&
-				!isHTTPProxyAccessorHandle(sourceHandle)
+				!isHTTPProxyAccessorHandle(sourceHandle) &&
+				!isFTPAccessorHandle(sourceHandle)
 			)
 				throw new Error(`Source AccessHandler type is wrong`)
 			if (
 				!isLocalFolderAccessorHandle(mainTargetHandle) &&
 				!isFileShareAccessorHandle(mainTargetHandle) &&
-				!isHTTPProxyAccessorHandle(mainTargetHandle)
+				!isHTTPProxyAccessorHandle(mainTargetHandle) &&
+				!isFTPAccessorHandle(mainTargetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
 			let url: string
-			if (isLocalFolderAccessorHandle(sourceHandle)) {
+			let safeUrl: string // safe for logging / labels
+			if (isLocalFolderAccessorHandle(sourceHandle) || isFileShareAccessorHandle(sourceHandle)) {
 				url = `file://${sourceHandle.fullPath}`
-			} else if (isFileShareAccessorHandle(sourceHandle)) {
-				url = `file://${sourceHandle.fullPath}`
-			} else if (isHTTPAccessorHandle(sourceHandle)) {
+				safeUrl = url
+			} else if (isHTTPAccessorHandle(sourceHandle) || isHTTPProxyAccessorHandle(sourceHandle)) {
 				url = `${sourceHandle.fullUrl}`
-			} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
-				url = `${sourceHandle.fullUrl}`
+				safeUrl = url
+			} else if (isFTPAccessorHandle(sourceHandle)) {
+				const o = sourceHandle.ftpUrl
+				url = o.url
+				safeUrl = o.safeUrl
 			} else {
 				assertNever(sourceHandle)
 				throw new Error(`Unsupported Source AccessHandler`)
 			}
 
-			const workInProgress = new WorkInProgress({ workLabel: `Generating preview of "${url}"` }, async () => {
+			const workInProgress = new WorkInProgress({ workLabel: `Generating preview of "${safeUrl}"` }, async () => {
 				// On cancel
 				htmlRenderHandler.cancel()
 			}).do(async () => {
@@ -316,6 +332,7 @@ async function lookupSources(
 	return lookupAccessorHandles<UniversalVersion>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -334,6 +351,7 @@ async function lookupTargets(
 	return lookupAccessorHandles<UniversalVersion>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		{
 			filePath,

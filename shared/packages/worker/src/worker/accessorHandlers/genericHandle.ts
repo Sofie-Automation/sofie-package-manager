@@ -93,6 +93,14 @@ export abstract class GenericAccessorHandle<Metadata> {
 	abstract checkHandleBasic(): AccessorHandlerCheckHandleBasicResult
 
 	/**
+	 * Checks if this Accessor is compatible with the Accessor assigned to the PackageContainer.
+	 * @returns true if (probably) compatible, false if not.
+	 */
+	abstract checkCompatibilityWithAccessor(
+		accessor: AccessorOnPackage.Any
+	): AccessorHandlerCheckHandleCompatibilityResult
+
+	/**
 	 * Checks if there are any issues with the properties in the accessor or content for being able to read
 	 * @returns undefined if all is OK / string with error message
 	 */
@@ -125,6 +133,12 @@ export abstract class GenericAccessorHandle<Metadata> {
 	 * @returns the version of the package
 	 */
 	abstract getPackageActualVersion(): Promise<Expectation.Version.Any>
+
+	/**
+	 * Ensures that the Package is stable, meaning that it is in place and is not queued for removal or similar.
+	 * This operation assumes that the Package is already in place.
+	 */
+	abstract ensurePackageFulfilled(): Promise<void>
 
 	/**
 	 * Removes the package from the PackageContainer (if the package exists)
@@ -252,6 +266,7 @@ type AccessorHandlerResultBad = {
 export type AccessorHandlerResultGeneric = AccessorHandlerResultSuccess | AccessorHandlerResultBad
 
 export type AccessorHandlerCheckHandleBasicResult = AccessorHandlerResultGeneric
+export type AccessorHandlerCheckHandleCompatibilityResult = AccessorHandlerResultGeneric
 export type AccessorHandlerCheckHandleReadResult = AccessorHandlerResultGeneric
 export type AccessorHandlerCheckHandleWriteResult = AccessorHandlerCheckHandleReadResult
 export type AccessorHandlerCheckPackageReadAccessResult = AccessorHandlerResultGeneric

@@ -143,6 +143,9 @@ export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 			}
 			return { fulfilled: false, knownReason: true, reason: packageInfoSynced.reason }
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -273,6 +276,7 @@ async function lookupLoudnessSources(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -290,6 +294,7 @@ async function lookupLoudnessTargets(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

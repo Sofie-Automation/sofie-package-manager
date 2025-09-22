@@ -14,6 +14,7 @@ import {
 } from '@sofie-package-manager/api'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
@@ -164,6 +165,9 @@ export const QuantelClipPreview: ExpectationHandlerGenericWorker = {
 				},
 			}
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -185,14 +189,16 @@ export const QuantelClipPreview: ExpectationHandlerGenericWorker = {
 			lookupSource.accessor.type === Accessor.AccessType.QUANTEL &&
 			(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupTarget.accessor.type === Accessor.AccessType.FTP)
 		) {
 			// We can read the source and write the preview directly.
 			if (!isQuantelClipAccessorHandle(sourceHandle)) throw new Error(`Source AccessHandler type is wrong`)
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
-				!isHTTPProxyAccessorHandle(targetHandle)
+				!isHTTPProxyAccessorHandle(targetHandle) &&
+				!isFTPAccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
@@ -326,6 +332,7 @@ async function lookupPreviewSources(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -343,6 +350,7 @@ async function lookupPreviewTargets(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

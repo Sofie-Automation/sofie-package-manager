@@ -181,6 +181,9 @@ yarn
 # Build all packages
 yarn build
 
+# Build only the packages that have changed (ie changes have not been git-committed)
+yarn build:changed
+
 ```
 
 Now you should be good to go.

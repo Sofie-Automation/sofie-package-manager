@@ -141,6 +141,8 @@ export const QuantelClipCopy: ExpectationHandlerGenericWorker = {
 			return { fulfilled: false, knownReason: issueVersions.knownReason, reason: issueVersions.reason }
 		}
 
+		await lookupTarget.handle.ensurePackageFulfilled()
+
 		return {
 			fulfilled: true,
 		}
@@ -322,6 +324,7 @@ async function lookupCopySources(
 	return lookupAccessorHandles<QuantelMetadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,
@@ -339,6 +342,7 @@ async function lookupCopyTargets(
 	return lookupAccessorHandles<QuantelMetadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,
