@@ -32,6 +32,7 @@ import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import { CancelablePromise } from '../../../lib/cancelablePromise'
 import { scanWithFFProbe, FFProbeScanResult } from './lib/scan'
+import { PackageReadStream } from '../../../accessorHandlers/genericHandle'
 
 /**
  * Generates a thumbnail image from a source video file, and stores the resulting file into the target PackageContainer
@@ -178,10 +179,12 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 
 		let ffMpegProcess: FFMpegProcess | undefined
 		let ffProbeProcess: CancelablePromise<any> | undefined
+		let sourceStream: PackageReadStream | undefined = undefined
 		const workInProgress = new WorkInProgress({ workLabel: 'Generating thumbnail' }, async () => {
 			// On cancel
 			ffMpegProcess?.cancel()
 			ffProbeProcess?.cancel()
+			sourceStream?.cancel()
 		}).do(async () => {
 			if (
 				(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
@@ -241,6 +244,7 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				const seekTimeCode: string | undefined = seekTime !== undefined ? formatTimeCode(seekTime) : undefined
 
 				let inputPath: string
+				let pipeStdin = false
 				if (isLocalFolderAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullPath
 				} else if (isFileShareAccessorHandle(sourceHandle)) {
@@ -251,7 +255,16 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullUrl
 				} else if (isFTPAccessorHandle(sourceHandle)) {
-					inputPath = sourceHandle.ftpUrl.url
+					if (
+						sourceHandle.ftpUrl.url.startsWith('ftps://') ||
+						sourceHandle.ftpUrl.url.startsWith('sftp://')
+					) {
+						// ffmpeg doesn't support ftps protocol, stream instead
+						pipeStdin = true
+						inputPath = '-' // stream on stdin
+					} else {
+						inputPath = sourceHandle.ftpUrl.url
+					}
 				} else {
 					assertNever(sourceHandle)
 					throw new Error(`Unsupported Target AccessHandler`)
@@ -299,6 +312,21 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 					},
 					async (progress: number) => {
 						workInProgress._reportProgress(sourceVersionHash, progress)
+					},
+					(ffmpegProcess) => {
+						if (pipeStdin) {
+							lookupSource.handle
+								.getPackageReadStream()
+								.then((stream) => {
+									sourceStream = stream
+									sourceStream.readStream.pipe(ffmpegProcess.stdin)
+								})
+								.catch((err) => {
+									workInProgress._reportError(
+										new Error(`FFMpeg stdin piping error: ${stringifyError(err)}`)
+									)
+								})
+						}
 					}
 					// ,worker.logger.debug
 				)

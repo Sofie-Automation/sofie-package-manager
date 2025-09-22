@@ -7,6 +7,7 @@ import {
 	AccessorOnPackage,
 	LoggerInstance,
 	escapeFilePath,
+	stringifyError,
 } from '@sofie-package-manager/api'
 import {
 	isQuantelClipAccessorHandle,
@@ -33,7 +34,7 @@ import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy'
 import { HTTPAccessorHandle } from '../../../../accessorHandlers/http'
 import { MAX_EXEC_BUFFER } from '../../../../lib/lib'
 import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg'
-import { GenericAccessorHandle } from '../../../../accessorHandlers/genericHandle'
+import { GenericAccessorHandle, PackageReadStream } from '../../../../accessorHandlers/genericHandle'
 import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
 
 export interface FFProbeScanResultStream {
@@ -68,6 +69,7 @@ export function scanWithFFProbe(
 		) {
 			let inputPath: string
 			let filePath: string
+			let pipeStdin = false
 			if (isLocalFolderAccessorHandle(sourceHandle)) {
 				inputPath = sourceHandle.fullPath
 				filePath = sourceHandle.filePath
@@ -82,8 +84,14 @@ export function scanWithFFProbe(
 				inputPath = sourceHandle.fullUrl
 				filePath = sourceHandle.filePath
 			} else if (isFTPAccessorHandle(sourceHandle)) {
-				inputPath = sourceHandle.ftpUrl.url
-				filePath = sourceHandle.filePath
+				if (sourceHandle.ftpUrl.url.startsWith('ftps://') || sourceHandle.ftpUrl.url.startsWith('sftp://')) {
+					// ffmpeg doesn't support ftps protocol, stream instead
+					pipeStdin = true
+					inputPath = '-' // stream on stdin
+				} else {
+					inputPath = sourceHandle.ftpUrl.url
+					filePath = sourceHandle.filePath
+				}
 			} else {
 				assertNever(sourceHandle)
 				throw new Error('Unknown handle')
@@ -98,38 +106,71 @@ export function scanWithFFProbe(
 				'-print_format',
 				'json',
 			]
+
 			let ffProbeProcess: ChildProcess | undefined = undefined
+			let sourceStream: PackageReadStream | undefined = undefined
 			onCancel(() => {
 				ffProbeProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 				ffProbeProcess?.kill()
+				sourceStream?.cancel()
 				reject('Cancelled')
 			})
 
-			ffProbeProcess = execFile(
-				getFFProbeExecutable(),
-				args,
-				{
-					maxBuffer: MAX_EXEC_BUFFER,
-					windowsVerbatimArguments: true, // To fix an issue with ffprobe.exe on Windows
-				},
-				(err, stdout, _stderr) => {
-					// this.logger.debug(`Worker: metadata generate: output (stdout, stderr)`, stdout, stderr)
-					ffProbeProcess = undefined
-					if (err) {
-						reject(err)
-						return
-					}
-					const json: FFProbeScanResult = JSON.parse(stdout)
-					if (!json.streams || !json.streams[0]) {
-						reject(new Error(`File doesn't seem to be a media file`))
-						return
-					}
-					json.filePath = filePath
+			ffProbeProcess = spawn(getFFProbeExecutable(), args, {
+				// maxBuffer: MAX_EXEC_BUFFER,
+				windowsVerbatimArguments: true, // To fix an issue with ffprobe.exe on Windows
+			})
+			let stdoutBuffer = ''
+			ffProbeProcess.stdout?.on('data', (data) => {
+				stdoutBuffer += data.toString()
+			})
 
-					fixJSONResult(json)
-					resolve(json)
+			ffProbeProcess.on('error', (err) => {
+				ffProbeProcess = undefined
+				reject(err)
+			})
+			ffProbeProcess.on('close', (code) => {
+				ffProbeProcess = undefined
+
+				if (code !== 0) {
+					reject(new Error(`FFProbe exited with code ${code}`))
+					return
 				}
-			)
+
+				const json: FFProbeScanResult = JSON.parse(stdoutBuffer)
+				if (!json.streams || !json.streams[0]) {
+					reject(new Error(`File doesn't seem to be a media file`))
+					return
+				}
+				json.filePath = filePath
+				fixJSONResult(json)
+				resolve(json)
+			})
+			if (pipeStdin) {
+				sourceStream = await sourceHandle.getPackageReadStream()
+				if (ffProbeProcess.stdin === null) {
+					throw new Error('ffprobeProcess.stdin is null, cant pipe to it')
+				}
+				sourceStream.readStream.on('error', (err) => {
+					// wait just a little bit before throwing, perhaps ffprobe is already done?
+					setTimeout(() => {
+						if (ffProbeProcess) {
+							// still going, so this is a real error
+							reject(new Error('Error reading source stream: ' + stringifyError(err)))
+						}
+					}, 10)
+				})
+				ffProbeProcess.stdin.on('error', (err) => {
+					// wait just a little bit before throwing, perhaps ffprobe is already done?
+					setTimeout(() => {
+						if (ffProbeProcess) {
+							// still going, so this is a real error
+							reject(new Error('Error writing stream: ' + stringifyError(err)))
+						}
+					}, 10)
+				})
+				sourceStream.readStream.pipe(ffProbeProcess.stdin)
+			}
 		} else if (isQuantelClipAccessorHandle(sourceHandle)) {
 			// Because we have no good way of using ffprobe to generate the info we want,
 			// we resort to faking it:

@@ -37,6 +37,7 @@ export async function spawnFFMpeg<Metadata>(
 	onDone: () => Promise<void>,
 	onFail: (err?: any) => Promise<void>,
 	onProgress?: (progress: number) => Promise<void>,
+	onStart?: (ffMpegProcess: ChildProcessWithoutNullStreams) => void,
 	log?: (str: string) => void
 ): Promise<FFMpegProcess> {
 	let FFMpegIsDone = false
@@ -63,8 +64,8 @@ export async function spawnFFMpeg<Metadata>(
 		pipeStdOut = true
 		args.push('pipe:1') // pipe output to stdout
 	} else if (isFTPAccessorHandle(targetHandle)) {
-		if (targetHandle.ftpUrl.url.startsWith('ftps://')) {
-			// ffmpeg doesn't support ftps
+		if (targetHandle.ftpUrl.url.startsWith('ftps://') || targetHandle.ftpUrl.url.startsWith('sftp://')) {
+			// ffmpeg doesn't support ftps protocol, stream instead
 			pipeStdOut = true
 			args.push('pipe:1') // pipe output to stdout
 		} else {
@@ -91,6 +92,7 @@ export async function spawnFFMpeg<Metadata>(
 		}
 		ffMpegProcess = undefined
 	}
+	onStart?.(ffMpegProcess)
 
 	if (pipeStdOut) {
 		log?.('ffmpeg: pipeStdOut')
