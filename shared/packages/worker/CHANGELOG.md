@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
+
+
+### Bug Fixes
+
+* take into account that exp.content can be null ([f0749e0](https://github.com/nrkno/sofie-package-manager/commit/f0749e0ffdf0ef2169d4cad8bc239e300e0c9499))
+
+
+
+
+
 # [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
 
 
