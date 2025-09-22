@@ -1,6 +1,6 @@
 {
     "name": "@sofie-package-manager/workforce",
-    "version": "1.52.0",
+    "version": "1.53.0-alpha.0",
     "main": "dist/index",
     "types": "dist/index",
     "files": [
@@ -13,7 +13,7 @@
         "__test": "jest"
     },
     "dependencies": {
-        "@sofie-package-manager/api": "1.52.0"
+        "@sofie-package-manager/api": "1.53.0-alpha.0"
     },
     "devDependencies": {
         "rimraf": "^5.0.5"

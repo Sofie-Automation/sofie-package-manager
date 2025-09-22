@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
+
+
+### Bug Fixes
+
+* ftp support ([f919631](https://github.com/nrkno/sofie-package-manager/commit/f919631f132a4b3df8eeae81c5436bfa0ae96583))
+* refactoring & fixes after code review ([2981d38](https://github.com/nrkno/sofie-package-manager/commit/2981d388ad13bd15776f53fb57502b0a7c285ea6))
+
+
+### Features
+
+* add FTP accessor ([9d087f1](https://github.com/nrkno/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
+
+
+
+
+
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @sofie-package-manager/api

@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
+
+
+### Bug Fixes
+
+* add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/Sofie-Automation/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
+* add support for streaming input data into ffmpeg ([c34c006](https://github.com/Sofie-Automation/sofie-package-manager/commit/c34c006c18977db6707d358ddcb2965047963e7b))
+* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/Sofie-Automation/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/Sofie-Automation/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
+* ensure the same FTP client is not used for download & upload ([8776cff](https://github.com/Sofie-Automation/sofie-package-manager/commit/8776cffe2cf664e3124600f5576d3a214bb74517))
+* ftp support ([f919631](https://github.com/Sofie-Automation/sofie-package-manager/commit/f919631f132a4b3df8eeae81c5436bfa0ae96583))
+* refactoring & fixes after code review ([2981d38](https://github.com/Sofie-Automation/sofie-package-manager/commit/2981d388ad13bd15776f53fb57502b0a7c285ea6))
+
+
+### Features
+
+* add FTP accessor ([9d087f1](https://github.com/Sofie-Automation/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
+
+
+
+
+
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package package-manager-monorepo
