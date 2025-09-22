@@ -50,7 +50,7 @@ export class HTTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 			type: HTTPAccessorHandle.type,
 		})
 		this.accessor = arg.accessor
-		this.content = arg.content
+		this.content = arg.content ?? {}
 		// this.workOptions = arg.workOptions
 
 		// Verify content data:

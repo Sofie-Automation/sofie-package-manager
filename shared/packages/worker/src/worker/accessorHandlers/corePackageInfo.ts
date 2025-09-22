@@ -46,7 +46,7 @@ export class CorePackageInfoAccessorHandle<Metadata> extends GenericAccessorHand
 		})
 
 		this.accessor = arg.accessor
-		this.content = arg.content // not used by this class
+		this.content = null // arg.content not used by this class
 
 		// Verify content data:
 		if (arg.workOptions.removeDelay && typeof arg.workOptions.removeDelay !== 'number')

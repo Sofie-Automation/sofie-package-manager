@@ -49,7 +49,7 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 		})
 
 		this.accessor = arg.accessor
-		this.content = arg.content
+		this.content = arg.content ?? {}
 
 		// Verify content data:
 		if (!this.content.onlyContainerAccess) {

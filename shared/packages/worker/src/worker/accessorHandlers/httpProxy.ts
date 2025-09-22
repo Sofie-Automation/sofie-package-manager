@@ -53,7 +53,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 			type: HTTPProxyAccessorHandle.type,
 		})
 		this.accessor = arg.accessor
-		this.content = arg.content
+		this.content = arg.content ?? {}
 		this.workOptions = arg.workOptions
 
 		// Verify content data:

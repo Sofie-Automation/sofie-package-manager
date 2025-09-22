@@ -79,7 +79,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 			type: FileShareAccessorHandle.type,
 		})
 		this.accessor = arg.accessor
-		this.content = arg.content
+		this.content = arg.content ?? {}
 		this.workOptions = arg.workOptions
 		this.originalFolderPath = this.accessor.folderPath
 		this.actualFolderPath = this.originalFolderPath // To be overwritten later

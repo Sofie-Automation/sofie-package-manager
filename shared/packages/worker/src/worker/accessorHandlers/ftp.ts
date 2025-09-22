@@ -58,7 +58,7 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 			type: FTPAccessorHandle.type,
 		})
 		this.accessor = arg.accessor
-		this.content = arg.content
+		this.content = arg.content ?? {}
 		this.workOptions = arg.workOptions
 
 		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
