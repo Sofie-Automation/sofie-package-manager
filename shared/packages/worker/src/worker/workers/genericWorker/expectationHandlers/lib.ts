@@ -146,12 +146,25 @@ export interface LookupChecks {
 export async function lookupAccessorHandles<Metadata>(
 	worker: BaseWorker,
 	packageContainers: PackageContainerOnPackage[],
+	combineWithPackageContainers: PackageContainerOnPackage[],
 	accessorContext: AccessorContext,
 	expectationContent: unknown,
 	expectationWorkOptions: unknown,
 	checks: LookupChecks
 ): Promise<LookupPackageContainer<Metadata>> {
 	const prioritizedAccessors = prioritizeAccessors(packageContainers)
+
+	const combineWithAccessors = prioritizeAccessors(combineWithPackageContainers).map((c) => ({
+		...c,
+		handle: getAccessorHandle<Metadata>(
+			worker,
+			c.accessorId,
+			c.accessor,
+			accessorContext,
+			expectationContent,
+			expectationWorkOptions
+		),
+	}))
 
 	return promiseTimeout<LookupPackageContainer<Metadata>>(
 		(async () => {
@@ -212,6 +225,32 @@ export async function lookupAccessorHandles<Metadata>(
 						}
 						continue // Maybe next accessor works?
 					}
+				}
+
+				// Check that the accessor can be combined with the combineWithPackageContainers:
+				let foundACompatibleAccessor = false
+				if (combineWithAccessors.length === 0) {
+					foundACompatibleAccessor = true // If no combineWithAccessors found, assume it's fine...
+				} else {
+					for (const c of combineWithAccessors) {
+						const check = handle.checkCompatibilityWithAccessor(c.accessor)
+						if (check.success) {
+							foundACompatibleAccessor = true
+							break
+						}
+					}
+				}
+				if (!foundACompatibleAccessor) {
+					errorReason = {
+						reason: {
+							user: `No accessor source/target combination found`,
+							tech: `${packageContainer.label}: Accessor "${
+								accessor.label || accessorId
+							}" is not compatible with any of the accessors for the other PackageContainers`,
+						},
+						knownReason: true,
+					}
+					continue // Maybe next accessor works?
 				}
 
 				if (checks.readPackage) {

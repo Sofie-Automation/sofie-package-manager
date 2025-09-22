@@ -376,6 +376,7 @@ async function lookupDeepScanSources(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -393,6 +394,7 @@ async function lookupDeepScanTargets(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

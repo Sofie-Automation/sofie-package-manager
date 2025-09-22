@@ -13,6 +13,7 @@ import {
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
 	AccessorConstructorProps,
+	AccessorHandlerCheckHandleCompatibilityResult,
 } from './genericHandle'
 import {
 	Accessor,
@@ -122,6 +123,22 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(
+		otherAccessor: AccessorOnPackage.Any
+	): AccessorHandlerCheckHandleCompatibilityResult {
+		// The FTP accessor cannot run with another FTP accessor of the same type:
+		if (otherAccessor.type === Accessor.AccessType.FTP && otherAccessor.serverType === this.accessor.serverType) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: 'Cannot use two FTP accessors of the same type',
+					tech: `Cannot use two FTP accessors of the same type ("${otherAccessor.serverType}")`,
+				},
+			}
+		}
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		const defaultResult = defaultCheckHandleRead(this.accessor)

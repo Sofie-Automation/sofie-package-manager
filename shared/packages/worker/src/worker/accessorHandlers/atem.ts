@@ -13,6 +13,7 @@ import {
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
 	AccessorConstructorProps,
+	AccessorHandlerCheckHandleCompatibilityResult,
 } from './genericHandle'
 import { Expectation, Accessor, AccessorOnPackage, escapeFilePath } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
@@ -107,6 +108,9 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 			}
 		}
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		const defaultResult = defaultCheckHandleRead(this.accessor)

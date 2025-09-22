@@ -408,6 +408,7 @@ async function lookupCopySources(
 	return lookupAccessorHandles<UniversalVersion>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,
@@ -425,6 +426,7 @@ async function lookupCopyTargets(
 	return lookupAccessorHandles<UniversalVersion>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

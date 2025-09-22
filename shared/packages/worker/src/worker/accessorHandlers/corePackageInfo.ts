@@ -1,6 +1,7 @@
 import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
@@ -70,6 +71,9 @@ export class CorePackageInfoAccessorHandle<Metadata> extends GenericAccessorHand
 			}
 		}
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		// Note: We assume that we always have write access here, no need to check this.accessor.allowRead

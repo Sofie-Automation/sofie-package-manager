@@ -93,6 +93,14 @@ export abstract class GenericAccessorHandle<Metadata> {
 	abstract checkHandleBasic(): AccessorHandlerCheckHandleBasicResult
 
 	/**
+	 * Checks if this Accessor is compatible with the Accessor assigned to the PackageContainer.
+	 * @returns true if (probably) compatible, false if not.
+	 */
+	abstract checkCompatibilityWithAccessor(
+		accessor: AccessorOnPackage.Any
+	): AccessorHandlerCheckHandleCompatibilityResult
+
+	/**
 	 * Checks if there are any issues with the properties in the accessor or content for being able to read
 	 * @returns undefined if all is OK / string with error message
 	 */
@@ -258,6 +266,7 @@ type AccessorHandlerResultBad = {
 export type AccessorHandlerResultGeneric = AccessorHandlerResultSuccess | AccessorHandlerResultBad
 
 export type AccessorHandlerCheckHandleBasicResult = AccessorHandlerResultGeneric
+export type AccessorHandlerCheckHandleCompatibilityResult = AccessorHandlerResultGeneric
 export type AccessorHandlerCheckHandleReadResult = AccessorHandlerResultGeneric
 export type AccessorHandlerCheckHandleWriteResult = AccessorHandlerCheckHandleReadResult
 export type AccessorHandlerCheckPackageReadAccessResult = AccessorHandlerResultGeneric

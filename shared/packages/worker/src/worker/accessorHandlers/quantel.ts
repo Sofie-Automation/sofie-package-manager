@@ -16,6 +16,7 @@ import {
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
 	AccessorConstructorProps,
+	AccessorHandlerCheckHandleCompatibilityResult,
 } from './genericHandle'
 import {
 	Accessor,
@@ -117,6 +118,9 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		}
 
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		const defaultResult = defaultCheckHandleRead(this.accessor)

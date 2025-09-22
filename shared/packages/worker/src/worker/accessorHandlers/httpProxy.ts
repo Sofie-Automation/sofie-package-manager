@@ -13,6 +13,7 @@ import {
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
 	AccessorConstructorProps,
+	AccessorHandlerCheckHandleCompatibilityResult,
 } from './genericHandle'
 import {
 	Accessor,
@@ -125,6 +126,9 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 				}
 		}
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		const defaultResult = defaultCheckHandleRead(this.accessor)

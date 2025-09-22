@@ -3,6 +3,7 @@ import fs from 'fs'
 import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
@@ -165,6 +166,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 				}
 		}
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		const defaultResult = defaultCheckHandleRead(this.accessor)
