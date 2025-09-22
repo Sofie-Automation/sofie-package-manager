@@ -66,7 +66,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		})
 		this.accessor = arg.accessor
 		this.workOptions = arg.workOptions
-		this.content = arg.content
+		this.content = arg.content ?? {}
 
 		// Verify content data:
 		if (!this.content.onlyContainerAccess) {
