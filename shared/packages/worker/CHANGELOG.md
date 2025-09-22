@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
+
+
+### Bug Fixes
+
+* issue with Accessor ([7d4d30f](https://github.com/nrkno/sofie-package-manager/commit/7d4d30fac33c66a0eebade28d5666b3bc0e1875f))
+
+
+
+
+
 # [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
 
 
