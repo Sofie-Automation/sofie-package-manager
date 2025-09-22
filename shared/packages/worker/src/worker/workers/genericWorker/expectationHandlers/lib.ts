@@ -8,7 +8,11 @@ import {
 import { prioritizeAccessors } from '../../../lib/lib'
 import { AccessorContext, GenericAccessorHandle } from '../../../accessorHandlers/genericHandle'
 import { BaseWorker } from '../../../worker'
-import { compareActualExpectVersions, findBestPackageContainerWithAccessToPackage } from '../lib/lib'
+import {
+	ACCESSOR_DUMMY_CONTENT,
+	compareActualExpectVersions,
+	findBestPackageContainerWithAccessToPackage,
+} from '../lib/lib'
 import { Diff } from 'deep-diff'
 import {
 	AccessorOnPackage,
@@ -161,7 +165,7 @@ export async function lookupAccessorHandles<Metadata>(
 			c.accessorId,
 			c.accessor,
 			accessorContext,
-			expectationContent,
+			ACCESSOR_DUMMY_CONTENT,
 			expectationWorkOptions
 		),
 	}))

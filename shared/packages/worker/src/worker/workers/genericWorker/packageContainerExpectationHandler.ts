@@ -14,7 +14,7 @@ import {
 import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from '../../accessorHandlers/genericHandle'
 import { BaseWorker } from '../../worker'
 import { lookupAccessorHandles, LookupChecks } from './expectationHandlers/lib'
-import { findBestAccessorOnPackageContainer } from './lib/lib'
+import { ACCESSOR_DUMMY_CONTENT, findBestAccessorOnPackageContainer } from './lib/lib'
 
 export async function doYouSupportPackageContainer(
 	packageContainer: PackageContainerExpectation,
@@ -112,11 +112,7 @@ async function lookupPackageContainer(
 		packageContainers,
 		[],
 		{ packageContainerId: packageContainer.id },
-		{
-			// This is somewhat of a hack, it makes the AccessorHandlers to not look to close on the package-related content data,
-			// in order to still be able to use them as-is for PackageContainer-related stuff.
-			onlyContainerAccess: true,
-		},
+		ACCESSOR_DUMMY_CONTENT,
 		{},
 		checks
 	)) as LookupPackageContainer

@@ -208,3 +208,9 @@ export function compareResourceIds(
 	// Do a textual comparison
 	return `${resourceId0}` === `${resourceId1}`
 }
+
+export const ACCESSOR_DUMMY_CONTENT = {
+	// This is somewhat of a hack, it makes the AccessorHandlers to not look to close on the package-related content data,
+	// in order to still be able to use them as-is for PackageContainer-related stuff.
+	onlyContainerAccess: true,
+}
