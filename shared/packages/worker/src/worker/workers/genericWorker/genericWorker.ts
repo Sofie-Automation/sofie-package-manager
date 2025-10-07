@@ -119,6 +119,8 @@ export class GenericWorker extends BaseWorker {
 				return MediaFileThumbnail
 			case Expectation.Type.MEDIA_FILE_PREVIEW:
 				return MediaFilePreview
+			case Expectation.Type.MEDIA_FILE_CONVERT:
+				return MediaFileConvert
 			case Expectation.Type.QUANTEL_CLIP_COPY:
 				return QuantelClipCopy
 			case Expectation.Type.QUANTEL_CLIP_THUMBNAIL:

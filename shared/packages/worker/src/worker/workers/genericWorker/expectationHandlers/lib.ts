@@ -153,7 +153,7 @@ export async function lookupAccessorHandles<Metadata>(
 	combineWithPackageContainers: PackageContainerOnPackage[],
 	accessorContext: AccessorContext,
 	expectationContent: unknown,
-	expectationWorkOptions: unknown,
+	expectationWorkOptions: Expectation.WorkOptions.All,
 	checks: LookupChecks
 ): Promise<LookupPackageContainer<Metadata>> {
 	const prioritizedAccessors = prioritizeAccessors(packageContainers)
