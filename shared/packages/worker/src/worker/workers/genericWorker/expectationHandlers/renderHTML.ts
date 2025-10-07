@@ -51,13 +51,13 @@ import { ProgressParts, ProgressPart } from './progressParts'
  */
 export const RenderHTML: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, genericWorker: GenericWorker): ReturnTypeDoYouSupportExpectation {
-		if (genericWorker.testHTMLRenderer)
+		if (genericWorker.executables.testHTMLRenderer)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (HTMLRenderer)',
-					tech: `Cannot access HTMLRenderer executable: ${genericWorker.testHTMLRenderer}`,
+					tech: `Cannot access HTMLRenderer executable: ${genericWorker.executables.testHTMLRenderer}`,
 				},
 			}
 		return checkWorkerHasAccessToPackageContainersOnPackage(genericWorker, {
