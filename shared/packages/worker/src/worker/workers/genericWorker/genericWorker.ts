@@ -151,4 +151,18 @@ export class GenericWorker extends BaseWorker {
 	): Promise<SetupPackageContainerMonitorsResult> {
 		return PackageContainerExpHandler.setupPackageContainerMonitors(packageContainer, this)
 	}
+
+	private hasEnsuredTemporaryFolderPath = new Set<string>()
+	getTemporaryFolderPath(localPath = ''): string {
+		const tempBasePath =
+			this.agentAPI.config.temporaryFolderPath ||
+			(process.platform === 'win32' ? 'C:\\temp\\package-manager' : '/tmp/package-manager')
+
+		const tempPath = path.join(tempBasePath, localPath)
+		if (!this.hasEnsuredTemporaryFolderPath.has(tempPath)) {
+			this.hasEnsuredTemporaryFolderPath.add(tempPath)
+			fs.mkdirSync(tempPath, { recursive: true })
+		}
+		return tempPath
+	}
 }

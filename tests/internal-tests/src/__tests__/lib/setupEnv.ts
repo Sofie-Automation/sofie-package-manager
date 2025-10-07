@@ -80,6 +80,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		resourceId: '',
 		networkIds: [],
 		windowsDriveLetters: ['X', 'Y', 'Z'],
+		temporaryFolderPath: undefined,
 		sourcePackageStabilityThreshold: 0, // Disabling this to speed up the tests
 		costMultiplier: 1,
 		considerCPULoad: null,
@@ -104,6 +105,7 @@ export const defaultTestConfig: SingleAppConfig = {
 			resourceId: '',
 			networkIds: [],
 			windowsDriveLetters: ['X', 'Y', 'Z'],
+			temporaryFolderPath: undefined,
 			costMultiplier: 1,
 			considerCPULoad: null,
 			failurePeriod: 0,
@@ -274,7 +276,8 @@ export async function prepareTestEnvironment(debugLogging: boolean): Promise<Tes
 				packageId: ExpectedPackageId,
 				packageStatus: Omit<ExpectedPackageStatusAPI.PackageContainerPackageStatus, 'statusChanged'> | null
 			) => {
-				if (debugLogging) console.log('reportPackageContainerPackageStatus', containerId, packageId, packageStatus)
+				if (debugLogging)
+					console.log('reportPackageContainerPackageStatus', containerId, packageId, packageStatus)
 
 				let container = containerStatuses[containerId]
 				if (!container) {

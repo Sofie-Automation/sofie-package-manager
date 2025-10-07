@@ -22,6 +22,7 @@ export interface AppContainerConfig {
 		resourceId: string
 		networkIds: string[]
 		windowsDriveLetters: WorkerAgentConfig['windowsDriveLetters']
+		temporaryFolderPath: WorkerAgentConfig['temporaryFolderPath']
 		costMultiplier: number
 		considerCPULoad: number | null
 		failurePeriodLimit: number

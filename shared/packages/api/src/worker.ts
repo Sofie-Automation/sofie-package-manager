@@ -70,6 +70,9 @@ export interface WorkerAgentConfig {
 	 * Example: ['X', 'Y', 'Z']
 	 */
 	windowsDriveLetters?: string[]
+
+	/** A temporary, local file path where the worker can store temporary artifacts */
+	temporaryFolderPath?: string
 }
 export type ReturnTypeDoYouSupportPackageContainer =
 	| {
