@@ -25,6 +25,7 @@ import {
 } from './lib/scan'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import { CompressionType, IframesScanResult, PackageInfoType } from './lib/coreApi'
+import { ProgressParts } from './progressParts'
 
 /**
  * Performs an I-frames scan of the source package
@@ -164,6 +165,15 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 			// On cancel
 			currentProcess?.cancel()
 		}).do(async () => {
+			const progressTracker = new ProgressParts()
+			progressTracker.on('progress', (p) => {
+				workInProgress._reportProgress(sourceVersionHash, p)
+			})
+			const progressSetup = progressTracker.addPart(1)
+			const progressScan = progressTracker.addPart(1)
+			const progressIframesScan = progressTracker.addPart(10)
+			const progressFinalize = progressTracker.addPart(1)
+
 			const sourceHandle = lookupSource.handle
 			const targetHandle = lookupTarget.handle
 			if (
@@ -185,14 +195,14 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 			const actualSourceVersion = await sourceHandle.getPackageActualVersion()
 			const sourceVersionHash = hashObj(actualSourceVersion)
 
-			workInProgress._reportProgress(sourceVersionHash, 0.01)
+			progressSetup(1)
 
 			// Scan with FFProbe:
 			currentProcess = scanWithFFProbe(sourceHandle)
 			const ffProbeScan: FFProbeScanResult = await currentProcess
 			const hasVideoStream =
 				ffProbeScan.streams && ffProbeScan.streams.some((stream) => stream.codec_type === 'video')
-			workInProgress._reportProgress(sourceVersionHash, 0.1)
+			progressScan(1)
 			currentProcess = undefined
 
 			let result: IframesScanResult = { type: CompressionType.Unknown }
@@ -204,7 +214,7 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 						sourceHandle,
 						null,
 						(progress) => {
-							workInProgress._reportProgress(sourceVersionHash, 0.21 + 0.77 * progress)
+							progressIframesScan(progress)
 						},
 						worker.logger.category('scanIframes'),
 						Number(ffProbeScan.format?.duration) || 10000
@@ -231,7 +241,6 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 				result = await currentProcess
 				currentProcess = undefined
 			}
-			workInProgress._reportProgress(sourceVersionHash, 0.99)
 
 			// all done:
 			const scanOperation = await targetHandle.prepareForOperation('Iframe scan', sourceHandle)
@@ -243,9 +252,12 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 				exp.endRequirement.version,
 				result
 			)
+			progressFinalize(0.5)
 
 			await targetHandle.finalizePackage(scanOperation)
+			progressFinalize(1)
 
+			progressTracker.destroy()
 			const duration = timer.get()
 			workInProgress._reportComplete(
 				sourceVersionHash,

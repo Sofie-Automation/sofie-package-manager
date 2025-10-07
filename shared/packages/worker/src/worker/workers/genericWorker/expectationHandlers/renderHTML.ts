@@ -44,6 +44,7 @@ import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder
 import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle'
 import { ByteCounter } from '../../../lib/streamByteCounter'
 import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch'
+import { ProgressParts, ProgressPart } from './progressParts'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer
@@ -461,37 +462,51 @@ class HTMLRenderHandler {
 		const actualSourceUVersion = makeUniversalVersion(actualSourceVersion)
 
 		try {
+			const progressTracker = new ProgressParts()
+			progressTracker.on('progress', (p) => {
+				workInProgress._reportProgress(actualSourceVersionHash, p)
+			})
+			const progressSetup = progressTracker.addPart(1)
+			const progressAdmin = progressTracker.addPart(2)
+			const progressRender = progressTracker.addPart(10)
+			const progressMoveFiles = progressTracker.addPart(4)
+			const progressFinalize = progressTracker.addPart(1)
+
 			// Remote old temp files, if they exist:
 			await this.cleanTempFiles()
-			workInProgress._reportProgress(actualSourceVersionHash, REPORT_PROGRESS.initialCleanTempFiles)
+			progressSetup(1)
 
 			// Render HTML file according to the steps:
 			this.htmlRenderer = new HTMLRenderer(
 				this.worker,
 				this.exp,
 				options.url,
-				workInProgress,
-				actualSourceVersionHash,
 				this.executeSteps,
-				this.outputPath
+				this.outputPath,
+				progressAdmin,
+				progressRender
 			)
 			await this.htmlRenderer.done
+			progressRender(1)
 
 			// Move files to the target:
-			await this.moveOutputFilesToTarget({
-				workInProgress,
-				actualSourceVersionHash,
-			})
+			await this.moveOutputFilesToTarget(
+				{
+					workInProgress,
+					actualSourceVersionHash,
+				},
+				progressMoveFiles
+			)
 
 			// Write metadata
 			if (!this.wasCancelled) {
 				await options.mainLookupTarget.handle.updateMetadata(actualSourceUVersion)
-				workInProgress._reportProgress(actualSourceVersionHash, REPORT_PROGRESS.writeMetadata)
+				progressFinalize(0.2)
 			}
 
 			// Clean temp files:
 			await this.cleanTempFiles()
-			workInProgress._reportProgress(actualSourceVersionHash, REPORT_PROGRESS.cleanTempFiles)
+			progressFinalize(0.5)
 
 			// Clean other old files:
 			const files = await fs.readdir(this.outputPath)
@@ -505,7 +520,7 @@ class HTMLRenderHandler {
 				})
 			)
 
-			workInProgress._reportProgress(actualSourceVersionHash, REPORT_PROGRESS.cleanOutputFiles)
+			progressFinalize(0.7)
 
 			const duration = this.timer.get()
 			workInProgress._reportComplete(
@@ -525,7 +540,10 @@ class HTMLRenderHandler {
 			await this.cleanTempFiles()
 		}
 	}
-	async moveOutputFilesToTarget(options: { workInProgress: WorkInProgress; actualSourceVersionHash: string }) {
+	async moveOutputFilesToTarget(
+		options: { workInProgress: WorkInProgress; actualSourceVersionHash: string },
+		reportProgress: ProgressPart
+	) {
 		// Move all this.outputFileNames files to our target
 
 		for (let i = 0; i < this.outputFileNames.length; i++) {
@@ -553,10 +571,7 @@ class HTMLRenderHandler {
 				localFileSourceHandle
 			)
 
-			options.workInProgress._reportProgress(
-				options.actualSourceVersionHash,
-				REPORT_PROGRESS.copyFilesToTarget + 0.29 * (i / this.outputFileNames.length)
-			)
+			reportProgress(i / this.outputFileNames.length)
 
 			const fileSize = (await fs.stat(localFileSourceHandle.fullPath)).size
 			const byteCounter = new ByteCounter()
@@ -565,10 +580,8 @@ class HTMLRenderHandler {
 
 				if (fileSize) {
 					const progress = bytes / fileSize
-					options.workInProgress._reportProgress(
-						options.actualSourceVersionHash,
-						REPORT_PROGRESS.copyFilesToTarget + 0.29 * ((i + progress) / this.outputFileNames.length)
-					)
+
+					reportProgress((i + progress) / this.outputFileNames.length)
 				}
 			})
 
@@ -580,10 +593,7 @@ class HTMLRenderHandler {
 
 			if (this.writeStream.usingCustomProgressEvent) {
 				this.writeStream.on('progress', (progress) => {
-					options.workInProgress._reportProgress(
-						options.actualSourceVersionHash,
-						REPORT_PROGRESS.copyFilesToTarget + 0.29 * ((i + progress) / this.outputFileNames.length)
-					)
+					reportProgress((i + progress) / this.outputFileNames.length)
 				})
 			}
 
@@ -635,10 +645,10 @@ class HTMLRenderer {
 		private worker: BaseWorker,
 		private exp: Expectation.RenderHTML,
 		private url: string,
-		private workInProgress: WorkInProgress,
-		private actualSourceVersionHash: string,
 		private executeSteps: { step: Steps[number]; duration: number }[],
-		private outputPath: string
+		private outputPath: string,
+		private reportAdminProgress: ProgressPart,
+		private reportRenderProgress: ProgressPart
 	) {
 		this.totalStepDuration = this.executeSteps.reduce((prev, cur) => prev + cur.duration, 0) || 1
 
@@ -741,10 +751,8 @@ class HTMLRenderer {
 					if (waitingForReady) {
 						waitingForReady = false
 
-						this.workInProgress._reportProgress(
-							this.actualSourceVersionHash,
-							REPORT_PROGRESS.setupWebSocketConnection
-						)
+						this.reportAdminProgress(0.1)
+
 						this.setupWebSocketConnection(message.port).catch((e) => this.onError(e))
 					} else {
 						this.onError(
@@ -838,10 +846,8 @@ class HTMLRenderer {
 				/** Progress within the step [0-1] */
 				progress: number
 			) => {
-				this.workInProgress._reportProgress(
-					this.actualSourceVersionHash,
-					REPORT_PROGRESS.sendCommands +
-						0.49 * ((stepStartDuration + progress * currentStep.duration) / this.totalStepDuration)
+				this.reportRenderProgress(
+					(stepStartDuration + progress * currentStep.duration) / this.totalStepDuration
 				)
 			}
 			reportStepProgress(0)
@@ -947,13 +953,14 @@ class HTMLRenderer {
 		} else {
 			// Done, no more commands to send.
 
-			this.workInProgress._reportProgress(this.actualSourceVersionHash, REPORT_PROGRESS.sendCommands + 0.49)
+			this.reportAdminProgress(0.9)
 
 			// Send a close command to the renderer
 			this.ws.send(JSON.stringify(literal<InteractiveMessage>({ do: 'close' })))
 
 			// Wait a little bit before completion
 			setTimeout(() => {
+				this.reportAdminProgress(1)
 				this.ws?.close()
 				this.onComplete()
 			}, 500)
@@ -972,15 +979,6 @@ class HTMLRenderer {
 }
 
 const COMMAND_TIMEOUT = 10000
-const REPORT_PROGRESS = {
-	initialCleanTempFiles: 0.05,
-	setupWebSocketConnection: 0.08,
-	sendCommands: 0.1,
-	copyFilesToTarget: 0.6,
-	writeMetadata: 0.9,
-	cleanTempFiles: 0.95,
-	cleanOutputFiles: 0.97,
-}
 
 /** Modify an property inside an object */
 function modifyObject(obj: Record<string, any> | Record<string, any>[], objPath: string | string[], value: unknown) {
