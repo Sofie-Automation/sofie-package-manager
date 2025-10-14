@@ -95,11 +95,11 @@ export class Workforce {
 							})
 							this.workerAgents.set(clientId, { api })
 							client.once('close', () => {
-								this.logger.warn(`Workforce: Connection to Worker "${clientId}" closed`)
+								this.logger.warn(`Workforce: Connection from Worker "${clientId}" closed`)
 								this.workerAgents.delete(clientId)
 								this.triggerEvaluateStatus()
 							})
-							this.logger.info(`Workforce: Connection to Worker "${clientId}" established`)
+							this.logger.info(`Workforce: Connection from Worker "${clientId}" established`)
 							this.triggerEvaluateStatus()
 							break
 						}

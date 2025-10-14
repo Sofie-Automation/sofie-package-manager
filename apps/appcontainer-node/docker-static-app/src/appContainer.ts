@@ -104,7 +104,7 @@ export class AppContainer {
 								this.apps.set(clientId, app)
 							}
 							client.once('close', () => {
-								this.logger.warn(`Connection to Worker "${clientId}" closed`)
+								this.logger.warn(`Connection from Worker "${clientId}" closed`)
 
 								// Cleanup the app if it is still the same connection:
 								const app = this.apps.get(clientId)
@@ -114,7 +114,7 @@ export class AppContainer {
 
 								this.workerStorage.releaseLockForTag(unprotectString(clientId))
 							})
-							this.logger.info(`Connection to Worker "${client.clientId}" established`)
+							this.logger.info(`Connection from Worker "${client.clientId}" established`)
 							app.workerAgentApi = api
 
 							// Set upp the app for pinging and automatic spin-down:

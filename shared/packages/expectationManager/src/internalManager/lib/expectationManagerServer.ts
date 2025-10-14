@@ -50,7 +50,7 @@ export class ExpectationManagerServer {
 							})
 							this.manager.workerAgents.upsert(clientId, { api, connected: true })
 							client.once('close', () => {
-								this.logger.warn(`Connection to Worker "${clientId}" closed`)
+								this.logger.warn(`Connection from Worker "${clientId}" closed`)
 
 								const workerAgent = this.manager.workerAgents.get(clientId)
 								if (workerAgent) {
@@ -58,7 +58,7 @@ export class ExpectationManagerServer {
 									this.manager.workerAgents.remove(clientId)
 								}
 							})
-							this.logger.info(`Connection to Worker "${clientId}" established`)
+							this.logger.info(`Connection from Worker "${clientId}" established`)
 							this.manager.tracker.triggerEvaluationNow()
 							break
 						}

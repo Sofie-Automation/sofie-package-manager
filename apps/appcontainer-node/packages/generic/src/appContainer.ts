@@ -101,12 +101,12 @@ export class AppContainer {
 									throw new Error(`Unknown app "${clientId}" just connected to the appContainer`)
 								}
 								client.once('close', () => {
-									this.logger.warn(`Connection to Worker "${clientId}" closed`)
+									this.logger.warn(`Connection from Worker "${clientId}" closed`)
 									app.workerAgentApi = null
 
 									this.workerStorage.releaseLockForTag(unprotectString(clientId))
 								})
-								this.logger.info(`Connection to Worker "${client.clientId}" established`)
+								this.logger.info(`Connection from Worker "${client.clientId}" established`)
 								app.workerAgentApi = api
 
 								// Set upp the app for pinging and automatic spin-down:
