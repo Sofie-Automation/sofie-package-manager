@@ -265,6 +265,9 @@ export class AppContainer {
 		this.workforceAPI.debugCutConnection()
 	}
 
+	/**
+	 * Called when no worker is picking up an Expectation, to see if one can be started to handle it
+	 */
 	async requestAppTypeForExpectation(
 		exp: Expectation.Any
 	): Promise<{ success: true; appType: AppType; cost: Cost } | { success: false; reason: Reason }> {
@@ -316,6 +319,9 @@ export class AppContainer {
 		}
 	}
 
+	/**
+	 * Called when no worker is handling something?, to see if one can be started to handle it
+	 */
 	async requestAppTypeForPackageContainer(
 		packageContainer: PackageContainerExpectation
 	): Promise<{ success: true; appType: AppType; cost: Cost } | { success: false; reason: Reason }> {
