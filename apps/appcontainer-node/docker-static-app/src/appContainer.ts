@@ -272,17 +272,6 @@ export class AppContainer {
 		exp: Expectation.Any
 	): Promise<{ success: true; appType: AppType; cost: Cost } | { success: false; reason: Reason }> {
 		this.logger.debug(`Got request for resources, for exp "${exp.id}"`)
-		if (this.apps.size >= this.config.appContainer.maxRunningApps) {
-			this.logger.debug(`Is already at our limit, no more resources available`)
-			// If we're at our limit, we can't possibly run anything else
-			return {
-				success: false,
-				reason: {
-					user: `Is already at limit (${this.config.appContainer.maxRunningApps})`,
-					tech: `Is already at limit (${this.config.appContainer.maxRunningApps})`,
-				},
-			}
-		}
 
 		let lastNotSupportReason: ExpectedPackageStatusAPI.Reason = {
 			user: 'No apps available',
@@ -326,17 +315,6 @@ export class AppContainer {
 		packageContainer: PackageContainerExpectation
 	): Promise<{ success: true; appType: AppType; cost: Cost } | { success: false; reason: Reason }> {
 		this.logger.debug(`Got request for resources, for packageContainer "${packageContainer.id}"`)
-		if (this.apps.size >= this.config.appContainer.maxRunningApps) {
-			this.logger.debug(`Is already at our limit, no more resources available`)
-			// If we're at our limit, we can't possibly run anything else
-			return {
-				success: false,
-				reason: {
-					user: `Is already at limit (${this.config.appContainer.maxRunningApps})`,
-					tech: `Is already at limit (${this.config.appContainer.maxRunningApps})`,
-				},
-			}
-		}
 
 		for (const appType of ALL_APP_TYPES) {
 			const runningApp = await this.getRunningApp(appType)
