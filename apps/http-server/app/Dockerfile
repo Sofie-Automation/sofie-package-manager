@@ -54,5 +54,4 @@ ENV HTTP_SERVER_PORT=8080
 ENV HTTP_SERVER_BASE_PATH="/data"
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["yarn", "start"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "node", "dist/index.js"]
