@@ -43,7 +43,7 @@ FROM node:18-alpine
 
 COPY --from=builder /src /src
 
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init ffmpeg
 
 # Run as non-root user
 USER 1000
