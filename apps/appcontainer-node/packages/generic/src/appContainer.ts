@@ -174,6 +174,7 @@ export class AppContainer {
 
 		process.on('exit', (code) => {
 			this.logger.info(`Closing with exitCode ${code}`)
+			this.websocketServer?.terminate()
 			this.killAllApps()
 		})
 	}

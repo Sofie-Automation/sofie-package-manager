@@ -227,7 +227,7 @@ const appContainerArguments = defineArguments({
 	// These are passed-through to the spun-up workers:
 	resourceId: {
 		type: 'string',
-		default: process.env.WORKER_NETWORK_ID || 'default',
+		default: process.env.WORKER_RESOURCE_ID || 'default',
 		describe: 'Identifier of the local resource/computer this worker runs on',
 	},
 	networkIds: {

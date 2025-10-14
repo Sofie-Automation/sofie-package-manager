@@ -10,6 +10,7 @@ import { ClientConnection } from './websocketServer'
  */
 export abstract class AdapterServer<ME extends MethodsInterfaceBase, OTHER extends MethodsInterfaceBase> {
 	protected _sendMessage: (type: keyof Omit<OTHER, 'id'>, ...args: any[]) => Promise<any>
+	protected _close: () => Promise<void>
 
 	public readonly type: string
 
@@ -36,6 +37,10 @@ export abstract class AdapterServer<ME extends MethodsInterfaceBase, OTHER exten
 					throw new Error(`Unknown method "${message.type}"`)
 				}
 			})
+
+			this._close = async () => {
+				options.clientConnection.close()
+			}
 		} else {
 			const clientHook: Omit<OTHER, 'id'> = options.hookMethods
 			this._sendMessage = async (type: keyof Omit<OTHER, 'id'>, ...args: any[]) => {
@@ -51,6 +56,10 @@ export abstract class AdapterServer<ME extends MethodsInterfaceBase, OTHER exten
 				} else {
 					throw new Error(`Unknown method "${String(type)}"`)
 				}
+			}
+
+			this._close = async () => {
+				// Nothing to do
 			}
 		}
 	}

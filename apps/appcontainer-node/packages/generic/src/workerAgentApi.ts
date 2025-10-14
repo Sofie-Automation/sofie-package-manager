@@ -43,4 +43,8 @@ export class WorkerAgentAPI
 	async setSpinDownTime(spinDownTime: number): Promise<void> {
 		return this._sendMessage('setSpinDownTime', spinDownTime)
 	}
+
+	async close(): Promise<void> {
+		return this._close()
+	}
 }
