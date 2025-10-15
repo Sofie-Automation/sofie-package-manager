@@ -31,6 +31,7 @@ import {
 	MonitorId,
 	betterPathResolve,
 	betterPathIsAbsolute,
+	isRunningInTest,
 } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
 import { GenericWorker } from '../workers/genericWorker/genericWorker'
@@ -779,5 +780,5 @@ interface MappedDriveLetters {
 
 function isFileShareSupportedOnCurrentPlatform(): boolean {
 	// This is only supported on windows currently
-	return process.platform === 'win32'
+	return isRunningInTest() || process.platform === 'win32'
 }

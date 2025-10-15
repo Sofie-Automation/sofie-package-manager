@@ -52,6 +52,7 @@ export const defaultTestConfig: SingleAppConfig = {
 	},
 	workforce: {
 		port: null,
+		allowNoAppContainers: false,
 	},
 	httpServer: {
 		port: 0,
@@ -274,7 +275,8 @@ export async function prepareTestEnvironment(debugLogging: boolean): Promise<Tes
 				packageId: ExpectedPackageId,
 				packageStatus: Omit<ExpectedPackageStatusAPI.PackageContainerPackageStatus, 'statusChanged'> | null
 			) => {
-				if (debugLogging) console.log('reportPackageContainerPackageStatus', containerId, packageId, packageStatus)
+				if (debugLogging)
+					console.log('reportPackageContainerPackageStatus', containerId, packageId, packageStatus)
 
 				let container = containerStatuses[containerId]
 				if (!container) {
