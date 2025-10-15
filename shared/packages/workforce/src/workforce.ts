@@ -36,6 +36,8 @@ import { WorkerHandler } from './workerHandler'
  * and mediates connections between the two.
  */
 export class Workforce {
+	private readonly config: WorkforceConfig
+
 	public workerAgents: Map<
 		WorkerAgentId,
 		{
@@ -76,6 +78,8 @@ export class Workforce {
 
 	constructor(logger: LoggerInstance, config: WorkforceConfig) {
 		this.logger = logger.category('Workforce')
+		this.config = config
+
 		if (config.workforce.port !== null) {
 			this.websocketServer = new WebsocketServer(
 				config.workforce.port,
@@ -227,16 +231,18 @@ export class Workforce {
 						message: '',
 				  }
 
-		statuses['any-appContainers'] =
-			this.appContainers.size === 0
-				? {
-						statusCode: StatusCode.BAD,
-						message: 'No appContainers connected to workforce',
-				  }
-				: {
-						statusCode: StatusCode.GOOD,
-						message: '',
-				  }
+		if (!this.config.workforce.allowNoAppContainers) {
+			statuses['any-appContainers'] =
+				this.appContainers.size === 0
+					? {
+							statusCode: StatusCode.BAD,
+							message: 'No appContainers connected to workforce',
+					  }
+					: {
+							statusCode: StatusCode.GOOD,
+							message: '',
+					  }
+		}
 
 		const statusHash = hashObj(statuses)
 
