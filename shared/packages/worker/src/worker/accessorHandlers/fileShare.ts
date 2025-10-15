@@ -61,11 +61,6 @@ export interface Content {
 	filePath?: string
 }
 
-function isFileShareSupportedOnCurrentPlatform(): boolean {
-	// This is only supported on windows currently
-	return process.platform === 'win32'
-}
-
 /** Accessor handle for accessing files on a network share */
 export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle<Metadata> {
 	static readonly type = FileShareAccessorHandleType
@@ -249,6 +244,18 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		return { success: true }
 	}
 	async tryPackageRead(): Promise<AccessorHandlerTryPackageReadResult> {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+				packageExists: false,
+			}
+		}
+
 		try {
 			// Check if we can open the file for reading:
 			const fd = await fsOpen(this.fullPath, 'r')
@@ -768,4 +775,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 }
 interface MappedDriveLetters {
 	[driveLetter: string]: string
+}
+
+function isFileShareSupportedOnCurrentPlatform(): boolean {
+	// This is only supported on windows currently
+	return process.platform === 'win32'
 }
