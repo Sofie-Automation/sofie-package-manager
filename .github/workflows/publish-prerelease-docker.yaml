@@ -62,7 +62,7 @@ jobs:
 
     strategy:
       matrix:
-        repo: [package-manager, workforce, http-server, quantel-http-transformer-proxy]
+        repo: [package-manager, workforce, http-server, quantel-http-transformer-proxy, worker]
 
     steps:
       - uses: actions/checkout@v5

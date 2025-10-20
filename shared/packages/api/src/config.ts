@@ -29,6 +29,11 @@ const workforceArguments = defineArguments({
 		default: parseInt(process.env.WORKFORCE_PORT || '', 10) || 8070,
 		describe: 'The port number to start the Workforce websocket server on',
 	},
+	allowNoAppContainers: {
+		type: 'boolean',
+		default: process.env.WORKFORCE_ALLOW_NO_APP_CONTAINERS === '1' || false,
+		describe: 'If true, the workforce will not check if it has no appContainers connected',
+	},
 })
 /** CLI-argument-definitions for the HTTP-Server process */
 const httpServerArguments = defineArguments({
@@ -227,7 +232,7 @@ const appContainerArguments = defineArguments({
 	// These are passed-through to the spun-up workers:
 	resourceId: {
 		type: 'string',
-		default: process.env.WORKER_NETWORK_ID || 'default',
+		default: process.env.WORKER_RESOURCE_ID || 'default',
 		describe: 'Identifier of the local resource/computer this worker runs on',
 	},
 	networkIds: {
@@ -334,6 +339,7 @@ export interface WorkforceConfig {
 	process: ProcessConfig
 	workforce: {
 		port: number | null
+		allowNoAppContainers: boolean
 	}
 }
 
@@ -349,6 +355,7 @@ export async function getWorkforceConfig(): Promise<WorkforceConfig> {
 		process: getProcessConfig(argv),
 		workforce: {
 			port: argv.port,
+			allowNoAppContainers: argv.allowNoAppContainers,
 		},
 	}
 }
