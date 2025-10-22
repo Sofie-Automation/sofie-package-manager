@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.4](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
+
+
+### Bug Fixes
+
+* bug when determining dev vs prod ([9669903](https://github.com/Sofie-Automation/sofie-package-manager/commit/96699035035b9619686ae1b1127831cc49909879))
+* bug when reading an empty "__removePackages.json" file ([3976215](https://github.com/Sofie-Automation/sofie-package-manager/commit/39762157cb4cf82df86451a1cad7b0e6b24fc861))
+* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/Sofie-Automation/sofie-package-manager/issues/219)) ([#235](https://github.com/Sofie-Automation/sofie-package-manager/issues/235)) ([6d62e95](https://github.com/Sofie-Automation/sofie-package-manager/commit/6d62e950f83c4a503ce164700863e89ee59d1650))
+* ftp-upload: fix a bug where the ftp-client cd:ed to different working directories, making our commands weird ([1dbc41a](https://github.com/Sofie-Automation/sofie-package-manager/commit/1dbc41a1030ab061af0123832a561f1ecbc81109))
+* ftp-upload: handle a case where ftp-server doesn't support ftp-upload ([b50bd59](https://github.com/Sofie-Automation/sofie-package-manager/commit/b50bd5930ded8456a24e69a47a0dbd07c9e060c3))
+* json-write-file: Don't store json-file (typically removePackages.json) at all if its content is an empty array ([ae65275](https://github.com/Sofie-Automation/sofie-package-manager/commit/ae65275278cbedfc5655147001dc3d759981a2ef))
+
+
+### Features
+
+* add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/Sofie-Automation/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+* add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/Sofie-Automation/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
+* support workers in docker SOFIE-4071 ([#236](https://github.com/Sofie-Automation/sofie-package-manager/issues/236)) ([681c62f](https://github.com/Sofie-Automation/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
+
+
+
+
+
 # [1.53.0-alpha.3](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 

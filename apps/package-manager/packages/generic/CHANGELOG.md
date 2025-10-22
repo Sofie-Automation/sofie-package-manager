@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
+
+
+### Features
+
+* add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/nrkno/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
+
+
+
+
+
 # [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 **Note:** Version bump only for package @package-manager/generic

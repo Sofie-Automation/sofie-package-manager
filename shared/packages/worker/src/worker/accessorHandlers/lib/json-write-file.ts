@@ -359,7 +359,7 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 		if (oldValue?.str === newValueStr) {
 			// do nothing
 		} else {
-			if (newValueStr === undefined) {
+			if (newValueStr === undefined || newValueStr === '') {
 				// undefined means remove the file
 				await this.fileHandler.unlinkIfExists(tmpFilePath)
 				await this.fileHandler.unlinkIfExists(filePath)
