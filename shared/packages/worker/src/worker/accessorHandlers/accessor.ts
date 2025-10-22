@@ -8,6 +8,7 @@ import { HTTPProxyAccessorHandle } from './httpProxy'
 import { LocalFolderAccessorHandle } from './localFolder'
 import { QuantelAccessorHandle } from './quantel'
 import { ATEMAccessorHandle } from './atem'
+import { FTPAccessorHandle } from './ftp'
 
 export function getAccessorHandle<Metadata>(
 	worker: BaseWorker,
@@ -45,12 +46,13 @@ export function getAccessorStaticHandle(accessor: AccessorOnPackage.Any) {
 	} else if (accessor.type === Accessor.AccessType.HTTP_PROXY) {
 		return HTTPProxyAccessorHandle
 	} else if (accessor.type === Accessor.AccessType.FILE_SHARE) {
-		if (process.platform !== 'win32') throw new Error(`FileShareAccessor: not supported on ${process.platform}`)
 		return FileShareAccessorHandle
 	} else if (accessor.type === Accessor.AccessType.QUANTEL) {
 		return QuantelAccessorHandle
 	} else if (accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE) {
 		return ATEMAccessorHandle
+	} else if (accessor.type === Accessor.AccessType.FTP) {
+		return FTPAccessorHandle
 	} else {
 		assertNever(accessor.type) // Assert  so as to not forget to add an if-clause above
 		throw new Error(`Unsupported Accessor type "${accessor.type}"`)
@@ -92,6 +94,11 @@ export function isATEMAccessorHandle<Metadata>(
 ): accessorHandler is ATEMAccessorHandle<Metadata> {
 	return accessorHandler.type === ATEMAccessorHandle.type
 }
+export function isFTPAccessorHandle<Metadata>(
+	accessorHandler: GenericAccessorHandle<Metadata>
+): accessorHandler is FTPAccessorHandle<Metadata> {
+	return accessorHandler.type === FTPAccessorHandle.type
+}
 
 /** Returns a generic value for how costly it is to use an Accessor type. A higher value means that it is more expensive to access the accessor */
 export function getAccessorCost(accessorType: Accessor.AccessType | undefined): number {
@@ -107,6 +114,7 @@ export function getAccessorCost(accessorType: Accessor.AccessType | undefined): 
 			return 2
 		// --------------------------------------------------------
 		case Accessor.AccessType.FILE_SHARE:
+		case Accessor.AccessType.FTP:
 			return 2
 		case Accessor.AccessType.HTTP_PROXY:
 		case Accessor.AccessType.HTTP:

@@ -10,6 +10,7 @@ export class PassiveTestWorker extends BaseWorker {
 					workerId: protectString('test'),
 					sourcePackageStabilityThreshold: 0,
 					windowsDriveLetters: ['X', 'Y', 'Z'],
+					temporaryFolderPath: undefined,
 				},
 				location: {
 					// localComputerId?: string
@@ -60,6 +61,9 @@ export class PassiveTestWorker extends BaseWorker {
 		throw new Error('Method not implemented.')
 	}
 	async setupPackageContainerMonitors(): Promise<any> {
+		throw new Error('Method not implemented.')
+	}
+	getTemporaryFolderPath(): string {
 		throw new Error('Method not implemented.')
 	}
 }

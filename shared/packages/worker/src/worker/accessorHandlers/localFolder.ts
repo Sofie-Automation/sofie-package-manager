@@ -15,6 +15,7 @@ import {
 	PackageOperation,
 	AccessorHandlerCheckHandleBasicResult,
 	AccessorConstructorProps,
+	AccessorHandlerCheckHandleCompatibilityResult,
 } from './genericHandle'
 import {
 	Accessor,
@@ -32,8 +33,7 @@ import {
 import { BaseWorker } from '../worker'
 import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
-import { compareResourceIds } from '../workers/genericWorker/lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -56,7 +56,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	static readonly type = LocalFolderAccessorHandleType
 
 	private content: Content
-	private workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
+	protected workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
 	private accessor: AccessorOnPackage.LocalFolder
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.LocalFolder>) {
@@ -66,7 +66,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		})
 		this.accessor = arg.accessor
 		this.workOptions = arg.workOptions
-		this.content = arg.content
+		this.content = arg.content ?? {}
 
 		// Verify content data:
 		if (!this.content.onlyContainerAccess) {
@@ -74,14 +74,11 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 				throw new Error('Bad input data: neither accessor.filePath, content.filePath nor content.path are set!')
 		}
 
-		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
-			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
 		if (this.workOptions.useTemporaryFilePath && typeof this.workOptions.useTemporaryFilePath !== 'boolean')
 			throw new Error('Bad input data: workOptions.useTemporaryFilePath is not a boolean!')
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.LocalFolder
-		return compareResourceIds(accessor.resourceId, worker.agentAPI.location.localComputerId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		return this.fullPath
@@ -141,6 +138,9 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		}
 
 		return { success: true }
+	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
 	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		const defaultResult = defaultCheckHandleRead(this.accessor)
@@ -223,20 +223,11 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		const stat = await fsStat(this.fullPath)
 		return this.convertStatToVersion(stat)
 	}
+	async ensurePackageFulfilled(): Promise<void> {
+		await this.fileHandler.clearPackageRemoval(this.filePath)
+	}
 	async removePackage(reason: string): Promise<void> {
-		if (this.workOptions.removeDelay) {
-			this.logOperation(
-				`Remove package: Delay remove file "${this.packageName}", delay: ${this.workOptions.removeDelay} (${reason})`
-			)
-			await this.delayPackageRemoval(this.filePath, this.workOptions.removeDelay)
-		} else {
-			await this.removeMetadata()
-			if (await this.unlinkIfExists(this.fullPath)) {
-				this.logOperation(`Remove package: Removed file "${this.packageName}" (${reason})`)
-			} else {
-				this.logOperation(`Remove package: File already removed "${this.packageName}" (${reason})`)
-			}
-		}
+		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 	async getPackageReadStream(): Promise<{ readStream: NodeJS.ReadableStream; cancel: () => void }> {
 		const readStream = await new Promise<fs.ReadStream>((resolve, reject) => {
@@ -254,7 +245,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
-		await this.clearPackageRemoval(this.filePath)
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
 
@@ -336,8 +327,9 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 			} else if (cronjob === 'cleanup') {
 				const options = packageContainerExp.cronjobs[cronjob]
 
-				badReason = await this.removeDuePackages()
-				if (!badReason && options?.cleanFileAge) badReason = await this.cleanupOldFiles(options.cleanFileAge)
+				badReason = await this.fileHandler.removeDuePackages()
+				if (!badReason && options?.cleanFileAge)
+					badReason = await this.fileHandler.cleanupOldFiles(options.cleanFileAge, this.folderPath)
 			} else {
 				// Assert that cronjob is of type "never", to ensure that all types of cronjobs are handled:
 				assertNever(cronjob)
@@ -374,7 +366,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		await this.clearPackageRemoval(this.filePath)
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 

@@ -3,6 +3,7 @@ import fs from 'fs'
 import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
@@ -30,6 +31,7 @@ import {
 	MonitorId,
 	betterPathResolve,
 	betterPathIsAbsolute,
+	isRunningInTest,
 } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
 import { GenericWorker } from '../workers/genericWorker/genericWorker'
@@ -38,7 +40,7 @@ import { exec } from 'child_process'
 import { FileShareAccessorHandleType, GenericFileAccessorHandle } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite } from './lib/lib'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import * as path from 'path'
 
 const fsStat = promisify(fs.stat)
@@ -69,7 +71,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	public disableDriveMapping = false
 
 	private content: Content
-	private workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
+	protected workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
 	private accessor: AccessorOnPackage.FileShare
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.FileShare>) {
@@ -78,7 +80,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 			type: FileShareAccessorHandle.type,
 		})
 		this.accessor = arg.accessor
-		this.content = arg.content
+		this.content = arg.content ?? {}
 		this.workOptions = arg.workOptions
 		this.originalFolderPath = this.accessor.folderPath
 		this.actualFolderPath = this.originalFolderPath // To be overwritten later
@@ -89,8 +91,6 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 				throw new Error('Bad input data: neither content.filePath nor accessor.filePath are set!')
 		}
 
-		if (arg.workOptions.removeDelay && typeof arg.workOptions.removeDelay !== 'number')
-			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
 		if (arg.workOptions.useTemporaryFilePath && typeof arg.workOptions.useTemporaryFilePath !== 'boolean')
 			throw new Error('Bad input data: workOptions.useTemporaryFilePath is not a boolean!')
 	}
@@ -111,14 +111,26 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	get fullPath(): string {
 		return this.getFullPath(this.filePath)
 	}
-	static doYouSupportAccess(worker: BaseWorker, accessor0: AccessorOnPackage.Any): boolean {
-		const accessor = accessor0 as AccessorOnPackage.FileShare
-		return !accessor.networkId || worker.agentAPI.location.localNetworkIds.includes(accessor.networkId)
+	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+		if (!isFileShareSupportedOnCurrentPlatform()) return false
+
+		return defaultDoYouSupportAccess(worker, accessor)
 	}
 	get packageName(): string {
 		return this.fullPath
 	}
 	checkHandleBasic(): AccessorHandlerCheckHandleBasicResult {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+
 		if (this.accessor.type !== Accessor.AccessType.FILE_SHARE) {
 			return {
 				success: false,
@@ -169,12 +181,47 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		}
 		return { success: true }
 	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+		return { success: true } // no special compatibility checks
+	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+
 		const defaultResult = defaultCheckHandleRead(this.accessor)
 		if (defaultResult) return defaultResult
 		return { success: true }
 	}
 	checkHandleWrite(): AccessorHandlerCheckHandleWriteResult {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+
 		const defaultResult = defaultCheckHandleWrite(this.accessor)
 		if (defaultResult) return defaultResult
 		return { success: true }
@@ -198,6 +245,18 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		return { success: true }
 	}
 	async tryPackageRead(): Promise<AccessorHandlerTryPackageReadResult> {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+				packageExists: false,
+			}
+		}
+
 		try {
 			// Check if we can open the file for reading:
 			const fd = await fsOpen(this.fullPath, 'r')
@@ -231,6 +290,17 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		return { success: true }
 	}
 	private async _checkPackageReadAccess(): Promise<AccessorHandlerCheckPackageReadAccessResult> {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+
 		await this.prepareFileAccess()
 
 		try {
@@ -272,21 +342,12 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		const stat = await fsStat(this.fullPath)
 		return this.convertStatToVersion(stat)
 	}
+	async ensurePackageFulfilled(): Promise<void> {
+		await this.fileHandler.clearPackageRemoval(this.filePath)
+	}
 	async removePackage(reason: string): Promise<void> {
 		await this.prepareFileAccess()
-		if (this.workOptions.removeDelay) {
-			this.logOperation(
-				`Remove package: Delay remove file "${this.packageName}", delay: ${this.workOptions.removeDelay} (${reason})`
-			)
-			await this.delayPackageRemoval(this.filePath, this.workOptions.removeDelay)
-		} else {
-			await this.removeMetadata()
-			if (await this.unlinkIfExists(this.fullPath)) {
-				this.logOperation(`Remove package: Removed file "${this.packageName}", ${reason}`)
-			} else {
-				this.logOperation(`Remove package: File already removed "${this.packageName}" (${reason})`)
-			}
-		}
+		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 
 	async getPackageReadStream(): Promise<{ readStream: NodeJS.ReadableStream; cancel: () => void }> {
@@ -307,7 +368,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
 		await this.prepareFileAccess()
-		await this.clearPackageRemoval(this.filePath)
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
 
@@ -372,6 +433,17 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		await this.unlinkIfExists(this.metadataPath)
 	}
 	async runCronJob(packageContainerExp: PackageContainerExpectation): Promise<AccessorHandlerRunCronJobResult> {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+
 		// Always check read/write access first:
 		const checkRead = await this.checkPackageContainerReadAccess()
 		if (!checkRead.success) return checkRead
@@ -389,8 +461,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 			} else if (cronjob === 'cleanup') {
 				const options = packageContainerExp.cronjobs[cronjob]
 
-				badReason = await this.removeDuePackages()
-				if (!badReason && options?.cleanFileAge) badReason = await this.cleanupOldFiles(options.cleanFileAge)
+				badReason = await this.fileHandler.removeDuePackages()
+				if (!badReason && options?.cleanFileAge)
+					badReason = await this.fileHandler.cleanupOldFiles(options.cleanFileAge, this.folderPath)
 			} else {
 				// Assert that cronjob is of type "never", to ensure that all types of cronjobs are handled:
 				assertNever(cronjob)
@@ -403,6 +476,17 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	async setupPackageContainerMonitors(
 		packageContainerExp: PackageContainerExpectation
 	): Promise<SetupPackageContainerMonitorsResult> {
+		if (!isFileShareSupportedOnCurrentPlatform()) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `File share is not supported on this worker`,
+					tech: `File share is not supported on ${process.platform}`,
+				},
+			}
+		}
+
 		const resultingMonitors: Record<MonitorId, MonitorInProgress> = {}
 		const monitorIds = Object.keys(
 			packageContainerExp.monitors
@@ -426,7 +510,10 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		await this.clearPackageRemoval(this.filePath)
+		if (!isFileShareSupportedOnCurrentPlatform())
+			throw new Error(`FileShareAccessor: not supported on ${process.platform}`)
+
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 
@@ -450,6 +537,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	 * This method should be called prior to any file access being made.
 	 */
 	async prepareFileAccess(forceRemount = false): Promise<void> {
+		if (!isFileShareSupportedOnCurrentPlatform())
+			throw new Error(`FileShareAccessor: not supported on ${process.platform}`)
+
 		if (!this.originalFolderPath) throw new Error(`FileShareAccessor: accessor.folderPath not set!`)
 		const folderPath = this.originalFolderPath
 
@@ -686,4 +776,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 }
 interface MappedDriveLetters {
 	[driveLetter: string]: string
+}
+
+function isFileShareSupportedOnCurrentPlatform(): boolean {
+	// This is only supported on windows currently
+	return isRunningInTest() || process.platform === 'win32'
 }

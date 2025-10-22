@@ -51,5 +51,4 @@ WORKDIR /src/apps/package-manager/app
 ENV package-manager_PORT=8070
 EXPOSE 8070
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["yarn", "start"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "node", "dist/index.js"]

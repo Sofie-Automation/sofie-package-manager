@@ -1,6 +1,7 @@
 import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
@@ -45,7 +46,7 @@ export class CorePackageInfoAccessorHandle<Metadata> extends GenericAccessorHand
 		})
 
 		this.accessor = arg.accessor
-		this.content = arg.content // not used by this class
+		this.content = null // arg.content not used by this class
 
 		// Verify content data:
 		if (arg.workOptions.removeDelay && typeof arg.workOptions.removeDelay !== 'number')
@@ -71,6 +72,9 @@ export class CorePackageInfoAccessorHandle<Metadata> extends GenericAccessorHand
 		}
 		return { success: true }
 	}
+	checkCompatibilityWithAccessor(): AccessorHandlerCheckHandleCompatibilityResult {
+		return { success: true } // no special compatibility checks
+	}
 	checkHandleRead(): AccessorHandlerCheckHandleReadResult {
 		// Note: We assume that we always have write access here, no need to check this.accessor.allowRead
 		return { success: true }
@@ -93,6 +97,9 @@ export class CorePackageInfoAccessorHandle<Metadata> extends GenericAccessorHand
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.CorePackageInfo> {
 		throw new Error('getPackageActualVersion not applicable for CorePackageInfo')
+	}
+	async ensurePackageFulfilled(): Promise<void> {
+		// Nothing
 	}
 	async removePackage(_reason: string): Promise<void> {
 		await this.removeMetadata()

@@ -26,6 +26,7 @@ import {
 	scanWithFFProbe,
 } from './lib/scan'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
+import { ProgressParts } from './progressParts'
 
 /**
  * Performs a "deep scan" of the source package and saves the result file into the target PackageContainer (a Sofie Core collection)
@@ -33,22 +34,22 @@ import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker
  */
 export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, worker: GenericWorker): ReturnTypeDoYouSupportExpectation {
-		if (worker.testFFMpeg)
+		if (worker.executables.testFFMpeg)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFMpeg)',
-					tech: `Cannot access FFMpeg executable: ${worker.testFFMpeg}`,
+					tech: `Cannot access FFMpeg executable: ${worker.executables.testFFMpeg}`,
 				},
 			}
-		if (worker.testFFProbe)
+		if (worker.executables.testFFProbe)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFProbe)',
-					tech: `Cannot access FFProbe executable: ${worker.testFFProbe}`,
+					tech: `Cannot access FFProbe executable: ${worker.executables.testFFProbe}`,
 				},
 			}
 		return checkWorkerHasAccessToPackageContainersOnPackage(worker, {
@@ -144,6 +145,9 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 			}
 			return { fulfilled: false, knownReason: true, reason: packageInfoSynced.reason }
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -167,6 +171,16 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 			// On cancel
 			currentProcess?.cancel()
 		}).do(async () => {
+			const progressTracker = new ProgressParts()
+			progressTracker.on('progress', (p) => {
+				workInProgress._reportProgress(sourceVersionHash, p)
+			})
+			const progressSetup = progressTracker.addPart(1)
+			const progressScan = progressTracker.addPart(1)
+			const progressScanFieldOrder = progressTracker.addPart(1)
+			const progressDeepScan = progressTracker.addPart(10)
+			const progressFinalize = progressTracker.addPart(1)
+
 			const sourceHandle = lookupSource.handle
 			const targetHandle = lookupTarget.handle
 			if (
@@ -188,14 +202,15 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 			const actualSourceVersion = await sourceHandle.getPackageActualVersion()
 			const sourceVersionHash = hashObj(actualSourceVersion)
 
-			workInProgress._reportProgress(sourceVersionHash, 0.01)
+			progressSetup(1)
 
 			// Scan with FFProbe:
 			currentProcess = scanWithFFProbe(sourceHandle)
 			const ffProbeScan: FFProbeScanResult = await currentProcess
 			const hasVideoStream =
 				ffProbeScan.streams && ffProbeScan.streams.some((stream) => stream.codec_type === 'video')
-			workInProgress._reportProgress(sourceVersionHash, 0.1)
+			progressScan(1)
+
 			currentProcess = undefined
 
 			// Scan field order:
@@ -205,7 +220,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 				resultFieldOrder = await currentProcess
 				currentProcess = undefined
 			}
-			workInProgress._reportProgress(sourceVersionHash, 0.2)
+			progressScanFieldOrder(1)
 
 			// Scan more info:
 			let resultBlacks: ScanAnomaly[] = []
@@ -228,7 +243,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 						exp.endRequirement.version,
 						(progress) => {
 							hasGottenProgress = true
-							workInProgress._reportProgress(sourceVersionHash, 0.21 + 0.77 * progress)
+							progressDeepScan(progress)
 						},
 						worker.logger.category('scanMoreInfo')
 					)
@@ -272,7 +287,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 								},
 								(progress) => {
 									hasGottenProgress = true
-									workInProgress._reportProgress(sourceVersionHash, 0.21 + 0.77 * progress)
+									progressDeepScan(progress)
 								},
 								worker.logger.category('scanMoreInfo')
 							)
@@ -292,7 +307,6 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 				resultScenes = result.scenes
 				currentProcess = undefined
 			}
-			workInProgress._reportProgress(sourceVersionHash, 0.99)
 
 			const deepScan: DeepScanResult = {
 				field_order: resultFieldOrder,
@@ -311,10 +325,13 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 				exp.endRequirement.version,
 				deepScan
 			)
+			progressFinalize(0.5)
 
 			await targetHandle.finalizePackage(scanOperation)
+			progressFinalize(1)
 
 			const duration = timer.get()
+			progressTracker.destroy()
 			workInProgress._reportComplete(
 				sourceVersionHash,
 				{
@@ -373,6 +390,7 @@ async function lookupDeepScanSources(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -390,6 +408,7 @@ async function lookupDeepScanTargets(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

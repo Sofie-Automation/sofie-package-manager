@@ -17,6 +17,7 @@ import { getStandardCost } from '../lib/lib'
 import { BaseWorker } from '../../../worker'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
@@ -32,13 +33,13 @@ import { getSourceHTTPHandle, QuantelClipMetadata } from './lib/quantel'
  */
 export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, worker: GenericWorker): ReturnTypeDoYouSupportExpectation {
-		if (worker.testFFMpeg)
+		if (worker.executables.testFFMpeg)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFMpeg)',
-					tech: `Cannot access FFMpeg executable: ${worker.testFFMpeg}`,
+					tech: `Cannot access FFMpeg executable: ${worker.executables.testFFMpeg}`,
 				},
 			}
 		return checkWorkerHasAccessToPackageContainersOnPackage(worker, {
@@ -162,6 +163,9 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 				},
 			}
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -184,14 +188,16 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 			lookupSource.accessor.type === Accessor.AccessType.QUANTEL &&
 			(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+				lookupTarget.accessor.type === Accessor.AccessType.FTP)
 		) {
 			if (!isQuantelClipAccessorHandle(sourceHandle)) throw new Error(`Source AccessHandler type is wrong`)
 
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
-				!isHTTPProxyAccessorHandle(targetHandle)
+				!isHTTPProxyAccessorHandle(targetHandle) &&
+				!isFTPAccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
@@ -379,6 +385,7 @@ async function lookupThumbnailSources(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -396,6 +403,7 @@ async function lookupThumbnailTargets(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

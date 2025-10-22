@@ -13,6 +13,7 @@ import {
 import {
 	isATEMAccessorHandle,
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -102,7 +103,8 @@ export async function isFileReadyToStartWorkingOn(
 export async function isFileFulfilled(
 	_worker: BaseWorker,
 	lookupSource: LookupPackageContainer<UniversalVersion>,
-	lookupTarget: LookupPackageContainer<UniversalVersion>
+	lookupTarget: LookupPackageContainer<UniversalVersion>,
+	modifySourceUVersion?: (version: UniversalVersion) => UniversalVersion
 ): Promise<ReturnTypeIsExpectationFulfilled> {
 	if (!lookupTarget.ready)
 		return {
@@ -139,8 +141,11 @@ export async function isFileFulfilled(
 		return { fulfilled: false, knownReason: lookupSource.knownReason, reason: lookupSource.reason }
 
 	const actualSourceVersion = await lookupSource.handle.getPackageActualVersion()
+	let actualSourceUVersion = makeUniversalVersion(actualSourceVersion)
 
-	const issueVersions = compareUniversalVersions(makeUniversalVersion(actualSourceVersion), actualTargetVersion)
+	if (modifySourceUVersion) actualSourceUVersion = modifySourceUVersion(actualSourceUVersion)
+
+	const issueVersions = compareUniversalVersions(actualSourceUVersion, actualTargetVersion)
 	if (!issueVersions.success) {
 		return { fulfilled: false, knownReason: issueVersions.knownReason, reason: issueVersions.reason }
 	}
@@ -151,7 +156,7 @@ export async function isFileFulfilled(
 	}
 }
 export async function doFileCopyExpectation(
-	exp: Expectation.FileCopy | Expectation.FileCopyProxy,
+	exp: Expectation.FileCopy | Expectation.FileCopyProxy | Expectation.MediaFileConvert,
 	lookupSource: LookupPackageContainer<UniversalVersion>,
 	lookupTarget: LookupPackageContainer<UniversalVersion>
 ): Promise<WorkInProgress | null> {
@@ -235,25 +240,29 @@ export async function doFileCopyExpectation(
 		(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupSource.accessor.type === Accessor.AccessType.HTTP ||
-			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY) &&
+			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+			lookupSource.accessor.type === Accessor.AccessType.FTP) &&
 		(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-			lookupTarget.accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE)
+			lookupTarget.accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE ||
+			lookupTarget.accessor.type === Accessor.AccessType.FTP)
 	) {
 		// We can copy by using file streams
 		if (
 			!isLocalFolderAccessorHandle(lookupSource.handle) &&
 			!isFileShareAccessorHandle(lookupSource.handle) &&
 			!isHTTPAccessorHandle(lookupSource.handle) &&
-			!isHTTPProxyAccessorHandle(lookupSource.handle)
+			!isHTTPProxyAccessorHandle(lookupSource.handle) &&
+			!isFTPAccessorHandle(lookupSource.handle)
 		)
 			throw new Error(`Source AccessHandler type is wrong`)
 		if (
 			!isLocalFolderAccessorHandle(targetHandle) &&
 			!isFileShareAccessorHandle(targetHandle) &&
 			!isHTTPProxyAccessorHandle(targetHandle) &&
-			!isATEMAccessorHandle(targetHandle)
+			!isATEMAccessorHandle(targetHandle) &&
+			!isFTPAccessorHandle(targetHandle)
 		)
 			throw new Error(`Target AccessHandler type is wrong`)
 

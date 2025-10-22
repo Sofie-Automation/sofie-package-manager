@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
+
+
+### Bug Fixes
+
+* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/nrkno/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/nrkno/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
+
+
+
+
+
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @http-server/app

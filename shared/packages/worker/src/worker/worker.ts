@@ -146,6 +146,9 @@ export abstract class BaseWorker {
 		}
 	}
 
+	/** Returns a local file path to a temporary folder */
+	abstract getTemporaryFolderPath(localPath?: string): string
+
 	private _accessorTemporaryCache: {
 		[accessorType: string]: {
 			[key: string]: {
@@ -172,7 +175,7 @@ export abstract class BaseWorker {
 	 * @example
 	 * const data = await this.worker.cacheTemporaryData(this.type, url, () => getData(url))
 	 * */
-	public async cacheData<T>(accessorType: string, key: string, cb: () => Promise<T>, ttl = 1000): Promise<T> {
+	public cacheData<T>(accessorType: string, key: string, cb: () => T, ttl = 1000): T {
 		// Check if data is in cache:
 		if (!this._accessorTemporaryCache[accessorType]) this._accessorTemporaryCache[accessorType] = {}
 		const cache = this._accessorTemporaryCache[accessorType]
@@ -181,7 +184,7 @@ export abstract class BaseWorker {
 			return cache[key].data
 		}
 
-		const data = await cb()
+		const data = cb()
 		cache[key] = {
 			validTo: now + ttl,
 			data: data,

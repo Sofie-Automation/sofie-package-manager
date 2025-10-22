@@ -1,6 +1,19 @@
 import { AccessorOnPackage } from '@sofie-package-manager/api'
 import { AccessorHandlerCheckHandleReadResult, AccessorHandlerCheckHandleWriteResult } from '../genericHandle'
+import { BaseWorker } from '../../worker'
+import { compareResourceIds } from '../../workers/genericWorker/lib/lib'
 
+export function defaultDoYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
+	if ('resourceId' in accessor) {
+		if (!compareResourceIds(accessor.resourceId, worker.agentAPI.location.localComputerId)) return false
+	}
+
+	if ('networkId' in accessor) {
+		if (accessor.networkId && !worker.agentAPI.location.localNetworkIds.includes(accessor.networkId)) return false
+	}
+
+	return true
+}
 export function defaultCheckHandleRead(
 	accessor: AccessorOnPackage.Any
 ): AccessorHandlerCheckHandleReadResult | undefined {

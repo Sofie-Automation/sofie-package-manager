@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
+
+**Note:** Version bump only for package @package-manager/generic
+
+
+
+
+
+# [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
+
+
+### Bug Fixes
+
+* add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/nrkno/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
+
+
+
+
+
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @package-manager/generic

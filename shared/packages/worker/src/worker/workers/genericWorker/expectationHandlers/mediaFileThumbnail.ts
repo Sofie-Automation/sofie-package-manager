@@ -15,6 +15,7 @@ import { getStandardCost } from '../lib/lib'
 import { BaseWorker } from '../../../worker'
 import {
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
@@ -31,28 +32,29 @@ import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import { CancelablePromise } from '../../../lib/cancelablePromise'
 import { scanWithFFProbe, FFProbeScanResult } from './lib/scan'
+import { PackageReadStream } from '../../../accessorHandlers/genericHandle'
 
 /**
  * Generates a thumbnail image from a source video file, and stores the resulting file into the target PackageContainer
  */
 export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, worker: GenericWorker): ReturnTypeDoYouSupportExpectation {
-		if (worker.testFFMpeg)
+		if (worker.executables.testFFMpeg)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFMpeg)',
-					tech: `Cannot access FFMpeg executable: ${worker.testFFMpeg}`,
+					tech: `Cannot access FFMpeg executable: ${worker.executables.testFFMpeg}`,
 				},
 			}
-		if (worker.testFFProbe)
+		if (worker.executables.testFFProbe)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFProbe)',
-					tech: `Cannot access FFProbe executable: ${worker.testFFProbe}`,
+					tech: `Cannot access FFProbe executable: ${worker.executables.testFFProbe}`,
 				},
 			}
 		return checkWorkerHasAccessToPackageContainersOnPackage(worker, {
@@ -157,6 +159,9 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				},
 			}
 		} else {
+			// Ensure that the target Package is staying Fulfilled:
+			await lookupTarget.handle.ensurePackageFulfilled()
+
 			return { fulfilled: true }
 		}
 	},
@@ -174,19 +179,23 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 
 		let ffMpegProcess: FFMpegProcess | undefined
 		let ffProbeProcess: CancelablePromise<any> | undefined
+		let sourceStream: PackageReadStream | undefined = undefined
 		const workInProgress = new WorkInProgress({ workLabel: 'Generating thumbnail' }, async () => {
 			// On cancel
 			ffMpegProcess?.cancel()
 			ffProbeProcess?.cancel()
+			sourceStream?.cancel()
 		}).do(async () => {
 			if (
 				(lookupSource.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 					lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 					lookupTarget.accessor.type === Accessor.AccessType.HTTP ||
-					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY) &&
+					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+					lookupSource.accessor.type === Accessor.AccessType.FTP) &&
 				(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 					lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
-					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY)
+					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
+					lookupTarget.accessor.type === Accessor.AccessType.FTP)
 			) {
 				const sourceHandle = lookupSource.handle
 				const targetHandle = lookupTarget.handle
@@ -194,13 +203,15 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 					!isLocalFolderAccessorHandle(sourceHandle) &&
 					!isHTTPAccessorHandle(sourceHandle) &&
 					!isFileShareAccessorHandle(sourceHandle) &&
-					!isHTTPProxyAccessorHandle(sourceHandle)
+					!isHTTPProxyAccessorHandle(sourceHandle) &&
+					!isFTPAccessorHandle(sourceHandle)
 				)
 					throw new Error(`Source AccessHandler type is wrong`)
 				if (
 					!isLocalFolderAccessorHandle(targetHandle) &&
 					!isFileShareAccessorHandle(targetHandle) &&
-					!isHTTPProxyAccessorHandle(targetHandle)
+					!isHTTPProxyAccessorHandle(targetHandle) &&
+					!isFTPAccessorHandle(targetHandle)
 				)
 					throw new Error(`Target AccessHandler type is wrong`)
 
@@ -233,6 +244,7 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				const seekTimeCode: string | undefined = seekTime !== undefined ? formatTimeCode(seekTime) : undefined
 
 				let inputPath: string
+				let pipeStdin = false
 				if (isLocalFolderAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullPath
 				} else if (isFileShareAccessorHandle(sourceHandle)) {
@@ -242,6 +254,17 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 					inputPath = sourceHandle.fullUrl
 				} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullUrl
+				} else if (isFTPAccessorHandle(sourceHandle)) {
+					if (
+						sourceHandle.ftpUrl.url.startsWith('ftps://') ||
+						sourceHandle.ftpUrl.url.startsWith('sftp://')
+					) {
+						// ffmpeg doesn't support ftps protocol, stream instead
+						pipeStdin = true
+						inputPath = '-' // stream on stdin
+					} else {
+						inputPath = sourceHandle.ftpUrl.url
+					}
 				} else {
 					assertNever(sourceHandle)
 					throw new Error(`Unsupported Target AccessHandler`)
@@ -289,6 +312,21 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 					},
 					async (progress: number) => {
 						workInProgress._reportProgress(sourceVersionHash, progress)
+					},
+					(ffmpegProcess) => {
+						if (pipeStdin) {
+							lookupSource.handle
+								.getPackageReadStream()
+								.then((stream) => {
+									sourceStream = stream
+									sourceStream.readStream.pipe(ffmpegProcess.stdin)
+								})
+								.catch((err) => {
+									workInProgress._reportError(
+										new Error(`FFMpeg stdin piping error: ${stringifyError(err)}`)
+									)
+								})
+						}
 					}
 					// ,worker.logger.debug
 				)
@@ -352,6 +390,7 @@ async function lookupThumbnailSources(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.startRequirement.sources,
+		exp.endRequirement.targets,
 		{ expectationId: exp.id },
 		exp.startRequirement.content,
 		exp.workOptions,
@@ -369,6 +408,7 @@ async function lookupThumbnailTargets(
 	return lookupAccessorHandles<Metadata>(
 		worker,
 		exp.endRequirement.targets,
+		exp.startRequirement.sources,
 		{ expectationId: exp.id },
 		exp.endRequirement.content,
 		exp.workOptions,

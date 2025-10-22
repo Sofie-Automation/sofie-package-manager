@@ -59,7 +59,7 @@ export class InternalManager {
 		public callbacks: ExpectationManagerCallbacks,
 		options?: ExpectationManagerOptions
 	) {
-		this.logger = logger.category('ExpectationManager')
+		this.logger = logger.category('ExpMgr')
 
 		const constants = {
 			...getDefaultConstants(),

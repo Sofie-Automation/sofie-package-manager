@@ -20,6 +20,7 @@ export namespace Expectation {
 		| PackageIframesScan
 		| MediaFileThumbnail
 		| MediaFilePreview
+		| MediaFileConvert
 		| QuantelClipCopy
 		// | QuantelClipScan
 		// | QuantelClipDeepScan
@@ -35,6 +36,7 @@ export namespace Expectation {
 		FILE_COPY_PROXY = 'file_copy_proxy',
 		MEDIA_FILE_THUMBNAIL = 'media_file_thumbnail',
 		MEDIA_FILE_PREVIEW = 'media_file_preview',
+		MEDIA_FILE_CONVERT = 'media_file_convert',
 		FILE_VERIFY = 'file_verify',
 		RENDER_HTML = 'render_html',
 
@@ -267,6 +269,22 @@ export namespace Expectation {
 				filePath: string
 			}
 			version: Version.ExpectedMediaFilePreview
+		}
+		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay & WorkOptions.UseTemporaryFilePath
+	}
+	/** Defines a Conversion of a Media file. One of the the sources are piped through an external executable and the resulting file is to be stored on the target. */
+	export interface MediaFileConvert extends Base {
+		type: Type.MEDIA_FILE_CONVERT
+
+		startRequirement: {
+			sources: SpecificPackageContainerOnPackage.FileSource[]
+		}
+		endRequirement: {
+			targets: SpecificPackageContainerOnPackage.FileTarget[]
+			content: {
+				filePath: string
+			}
+			version: Version.ExpectedMediaFileConvert
 		}
 		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay & WorkOptions.UseTemporaryFilePath
 	}
@@ -508,6 +526,7 @@ export namespace Expectation {
 
 	// eslint-disable-next-line @typescript-eslint/no-namespace
 	export namespace WorkOptions {
+		export type All = Base & RemoveDelay & UseTemporaryFilePath
 		export interface Base {
 			/** If set, a worker might decide to wait with this expectation until the CPU load is lower. */
 			allowWaitForCPU?: boolean
@@ -534,24 +553,29 @@ export namespace Expectation {
 		export type ExpectAny =
 			| ExpectedFileOnDisk
 			| MediaFileThumbnail
+			| MediaFileConvert
 			| ExpectedCorePackageInfo
 			| ExpectedHTTPFile
 			| ExpectedQuantelClip
 			| ExpectedATEMFile
 			| ExpectedJSONData
+			| ExpectedFTPFile
 		export type Any =
 			| FileOnDisk
 			| MediaFileThumbnail
+			| MediaFileConvert
 			| CorePackageInfo
 			| HTTPFile
 			| QuantelClip
 			| ATEMFile
 			| JSONData
+			| FTPFile
 		export interface Base {
 			type: Type
 		}
 		export enum Type {
 			FILE_ON_DISK = 'file_on_disk',
+			MEDIA_FILE_CONVERT = 'media_file_convert',
 			MEDIA_FILE_THUMBNAIL = 'media_file_thumbnail',
 			MEDIA_FILE_PREVIEW = 'media_file_preview',
 			CORE_PACKAGE_INFO = 'core_package_info',
@@ -561,6 +585,7 @@ export namespace Expectation {
 			QUANTEL_CLIP_PREVIEW = 'quantel_clip_preview',
 			ATEM_FILE = 'atem_file',
 			JSON_DATA = 'json_data',
+			FTP_FILE = 'ftp_file',
 		}
 		type ExpectedType<T extends Base> = Partial<T> & Pick<T, 'type'>
 
@@ -586,6 +611,48 @@ export namespace Expectation {
 			seekTime: number
 		}
 		export type ExpectedMediaFileThumbnail = ExpectedType<MediaFileThumbnail>
+
+		export interface MediaFileConvert extends Base {
+			type: Type.MEDIA_FILE_CONVERT
+
+			/**
+			 * List of conversion steps to perform, in order.
+			 */
+			conversions: ConversionStep[]
+		}
+		export interface ConversionStep {
+			/**
+			 * Path to the executable.
+			 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+			 */
+			executable: string
+			/**
+			 * Arguments to the executable.
+			 * Supported placeholders:
+			 * - {SOURCE} - replaced with the full path of the source file
+			 * - {TARGET} - replaced with the full path of the target file
+			 */
+			args: string[]
+
+			/**
+			 * Set to true if the executable needs the source to be locally available
+			 * (So PM will copy the source to a local temp folder before running the executable)
+			 */
+			needsLocalSource?: boolean
+			/**
+			 * Set to true if the executable needs the target to be locally available
+			 * (So PM will create the target in a local temp folder, and then copy it to the actual target when done)
+			 */
+			needsLocalTarget?: boolean
+
+			/**
+			 * Force the output filename from this step.
+			 * This can be useful in multi-step scenarios where you want to specify the inter-step filename.
+			 * This property is ignored in the final step.
+			 */
+			outputFileName?: string
+		}
+		export type ExpectedMediaFileConvert = MediaFileConvert // ExpectedType<MediaFileConvert>
 
 		export interface MediaFilePreview extends Base {
 			type: Type.MEDIA_FILE_PREVIEW
@@ -652,5 +719,12 @@ export namespace Expectation {
 			size: string
 		}
 		export type ExpectedJSONData = ExpectedType<JSONData>
+
+		export interface FTPFile extends Base {
+			type: Type.FTP_FILE
+			fileSize: number // size in bytes
+			modifiedDate: number // timestamp (ms)
+		}
+		export type ExpectedFTPFile = ExpectedType<FTPFile>
 	}
 }

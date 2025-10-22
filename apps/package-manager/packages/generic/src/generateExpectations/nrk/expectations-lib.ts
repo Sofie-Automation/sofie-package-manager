@@ -34,7 +34,7 @@ export function generateMediaFileCopy(
 	managerId: ExpectationManagerId,
 	expWrap: ExpectedPackageWrap,
 	settings: PackageManagerSettings
-): Expectation.FileCopy {
+): Expectation.FileCopy | Expectation.MediaFileConvert {
 	const expWrapMediaFile = expWrap as ExpectedPackageWrapMediaFile
 
 	const endRequirement: Expectation.FileCopy['endRequirement'] = {
@@ -78,7 +78,38 @@ export function generateMediaFileCopy(
 		},
 	}
 
-	return exp
+	if (
+		expWrapMediaFile.expectedPackage.version.conversions &&
+		expWrapMediaFile.expectedPackage.version.conversions.length > 0
+	) {
+		// Return a MediaFileConvert expectation:
+
+		const convertExp: Expectation.MediaFileConvert = {
+			...exp,
+			type: Expectation.Type.MEDIA_FILE_CONVERT,
+			statusReport: {
+				...exp.statusReport,
+				label: exp.statusReport.label.replace('Copying media', 'Copy and converting media'),
+				description: exp.statusReport.description.replace('Copy media', 'Copy and convert media'),
+			},
+			startRequirement: {
+				sources: expWrapMediaFile.sources,
+			},
+			endRequirement: {
+				targets: endRequirement.targets,
+				content: endRequirement.content,
+				version: {
+					type: Expectation.Version.Type.MEDIA_FILE_CONVERT,
+					conversions: expWrapMediaFile.expectedPackage.version.conversions,
+				},
+			},
+		}
+
+		return convertExp
+	} else {
+		// Just return the copy expectation:
+		return exp
+	}
 }
 export function generateMediaFileVerify(
 	managerId: ExpectationManagerId,
@@ -216,7 +247,7 @@ export function generatePackageScan(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -264,7 +295,7 @@ export function generatePackageDeepScan(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -320,7 +351,7 @@ export function generatePackageLoudness(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -374,7 +405,7 @@ export function generatePackageIframes(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -426,7 +457,7 @@ export function generateMediaFileThumbnail(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -480,7 +511,7 @@ export function generateMediaFilePreview(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -534,7 +565,7 @@ export function generateQuantelClipThumbnail(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -587,7 +618,7 @@ export function generateQuantelClipPreview(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},

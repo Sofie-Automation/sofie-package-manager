@@ -29,6 +29,11 @@ const workforceArguments = defineArguments({
 		default: parseInt(process.env.WORKFORCE_PORT || '', 10) || 8070,
 		describe: 'The port number to start the Workforce websocket server on',
 	},
+	allowNoAppContainers: {
+		type: 'boolean',
+		default: process.env.WORKFORCE_ALLOW_NO_APP_CONTAINERS === '1' || false,
+		describe: 'If true, the workforce will not check if it has no appContainers connected',
+	},
 })
 /** CLI-argument-definitions for the HTTP-Server process */
 const httpServerArguments = defineArguments({
@@ -143,6 +148,11 @@ const workerArguments = defineArguments({
 		default: process.env.WORKER_WINDOWS_DRIVE_LETTERS || 'X;Y;Z',
 		describe: 'Which Windows Drive letters can be used to map shares. ("X;Y;Z") ',
 	},
+	temporaryFolderPath: {
+		type: 'string',
+		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
+		describe: 'A temporary, local file path where the worker can store temporary artifacts',
+	},
 	resourceId: {
 		type: 'string',
 		default: process.env.WORKER_NETWORK_ID || 'default',
@@ -227,7 +237,7 @@ const appContainerArguments = defineArguments({
 	// These are passed-through to the spun-up workers:
 	resourceId: {
 		type: 'string',
-		default: process.env.WORKER_NETWORK_ID || 'default',
+		default: process.env.WORKER_RESOURCE_ID || 'default',
 		describe: 'Identifier of the local resource/computer this worker runs on',
 	},
 	networkIds: {
@@ -239,6 +249,11 @@ const appContainerArguments = defineArguments({
 		type: 'string',
 		default: process.env.WORKER_WINDOWS_DRIVE_LETTERS || 'X;Y;Z',
 		describe: 'Which Windows Drive letters can be used to map shares. ("X;Y;Z") ',
+	},
+	temporaryFolderPath: {
+		type: 'string',
+		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
+		describe: 'A temporary, local file path where the worker can store temporary artifacts',
 	},
 	costMultiplier: {
 		type: 'number',
@@ -334,6 +349,7 @@ export interface WorkforceConfig {
 	process: ProcessConfig
 	workforce: {
 		port: number | null
+		allowNoAppContainers: boolean
 	}
 }
 
@@ -349,6 +365,7 @@ export async function getWorkforceConfig(): Promise<WorkforceConfig> {
 		process: getProcessConfig(argv),
 		workforce: {
 			port: argv.port,
+			allowNoAppContainers: argv.allowNoAppContainers,
 		},
 	}
 }
@@ -470,6 +487,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			resourceId: argv.resourceId,
 			networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
 			windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
+			temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
 			costMultiplier:
 				(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) || 1,
 			considerCPULoad:
@@ -514,6 +532,7 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 				resourceId: argv.resourceId,
 				networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
 				windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
+				temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
 				costMultiplier:
 					(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) ||
 					1,

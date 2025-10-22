@@ -7,6 +7,7 @@ import {
 	AccessorOnPackage,
 	LoggerInstance,
 	escapeFilePath,
+	stringifyError,
 } from '@sofie-package-manager/api'
 import {
 	isQuantelClipAccessorHandle,
@@ -14,6 +15,7 @@ import {
 	isFileShareAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isHTTPAccessorHandle,
+	isFTPAccessorHandle,
 } from '../../../../accessorHandlers/accessor'
 import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
 import { QuantelAccessorHandle } from '../../../../accessorHandlers/quantel'
@@ -32,7 +34,8 @@ import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy'
 import { HTTPAccessorHandle } from '../../../../accessorHandlers/http'
 import { MAX_EXEC_BUFFER } from '../../../../lib/lib'
 import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg'
-import { GenericAccessorHandle } from '../../../../accessorHandlers/genericHandle'
+import { GenericAccessorHandle, PackageReadStream } from '../../../../accessorHandlers/genericHandle'
+import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
 
 export interface FFProbeScanResultStream {
 	index: number
@@ -54,16 +57,19 @@ export function scanWithFFProbe(
 		| HTTPAccessorHandle<any>
 		| HTTPProxyAccessorHandle<any>
 		| QuantelAccessorHandle<any>
+		| FTPAccessorHandle<any>
 ): CancelablePromise<FFProbeScanResult> {
 	return new CancelablePromise<FFProbeScanResult>(async (resolve, reject, onCancel) => {
 		if (
 			isLocalFolderAccessorHandle(sourceHandle) ||
 			isFileShareAccessorHandle(sourceHandle) ||
 			isHTTPAccessorHandle(sourceHandle) ||
-			isHTTPProxyAccessorHandle(sourceHandle)
+			isHTTPProxyAccessorHandle(sourceHandle) ||
+			isFTPAccessorHandle(sourceHandle)
 		) {
 			let inputPath: string
 			let filePath: string
+			let pipeStdin = false
 			if (isLocalFolderAccessorHandle(sourceHandle)) {
 				inputPath = sourceHandle.fullPath
 				filePath = sourceHandle.filePath
@@ -77,6 +83,15 @@ export function scanWithFFProbe(
 			} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 				inputPath = sourceHandle.fullUrl
 				filePath = sourceHandle.filePath
+			} else if (isFTPAccessorHandle(sourceHandle)) {
+				if (sourceHandle.ftpUrl.url.startsWith('ftps://') || sourceHandle.ftpUrl.url.startsWith('sftp://')) {
+					// ffmpeg doesn't support ftps protocol, stream instead
+					pipeStdin = true
+					inputPath = '-' // stream on stdin
+				} else {
+					inputPath = sourceHandle.ftpUrl.url
+					filePath = sourceHandle.filePath
+				}
 			} else {
 				assertNever(sourceHandle)
 				throw new Error('Unknown handle')
@@ -91,40 +106,73 @@ export function scanWithFFProbe(
 				'-print_format',
 				'json',
 			]
+
 			let ffProbeProcess: ChildProcess | undefined = undefined
+			let sourceStream: PackageReadStream | undefined = undefined
 			onCancel(() => {
 				ffProbeProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 				ffProbeProcess?.kill()
+				sourceStream?.cancel()
 				reject('Cancelled')
 			})
 
-			ffProbeProcess = execFile(
-				getFFProbeExecutable(),
-				args,
-				{
-					maxBuffer: MAX_EXEC_BUFFER,
-					windowsVerbatimArguments: true, // To fix an issue with ffprobe.exe on Windows
-				},
-				(err, stdout, _stderr) => {
-					// this.logger.debug(`Worker: metadata generate: output (stdout, stderr)`, stdout, stderr)
-					ffProbeProcess = undefined
-					if (err) {
-						reject(err)
-						return
-					}
-					const json: FFProbeScanResult = JSON.parse(stdout)
-					if (!json.streams || !json.streams[0]) {
-						reject(new Error(`File doesn't seem to be a media file`))
-						return
-					}
-					json.filePath = filePath
+			ffProbeProcess = spawn(getFFProbeExecutable(), args, {
+				// maxBuffer: MAX_EXEC_BUFFER,
+				windowsVerbatimArguments: true, // To fix an issue with ffprobe.exe on Windows
+			})
+			let stdoutBuffer = ''
+			ffProbeProcess.stdout?.on('data', (data) => {
+				stdoutBuffer += data.toString()
+			})
 
-					fixJSONResult(json)
-					resolve(json)
+			ffProbeProcess.on('error', (err) => {
+				ffProbeProcess = undefined
+				reject(err)
+			})
+			ffProbeProcess.on('close', (code) => {
+				ffProbeProcess = undefined
+
+				if (code !== 0) {
+					reject(new Error(`FFProbe exited with code ${code}`))
+					return
 				}
-			)
+
+				const json: FFProbeScanResult = JSON.parse(stdoutBuffer)
+				if (!json.streams || !json.streams[0]) {
+					reject(new Error(`File doesn't seem to be a media file`))
+					return
+				}
+				json.filePath = filePath
+				fixJSONResult(json)
+				resolve(json)
+			})
+			if (pipeStdin) {
+				sourceStream = await sourceHandle.getPackageReadStream()
+				if (ffProbeProcess.stdin === null) {
+					throw new Error('ffprobeProcess.stdin is null, cant pipe to it')
+				}
+				sourceStream.readStream.on('error', (err) => {
+					// wait just a little bit before throwing, perhaps ffprobe is already done?
+					setTimeout(() => {
+						if (ffProbeProcess) {
+							// still going, so this is a real error
+							reject(new Error('Error reading source stream: ' + stringifyError(err)))
+						}
+					}, 10)
+				})
+				ffProbeProcess.stdin.on('error', (err) => {
+					// wait just a little bit before throwing, perhaps ffprobe is already done?
+					setTimeout(() => {
+						if (ffProbeProcess) {
+							// still going, so this is a real error
+							reject(new Error('Error writing stream: ' + stringifyError(err)))
+						}
+					}, 10)
+				})
+				sourceStream.readStream.pipe(ffProbeProcess.stdin)
+			}
 		} else if (isQuantelClipAccessorHandle(sourceHandle)) {
-			// Because we have no good way of using ffprobe to generate the into we want,
+			// Because we have no good way of using ffprobe to generate the info we want,
 			// we resort to faking it:
 
 			const clip = await sourceHandle.getClip()
@@ -169,12 +217,7 @@ function fixJSONResult(obj: any): void {
 }
 
 export function scanFieldOrder(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	targetVersion: Expectation.PackageDeepScan['endRequirement']['version']
 ): CancelablePromise<FieldOrder> {
 	return new CancelablePromise<FieldOrder>(async (resolve, reject, onCancel) => {
@@ -245,12 +288,7 @@ export interface ScanMoreInfoResult {
 }
 
 export function scanMoreInfo(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	previouslyScanned: FFProbeScanResult,
 	targetVersion: Expectation.PackageDeepScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
@@ -471,12 +509,7 @@ export function scanMoreInfo(
 }
 
 function scanLoudnessStream(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	_previouslyScanned: FFProbeScanResult,
 	channelSpec: string,
 	filter?: string
@@ -569,12 +602,7 @@ function scanLoudnessStream(
 }
 
 export function scanLoudness(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	previouslyScanned: FFProbeScanResult,
 	targetVersion: Expectation.PackageLoudnessScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
@@ -664,12 +692,7 @@ export function scanLoudness(
 }
 const EPSILON = 0.00001
 export function scanIframes(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>,
+	sourceHandle: FFMpegSupportedSourceHandles,
 	_targetVersion: Expectation.PackageIframesScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
 	onProgress: (
@@ -811,14 +834,15 @@ export function scanIframes(
 	})
 }
 
-async function getFFMpegInputArgsFromAccessorHandle(
-	sourceHandle:
-		| LocalFolderAccessorHandle<any>
-		| FileShareAccessorHandle<any>
-		| HTTPAccessorHandle<any>
-		| HTTPProxyAccessorHandle<any>
-		| QuantelAccessorHandle<any>
-): Promise<string[]> {
+type FFMpegSupportedSourceHandles =
+	| LocalFolderAccessorHandle<any>
+	| FileShareAccessorHandle<any>
+	| HTTPAccessorHandle<any>
+	| HTTPProxyAccessorHandle<any>
+	| QuantelAccessorHandle<any>
+	| FTPAccessorHandle<any>
+
+async function getFFMpegInputArgsFromAccessorHandle(sourceHandle: FFMpegSupportedSourceHandles): Promise<string[]> {
 	const args: string[] = []
 	if (isLocalFolderAccessorHandle(sourceHandle)) {
 		args.push(`-i`, escapeFilePath(sourceHandle.fullPath))
@@ -829,6 +853,8 @@ async function getFFMpegInputArgsFromAccessorHandle(
 		args.push(`-i`, sourceHandle.fullUrl)
 	} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
 		args.push(`-i`, sourceHandle.fullUrl)
+	} else if (isFTPAccessorHandle(sourceHandle)) {
+		args.push(`-i`, sourceHandle.ftpUrl.url)
 	} else if (isQuantelClipAccessorHandle(sourceHandle)) {
 		const httpStreamURL = await sourceHandle.getTransformerStreamURL()
 
@@ -849,6 +875,7 @@ const FFMPEG_SUPPORTED_SOURCE_ACCESSORS: Set<Accessor.AccessType | undefined> = 
 	Accessor.AccessType.HTTP,
 	Accessor.AccessType.HTTP_PROXY,
 	Accessor.AccessType.QUANTEL,
+	Accessor.AccessType.FTP,
 ])
 
 export function isAnFFMpegSupportedSourceAccessor(sourceAccessorOnPackage: AccessorOnPackage.Any): boolean {
@@ -862,12 +889,14 @@ export function isAnFFMpegSupportedSourceAccessorHandle(
 	| FileShareAccessorHandle<any>
 	| HTTPAccessorHandle<any>
 	| HTTPProxyAccessorHandle<any>
-	| QuantelAccessorHandle<any> {
+	| QuantelAccessorHandle<any>
+	| FTPAccessorHandle<any> {
 	return (
 		isLocalFolderAccessorHandle(sourceHandle) ||
 		isFileShareAccessorHandle(sourceHandle) ||
 		isHTTPAccessorHandle(sourceHandle) ||
 		isHTTPProxyAccessorHandle(sourceHandle) ||
-		isQuantelClipAccessorHandle(sourceHandle)
+		isQuantelClipAccessorHandle(sourceHandle) ||
+		isFTPAccessorHandle(sourceHandle)
 	)
 }

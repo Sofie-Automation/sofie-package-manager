@@ -7,5 +7,6 @@
  * @see {@link https://ffmpeg.org/ffmpeg-utils.html#Quoting-and-escaping}
  */
 export function escapeFilePath(path: string): string {
+	if (path === '-') return path
 	return process.platform === 'win32' ? `"${path}"` : path
 }

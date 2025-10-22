@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
+
+
+### Bug Fixes
+
+* issue with Accessor ([7d4d30f](https://github.com/nrkno/sofie-package-manager/commit/7d4d30fac33c66a0eebade28d5666b3bc0e1875f))
+
+
+
+
+
+# [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
+
+**Note:** Version bump only for package @single-app/app
+
+
+
+
+
+# [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
+
+**Note:** Version bump only for package @single-app/app
+
+
+
+
+
+# [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
+
+
+### Features
+
+* add FTP accessor ([9d087f1](https://github.com/nrkno/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
+
+
+
+
+
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @single-app/app

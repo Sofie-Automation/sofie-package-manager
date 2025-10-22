@@ -68,9 +68,11 @@ export function makeUniversalVersion(
 	if (
 		![
 			Expectation.Version.Type.FILE_ON_DISK,
+			Expectation.Version.Type.FTP_FILE,
 			Expectation.Version.Type.HTTP_FILE,
 			Expectation.Version.Type.QUANTEL_CLIP,
 			Expectation.Version.Type.JSON_DATA,
+			Expectation.Version.Type.MEDIA_FILE_CONVERT,
 		].includes(version.type)
 	) {
 		throw new Error(`getAllVersionProperties: Unsupported type "${version.type}"`)
@@ -84,6 +86,8 @@ export function makeUniversalVersion(
 			value:
 				version.type === Expectation.Version.Type.FILE_ON_DISK
 					? version.fileSize
+					: version.type === Expectation.Version.Type.FTP_FILE
+					? version.fileSize
 					: version.type === Expectation.Version.Type.HTTP_FILE
 					? version.contentLength
 					: version.type === Expectation.Version.Type.JSON_DATA
@@ -95,6 +99,8 @@ export function makeUniversalVersion(
 			name: 'Modified date',
 			value:
 				version.type === Expectation.Version.Type.FILE_ON_DISK
+					? version.modifiedDate
+					: version.type === Expectation.Version.Type.FTP_FILE
 					? version.modifiedDate
 					: version.type === Expectation.Version.Type.HTTP_FILE
 					? version.modified
@@ -202,4 +208,10 @@ export function compareResourceIds(
 
 	// Do a textual comparison
 	return `${resourceId0}` === `${resourceId1}`
+}
+
+export const ACCESSOR_DUMMY_CONTENT = {
+	// This is somewhat of a hack, it makes the AccessorHandlers to not look to close on the package-related content data,
+	// in order to still be able to use them as-is for PackageContainer-related stuff.
+	onlyContainerAccess: true,
 }

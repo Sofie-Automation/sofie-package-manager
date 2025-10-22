@@ -1,13 +1,18 @@
 import {
 	getAccessorHandle,
 	isFileShareAccessorHandle,
+	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { prioritizeAccessors } from '../../../lib/lib'
 import { AccessorContext, GenericAccessorHandle } from '../../../accessorHandlers/genericHandle'
 import { BaseWorker } from '../../../worker'
-import { compareActualExpectVersions, findBestPackageContainerWithAccessToPackage } from '../lib/lib'
+import {
+	ACCESSOR_DUMMY_CONTENT,
+	compareActualExpectVersions,
+	findBestPackageContainerWithAccessToPackage,
+} from '../lib/lib'
 import { Diff } from 'deep-diff'
 import {
 	AccessorOnPackage,
@@ -25,6 +30,7 @@ import {
 import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder'
 import { FileShareAccessorHandle } from '../../../accessorHandlers/fileShare'
 import { HTTPProxyAccessorHandle } from '../../../accessorHandlers/httpProxy'
+import { FTPAccessorHandle } from '../../../accessorHandlers/ftp'
 
 /** Check that a worker has access to the packageContainers through its accessors */
 export function checkWorkerHasAccessToPackageContainersOnPackage(
@@ -144,12 +150,25 @@ export interface LookupChecks {
 export async function lookupAccessorHandles<Metadata>(
 	worker: BaseWorker,
 	packageContainers: PackageContainerOnPackage[],
+	combineWithPackageContainers: PackageContainerOnPackage[],
 	accessorContext: AccessorContext,
 	expectationContent: unknown,
-	expectationWorkOptions: unknown,
+	expectationWorkOptions: Expectation.WorkOptions.All,
 	checks: LookupChecks
 ): Promise<LookupPackageContainer<Metadata>> {
 	const prioritizedAccessors = prioritizeAccessors(packageContainers)
+
+	const combineWithAccessors = prioritizeAccessors(combineWithPackageContainers).map((c) => ({
+		...c,
+		handle: getAccessorHandle<Metadata>(
+			worker,
+			c.accessorId,
+			c.accessor,
+			accessorContext,
+			ACCESSOR_DUMMY_CONTENT,
+			expectationWorkOptions
+		),
+	}))
 
 	return promiseTimeout<LookupPackageContainer<Metadata>>(
 		(async () => {
@@ -210,6 +229,32 @@ export async function lookupAccessorHandles<Metadata>(
 						}
 						continue // Maybe next accessor works?
 					}
+				}
+
+				// Check that the accessor can be combined with the combineWithPackageContainers:
+				let foundACompatibleAccessor = false
+				if (combineWithAccessors.length === 0) {
+					foundACompatibleAccessor = true // If no combineWithAccessors found, assume it's fine...
+				} else {
+					for (const c of combineWithAccessors) {
+						const check = handle.checkCompatibilityWithAccessor(c.accessor)
+						if (check.success) {
+							foundACompatibleAccessor = true
+							break
+						}
+					}
+				}
+				if (!foundACompatibleAccessor) {
+					errorReason = {
+						reason: {
+							user: `No accessor source/target combination found`,
+							tech: `${packageContainer.label}: Accessor "${
+								accessor.label || accessorId
+							}" is not compatible with any of the accessors for the other PackageContainers`,
+						},
+						knownReason: true,
+					}
+					continue // Maybe next accessor works?
 				}
 
 				if (checks.readPackage) {
@@ -482,7 +527,11 @@ export function thumbnailFFMpegArguments(
 export function proxyFFMpegArguments(
 	input: string,
 	seekableSource: boolean,
-	targetHandle: LocalFolderAccessorHandle<any> | FileShareAccessorHandle<any> | HTTPProxyAccessorHandle<any>
+	targetHandle:
+		| LocalFolderAccessorHandle<any>
+		| FileShareAccessorHandle<any>
+		| HTTPProxyAccessorHandle<any>
+		| FTPAccessorHandle<any>
 ): string[] {
 	const args = [
 		'-hide_banner',
@@ -498,12 +547,14 @@ export function proxyFFMpegArguments(
 	]
 
 	// Check target to see if we should tell ffmpeg which format to use:
-	let targetPath = ''
+	let targetPath: string
 	if (isLocalFolderAccessorHandle(targetHandle)) {
 		targetPath = targetHandle.fullPath
 	} else if (isFileShareAccessorHandle(targetHandle)) {
 		targetPath = targetHandle.fullPath
 	} else if (isHTTPProxyAccessorHandle(targetHandle)) {
+		targetPath = ''
+	} else if (isFTPAccessorHandle(targetHandle)) {
 		targetPath = ''
 	} else {
 		assertNever(targetHandle)
