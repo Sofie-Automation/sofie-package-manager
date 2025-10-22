@@ -354,7 +354,7 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 		const oldValue = await this.readJSONFile(filePath)
 
 		const newValue = cbManipulate(oldValue?.value)
-		const newValueStr = newValue !== undefined ? JSON.stringify(newValue) : ''
+		const newValueStr = newValue !== undefined ? JSON.stringify(newValue) : undefined
 
 		if (oldValue?.str === newValueStr) {
 			// do nothing
