@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
+
+
+### Bug Fixes
+
+* bug when determining dev vs prod ([9669903](https://github.com/nrkno/sofie-package-manager/commit/96699035035b9619686ae1b1127831cc49909879))
+
+
+### Features
+
+* add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+* support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
+
+
+
+
+
 # [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 **Note:** Version bump only for package @appcontainer-node/generic
