@@ -108,7 +108,7 @@ if (!executableName) {
 		path.join(basePath, './dist/index.js'),
 		// '--debug',
 		'--targets',
-		'node18-win-x64',
+		'node24-win-x64',
 		'--output',
 		binaryOutputPath,
 		...extraArgs,

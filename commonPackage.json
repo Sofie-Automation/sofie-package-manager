@@ -1,7 +1,7 @@
 {
 	"description": "The properties of this file are automatically copied to all packages' package.json files",
 	"engines": {
-		"node": ">=18"
+		"node": ">=24"
 	},
 	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
 	"lint-staged": {

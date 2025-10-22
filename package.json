@@ -69,7 +69,7 @@
 		"underscore": "^1.13.6"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=24"
 	},
 	"dependencies": {
 		"@sofie-automation/server-core-integration": "1.52.0-nightly-release52-20250110-120624-cb59dd9.0",

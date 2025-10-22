@@ -31,14 +31,14 @@
 		"@types/koa-router": "^7.4.0",
 		"@types/koa__cors": "^4.0.0",
 		"@types/mime-types": "^2.1.0",
-		"@types/node": "^18",
+		"@types/node": "^24",
 		"@types/underscore": "^1.10.24",
 		"@types/yargs": "^17.0.24",
 		"rimraf": "^5.0.5"
 	},
 	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
 	"engines": {
-		"node": ">=18"
+		"node": ">=24"
 	},
 	"lint-staged": {
 		"*.{js,css,json,md,scss}": [
