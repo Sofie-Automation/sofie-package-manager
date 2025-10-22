@@ -160,13 +160,13 @@ export class GenericFileOperationsHandler {
 		if (this.fileHandler.getPackagesToRemove) return this.fileHandler.getPackagesToRemove()
 
 		const exists = await this.fileHandler.fileExists(this.deferRemovePackagesPath)
-		if (exists) {
-			const buf = await this.fileHandler.readFile(this.deferRemovePackagesPath)
-			const text = buf.toString('utf8')
-			const packagesToRemove: DelayPackageRemovalEntry[] = JSON.parse(text)
-			if (!Array.isArray(packagesToRemove)) return []
-			return packagesToRemove
-		} else return []
+		if (!exists) return []
+		const buf = await this.fileHandler.readFile(this.deferRemovePackagesPath)
+		const text = buf.toString('utf8')
+		if (text.length === 0) return []
+		const packagesToRemove: DelayPackageRemovalEntry[] = JSON.parse(text)
+		if (!Array.isArray(packagesToRemove)) return []
+		return packagesToRemove
 	}
 	/** Update the deferred-remove-packages list */
 	private async updatePackagesToRemove(
