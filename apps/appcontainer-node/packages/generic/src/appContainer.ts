@@ -300,6 +300,9 @@ export class AppContainer {
 				this.config.appContainer.worker.windowsDriveLetters
 					? `--windowsDriveLetters=${this.config.appContainer.worker.windowsDriveLetters?.join(';')}`
 					: '',
+				this.config.appContainer.worker.temporaryFolderPath
+					? `--temporaryFolderPath=${this.config.appContainer.worker.temporaryFolderPath}`
+					: '',
 				this.config.appContainer.worker.costMultiplier
 					? `--costMultiplier=${this.config.appContainer.worker.costMultiplier}`
 					: '',

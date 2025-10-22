@@ -29,6 +29,7 @@ import { UniversalVersion } from '../workers/genericWorker/lib/lib'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import { getFFMpegExecutable, getFFProbeExecutable } from '../workers/genericWorker/expectationHandlers/lib/ffmpeg'
+import { ProgressParts } from '../workers/genericWorker/expectationHandlers/progressParts'
 
 const fsReadFile = promisify(fs.readFile)
 
@@ -289,7 +290,11 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 						throw new Error('atem-connection not ready')
 					}
 
-					streamWrapper.emit('progress', 0.1)
+					const progressTracker = new ProgressParts()
+					progressTracker.on('progress', (p) => {
+						streamWrapper.emit('progress', p)
+					})
+					const progressSetup = progressTracker.addPart(1)
 
 					const tmpObj = tmp.dirSync({ unsafeCleanup: true })
 					try {
@@ -301,12 +306,16 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 						const { width, height } = info
 						await stream2Disk(sourceStream, inputFile)
 						if (aborted) return
-						streamWrapper.emit('progress', 0.2)
 
 						if (this.accessor.mediaType === 'still') {
+							const progressConvert = progressTracker.addPart(3)
+							const progressUpload = progressTracker.addPart(5)
+							progressSetup(1)
+
 							await createTGASequence(inputFile, { width, height })
 							if (aborted) return
-							streamWrapper.emit('progress', 0.5)
+
+							progressConvert(0.5)
 
 							const allTGAs = fs
 								.readdirSync(tmpObj.name)
@@ -324,10 +333,12 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 							const tgaPath = allTGAs[0]
 							await convertFrameToRGBA(tgaPath)
 							if (aborted) return
-							streamWrapper.emit('progress', 0.7)
+
+							progressConvert(1)
 
 							const rgbaPath = tgaPath.replace('.tga', '.rgba')
 							const rgbaBuffer = await fsReadFile(rgbaPath)
+							progressUpload(0.5)
 							if (aborted) return
 							await atem.uploadStill(
 								bankIndex,
@@ -335,8 +346,16 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 								this.getAtemClipName(),
 								'Uploaded by package-manager'
 							)
-							streamWrapper.emit('progress', 1)
+							progressUpload(1)
 						} else {
+							const progressConvertPrepare = progressTracker.addPart(2)
+							const progressConvert = progressTracker.addPart(2)
+							const progressUploadRead = progressTracker.addPart(3)
+							const progressUploadWrite = progressTracker.addPart(5)
+							const progressUploadAudio = progressTracker.addPart(2)
+
+							progressSetup(1)
+
 							const duration = await countFrames(inputFile)
 							if (aborted) return
 							const maxDuration = atem.state.settings.mediaPool.maxFrames[bankIndex]
@@ -344,10 +363,11 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 								throw new Error(`File is too long in duration (${duration} frames, max ${maxDuration})`)
 							}
 
-							streamWrapper.emit('progress', 0.3)
+							progressConvertPrepare(0.1)
+
 							await createTGASequence(inputFile, { width, height })
 							if (aborted) return
-							streamWrapper.emit('progress', 0.4)
+							progressConvertPrepare(0.5)
 
 							const allTGAs = fs
 								.readdirSync(tmpObj.name)
@@ -358,14 +378,15 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 									return path.join(tmpObj.name, tga)
 								})
 
-							streamWrapper.emit('progress', 0.5)
+							progressConvertPrepare(0.6)
+
 							for (let index = 0; index < allTGAs.length; index++) {
 								const tga = allTGAs[index]
-								streamWrapper.emit('progress', 0.5 + 0.1 * (index / allTGAs.length))
+								progressConvert(index / allTGAs.length)
 								await convertFrameToRGBA(tga)
 								if (aborted) return
 							}
-							streamWrapper.emit('progress', 0.6)
+							progressConvertPrepare(1)
 
 							const allRGBAs = allTGAs.map((filename) => {
 								return filename.replace('.tga', '.rgba')
@@ -374,9 +395,9 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 								for (let i = 0; i < allRGBAs.length; i++) {
 									if (aborted) throw new Error('Aborted')
 
-									streamWrapper.emit('progress', 0.61 + 0.29 * ((i - 0.5) / allRGBAs.length))
+									progressUploadRead(i / allRGBAs.length)
 									yield await fsReadFile(allRGBAs[i])
-									streamWrapper.emit('progress', 0.61 + 0.29 * (i / allRGBAs.length))
+									progressUploadWrite(i / allRGBAs.length)
 								}
 							}
 
@@ -389,21 +410,28 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 							}
 							if (aborted) return
 
+							progressUploadRead(1)
+							progressUploadWrite(1)
+
 							const audioStreamIndices = await getStreamIndices(inputFile, 'audio')
 							if (audioStreamIndices.length > 0) {
+								progressUploadAudio(0.1)
 								await convertAudio(inputFile)
+								progressUploadAudio(0.3)
 								await sleep(1000) // Helps avoid a lock-related "Code 5" error from the ATEM.
 
 								if (aborted) return
 								const audioBuffer = await fsReadFile(replaceFileExtension(inputFile, '.wav'))
+								progressUploadAudio(0.5)
 								await atem.uploadAudio(bankIndex, audioBuffer, `audio${this.accessor.bankIndex}`)
 							}
 
-							streamWrapper.emit('progress', 1)
+							progressUploadAudio(1)
 						}
 					} catch (err) {
 						streamWrapper.emit('error', err)
 					} finally {
+						progressTracker.destroy()
 						tmpObj.removeCallback()
 					}
 

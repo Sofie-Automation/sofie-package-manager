@@ -117,54 +117,19 @@ export async function spawnFFMpeg<Metadata>(
 	}
 	const lastFewLines: string[] = []
 
-	let fileDuration: number | undefined = undefined
 	ffMpegProcess.stderr.on('data', (data) => {
 		const str = data.toString()
 
 		log?.('ffmpeg:' + str)
-
-		// Duration is reported by FFMpeg at the beginning, this means that it successfully opened the source
-		// stream and has begun processing
-		const m = str.match(/Duration:\s?(\d+):(\d+):([\d.]+)/)
-		if (m) {
-			const hh = m[1]
-			const mm = m[2]
-			const ss = m[3]
-
-			fileDuration = parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseFloat(ss)
-
-			// Report back an initial status, because it looks nice:
-			// workInProgress._reportProgress(actualSourceVersionHash, 0)
-			onProgress?.(0).catch((err) => log?.(`spawnFFMpeg onProgress update failed: ${stringifyError(err)}`))
-
-			return
-		}
-		if (fileDuration) {
-			// Time position in source is reported periodically, but we need fileDuration to convert that into
-			// percentages
-			const m2 = str.match(/time=\s?(\d+):(\d+):([\d.]+)/)
-			if (m2) {
-				const hh = m2[1]
-				const mm = m2[2]
-				const ss = m2[3]
-
-				const progress = parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseFloat(ss)
-				// workInProgress._reportProgress(
-				// 	actualSourceVersionHash,
-				// 	((uploadIsDone ? 1 : 0.9) * progress) / fileDuration
-				// )
-				onProgress?.(((uploadIsDone ? 1 : 0.9) * progress) / fileDuration).catch((err) =>
-					log?.(`spawnFFMpeg onProgress update failed: ${stringifyError(err)}`)
-				)
-				return
-			}
-		}
 
 		lastFewLines.push(str)
 
 		if (lastFewLines.length > 10) {
 			lastFewLines.shift()
 		}
+	})
+	ffmpegInterpretProgress(ffMpegProcess, (progress) => {
+		onProgress?.(progress).catch((err) => log?.(`spawnFFMpeg onProgress update failed: ${stringifyError(err)}`))
 	})
 	const onClose = (code: number | null) => {
 		if (ffMpegProcess) {
@@ -198,4 +163,42 @@ export async function spawnFFMpeg<Metadata>(
 			onFail(`Cancelled`).catch((err) => log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(err)}`))
 		},
 	}
+}
+
+export function ffmpegInterpretProgress(
+	ffMpegProcess: ChildProcessWithoutNullStreams,
+	cbProgress: (progress: number) => void
+): void {
+	let fileDuration: number | undefined = undefined
+	ffMpegProcess.stderr.on('data', (data) => {
+		const str = data.toString()
+
+		// Duration is reported by FFMpeg at the beginning, this means that it successfully opened the source
+		// stream and has begun processing
+		const m = str.match(/Duration:\s?(\d+):(\d+):([\d.]+)/)
+		if (m) {
+			const hh = m[1]
+			const mm = m[2]
+			const ss = m[3]
+
+			fileDuration = parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseFloat(ss)
+
+			return
+		}
+		if (fileDuration) {
+			// Time position in source is reported periodically, but we need fileDuration to convert that into
+			// percentages
+			const m2 = str.match(/time=\s?(\d+):(\d+):([\d.]+)/)
+			if (m2) {
+				const hh = m2[1]
+				const mm = m2[2]
+				const ss = m2[3]
+
+				const progress = parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseFloat(ss)
+
+				cbProgress(progress / fileDuration)
+				return
+			}
+		}
+	})
 }

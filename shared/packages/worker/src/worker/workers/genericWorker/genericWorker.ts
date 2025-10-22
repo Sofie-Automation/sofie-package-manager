@@ -12,9 +12,9 @@ import {
 	ReturnTypeRunPackageContainerCronJob,
 	assertNever,
 	stringifyError,
-	testHtmlRenderer,
 } from '@sofie-package-manager/api'
 import { BaseWorker, GenericWorkerAgentAPI } from '../../worker'
+import fs from 'fs'
 import { FileCopy } from './expectationHandlers/fileCopy'
 import { FileCopyProxy } from './expectationHandlers/fileCopyProxy'
 import { PackageScan } from './expectationHandlers/packageScan'
@@ -28,12 +28,15 @@ import { QuantelClipCopy } from './expectationHandlers/quantelClipCopy'
 import * as PackageContainerExpHandler from './packageContainerExpectationHandler'
 import { QuantelClipPreview } from './expectationHandlers/quantelClipPreview'
 import { QuantelThumbnail } from './expectationHandlers/quantelClipThumbnail'
-import { testFFMpeg, testFFProbe } from './expectationHandlers/lib/ffmpeg'
+
 import { JsonDataCopy } from './expectationHandlers/jsonDataCopy'
 import { SetupPackageContainerMonitorsResult } from '../../accessorHandlers/genericHandle'
 import { FileVerify } from './expectationHandlers/fileVerify'
 import { RenderHTML } from './expectationHandlers/renderHTML'
 import { PackageIframesScan } from './expectationHandlers/packageIframesScan'
+import { ExecutableDependencyHandler } from './lib/executableDependencyHandler'
+import { MediaFileConvert } from './expectationHandlers/mediaFileConvert'
+import path from 'path'
 
 export type ExpectationHandlerGenericWorker = ExpectationHandler<GenericWorker>
 
@@ -41,12 +44,7 @@ export type ExpectationHandlerGenericWorker = ExpectationHandler<GenericWorker>
 export class GenericWorker extends BaseWorker {
 	static readonly type = 'genericWorker'
 
-	/** Contains the result of testing the FFMpeg executable. null = all is well, otherwise contains error message */
-	public testFFMpeg: null | string = 'Not initialized'
-	/** Contains the result of testing the FFProbe executable. null = all is well, otherwise contains error message */
-	public testFFProbe: null | string = 'Not initialized'
-	/** Contains the result of testing the HTMLRenderer executable. null = all is well, otherwise contains error message */
-	public testHTMLRenderer: null | string = 'Not initialized'
+	public executables: ExecutableDependencyHandler
 
 	private monitorExecutables: NodeJS.Timeout | undefined
 
@@ -56,15 +54,18 @@ export class GenericWorker extends BaseWorker {
 		sendMessageToManager: ExpectationManagerWorkerAgent.MessageFromWorker
 	) {
 		super(logger.category('GenericWorker'), agentAPI, sendMessageToManager, GenericWorker.type)
+
+		this.executables = new ExecutableDependencyHandler(logger.category('ExecutableDependencyHandler'))
+
 		this.logger.debug(`Worker started`)
 	}
 	async doYouSupportExpectation(exp: Expectation.Any): Promise<ReturnTypeDoYouSupportExpectation> {
 		return this.getExpectationHandler(exp).doYouSupportExpectation(exp, this)
 	}
 	async init(): Promise<void> {
-		await this.checkExecutables()
+		await this.executables.checkExecutables()
 		this.monitorExecutables = setInterval(() => {
-			this.checkExecutables().catch((err) => {
+			this.executables.checkExecutables().catch((err) => {
 				this.logger.error(`Error in checkExecutables: ${stringifyError(err)}`)
 			})
 		}, 1000 * 60 * 5) // Check every 5 minutes
@@ -77,11 +78,7 @@ export class GenericWorker extends BaseWorker {
 		}
 		this.logger.debug(`Worker terminated`)
 	}
-	private async checkExecutables() {
-		this.testFFMpeg = await testFFMpeg()
-		this.testFFProbe = await testFFProbe()
-		this.testHTMLRenderer = await testHtmlRenderer()
-	}
+
 	async getCostFortExpectation(exp: Expectation.Any): Promise<ReturnTypeGetCostFortExpectation> {
 		return this.getExpectationHandler(exp).getCostForExpectation(exp, this)
 	}
@@ -122,6 +119,8 @@ export class GenericWorker extends BaseWorker {
 				return MediaFileThumbnail
 			case Expectation.Type.MEDIA_FILE_PREVIEW:
 				return MediaFilePreview
+			case Expectation.Type.MEDIA_FILE_CONVERT:
+				return MediaFileConvert
 			case Expectation.Type.QUANTEL_CLIP_COPY:
 				return QuantelClipCopy
 			case Expectation.Type.QUANTEL_CLIP_THUMBNAIL:
@@ -153,5 +152,19 @@ export class GenericWorker extends BaseWorker {
 		packageContainer: PackageContainerExpectation
 	): Promise<SetupPackageContainerMonitorsResult> {
 		return PackageContainerExpHandler.setupPackageContainerMonitors(packageContainer, this)
+	}
+
+	private hasEnsuredTemporaryFolderPath = new Set<string>()
+	getTemporaryFolderPath(localPath = ''): string {
+		const tempBasePath =
+			this.agentAPI.config.temporaryFolderPath ||
+			(process.platform === 'win32' ? 'C:\\temp\\package-manager' : '/tmp/package-manager')
+
+		const tempPath = path.join(tempBasePath, localPath)
+		if (!this.hasEnsuredTemporaryFolderPath.has(tempPath)) {
+			this.hasEnsuredTemporaryFolderPath.add(tempPath)
+			fs.mkdirSync(tempPath, { recursive: true })
+		}
+		return tempPath
 	}
 }

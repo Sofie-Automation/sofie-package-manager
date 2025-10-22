@@ -146,6 +146,9 @@ export abstract class BaseWorker {
 		}
 	}
 
+	/** Returns a local file path to a temporary folder */
+	abstract getTemporaryFolderPath(localPath?: string): string
+
 	private _accessorTemporaryCache: {
 		[accessorType: string]: {
 			[key: string]: {

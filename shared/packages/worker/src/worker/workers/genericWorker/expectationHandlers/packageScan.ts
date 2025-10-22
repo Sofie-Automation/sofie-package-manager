@@ -25,22 +25,22 @@ import { PackageInfoType } from './lib/coreApi'
  */
 export const PackageScan: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, worker: GenericWorker): ReturnTypeDoYouSupportExpectation {
-		if (worker.testFFMpeg)
+		if (worker.executables.testFFMpeg)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFMpeg)',
-					tech: `Cannot access FFMpeg executable: ${worker.testFFMpeg}`,
+					tech: `Cannot access FFMpeg executable: ${worker.executables.testFFMpeg}`,
 				},
 			}
-		if (worker.testFFProbe)
+		if (worker.executables.testFFProbe)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFProbe)',
-					tech: `Cannot access FFProbe executable: ${worker.testFFProbe}`,
+					tech: `Cannot access FFProbe executable: ${worker.executables.testFFProbe}`,
 				},
 			}
 		return checkWorkerHasAccessToPackageContainersOnPackage(worker, {

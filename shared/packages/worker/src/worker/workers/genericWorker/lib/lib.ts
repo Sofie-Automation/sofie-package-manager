@@ -72,6 +72,7 @@ export function makeUniversalVersion(
 			Expectation.Version.Type.HTTP_FILE,
 			Expectation.Version.Type.QUANTEL_CLIP,
 			Expectation.Version.Type.JSON_DATA,
+			Expectation.Version.Type.MEDIA_FILE_CONVERT,
 		].includes(version.type)
 	) {
 		throw new Error(`getAllVersionProperties: Unsupported type "${version.type}"`)

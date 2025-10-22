@@ -15,7 +15,10 @@ export interface ExpectationHandler<TWorker extends BaseWorker> {
 	 * This includes things like:
 	 * * Being able to access/read/write to the sources and targets
 	 */
-	doYouSupportExpectation: (exp: Expectation.Any, worker: TWorker) => ReturnTypeDoYouSupportExpectation
+	doYouSupportExpectation: (
+		exp: Expectation.Any,
+		worker: TWorker
+	) => ReturnTypeDoYouSupportExpectation | Promise<ReturnTypeDoYouSupportExpectation>
 	/**
 	 * Estimate the cost for fulfilling an expectation.
 	 * The returned cost is later used to determine which worker is going to get the job.

@@ -47,7 +47,20 @@ export class FTPClient extends FTPClientBase {
 
 		for (const method of methodsToOverride) {
 			const orgMethod = (ftpClient as any)[method] as (...args: any[]) => Promise<any>
-			const newMethod = async (...args: any[]) => queue.add(async () => orgMethod.apply(ftpClient, args))
+			const newMethod = async (...args: any[]) => {
+				return queue.add(async () => {
+					const orgError = new Error(`Error executing ${method}: ${JSON.stringify(args)}`) // Used later
+					try {
+						const result = await orgMethod.apply(ftpClient, args)
+						return result
+					} catch (e) {
+						if (typeof e === 'object' && e !== null && 'stack' in e) {
+							e.stack += `\nOriginal stack: ${orgError.stack}`
+						}
+						throw e
+					}
+				})
+			}
 			;(ftpClient as any)[method] = newMethod
 		}
 
@@ -79,6 +92,7 @@ export class FTPClient extends FTPClientBase {
 					},
 				}
 				await this.client.access(options)
+				await this.client.cd('/')
 
 				this.initializing = null // Reset initializing promise after successful initialization
 			})
@@ -181,6 +195,7 @@ export class FTPClient extends FTPClientBase {
 
 		// Ensure the directory exists:
 		await this.client.ensureDir(path.dirname(fullPath))
+		await this.client.cd('/') // Revert to root after ensureDir
 
 		// Remove the file if it already exists:
 		await this.client.remove(fullPath, true)
@@ -199,6 +214,7 @@ export class FTPClient extends FTPClientBase {
 
 		// Ensure the directory exists:
 		await this.client.ensureDir(path.dirname(fullPath))
+		await this.client.cd('/') // Revert to root after ensureDir
 
 		const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content, 'utf-8')
 
@@ -302,6 +318,7 @@ export class FTPClient extends FTPClientBase {
 		const response = await this._fileExists(fullPath)
 		if (response.exists) {
 			await this.client.removeDir(fullPath)
+			await this.client.cd('/') // Revert to root after removeDir
 
 			return true
 		} else {

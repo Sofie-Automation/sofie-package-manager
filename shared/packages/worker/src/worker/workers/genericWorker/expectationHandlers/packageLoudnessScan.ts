@@ -25,6 +25,7 @@ import {
 } from './lib/scan'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import { LoudnessScanResult, PackageInfoType } from './lib/coreApi'
+import { ProgressParts } from './progressParts'
 
 /**
  * Performs a "deep scan" of the source package and saves the result file into the target PackageContainer (a Sofie Core collection)
@@ -32,22 +33,22 @@ import { LoudnessScanResult, PackageInfoType } from './lib/coreApi'
  */
 export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, worker: GenericWorker): ReturnTypeDoYouSupportExpectation {
-		if (worker.testFFMpeg)
+		if (worker.executables.testFFMpeg)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFMpeg)',
-					tech: `Cannot access FFMpeg executable: ${worker.testFFMpeg}`,
+					tech: `Cannot access FFMpeg executable: ${worker.executables.testFFMpeg}`,
 				},
 			}
-		if (worker.testFFProbe)
+		if (worker.executables.testFFProbe)
 			return {
 				support: false,
 				knownReason: true,
 				reason: {
 					user: 'There is an issue with the Worker (FFProbe)',
-					tech: `Cannot access FFProbe executable: ${worker.testFFProbe}`,
+					tech: `Cannot access FFProbe executable: ${worker.executables.testFFProbe}`,
 				},
 			}
 		return checkWorkerHasAccessToPackageContainersOnPackage(worker, {
@@ -165,6 +166,14 @@ export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 			// On cancel
 			currentProcess?.cancel()
 		}).do(async () => {
+			const progressTracker = new ProgressParts()
+			progressTracker.on('progress', (p) => {
+				workInProgress._reportProgress(sourceVersionHash, p)
+			})
+			const progressSetup = progressTracker.addPart(1)
+			const progressScan = progressTracker.addPart(7)
+			const progressFinalize = progressTracker.addPart(1)
+
 			const sourceHandle = lookupSource.handle
 			const targetHandle = lookupTarget.handle
 			if (
@@ -186,24 +195,22 @@ export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 			const actualSourceVersion = await sourceHandle.getPackageActualVersion()
 			const sourceVersionHash = hashObj(actualSourceVersion)
 
-			workInProgress._reportProgress(sourceVersionHash, 0.01)
+			progressSetup(1)
 
 			// Scan with FFProbe:
 			currentProcess = scanWithFFProbe(sourceHandle)
 			const ffProbeScan: FFProbeScanResult = await currentProcess
 			const hasAudioStream =
 				ffProbeScan.streams && ffProbeScan.streams.some((stream) => stream.codec_type === 'audio')
-			workInProgress._reportProgress(sourceVersionHash, 0.1)
 			currentProcess = undefined
 			let result: LoudnessScanResult | undefined = undefined
 
 			if (hasAudioStream) {
 				currentProcess = scanLoudness(sourceHandle, ffProbeScan, exp.endRequirement.version, (progress) => {
-					workInProgress._reportProgress(sourceVersionHash, 0.21 + 0.77 * progress)
+					progressScan(progress)
 				})
 				result = await currentProcess
 			}
-			workInProgress._reportProgress(sourceVersionHash, 0.2)
 
 			// all done:
 			const scanOperation = await targetHandle.prepareForOperation('Loudness scan', sourceHandle)
@@ -215,8 +222,11 @@ export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 				exp.endRequirement.version,
 				result
 			)
+			progressFinalize(0.5)
 			await targetHandle.finalizePackage(scanOperation)
+			progressFinalize(1)
 
+			progressTracker.destroy()
 			const duration = timer.get()
 			workInProgress._reportComplete(
 				sourceVersionHash,

@@ -188,7 +188,9 @@ export class GenericFileOperationsHandler {
 			await this.jsonWriter.updateJSONFileBatch<DelayPackageRemovalEntry[]>(
 				this.deferRemovePackagesPath,
 				(list) => {
-					return cbManipulateList(list ?? [])
+					const newList = cbManipulateList(list ?? [])
+					if (newList.length === 0) return undefined // delete the file if the list is empty
+					return newList
 				}
 			)
 		} catch (e) {

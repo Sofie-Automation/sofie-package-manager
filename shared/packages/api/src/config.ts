@@ -148,6 +148,11 @@ const workerArguments = defineArguments({
 		default: process.env.WORKER_WINDOWS_DRIVE_LETTERS || 'X;Y;Z',
 		describe: 'Which Windows Drive letters can be used to map shares. ("X;Y;Z") ',
 	},
+	temporaryFolderPath: {
+		type: 'string',
+		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
+		describe: 'A temporary, local file path where the worker can store temporary artifacts',
+	},
 	resourceId: {
 		type: 'string',
 		default: process.env.WORKER_NETWORK_ID || 'default',
@@ -244,6 +249,11 @@ const appContainerArguments = defineArguments({
 		type: 'string',
 		default: process.env.WORKER_WINDOWS_DRIVE_LETTERS || 'X;Y;Z',
 		describe: 'Which Windows Drive letters can be used to map shares. ("X;Y;Z") ',
+	},
+	temporaryFolderPath: {
+		type: 'string',
+		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
+		describe: 'A temporary, local file path where the worker can store temporary artifacts',
 	},
 	costMultiplier: {
 		type: 'number',
@@ -477,6 +487,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			resourceId: argv.resourceId,
 			networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
 			windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
+			temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
 			costMultiplier:
 				(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) || 1,
 			considerCPULoad:
@@ -521,6 +532,7 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 				resourceId: argv.resourceId,
 				networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
 				windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
+				temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
 				costMultiplier:
 					(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) ||
 					1,

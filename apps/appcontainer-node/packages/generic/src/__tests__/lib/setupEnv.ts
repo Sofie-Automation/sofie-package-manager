@@ -46,6 +46,7 @@ export async function setupAppContainer(partialAppContainerConfig: Partial<AppCo
 					networkIds: [],
 					resourceId: '',
 					windowsDriveLetters: [],
+					temporaryFolderPath: '',
 				},
 				workforceURL: null,
 			},

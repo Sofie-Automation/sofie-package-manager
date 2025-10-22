@@ -148,6 +148,38 @@ export namespace ExpectedPackage {
 			modifiedDate?: number // timestamp (ms)
 			checksum?: string
 			checkSumType?: 'sha' | 'md5' | 'whatever'
+			conversions?: {
+				/**
+				 * Path to the executable.
+				 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+				 */
+				executable: string
+				/**
+				 * Arguments to the executable.
+				 * Supported placeholders:
+				 * - {SOURCE} - replaced with the full path of the source file
+				 * - {TARGET} - replaced with the full path of the target file
+				 */
+				args: string[]
+
+				/**
+				 * Set to true if the executable needs the source to be locally available
+				 * (So PM will copy the source to a local temp folder before running the executable)
+				 */
+				needsLocalSource?: boolean
+				/**
+				 * Set to true if the executable needs the target to be locally available
+				 * (So PM will create the target in a local temp folder, and then copy it to the actual target when done)
+				 */
+				needsLocalTarget?: boolean
+
+				/**
+				 * Force the output filename from this step.
+				 * This can be useful in multi-step scenarios where you want to specify the inter-step filename.
+				 * This property is ignored in the final step.
+				 */
+				outputFileName?: string
+			}[]
 		}
 		sources: {
 			containerId: PackageContainerId

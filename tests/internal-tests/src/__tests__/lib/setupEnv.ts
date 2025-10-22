@@ -81,6 +81,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		resourceId: '',
 		networkIds: [],
 		windowsDriveLetters: ['X', 'Y', 'Z'],
+		temporaryFolderPath: undefined,
 		sourcePackageStabilityThreshold: 0, // Disabling this to speed up the tests
 		costMultiplier: 1,
 		considerCPULoad: null,
@@ -105,6 +106,7 @@ export const defaultTestConfig: SingleAppConfig = {
 			resourceId: '',
 			networkIds: [],
 			windowsDriveLetters: ['X', 'Y', 'Z'],
+			temporaryFolderPath: undefined,
 			costMultiplier: 1,
 			considerCPULoad: null,
 			failurePeriod: 0,

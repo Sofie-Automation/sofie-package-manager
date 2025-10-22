@@ -103,7 +103,8 @@ export async function isFileReadyToStartWorkingOn(
 export async function isFileFulfilled(
 	_worker: BaseWorker,
 	lookupSource: LookupPackageContainer<UniversalVersion>,
-	lookupTarget: LookupPackageContainer<UniversalVersion>
+	lookupTarget: LookupPackageContainer<UniversalVersion>,
+	modifySourceUVersion?: (version: UniversalVersion) => UniversalVersion
 ): Promise<ReturnTypeIsExpectationFulfilled> {
 	if (!lookupTarget.ready)
 		return {
@@ -140,8 +141,11 @@ export async function isFileFulfilled(
 		return { fulfilled: false, knownReason: lookupSource.knownReason, reason: lookupSource.reason }
 
 	const actualSourceVersion = await lookupSource.handle.getPackageActualVersion()
+	let actualSourceUVersion = makeUniversalVersion(actualSourceVersion)
 
-	const issueVersions = compareUniversalVersions(makeUniversalVersion(actualSourceVersion), actualTargetVersion)
+	if (modifySourceUVersion) actualSourceUVersion = modifySourceUVersion(actualSourceUVersion)
+
+	const issueVersions = compareUniversalVersions(actualSourceUVersion, actualTargetVersion)
 	if (!issueVersions.success) {
 		return { fulfilled: false, knownReason: issueVersions.knownReason, reason: issueVersions.reason }
 	}
@@ -152,7 +156,7 @@ export async function isFileFulfilled(
 	}
 }
 export async function doFileCopyExpectation(
-	exp: Expectation.FileCopy | Expectation.FileCopyProxy,
+	exp: Expectation.FileCopy | Expectation.FileCopyProxy | Expectation.MediaFileConvert,
 	lookupSource: LookupPackageContainer<UniversalVersion>,
 	lookupTarget: LookupPackageContainer<UniversalVersion>
 ): Promise<WorkInProgress | null> {
