@@ -204,14 +204,25 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 						continue
 					}
 
+					const fileData = Buffer.from(newValueStr, 'utf-8')
+
 					// Note: We can't unlink the file anywhere in here, or other calls to Lockfile can break
 					// by overwriting the file with an empty one.
 
 					// Write to a temporary file first, to avoid corrupting the file in case of a process exit:
-					await this.fileHandler.writeFile(tmpFilePath, Buffer.from(newValueStr, 'utf-8'))
+					await this.fileHandler.writeFile(tmpFilePath, fileData)
 
 					// Rename file:
 					await this.rename(tmpFilePath, filePath)
+
+					try {
+						// Rename file:
+						await this.rename(tmpFilePath, filePath)
+					} catch (e) {
+						// If renaming fails, try writing directly to the file instead:
+						await this.fileHandler.writeFile(filePath, fileData)
+						await this.fileHandler.unlinkIfExists(tmpFilePath)
+					}
 				}
 
 				// Release the lock:
@@ -348,11 +359,26 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 		if (oldValue?.str === newValueStr) {
 			// do nothing
 		} else {
-			// Write to a temporary file first, to avoid corrupting the file in case of a process exit:
-			await this.fileHandler.writeFile(tmpFilePath, Buffer.from(newValueStr, 'utf-8'))
+			if (newValueStr === undefined) {
+				// undefined means remove the file
+				await this.fileHandler.unlinkIfExists(tmpFilePath)
+				await this.fileHandler.unlinkIfExists(filePath)
+			} else {
+				const fileData = Buffer.from(newValueStr, 'utf-8')
+				// Write to a temporary file first, to avoid corrupting the file in case of a process exit:
+				await this.fileHandler.writeFile(tmpFilePath, fileData)
 
-			// Rename file:
-			await this.rename(tmpFilePath, filePath)
+				try {
+					// Rename file:
+					await this.rename(tmpFilePath, filePath)
+				} catch (e) {
+					// Renaming failed.
+					// (rename might not be supported on all file systems, such as some ftp servers)
+					// Instead, try writing directly to the file instead:
+					await this.fileHandler.writeFile(filePath, fileData)
+					await this.fileHandler.unlinkIfExists(tmpFilePath)
+				}
+			}
 		}
 
 		// Release lock:
