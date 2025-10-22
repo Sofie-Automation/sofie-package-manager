@@ -10,7 +10,7 @@
 		"test": "jest --runInBand"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=24"
 	},
 	"peerDependencies": {
 		"@sofie-automation/shared-lib": "*",
