@@ -20,7 +20,7 @@ export class ExpectationManagerAPI
 	implements ExpectationManagerWorkerAgent.ExpectationManager
 {
 	constructor(public id: WorkerAgentId, logger: LoggerInstance) {
-		super(logger.category('ExpectationManagerAPI'), id, 'workerAgent')
+		super(logger.category('ExpMgrAPI'), id, 'workerAgent')
 	}
 
 	async messageFromWorker(message: ExpectationManagerWorkerAgent.MessageFromWorkerPayload.Any): Promise<any> {

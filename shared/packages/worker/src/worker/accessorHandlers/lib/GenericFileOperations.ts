@@ -14,7 +14,7 @@ export class GenericFileOperationsHandler {
 		private readonly workOptions: Expectation.WorkOptions.RemoveDelay,
 		logger: LoggerInstance
 	) {
-		this.logger = logger.category('GenericFileOperationsHandler')
+		this.logger = logger.category('GenericFileOpHandler')
 	}
 
 	/** Depending on workOptions removes a file, alternatively schedules it for later removal */

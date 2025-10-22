@@ -28,7 +28,7 @@ export class ExpectationManagerServer {
 		private serverAccessBaseUrl: string | undefined,
 		private workForceConnectionOptions: ClientConnectionOptions
 	) {
-		this.logger = logger.category('ExpectationManagerServer')
+		this.logger = logger.category('ExpMgrServer')
 
 		if (this.serverOptions.type === 'websocket') {
 			this.websocketServer = new WebsocketServer(

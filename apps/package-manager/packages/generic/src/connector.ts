@@ -57,7 +57,7 @@ export class Connector {
 
 	private logger: LoggerInstance
 	constructor(logger: LoggerInstance, private config: PackageManagerConfig, private _process: ProcessHandler) {
-		this.logger = logger.category('Connector')
+		this.logger = logger.category('Conn')
 		this.coreHandler = new CoreHandler(this.logger, this.config.packageManager)
 
 		const packageManagerServerOptions: ExpectationManagerServerOptions =

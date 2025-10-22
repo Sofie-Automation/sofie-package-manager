@@ -116,7 +116,7 @@ export class PackageManagerHandler {
 		concurrency: number | undefined,
 		chaosMonkey: boolean
 	) {
-		this.logger = logger.category('PackageManager')
+		this.logger = logger.category('PkgMgr')
 		this.callbacksHandler = new ExpectationManagerCallbacksHandler(this.logger, this)
 
 		this.expectationManager = new ExpectationManager(
