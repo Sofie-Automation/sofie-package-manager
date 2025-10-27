@@ -47,14 +47,14 @@ jobs:
         with:
           key: ${{ runner.os }}-natives-${{ hashFiles('node_modules/**/expected-shas.json') }}-${{ hashFiles('node_modules/**/electron/package.json') }}
           path: |
-            ~/.pkg-cache # yao-pkg
-            ~/.cache/electron-builder/
-            ~/.cache/electron/
+            ${{ github.workspace }}/.cache
 
       - name: Run build
         env:
           CI: true
-          PKG_CACHE_PATH: ${{ runner.temp }}
+          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+          PKG_CACHE_PATH: ${{ github.workspace  }}/.cache/yao-pkg
         run: |
           # try and avoid timeout errors
 
