@@ -76,6 +76,12 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
+      - name: Cache ffmpeg binaries
+        uses: actions/cache@v4
+        with:
+          path: '.ffmpeg'
+          key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/ffmpegReleases.json') }}
+
       - name: Enable Corepack
         run: corepack enable
 
