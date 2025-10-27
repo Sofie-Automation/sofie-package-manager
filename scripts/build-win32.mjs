@@ -49,8 +49,9 @@ if (!executableName) {
 	const copiedFolders = []
 	let ps = []
 	for (const package0 of packages) {
-		if (package0.name.match(/boilerplate/)) continue
-		if (package0.name.match(packageJson.name)) continue
+		if (package0.name.match(/boilerplate/)) continue // exclude boilerplate package
+		if (package0.name.match(/@tests/)) continue // exclude @tests packages
+		if (package0.name.match(packageJson.name)) continue // exclude own package
 
 		const source = path.join(`${basePath}/../../../tmp_packages_for_build/`, package0.name)
 		const target = path.resolve(path.join(basePath, 'node_modules', package0.name))
