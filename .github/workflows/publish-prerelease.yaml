@@ -23,10 +23,11 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node_version }}
+          cache: 'yarn'
 
       - name: Prepare Environment
         run: |
-          yarn
+          yarn install --immutable
           yarn build
         env:
           CI: true
@@ -53,6 +54,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: 'yarn'
+
       - name: Check release is desired
         id: do-publish
         run: |
@@ -68,7 +71,7 @@ jobs:
       - name: Prepare Environment
         if: ${{ steps.do-publish.outputs.publish }}
         run: |
-          yarn
+          yarn install --immutable
         env:
           CI: true
       - name: Build
