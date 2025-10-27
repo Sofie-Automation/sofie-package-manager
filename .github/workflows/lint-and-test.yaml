@@ -32,7 +32,10 @@ jobs:
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+            **/node_modules
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Prepare Environment
@@ -73,7 +76,10 @@ jobs:
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+            **/node_modules
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache ffmpeg binaries
