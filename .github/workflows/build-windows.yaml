@@ -29,10 +29,27 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          path: |
+            ~/.yarn/cache
+            **/node_modules
+
       - name: Prepare Environment
         run: yarn
         env:
           CI: true
+
+      - name: Restore pkg/electron cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-natives-${{ hashFiles('node_modules/**/expected-shas.json') }}-${{ hashFiles('node_modules/**/electron/package.json') }}
+          path: |
+            ~/.pkg-cache # yao-pkg
+            ~/.cache/electron-builder/
+            ~/.cache/electron/
 
       - name: Run build
         env:
