@@ -42,8 +42,9 @@ const packageJson = require(path.join(basePath, '/package.json'))
 		const copiedFolders = []
 		let ps = []
 		for (const package0 of packages) {
-			if (package0.name.match(/boilerplate/)) continue
-			if (package0.name.match(packageJson.name)) continue
+			if (package0.name.match(/boilerplate/)) continue // exclude boilerplate package
+			if (package0.name.match(/@tests/)) continue // exclude @tests packages
+			if (package0.name.match(packageJson.name)) continue // exclude own package
 
 			const target = path.resolve(path.join(basePath, 'tmp_packages_for_build', package0.name))
 			log(`  Copying: ${package0.name} to ${target}`)
@@ -79,7 +80,11 @@ const packageJson = require(path.join(basePath, '/package.json'))
 	}
 
 	log(`...done!`)
-})().catch(log)
+})().catch((err) => {
+	log(err)
+	// eslint-disable-next-line no-process-exit
+	process.exit(1)
+})
 
 function log(...args) {
 	// eslint-disable-next-line no-console
