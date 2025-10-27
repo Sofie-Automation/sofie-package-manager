@@ -1,4 +1,4 @@
-FROM node:18-alpine as builder
+FROM node:24-alpine as builder
 
 # Note: Build this from the root directory:
 # cd package-manager
@@ -39,7 +39,7 @@ RUN rm -r scripts
 
 
 # Create deploy-image:
-FROM node:18-alpine
+FROM node:24-alpine
 
 COPY --from=builder /src /src
 
