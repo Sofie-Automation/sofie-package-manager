@@ -27,7 +27,7 @@ jobs:
 
       - name: Prepare Environment
         run: |
-          yarn install --frozen-lockfile
+          yarn install --immutable
           yarn build
         env:
           CI: true
@@ -71,7 +71,7 @@ jobs:
       - name: Prepare Environment
         if: ${{ steps.do-publish.outputs.publish }}
         run: |
-          yarn install --frozen-lockfile
+          yarn install --immutable
         env:
           CI: true
       - name: Build

@@ -31,7 +31,7 @@ jobs:
         run: corepack enable
 
       - name: Prepare Environment
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
         env:
           CI: true
       - name: Type check
@@ -70,7 +70,7 @@ jobs:
 
       - name: Prepare Environment
         run: |
-          yarn install --frozen-lockfile
+          yarn install --immutable
           yarn build
         env:
           CI: true
