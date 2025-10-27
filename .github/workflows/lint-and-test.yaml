@@ -61,7 +61,7 @@ jobs:
       matrix:
         node_version: ['18', '20']
         os: [ubuntu-latest, windows-latest] # [windows-latest, macOS-latest]
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v5
