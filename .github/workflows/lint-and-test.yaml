@@ -36,7 +36,7 @@ jobs:
             .yarn/cache
             .yarn/install-state.gz
             **/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-18-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Prepare Environment
         run: |
@@ -80,7 +80,7 @@ jobs:
             .yarn/cache
             .yarn/install-state.gz
             **/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ matrix.node_version }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache ffmpeg binaries
         uses: actions/cache@v4

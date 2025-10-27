@@ -36,7 +36,7 @@ jobs:
             .yarn/cache
             .yarn/install-state.gz
             **/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-18-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Prepare Environment
         run: yarn
