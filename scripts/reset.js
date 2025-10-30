@@ -58,7 +58,11 @@ const basePath = '.'
 	}
 
 	log(`...done!`)
-})().catch(log)
+})().catch((err) => {
+	log(err)
+	// eslint-disable-next-line no-process-exit
+	process.exit(1)
+})
 
 function log(...args) {
 	// eslint-disable-next-line no-console

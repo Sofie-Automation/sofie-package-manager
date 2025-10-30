@@ -24,7 +24,8 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '24'
+          cache: 'yarn'
 
       - name: Enable Corepack
         run: corepack enable
@@ -39,7 +40,7 @@ jobs:
           key: ${{ runner.os }}-18-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Prepare Environment
-        run: yarn
+        run: yarn install --immutable
         env:
           CI: true
 
@@ -88,7 +89,7 @@ jobs:
 
       - name: Upload artifacts
         if: '!cancelled()'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Windows
           path: deploy
@@ -105,7 +106,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: Windows
           path: deploy
