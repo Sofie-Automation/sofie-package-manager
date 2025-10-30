@@ -24,20 +24,14 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '24'
+          cache: 'yarn'
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
       - name: Prepare Environment
-        run: |
-          yarn
+        run: yarn install --immutable
         env:
           CI: true
       - name: Type check
@@ -56,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node_version: ['18', '20']
+        node_version: ['20', '22', '24']
         os: [ubuntu-latest, windows-latest] # [windows-latest, macOS-latest]
     timeout-minutes: 10
     steps:
@@ -69,19 +63,14 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node_version }}
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          cache: 'yarn'
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Prepare Environment
         run: |
-          yarn
+          yarn install --immutable
           yarn build
         env:
           CI: true
