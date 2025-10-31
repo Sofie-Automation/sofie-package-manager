@@ -392,6 +392,8 @@ class MediaConversion {
 			prevOperation = operation
 		}
 
+		// Set up an OperationPointer.
+		// This points to the current file source and as the work progresses, the pointer is updated to point to the resulting files
 		let operationPointer: OperationPointer = {
 			lookup: this.lookupSource,
 			packageContainer: {
@@ -408,6 +410,7 @@ class MediaConversion {
 			const nextOperationPointer = await operation.work(operationPointer)
 			this.currentOperation = null
 
+			// Change the pointer so that the next operation will use the new pointer:
 			operationPointer = nextOperationPointer
 		}
 	}
@@ -453,12 +456,23 @@ class MediaConversion {
 class MediaConversionOperation {
 	private reportPrepareLocal: ProgressPart
 	private reportFinalizeLocal: ProgressPart
+	private reportPreChecks: ProgressPart[] = []
 	private reportPrepare: ProgressPart
 	private reportProgress: ProgressPart
 	private reportFinalize: ProgressPart
 
 	private subWorkInProgress: IWorkInProgress | null = null
 	private spawnedProcess: SpawnedProcess | undefined = undefined
+
+	private anyNeedsLocalSource(): boolean {
+		if (this.conversion.needsLocalSource) return true
+
+		for (const preCheck of this.conversion.preChecks ?? []) {
+			if (preCheck.needsLocalSource) return true
+		}
+
+		return false
+	}
 
 	constructor(
 		private logger: LoggerInstance,
@@ -470,11 +484,13 @@ class MediaConversionOperation {
 	) {
 		const isFirst = previousOperation === null
 
-		this.reportPrepareLocal = this.parent.progressTracker.addPart(isFirst && conversion.needsLocalSource ? 3 : 0)
+		this.reportPrepareLocal = this.parent.progressTracker.addPart(isFirst && this.anyNeedsLocalSource() ? 3 : 0)
 		this.reportFinalizeLocal = this.parent.progressTracker.addPart(
 			this.isFinalStep && conversion.needsLocalTarget ? 3 : 0
 		)
-
+		;(this.conversion.preChecks ?? []).forEach(() => {
+			this.reportPreChecks.push(this.parent.progressTracker.addPart(1))
+		})
 		this.reportPrepare = this.parent.progressTracker.addPart(1)
 		this.reportProgress = this.parent.progressTracker.addPart(10)
 		this.reportFinalize = this.parent.progressTracker.addPart(1)
@@ -486,48 +502,189 @@ class MediaConversionOperation {
 
 	public async work(operationPointer: OperationPointer): Promise<OperationPointer> {
 		this.logger.debug('Starting work')
-		// Step 1: (Maybe) copy source file to local temp folder:
 
-		// Change pointer to match the new location:
-		operationPointer = await this.copyToLocalTempFolder(operationPointer)
-		this.reportPrepareLocal(1)
+		// Step 0: Run pre-checks:
+		const preCheckResult = await this.runPreChecks(operationPointer)
+		operationPointer = preCheckResult.operationPointer
 
-		// Prepare target pointer:
-		const operationTargetPointer = await this.prepareTargetPointer(operationPointer)
+		if (preCheckResult.runStep) {
+			// Step 1: (Maybe) copy source file to local temp folder:
 
-		// Step 2: Do the conversion:
+			// (maybe) copy to local folder, then change pointer to match the new location:
+			operationPointer = await this.copyToLocalTempFolder(operationPointer, this.conversion)
 
-		await this.convert(operationPointer, operationTargetPointer)
-		this.reportProgress(1)
-		// (Maybe) Cleanup the source, since the conversion is now done with it:
-		await this.cleanupSource(operationPointer)
-		this.reportFinalize(1)
+			// Prepare target pointer:
+			const operationTargetPointer = await this.prepareTargetPointer(operationPointer)
 
-		// Step 3: (Maybe) copy target file from local temp folder:
+			// Step 2: Do the conversion:
+			await this.convert(operationPointer, operationTargetPointer, preCheckResult.replaceStrings)
+			this.reportProgress(1)
+			// (Maybe) Cleanup the source, since the conversion is now done with it:
+			await this.cleanupSource(operationPointer)
+			this.reportFinalize(1)
 
-		// Change pointer to match the new location:
-		await this.copyFromTempToTarget(operationTargetPointer)
+			// Move pointer to current target:
+			operationPointer = operationTargetPointer
+		} else {
+			// Skip this conversion step!
 
-		if (this.isFinalStep) {
-			// (Maybe) Cleanup the source, since the file has been copied to the final target:
-			await this.cleanupSource(operationTargetPointer)
+			// (do nothing)
+
+			this.reportPrepare(1)
+			this.reportProgress(1)
+			this.reportFinalize(1)
+
+			this.logger.debug('Skipping conversion step due to pre-checks')
 		}
+
+		// Step 3: (Maybe) copy target file from local temp folder & cleanup:
+		await this.copyFromTempToTarget(operationPointer)
 		this.reportFinalizeLocal(1)
 
 		this.logger.debug('Done')
 
-		return operationTargetPointer
+		return operationPointer
+	}
+
+	private async runPreChecks(operationPointer: OperationPointer): Promise<{
+		/** Resulting OperationPointer, to be used in the conversion step */
+		operationPointer: OperationPointer
+		/** Whether the conversion step should be run or skipped */
+		runStep: boolean
+		/** Values that can be used on the args of the conversion step */
+		replaceStrings: Record<string, string>
+	}> {
+		const result: {
+			operationPointer: OperationPointer
+			runStep: boolean
+			replaceStrings: Record<string, string>
+		} = {
+			operationPointer: operationPointer,
+			runStep: true,
+			replaceStrings: {},
+		}
+
+		if (!this.conversion.preChecks) {
+			return result
+		}
+		for (let i = 0; i < this.conversion.preChecks.length; i++) {
+			const preCheck = this.conversion.preChecks[i]
+
+			// (maybe) copy to local folder, then change pointer to match the new location:
+			result.operationPointer = await this.copyToLocalTempFolder(result.operationPointer, preCheck)
+
+			const reportPreCheck = this.reportPreChecks[i]
+
+			// Run PreCheck:
+			reportPreCheck(0.1)
+
+			const preCheckResult = await this.executePreCheck(result.operationPointer, preCheck)
+			reportPreCheck(0.7)
+
+			for (let handleOutputIndex = 0; handleOutputIndex < preCheck.handleOutput.length; handleOutputIndex++) {
+				const handle = preCheck.handleOutput[handleOutputIndex]
+
+				const sourceStr =
+					handle.source === 'stdout'
+						? preCheckResult.stdout
+						: handle.source === 'stderr'
+						? preCheckResult.stderr
+						: ''
+
+				const regex = new RegExp(handle.regex, handle.regexFlags)
+				const matches = sourceStr.match(regex)
+
+				if (matches) {
+					// match
+					if (handle.effect?.onlyRunStepIfNoMatch) result.runStep = false
+
+					for (let matchIndex = 0; matchIndex < matches.length; matchIndex++) {
+						const match = matches[matchIndex]
+
+						// "{PRECHECK.0.REGEX.1}" (first index is the handleOutput index, second is the capture group index)
+						result.replaceStrings[`{PRECHECK.${handleOutputIndex}.REGEX.${matchIndex}}`] = match
+					}
+				} else {
+					// no match
+					if (handle.effect?.onlyRunStepIfMatch) result.runStep = false
+				}
+			}
+
+			// end
+			reportPreCheck(1)
+		}
+
+		return result
+	}
+
+	private async executePreCheck(
+		operationPointer: OperationPointer,
+		preCheck: Required<Expectation.Version.ConversionStep>['preChecks'][0]
+	): Promise<{
+		stdout: string
+		stderr: string
+	}> {
+		const sourcePath = await this.getAccessorFullPath(operationPointer.lookup.handle)
+		const args = this.replaceStringsInArgs(preCheck.args, {
+			SOURCE: escapeFilePath(sourcePath),
+		})
+		this.logger.debug(`Spawning process: ${preCheck.executable} ${args.join(' ')}`)
+
+		// Optimization: Just collect data that will be used later:
+		let usesStdOut = false
+		let usesStdErr = false
+		preCheck.handleOutput.forEach((handle) => {
+			if (handle.source === 'stderr') usesStdErr = true
+			else if (handle.source === 'stdout') usesStdOut = true
+		})
+
+		return await new Promise<{
+			stdout: string
+			stderr: string
+		}>((resolve, reject) => {
+			let stdout = ''
+			let stderr = ''
+			spawnProcess(
+				this.conversion.executable,
+				args,
+				() => resolve({ stdout, stderr }), // On Done
+				(err) => reject(err), // On Error
+				noop // on Progress
+				// ,this.logger.silly
+			)
+				.then((p) => {
+					this.spawnedProcess = p
+
+					if (usesStdOut) {
+						p.execProcess.stdout.on('data', (data: Buffer) => {
+							stdout += data.toString()
+						})
+					}
+					if (usesStdErr) {
+						p.execProcess.stderr.on('data', (data: Buffer) => {
+							stderr += data.toString()
+						})
+					}
+				})
+				.catch(reject)
+				.finally(() => {
+					this.spawnedProcess = undefined
+				})
+		})
 	}
 
 	/**
 	 * Copy source file to local temp folder
 	 */
-	private async copyToLocalTempFolder(operationPointer: OperationPointer): Promise<OperationPointer> {
-		if (
-			!this.conversion.needsLocalSource ||
-			operationPointer.lookup.accessor.type === Accessor.AccessType.LOCAL_FOLDER
-		) {
+	private async copyToLocalTempFolder(
+		operationPointer: OperationPointer,
+		step: {
+			needsLocalSource?: boolean
+		}
+	): Promise<OperationPointer> {
+		if (!step.needsLocalSource || operationPointer.lookup.accessor.type === Accessor.AccessType.LOCAL_FOLDER) {
 			// No need to do any copying as we can use the current source directly:
+			this.reportPrepareLocal(1)
 			return operationPointer
 		}
 
@@ -558,28 +715,32 @@ class MediaConversionOperation {
 		}
 
 		await this.copyFile(this.parent.lookupSource, localLookup, 'prepare source', this.reportPrepareLocal)
+		this.reportPrepareLocal(1)
 
 		// Return pointer to new local source:
 		return {
 			lookup: localLookup,
 			packageContainer: localPackageContainer.packageContainer,
 			isTemporary: true,
-		}
+		} satisfies OperationPointer
 	}
 	/**
-	 * Copy from local temp folder to final target
+	 * Copy from local temp folder to final target and cleanup, if needed
 	 */
 	private async copyFromTempToTarget(operationPointer: OperationPointer): Promise<void> {
-		if (!this.isFinalStep || !operationPointer.isTemporary) {
-			// No need to do any copying
-			return
+		if (this.isFinalStep && operationPointer.isTemporary) {
+			await this.copyFile(
+				operationPointer.lookup,
+				this.parent.lookupTarget,
+				'final copy to target',
+				this.reportFinalizeLocal
+			)
 		}
-		await this.copyFile(
-			operationPointer.lookup,
-			this.parent.lookupTarget,
-			'final copy to target',
-			this.reportFinalizeLocal
-		)
+
+		if (this.isFinalStep) {
+			// (Maybe) Cleanup the source, since the file has now been copied to the final target:
+			await this.cleanupSource(operationPointer)
+		}
 	}
 	/**
 	 * Performs a file copy between two file-based PackageContainers
@@ -658,24 +819,30 @@ class MediaConversionOperation {
 			}
 		}
 	}
-	private async convert(operationPointer: OperationPointer, operationTargetPointer: OperationPointer) {
-		this.reportPrepare(0.5)
-
-		const sourcePath = await this.getAccessorFullPath(operationPointer.lookup.handle)
-		const targetPath = await this.getAccessorFullPath(operationTargetPointer.lookup.handle)
-		this.reportPrepare(1)
-
-		const argsReplaceStrings: Record<string, string> = {
-			SOURCE: escapeFilePath(sourcePath),
-			TARGET: escapeFilePath(targetPath),
-		}
-		const args = this.conversion.args.map((arg) => {
+	private replaceStringsInArgs(args: string[], argsReplaceStrings: Record<string, string>): string[] {
+		return args.map((arg) => {
 			let argOut = arg
 			for (const [key, val] of Object.entries<string>(argsReplaceStrings)) {
 				argOut = argOut.replace(`{${key}}`, val)
 			}
 			return argOut
 		})
+	}
+	private async convert(
+		operationPointer: OperationPointer,
+		operationTargetPointer: OperationPointer,
+		argsReplaceStrings: Record<string, string>
+	) {
+		this.reportPrepare(0.5)
+
+		const sourcePath = await this.getAccessorFullPath(operationPointer.lookup.handle)
+		const targetPath = await this.getAccessorFullPath(operationTargetPointer.lookup.handle)
+		this.reportPrepare(1)
+
+		argsReplaceStrings.SOURCE = escapeFilePath(sourcePath)
+		argsReplaceStrings.TARGET = escapeFilePath(targetPath)
+
+		const args = this.replaceStringsInArgs(this.conversion.args, argsReplaceStrings)
 
 		this.logger.debug(`Spawning process: ${this.conversion.executable} ${args.join(' ')}`)
 
@@ -715,7 +882,7 @@ class MediaConversionOperation {
 			return
 		}
 		try {
-			await operationPointer.lookup.handle.removePackage('Cleanup temporary file after conversion step')
+			await operationPointer.lookup.handle.removePackage('Cleanup temporary source file')
 		} catch (err) {
 			this.logger.warn(`Error removing temporary source file: ${stringifyError(err)} (will continue)`)
 		}
@@ -788,8 +955,14 @@ class MediaConversionOperation {
 		)
 	}
 }
+/**
+ * This is a pointer to a file, along with the means to access it.
+ */
 interface OperationPointer {
 	lookup: LookupFilePackageContainer<UniversalVersion>
 	packageContainer: PackageContainerOnPackage
 	isTemporary: boolean
+}
+const noop = () => {
+	// nothing
 }
