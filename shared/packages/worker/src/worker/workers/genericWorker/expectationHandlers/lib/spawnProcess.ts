@@ -75,7 +75,7 @@ export async function spawnProcess(
 				onDone()
 			} else {
 				// workInProgress._reportError(new Error(`FFMpeg exit code ${code}: ${lastFewLines.join('\n')}`))
-				onError(new Error(`${processName} exit code ${code}: ${lastFewLines.join('\n')}`))
+				onError(new Error(`${processName} exit code ${code}: ${lastFewLines.join('\n')} (${args.join(' ')})`))
 			}
 		}
 	}

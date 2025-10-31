@@ -402,6 +402,7 @@ class MediaConversion {
 				label: 'Source',
 			},
 			isTemporary: false,
+			isSource: true,
 		}
 
 		// Execute the operations:
@@ -528,7 +529,23 @@ class MediaConversionOperation {
 		} else {
 			// Skip this conversion step!
 
-			// (do nothing)
+			// just copy the file
+
+			// // Prepare target pointer:
+			// const operationTargetPointer = await this.prepareTargetPointer(operationPointer)
+
+			// const sourcePath = await this.getAccessorFullPath(operationPointer.lookup.handle)
+
+			// const localLookup = await this.lookupLocalAccessorHandle(
+			// 	[localPackageContainer.packageContainer],
+			// 	path.basename(sourcePath),
+			// 	operationPointer
+			// )
+
+			// if (!localLookup.ready)
+			// 	throw new Error(`Internal Error: localLookup is not ready: ${localLookup.reason.tech}`)
+
+			// await this.copyFile(this.parent.lookupSource, localLookup, 'prepare source', this.reportPrepareLocal)
 
 			this.reportPrepare(1)
 			this.reportProgress(1)
@@ -570,6 +587,8 @@ class MediaConversionOperation {
 		for (let i = 0; i < this.conversion.preChecks.length; i++) {
 			const preCheck = this.conversion.preChecks[i]
 
+			this.logger.debug(`PreCheck ${i}`)
+
 			// (maybe) copy to local folder, then change pointer to match the new location:
 			result.operationPointer = await this.copyToLocalTempFolder(result.operationPointer, preCheck)
 
@@ -591,12 +610,23 @@ class MediaConversionOperation {
 						? preCheckResult.stderr
 						: ''
 
+				this.logger.silly(handle.source + ' sourceStr ' + sourceStr)
+
 				const regex = new RegExp(handle.regex, handle.regexFlags)
 				const matches = sourceStr.match(regex)
 
 				if (matches) {
+					this.logger.debug(`PreCheck ${i} match /${handle.regex}/${handle.regexFlags}`)
 					// match
-					if (handle.effect?.onlyRunStepIfNoMatch) result.runStep = false
+					if (handle.effect?.onlyRunStepIfNoMatch) {
+						result.runStep = false
+
+						this.logger.debug(
+							`Skipping conversion step due to pre-check match condition: /${handle.regex}/${
+								handle.regexFlags ?? ''
+							}`
+						)
+					}
 
 					for (let matchIndex = 0; matchIndex < matches.length; matchIndex++) {
 						const match = matches[matchIndex]
@@ -605,14 +635,24 @@ class MediaConversionOperation {
 						result.replaceStrings[`{PRECHECK.${handleOutputIndex}.REGEX.${matchIndex}}`] = match
 					}
 				} else {
+					this.logger.debug(`PreCheck ${i} no-match /${handle.regex}/${handle.regexFlags}`)
 					// no match
-					if (handle.effect?.onlyRunStepIfMatch) result.runStep = false
+					if (handle.effect?.onlyRunStepIfMatch) {
+						result.runStep = false
+						this.logger.debug(
+							`Skipping conversion step due to pre-check no-match condition: /${handle.regex}/${
+								handle.regexFlags ?? ''
+							}`
+						)
+					}
 				}
 			}
 
 			// end
 			reportPreCheck(1)
 		}
+
+		this.logger.debug(`PreChecks done`)
 
 		return result
 	}
@@ -645,7 +685,7 @@ class MediaConversionOperation {
 			let stdout = ''
 			let stderr = ''
 			spawnProcess(
-				this.conversion.executable,
+				preCheck.executable,
 				args,
 				() => resolve({ stdout, stderr }), // On Done
 				(err) => reject(err), // On Error
@@ -728,7 +768,7 @@ class MediaConversionOperation {
 	 * Copy from local temp folder to final target and cleanup, if needed
 	 */
 	private async copyFromTempToTarget(operationPointer: OperationPointer): Promise<void> {
-		if (this.isFinalStep && operationPointer.isTemporary) {
+		if (this.isFinalStep && (operationPointer.isTemporary || operationPointer.isSource)) {
 			await this.copyFile(
 				operationPointer.lookup,
 				this.parent.lookupTarget,
@@ -961,7 +1001,10 @@ class MediaConversionOperation {
 interface OperationPointer {
 	lookup: LookupFilePackageContainer<UniversalVersion>
 	packageContainer: PackageContainerOnPackage
+	/** True if a temporary storage */
 	isTemporary: boolean
+	/** True if the original source */
+	isSource?: boolean
 }
 const noop = () => {
 	// nothing
