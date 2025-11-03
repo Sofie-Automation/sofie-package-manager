@@ -60,6 +60,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		apiKeyRead: '',
 		apiKeyWrite: '',
 		cleanFileAge: -1,
+		matchFilenamesWithoutExtension: false,
 	},
 	packageManager: {
 		coreHost: '',

@@ -66,6 +66,11 @@ const httpServerArguments = defineArguments({
 		default: process.env.HTTP_SERVER_BASE_PATH || './fileStorage',
 		describe: 'The internal path to use for file storage',
 	},
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, will match filenames ignoring their file extensions',
+	},
 })
 /** CLI-argument-definitions for the Package Manager process */
 const packageManagerArguments = defineArguments({
@@ -369,6 +374,7 @@ export interface HTTPServerConfig {
 		apiKeyWrite: string | undefined
 		/** Clean up (remove) files older than this age (in seconds). 0 or -1 means that it's disabled. */
 		cleanFileAge: number
+		matchFilenamesWithoutExtension: boolean
 	}
 }
 export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
@@ -391,6 +397,7 @@ export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
 			apiKeyRead: argv.apiKeyRead,
 			apiKeyWrite: argv.apiKeyWrite,
 			cleanFileAge: argv.cleanFileAge,
+			matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 		},
 	}
 }
