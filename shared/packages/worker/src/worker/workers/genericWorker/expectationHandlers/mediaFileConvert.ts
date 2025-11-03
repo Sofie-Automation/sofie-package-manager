@@ -846,7 +846,7 @@ class MediaConversionOperation {
 		context: string,
 		onProgress: ProgressPart
 	) {
-		const wip = await doFileCopyExpectation(this.exp, fromPackageContainer, toPackageContainer)
+		const wip = await doFileCopyExpectation(this.parent.worker, this.exp, fromPackageContainer, toPackageContainer)
 		if (!wip) throw new Error(`Unable to do file copy, wip is null (${context})`)
 		this.subWorkInProgress = wip
 		await new Promise((resolve, reject) => {

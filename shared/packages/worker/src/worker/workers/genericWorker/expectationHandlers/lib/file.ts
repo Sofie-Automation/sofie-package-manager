@@ -9,6 +9,7 @@ import {
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	startTimer,
+	resolveFileWithoutExtension,
 } from '@sofie-package-manager/api'
 import {
 	isATEMAccessorHandle,
@@ -156,6 +157,7 @@ export async function isFileFulfilled(
 	}
 }
 export async function doFileCopyExpectation(
+	worker: BaseWorker,
 	exp: Expectation.FileCopy | Expectation.FileCopyProxy | Expectation.MediaFileConvert,
 	lookupSource: LookupPackageContainer<UniversalVersion>,
 	lookupTarget: LookupPackageContainer<UniversalVersion>
@@ -206,10 +208,30 @@ export async function doFileCopyExpectation(
 				lookupSource.handle
 			)
 
-			const sourcePath = sourceHandle.fullPath
-			const targetPath = exp.workOptions.useTemporaryFilePath
-				? targetHandle.temporaryFilePath
-				: targetHandle.fullPath
+			let sourcePath: string
+			let targetPath: string
+			if (worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
+				const resolved = await resolveFileWithoutExtension(sourceHandle.fullPath)
+				switch (resolved.result) {
+					case 'found':
+						sourcePath = resolved.fullPath
+						targetPath = exp.workOptions.useTemporaryFilePath
+							? targetHandle.temporaryFilePath
+							: targetHandle.fullPath + resolved.extension
+						break
+					case 'notFound':
+						throw new Error(`File not found: "${sourceHandle.fullPath}"`)
+					case 'multiple':
+						throw new Error(`Multiple files found matching: "${sourceHandle.fullPath}"`)
+					case 'error':
+						throw resolved.error
+				}
+			} else {
+				sourcePath = sourceHandle.fullPath
+				targetPath = exp.workOptions.useTemporaryFilePath
+					? targetHandle.temporaryFilePath
+					: targetHandle.fullPath
+			}
 
 			copying = roboCopyFile(sourcePath, targetPath, (progress: number) => {
 				workInProgress._reportProgress(actualSourceVersionHash, progress / 100)
