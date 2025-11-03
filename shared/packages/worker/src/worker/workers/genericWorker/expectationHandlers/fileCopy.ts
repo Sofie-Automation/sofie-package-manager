@@ -73,7 +73,7 @@ export const FileCopy: ExpectationHandlerGenericWorker = {
 		const lookupTarget = await lookupCopyTargets(worker, exp)
 		if (!lookupTarget.ready) throw new Error(`Can't start working due to target: ${lookupTarget.reason.tech}`)
 
-		const workInProgress = await doFileCopyExpectation(exp, lookupSource, lookupTarget)
+		const workInProgress = await doFileCopyExpectation(worker, exp, lookupSource, lookupTarget)
 		if (workInProgress === null) {
 			throw new Error(
 				`FileCopy.workOnExpectation: Unsupported accessor source-target pair "${lookupSource.accessor.type}"-"${lookupTarget.accessor.type}"`
