@@ -97,8 +97,12 @@ export class FileStorage extends Storage {
 	> {
 		let fullPath = path.join(this._basePath, paramPath)
 
-		// If file does not exist, try to resolve by extension
 		if (!(await this.exists(fullPath))) {
+			if (!this.config.httpServer.matchFilenamesWithoutExtension) {
+				return { found: false, code: 404, reason: 'Package not found' }
+			}
+
+			// If file does not exist, try to resolve by extension
 			const dir = path.dirname(fullPath)
 			const base = path.basename(fullPath)
 
