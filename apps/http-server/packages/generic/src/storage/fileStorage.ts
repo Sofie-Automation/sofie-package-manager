@@ -4,7 +4,12 @@ import { promisify } from 'util'
 import mime from 'mime-types'
 import prettyBytes from 'pretty-bytes'
 import { asyncPipe, CTXPost } from '../lib'
-import { betterPathResolve, HTTPServerConfig, LoggerInstance } from '@sofie-package-manager/api'
+import {
+	betterPathResolve,
+	HTTPServerConfig,
+	LoggerInstance,
+	resolveFileWithoutExtension,
+} from '@sofie-package-manager/api'
 import { BadResponse, PackageInfo, ResponseMeta, Storage } from './storage'
 import { Readable } from 'stream'
 
@@ -99,23 +104,18 @@ export class FileStorage extends Storage {
 
 		// If file does not exist, try to resolve by extension
 		if (!(await this.exists(fullPath))) {
-			const dir = path.dirname(fullPath)
-			const base = path.basename(fullPath)
+			const resolution = await resolveFileWithoutExtension(fullPath)
 
-			try {
-				const files = await fsReaddir(dir)
-				const matches = files.filter((f) => f.startsWith(base + '.'))
-
-				if (matches.length === 1) {
-					fullPath = path.join(dir, matches[0])
-				} else if (matches.length > 1) {
-					// HTTP 409 Conflict
+			switch (resolution.result) {
+				case 'found':
+					fullPath = resolution.fullPath
+					break
+				case 'multiple':
 					return { found: false, code: 409, reason: 'Multiple files found' }
-				} else {
+				case 'notFound':
 					return { found: false, code: 404, reason: 'Package not found' }
-				}
-			} catch {
-				return { found: false, code: 500, reason: 'File system error' }
+				case 'error':
+					return { found: false, code: 500, reason: 'File system error' }
 			}
 		}
 		let mimeType = mime.lookup(fullPath)
