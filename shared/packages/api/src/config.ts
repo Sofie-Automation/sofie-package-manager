@@ -21,6 +21,11 @@ export const processOptions = defineArguments({
 		describe: 'Set to true to allow all SSL certificates (only use this in a safe, local environment)',
 	},
 	certificates: { type: 'string', describe: 'SSL Certificates' },
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, will match filenames ignoring their file extensions',
+	},
 })
 /** CLI-argument-definitions for the Workforce process */
 const workforceArguments = defineArguments({
@@ -62,11 +67,6 @@ const httpServerArguments = defineArguments({
 		type: 'string',
 		default: process.env.HTTP_SERVER_BASE_PATH || './fileStorage',
 		describe: 'The internal path to use for file storage',
-	},
-	matchFilenamesWithoutExtension: {
-		type: 'boolean',
-		default: process.env.MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
-		describe: 'If true, will match filenames ignoring their file extensions',
 	},
 })
 /** CLI-argument-definitions for the Package Manager process */
@@ -334,12 +334,14 @@ export interface ProcessConfig {
 	unsafeSSL: boolean
 	/** Paths to certificates to load, for SSL-connections */
 	certificates: string[]
+	matchFilenamesWithoutExtension: boolean
 }
 export function getProcessConfig(argv: {
 	logPath: string | undefined
 	logLevel: string | undefined
 	unsafeSSL: boolean
 	certificates: string | undefined
+	matchFilenamesWithoutExtension: boolean
 }): ProcessConfig {
 	const certs: string[] = (argv.certificates || process.env.CERTIFICATES || '').split(';') || []
 	return {
@@ -347,6 +349,7 @@ export function getProcessConfig(argv: {
 		logLevel: argv.logLevel,
 		unsafeSSL: argv.unsafeSSL,
 		certificates: _.compact(certs),
+		matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 	}
 }
 // Configuration for the Workforce Application: ------------------------------
@@ -385,7 +388,6 @@ export interface HTTPServerConfig {
 		apiKeyWrite: string | undefined
 		/** Clean up (remove) files older than this age (in seconds). 0 or -1 means that it's disabled. */
 		cleanFileAge: number
-		matchFilenamesWithoutExtension: boolean
 	}
 }
 export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
@@ -408,7 +410,6 @@ export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
 			apiKeyRead: argv.apiKeyRead,
 			apiKeyWrite: argv.apiKeyWrite,
 			cleanFileAge: argv.cleanFileAge,
-			matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 		},
 	}
 }
