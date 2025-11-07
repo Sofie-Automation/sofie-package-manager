@@ -246,10 +246,10 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				let inputPath: string
 				let pipeStdin = false
 				if (isLocalFolderAccessorHandle(sourceHandle)) {
-					inputPath = sourceHandle.fullPath
+					inputPath = await sourceHandle.getResolvedFullPath()
 				} else if (isFileShareAccessorHandle(sourceHandle)) {
 					await sourceHandle.prepareFileAccess()
-					inputPath = sourceHandle.fullPath
+					inputPath = await sourceHandle.getResolvedFullPath()
 				} else if (isHTTPAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullUrl
 				} else if (isHTTPProxyAccessorHandle(sourceHandle)) {

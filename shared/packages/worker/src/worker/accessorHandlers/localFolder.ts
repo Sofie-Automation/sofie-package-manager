@@ -60,6 +60,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	private content: Content
 	protected workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
 	private accessor: AccessorOnPackage.LocalFolder
+	private _resolvedFullPath: string | undefined
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.LocalFolder>) {
 		super({
@@ -88,6 +89,40 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	/** Full path to the package */
 	get fullPath(): string {
 		return this.getFullPath(this.filePath)
+	}
+	/**
+	 * Get the resolved full path to the package.
+	 * If matchFilenamesWithoutExtension is enabled, this will resolve the path to include the file extension.
+	 * For FFmpeg/FFprobe operations, use this instead of fullPath.
+	 * The result is memoized after the first call.
+	 */
+	async getResolvedFullPath(): Promise<string> {
+		if (this._resolvedFullPath !== undefined) {
+			return this._resolvedFullPath
+		}
+
+		const fullPath = this.fullPath
+
+		// If matchFilenamesWithoutExtension is disabled, just return the fullPath
+		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
+			this._resolvedFullPath = fullPath
+			return this._resolvedFullPath
+		}
+
+		// Resolve the file with any extension
+		const resolution = await resolveFileWithoutExtension(fullPath)
+
+		switch (resolution.result) {
+			case 'found':
+				this._resolvedFullPath = resolution.fullPath
+				return this._resolvedFullPath
+			case 'multiple':
+				throw new Error(`Multiple files found matching "${fullPath}": ${resolution.matches.join(', ')}`)
+			case 'notFound':
+				throw new Error(`File not found: "${fullPath}"`)
+			case 'error':
+				throw new Error(`Error resolving file "${fullPath}": ${stringifyError(resolution.error, true)}`)
+		}
 	}
 	checkHandleBasic(): AccessorHandlerCheckHandleBasicResult {
 		if (this.accessor.type !== Accessor.AccessType.LOCAL_FOLDER) {
@@ -156,7 +191,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	}
 	async checkPackageReadAccess(): Promise<AccessorHandlerCheckPackageReadAccessResult> {
 		try {
-			const actualFullPath = await this.findMatchingPath(this.fullPath)
+			const actualFullPath = await this.getResolvedFullPath()
 			await fsAccess(actualFullPath, fs.constants.R_OK)
 			// The file exists and can be read
 		} catch (err) {
@@ -176,7 +211,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	async tryPackageRead(): Promise<AccessorHandlerTryPackageReadResult> {
 		try {
 			// Check if we can open the file for reading:
-			const actualFullPath = await this.findMatchingPath(this.fullPath)
+			const actualFullPath = await this.getResolvedFullPath()
 			const fd = await fsOpen(actualFullPath, 'r')
 
 			// If that worked, we seem to have read access.
@@ -225,7 +260,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		return { success: true }
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FileOnDisk> {
-		const actualFullPath = await this.findMatchingPath(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
 		const stat = await fsStat(actualFullPath)
 		return this.convertStatToVersion(stat)
 	}
@@ -424,24 +459,5 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	}
 	private _getFilePath(): string | undefined {
 		return this.accessor.filePath || this.content.filePath || this.content.path
-	}
-
-	public async findMatchingPath(fullPath: string): Promise<string> {
-		// If matchFilenamesWithoutExtension is enabled, try to find a file with any extension
-		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
-			return fullPath
-		}
-		const resolution = await resolveFileWithoutExtension(fullPath)
-
-		switch (resolution.result) {
-			case 'found':
-				return resolution.fullPath
-			case 'multiple':
-				throw new Error(`Multiple files found matching "${fullPath}": ${resolution.matches.join(', ')}`)
-			case 'notFound':
-				throw new Error(`File not found: "${fullPath}"`)
-			case 'error':
-				throw new Error(`Error resolving file "${fullPath}": ${stringifyError(resolution.error, true)}`)
-		}
 	}
 }

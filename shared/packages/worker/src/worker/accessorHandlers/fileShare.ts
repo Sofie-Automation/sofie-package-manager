@@ -75,6 +75,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	private content: Content
 	protected workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
 	private accessor: AccessorOnPackage.FileShare
+	private _resolvedFullPath: string | undefined
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.FileShare>) {
 		super({
@@ -112,6 +113,40 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	/** Full path to the package */
 	get fullPath(): string {
 		return this.getFullPath(this.filePath)
+	}
+	/**
+	 * Get the resolved full path to the package.
+	 * If matchFilenamesWithoutExtension is enabled, this will resolve the path to include the file extension.
+	 * For FFmpeg/FFprobe operations, use this instead of fullPath.
+	 * The result is memoized after the first call.
+	 */
+	async getResolvedFullPath(): Promise<string> {
+		if (this._resolvedFullPath !== undefined) {
+			return this._resolvedFullPath
+		}
+
+		const fullPath = this.fullPath
+
+		// If matchFilenamesWithoutExtension is disabled, just return the fullPath
+		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
+			this._resolvedFullPath = fullPath
+			return this._resolvedFullPath
+		}
+
+		// Resolve the file with any extension
+		const resolution = await resolveFileWithoutExtension(fullPath)
+
+		switch (resolution.result) {
+			case 'found':
+				this._resolvedFullPath = resolution.fullPath
+				return this._resolvedFullPath
+			case 'multiple':
+				throw new Error(`Multiple files found matching "${fullPath}": ${resolution.matches.join(', ')}`)
+			case 'notFound':
+				throw new Error(`File not found: "${fullPath}"`)
+			case 'error':
+				throw new Error(`Error resolving file "${fullPath}": ${stringifyError(resolution.error, true)}`)
+		}
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
 		if (!isFileShareSupportedOnCurrentPlatform()) return false
@@ -261,7 +296,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 
 		try {
 			// Check if we can open the file for reading:
-			const actualFullPath = await this.findMatchingPath(this.fullPath)
+			const actualFullPath = await this.getResolvedFullPath()
 			const fd = await fsOpen(actualFullPath, 'r')
 
 			// If that worked, we seem to have read access.
@@ -307,7 +342,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		await this.prepareFileAccess()
 
 		try {
-			const actualFullPath = await this.findMatchingPath(this.fullPath)
+			const actualFullPath = await this.getResolvedFullPath()
 			await fsAccess(actualFullPath, fs.constants.R_OK)
 			// The file exists
 		} catch (err) {
@@ -343,7 +378,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FileOnDisk> {
 		await this.prepareFileAccess()
-		const actualFullPath = await this.findMatchingPath(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
 		const stat = await fsStat(actualFullPath)
 		return this.convertStatToVersion(stat)
 	}
@@ -357,7 +392,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 
 	async getPackageReadStream(): Promise<{ readStream: NodeJS.ReadableStream; cancel: () => void }> {
 		await this.prepareFileAccess()
-		const actualFullPath = await this.findMatchingPath(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
 		const readStream = await new Promise<fs.ReadStream>((resolve, reject) => {
 			const rs: fs.ReadStream = fs.createReadStream(actualFullPath)
 			rs.once('error', reject)
@@ -782,25 +817,6 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	}
 	private _getFilePath(): string | undefined {
 		return this.accessor.filePath || this.content.filePath
-	}
-
-	public async findMatchingPath(fullPath: string): Promise<string> {
-		// If matchFilenamesWithoutExtension is enabled, try to find a file with any extension
-		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
-			return fullPath
-		}
-		const resolution = await resolveFileWithoutExtension(fullPath)
-
-		switch (resolution.result) {
-			case 'found':
-				return resolution.fullPath
-			case 'multiple':
-				throw new Error(`Multiple files found matching "${fullPath}": ${resolution.matches.join(', ')}`)
-			case 'notFound':
-				throw new Error(`File not found: "${fullPath}"`)
-			case 'error':
-				throw new Error(`Error resolving file "${fullPath}": ${stringifyError(resolution.error, true)}`)
-		}
 	}
 }
 interface MappedDriveLetters {

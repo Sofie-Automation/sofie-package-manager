@@ -74,13 +74,11 @@ export function scanWithFFProbe(
 			let filePath: string
 			let pipeStdin = false
 			if (isLocalFolderAccessorHandle(sourceHandle)) {
-				// Resolve the path with extension if matchFilenamesWithoutExtension is enabled
-				inputPath = await sourceHandle.findMatchingPath(sourceHandle.fullPath)
+				inputPath = await sourceHandle.getResolvedFullPath()
 				filePath = sourceHandle.filePath
 			} else if (isFileShareAccessorHandle(sourceHandle)) {
 				await sourceHandle.prepareFileAccess()
-				// Resolve the path with extension if matchFilenamesWithoutExtension is enabled
-				inputPath = await sourceHandle.findMatchingPath(sourceHandle.fullPath)
+				inputPath = await sourceHandle.getResolvedFullPath()
 				filePath = sourceHandle.filePath
 			} else if (isHTTPAccessorHandle(sourceHandle)) {
 				inputPath = sourceHandle.fullUrl
@@ -847,13 +845,11 @@ type FFMpegSupportedSourceHandles =
 async function getFFMpegInputArgsFromAccessorHandle(sourceHandle: FFMpegSupportedSourceHandles): Promise<string[]> {
 	const args: string[] = []
 	if (isLocalFolderAccessorHandle(sourceHandle)) {
-		// Resolve the path with extension if matchFilenamesWithoutExtension is enabled
-		const resolvedPath = await sourceHandle.findMatchingPath(sourceHandle.fullPath)
+		const resolvedPath = await sourceHandle.getResolvedFullPath()
 		args.push(`-i`, escapeFilePath(resolvedPath))
 	} else if (isFileShareAccessorHandle(sourceHandle)) {
 		await sourceHandle.prepareFileAccess()
-		// Resolve the path with extension if matchFilenamesWithoutExtension is enabled
-		const resolvedPath = await sourceHandle.findMatchingPath(sourceHandle.fullPath)
+		const resolvedPath = await sourceHandle.getResolvedFullPath()
 		args.push(`-i`, escapeFilePath(resolvedPath))
 	} else if (isHTTPAccessorHandle(sourceHandle)) {
 		args.push(`-i`, sourceHandle.fullUrl)
