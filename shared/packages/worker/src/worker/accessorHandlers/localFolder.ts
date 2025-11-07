@@ -426,7 +426,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		return this.accessor.filePath || this.content.filePath || this.content.path
 	}
 
-	private async findMatchingPath(fullPath: string): Promise<string> {
+	public async findMatchingPath(fullPath: string): Promise<string> {
 		// If matchFilenamesWithoutExtension is enabled, try to find a file with any extension
 		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
 			return fullPath

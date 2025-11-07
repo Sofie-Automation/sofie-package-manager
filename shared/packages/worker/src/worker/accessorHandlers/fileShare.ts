@@ -784,7 +784,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		return this.accessor.filePath || this.content.filePath
 	}
 
-	private async findMatchingPath(fullPath: string): Promise<string> {
+	public async findMatchingPath(fullPath: string): Promise<string> {
 		// If matchFilenamesWithoutExtension is enabled, try to find a file with any extension
 		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
 			return fullPath
