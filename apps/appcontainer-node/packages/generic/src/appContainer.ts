@@ -296,6 +296,7 @@ export class AppContainer {
 				this.config.process.certificates.length
 					? `--certificates=${this.config.process.certificates.join(';')}`
 					: '',
+				this.config.process.matchFilenamesWithoutExtension ? '--matchFilenamesWithoutExtension=true' : '',
 
 				this.config.appContainer.worker.windowsDriveLetters
 					? `--windowsDriveLetters=${this.config.appContainer.worker.windowsDriveLetters?.join(';')}`
