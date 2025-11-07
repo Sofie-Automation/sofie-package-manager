@@ -2208,6 +2208,7 @@ __metadata:
     "@types/winston": "npm:^2.3.9"
     "@types/ws": "npm:^8.5.4"
     jest: "npm:*"
+    kairos-lib: "npm:^0.2.0"
     rimraf: "npm:^5.0.5"
     underscore: "npm:^1.12.0"
     winston: "npm:^3.5.1"
@@ -2252,6 +2253,7 @@ __metadata:
     form-data: "npm:^4.0.0"
     jest: "npm:*"
     jest-mock-extended: "npm:^3.0.5"
+    kairos-connection: "npm:^0.2.0"
     node-fetch: "npm:^2.6.1"
     p-queue: "npm:^6.6.2"
     proper-lockfile: "npm:^4.1.2"
@@ -8861,6 +8863,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"kairos-connection@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "kairos-connection@npm:0.2.0"
+  dependencies:
+    kairos-lib: "npm:0.2.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/521fa27e216995c885494b3f059d4436484f877019acfffb7f5ecef4d4249ce868dfd3e757372813c0ca909dabf79beb1721fd9fd3c89b24e3b9d320d8f86423
+  languageName: node
+  linkType: hard
+
+"kairos-lib@npm:0.2.0, kairos-lib@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "kairos-lib@npm:0.2.0"
+  dependencies:
+    tslib: "npm:^2.8.1"
+  checksum: 10/f09b85dec6a7fe1bc6bc238c4605d778c166c40c7f44bc46bef5ba9ceb9fe302ff24ea36e4c612d849516b89b58244b981d34bd56206dede73a1998e8eb5c15d
+  languageName: node
+  linkType: hard
+
 "keygrip@npm:~1.1.0":
   version: 1.1.0
   resolution: "keygrip@npm:1.1.0"
@@ -11082,7 +11103,7 @@ __metadata:
     node-gyp: "npm:^11.4.2"
     rimraf: "npm:^5.0.5"
     ts-jest: "npm:^29.0.3"
-    typescript: "npm:~4.9"
+    typescript: "npm:^5.7.3"
     underscore: "npm:^1.13.6"
   languageName: unknown
   linkType: soft
@@ -13633,7 +13654,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.6.3":
+"tslib@npm:^2.6.3, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
@@ -13819,7 +13840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^3 || ^4, typescript@npm:~4.9":
+"typescript@npm:^3 || ^4":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -13839,7 +13860,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^3 || ^4#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A~4.9#optional!builtin<compat/typescript>":
+"typescript@npm:^5.7.3":
+  version: 5.9.3
+  resolution: "typescript@npm:5.9.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/c089d9d3da2729fd4ac517f9b0e0485914c4b3c26f80dc0cffcb5de1719a17951e92425d55db59515c1a7ddab65808466debb864d0d56dcf43f27007d0709594
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^3 || ^4#optional!builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#optional!builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
@@ -13856,6 +13887,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/760f7d92fb383dbf7dee2443bf902f4365db2117f96f875cf809167f6103d55064de973db9f78fe8f31ec08fff52b2c969aee0d310939c0a3798ec75d0bca2e1
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>":
+  version: 5.9.3
+  resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5adc0c"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/5d416ad4f2ea564f515a3f919e901edbfa4b497cc17dd325c5726046c3eef7ed22d1f59c787267d478311f6f0a265ff790f8a6c7e9df3ea3471458f5ec81e8b7
   languageName: node
   linkType: hard
 
