@@ -49,6 +49,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		unsafeSSL: false,
 		certificates: [],
 		logLevel: LogLevel.INFO,
+		matchFilenamesWithoutExtension: false,
 	},
 	workforce: {
 		port: null,
@@ -222,6 +223,7 @@ export async function prepareTestEnvironment(debugLogging: boolean): Promise<Tes
 			logPath: undefined,
 			unsafeSSL: false,
 			logLevel: debugLogging ? LogLevel.DEBUG : LogLevel.INFO,
+			matchFilenamesWithoutExtension: false,
 		},
 	}
 	initializeLogger(config)
