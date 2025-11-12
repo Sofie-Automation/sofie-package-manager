@@ -2,6 +2,8 @@
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { AccessorOnPackage, PackageContainerOnPackage } from './inputApi'
 import { AccessorId, ExpectationId, ExpectationManagerId, ExpectedPackageId } from './ids'
+// eslint-disable-next-line node/no-missing-import
+import { MediaRamRecRef, MediaStillRef } from 'kairos-lib'
 
 /*
  * This file contains definitions for Expectations, the internal data structure upon which the Package Manager operates.
@@ -29,6 +31,7 @@ export namespace Expectation {
 		| JsonDataCopy
 		| FileVerify
 		| RenderHTML
+		| PackageKairosLoadToRam
 
 	/** Defines the Expectation type, used to separate the different Expectations */
 	export enum Type {
@@ -44,6 +47,7 @@ export namespace Expectation {
 		PACKAGE_DEEP_SCAN = 'package_deep_scan',
 		PACKAGE_LOUDNESS_SCAN = 'package_loudness_scan',
 		PACKAGE_IFRAMES_SCAN = 'package_iframes_scan',
+		PACKAGE_KAIROS_LOAD_TO_RAM = 'package_kairos_load_to_ram',
 
 		QUANTEL_CLIP_COPY = 'quantel_clip_copy',
 		// QUANTEL_CLIP_SCAN = 'quantel_clip_scan',
@@ -232,6 +236,22 @@ export namespace Expectation {
 		endRequirement: {
 			targets: SpecificPackageContainerOnPackage.CorePackage[]
 			content: null // not using content, entries are stored using this.fromPackages
+			version: null
+		}
+		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay
+	}
+	/** Defines a package that should be loaded into RAM on a Kairos Vision mixer */
+	export interface PackageKairosLoadToRam extends Base {
+		type: Type.PACKAGE_KAIROS_LOAD_TO_RAM
+
+		startRequirement: {
+			sources: []
+		}
+		endRequirement: {
+			targets: SpecificPackageContainerOnPackage.KairosClip[]
+			content: {
+				ref: MediaRamRecRef | MediaStillRef
+			}
 			version: null
 		}
 		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay
@@ -489,6 +509,12 @@ export namespace Expectation {
 				[accessorId: AccessorId]: AccessorOnPackage.Quantel
 			}
 		}
+		/** Defines a PackageContainer for Kairos clips, stored on a Kairos Vision Mixer servers. */
+		export interface KairosClip extends PackageContainerOnPackage {
+			accessors: {
+				[accessorId: AccessorId]: AccessorOnPackage.KairosClip
+			}
+		}
 
 		/** Defines a PackageContainer for reading JSON data. */
 		export interface JSONDataSource extends PackageContainerOnPackage {
@@ -560,6 +586,7 @@ export namespace Expectation {
 			| ExpectedATEMFile
 			| ExpectedJSONData
 			| ExpectedFTPFile
+			| ExpectedUnspecified
 		export type Any =
 			| FileOnDisk
 			| MediaFileThumbnail
@@ -570,6 +597,7 @@ export namespace Expectation {
 			| ATEMFile
 			| JSONData
 			| FTPFile
+			| Unspecified
 		export interface Base {
 			type: Type
 		}
@@ -586,6 +614,7 @@ export namespace Expectation {
 			ATEM_FILE = 'atem_file',
 			JSON_DATA = 'json_data',
 			FTP_FILE = 'ftp_file',
+			UNSPECIFIED = 'unspecified',
 		}
 		type ExpectedType<T extends Base> = Partial<T> & Pick<T, 'type'>
 
@@ -631,6 +660,7 @@ export namespace Expectation {
 			 * Supported placeholders:
 			 * - {SOURCE} - replaced with the full path of the source file
 			 * - {TARGET} - replaced with the full path of the target file
+			 * - {PRECHECK.0.REGEX.1} replaced with capture group from preCheck
 			 */
 			args: string[]
 
@@ -651,6 +681,51 @@ export namespace Expectation {
 			 * This property is ignored in the final step.
 			 */
 			outputFileName?: string
+
+			/**
+			 * If set, defines one or more operation to run _before_ a conversion step,
+			 * in order to gather information used to modify the conversion step or potentially skip it.
+			 */
+			preChecks?: {
+				/**
+				 * Path to the executable.
+				 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+				 */
+				executable: string
+				/**
+				 * Arguments to the executable.
+				 * Supported placeholders:
+				 * - {SOURCE} - replaced with the full path of the source file
+				 */
+				args: string[]
+				/**
+				 * Set to true if the executable needs the source to be locally available
+				 * (So PM will copy the source to a local temp folder before running the executable)
+				 */
+				needsLocalSource?: boolean
+
+				/**  */
+				handleOutput: {
+					source: 'stdout' | 'stderr'
+
+					/**
+					 * Regular Expression to run the source into
+					 * You can use capturing groups here, to be used in the conversion step args
+					 * like so: "{PRECHECK.0.REGEX.1}" (first index is the handleOutput index, second is the capture group index)
+					 * */
+					regex: string
+
+					/** Options to use with for the Regular Expression (i/g/m) */
+					regexFlags?: string // igm
+
+					effect?: {
+						/** If true, will only run this conversion step if regex matches. (If undefined, step will run by default) */
+						onlyRunStepIfMatch?: boolean
+						/** If true, will only run this conversion step if regex doesn't match. (If undefined, step will run by default) */
+						onlyRunStepIfNoMatch?: boolean
+					}
+				}[]
+			}[]
 		}
 		export type ExpectedMediaFileConvert = MediaFileConvert // ExpectedType<MediaFileConvert>
 
@@ -726,5 +801,11 @@ export namespace Expectation {
 			modifiedDate: number // timestamp (ms)
 		}
 		export type ExpectedFTPFile = ExpectedType<FTPFile>
+
+		/** Only used when there is no version information available! */
+		export interface Unspecified extends Base {
+			type: Type.UNSPECIFIED
+		}
+		export type ExpectedUnspecified = ExpectedType<Unspecified>
 	}
 }

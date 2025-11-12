@@ -3,6 +3,7 @@ import { ffmpegInterpretProgress } from './ffmpeg'
 import { stringifyError } from '@sofie-package-manager/api'
 
 export interface SpawnedProcess {
+	execProcess: ChildProcessWithoutNullStreams
 	cancel: () => void
 }
 /**
@@ -17,7 +18,6 @@ export async function spawnProcess(
 	onDone: () => void,
 	onError: (err?: any) => void,
 	onProgress: (progress: number) => void,
-	// onStart?: (ffMpegProcess: ChildProcessWithoutNullStreams) => void,
 	log?: (str: string) => void
 ): Promise<SpawnedProcess> {
 	const processName = `process-name: ${executable}`
@@ -75,7 +75,7 @@ export async function spawnProcess(
 				onDone()
 			} else {
 				// workInProgress._reportError(new Error(`FFMpeg exit code ${code}: ${lastFewLines.join('\n')}`))
-				onError(new Error(`${processName} exit code ${code}: ${lastFewLines.join('\n')}`))
+				onError(new Error(`${processName} exit code ${code}: ${lastFewLines.join('\n')} (${args.join(' ')})`))
 			}
 		}
 	}
@@ -111,6 +111,7 @@ export async function spawnProcess(
 	}
 
 	return {
+		execProcess,
 		cancel: () => {
 			// Called if the process should be cancelled
 

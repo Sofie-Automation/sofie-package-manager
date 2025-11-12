@@ -36,6 +36,8 @@ function getAccessorTypePriority(accessor: AccessorOnPackage.Any): number {
 		return 99999
 	} else if (accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE) {
 		return 99999
+	} else if (accessor.type === Accessor.AccessType.KAIROS_CLIP) {
+		return 99999
 	} else {
 		assertNever(accessor.type)
 		return 99999
@@ -115,4 +117,9 @@ export function isEqual(a: unknown, b: unknown): boolean {
 	} else {
 		return a === b
 	}
+}
+export async function sleep(duration: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(() => resolve(), duration)
+	})
 }

@@ -29,6 +29,7 @@ import {
 	generatePackageLoudness,
 	generateHTMLRender,
 	generatePackageIframes,
+	generatePackageKairosLoadToRam,
 } from './expectations-lib'
 import { getSmartbullExpectedPackages, shouldBeIgnored } from './smartbull'
 import { TEMPORARY_STORAGE_ID } from './lib'
@@ -288,6 +289,15 @@ function getSideEffectOfExpectation(
 			expectations[loudness.id] = loudness
 		}
 
+		if (expectation0.sideEffect?.kairosLoadToRam) {
+			const kairosLoadToRam = generatePackageKairosLoadToRam(
+				packageContainers,
+				expectation,
+				expectation0.sideEffect.kairosLoadToRam,
+				settings
+			)
+			if (kairosLoadToRam) expectations[kairosLoadToRam.id] = kairosLoadToRam
+		}
 		if (expectation0.sideEffect?.iframes) {
 			const iframes = generatePackageIframes(expectation, settings)
 			expectations[iframes.id] = iframes
