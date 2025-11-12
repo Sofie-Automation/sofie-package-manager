@@ -36,6 +36,7 @@ import {
 	getLogLevel,
 	Cost,
 	LeveledLogMethodLight,
+	isRunningInDevelopment,
 } from '@sofie-package-manager/api'
 
 import { WorkforceAPI } from './workforceApi'
@@ -332,10 +333,7 @@ export class AppContainer {
 
 			return args
 		}
-		if (
-			path.basename(process.execPath) === 'node.exe' || // windows
-			path.basename(process.execPath) === 'node' // linux
-		) {
+		if (isRunningInDevelopment()) {
 			// Process runs as a node process, we're probably in development mode.
 			const appType = protectString<AppType>('worker')
 			this.availableApps.set(appType, {
@@ -642,8 +640,7 @@ export class AppContainer {
 		availableApp: AvailableAppInfo,
 		useCriticalOnlyMode: boolean
 	): cp.ChildProcess {
-		const isRunningInDevelopmentMode = process.execPath.endsWith('node.exe') || process.execPath.endsWith('node')
-		const cwd = isRunningInDevelopmentMode
+		const cwd = isRunningInDevelopment()
 			? undefined // Process runs as a node process, we're probably in development mode.
 			: path.dirname(process.execPath) // Process runs as a node process, we're probably in development mode.
 
