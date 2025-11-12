@@ -3,6 +3,8 @@ const promisify = require('util').promisify
 const cp = require('child_process')
 const path = require('path')
 const os = require('os')
+// eslint-disable-next-line node/no-extraneous-require
+const pkgFetch = require('@yao-pkg/pkg-fetch')
 // const nexe = require('nexe')
 const exec = promisify(cp.exec)
 
@@ -77,6 +79,17 @@ const packageJson = require(path.join(basePath, '/package.json'))
 
 		log(`  Copying: ${source} to ${target}`)
 		await fse.copy(source, target)
+	}
+
+	{
+		log(`Populating pkg cache`)
+
+		// This needs to match the version used by `build-win32.js`
+		await pkgFetch.need({
+			platform: 'win32',
+			arch: 'x64',
+			nodeRange: 'node24',
+		})
 	}
 
 	log(`...done!`)
