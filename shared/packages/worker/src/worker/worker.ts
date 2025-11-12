@@ -12,13 +12,13 @@ import {
 	ReturnTypeRemoveExpectation,
 	ReturnTypeRunPackageContainerCronJob,
 	stringMaxLength,
-	WorkerAgentConfig,
+	WorkerConfig,
 } from '@sofie-package-manager/api'
 import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from './accessorHandlers/genericHandle'
 import { IWorkInProgress } from './lib/workInProgress'
 
 export interface GenericWorkerAgentAPI {
-	config: WorkerAgentConfig
+	config: WorkerConfig['worker']
 	location: WorkerLocation
 	/**
 	 * Acquire a read/write lock to a data point, then write the result of the callback to it.

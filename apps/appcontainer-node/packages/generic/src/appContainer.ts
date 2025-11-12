@@ -283,7 +283,7 @@ export class AppContainer {
 
 	private async discoverAvailableApps() {
 		const getWorkerArgs = (appId: AppId, pickUpCriticalExpectationsOnly: boolean): string[] => {
-			return [
+			const args: string[] = [
 				// Set initial loglevel to be same as appContainer:
 				`--logLevel=${getLogLevel()}`,
 
@@ -296,32 +296,41 @@ export class AppContainer {
 				this.config.process.certificates.length
 					? `--certificates=${this.config.process.certificates.join(';')}`
 					: '',
-
-				this.config.appContainer.worker.windowsDriveLetters
-					? `--windowsDriveLetters=${this.config.appContainer.worker.windowsDriveLetters?.join(';')}`
-					: '',
-				this.config.appContainer.worker.temporaryFolderPath
-					? `--temporaryFolderPath=${this.config.appContainer.worker.temporaryFolderPath}`
-					: '',
-				this.config.appContainer.worker.costMultiplier
-					? `--costMultiplier=${this.config.appContainer.worker.costMultiplier}`
-					: '',
-				this.config.appContainer.worker.considerCPULoad
-					? `--considerCPULoad=${this.config.appContainer.worker.considerCPULoad}`
-					: '',
-				this.config.appContainer.worker.resourceId
-					? `--resourceId=${this.config.appContainer.worker.resourceId}`
-					: '',
-				this.config.appContainer.worker.networkIds.length
-					? `--networkIds=${this.config.appContainer.worker.networkIds.join(';')}`
-					: '',
-				this.config.appContainer.worker.failurePeriodLimit
-					? `--failurePeriodLimit=${this.config.appContainer.worker.failurePeriodLimit}`
-					: '',
-				this.config.appContainer.worker.failurePeriod
-					? `--failurePeriod=${this.config.appContainer.worker.failurePeriod}`
-					: '',
 			]
+
+			const workerArgs = this.config.appContainer.worker
+			const keys = Object.keys(workerArgs) as (keyof AppContainerProcessConfig['appContainer']['worker'])[]
+			for (const key of keys) {
+				let argValue: string | undefined = undefined
+				if (key === 'windowsDriveLetters') {
+					argValue = workerArgs.windowsDriveLetters?.join(';')
+				} else if (key === 'temporaryFolderPath') {
+					argValue = workerArgs.temporaryFolderPath
+				} else if (key === 'costMultiplier') {
+					argValue = workerArgs.costMultiplier?.toString()
+				} else if (key === 'considerCPULoad') {
+					argValue = workerArgs.considerCPULoad?.toString()
+				} else if (key === 'resourceId') {
+					argValue = workerArgs.resourceId
+				} else if (key === 'networkIds') {
+					argValue = workerArgs.networkIds.join(';')
+				} else if (key === 'failurePeriodLimit') {
+					argValue = workerArgs.failurePeriodLimit?.toString()
+				} else if (key === 'failurePeriod') {
+					argValue = workerArgs.failurePeriod?.toString()
+				} else if (key === 'sourcePackageStabilityThreshold') {
+					argValue = workerArgs.sourcePackageStabilityThreshold?.toString()
+				} else if (key === 'pickUpCriticalExpectationsOnly') {
+					argValue = workerArgs.pickUpCriticalExpectationsOnly ? 'true' : 'false'
+				} else {
+					assertNever(key)
+					this.logger.error(`Unknown worker argument key: "${key}"=${workerArgs[key]}`)
+				}
+
+				if (argValue) args.push(`--${key}=${argValue}`)
+			}
+
+			return args
 		}
 		if (
 			path.basename(process.execPath) === 'node.exe' || // windows
