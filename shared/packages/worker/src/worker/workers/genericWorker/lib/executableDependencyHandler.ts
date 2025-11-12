@@ -65,10 +65,6 @@ export class ExecutableDependencyHandler {
 	}
 
 	async testFFExecutable(executable: string): Promise<string | null> {
-		if (executable.endsWith('.exe') && process.platform !== 'win32') {
-			executable = executable.slice(0, -4) // remove .exe
-		}
-
 		return new Promise<string | null>((resolve) => {
 			const execProcess = spawn(executable, ['-v'])
 

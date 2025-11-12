@@ -18,16 +18,8 @@ export interface AppContainerConfig {
 	/** Minimum number of critical workers to spin up */
 	minCriticalWorkerApps: number
 
-	worker: {
-		resourceId: string
-		networkIds: string[]
-		windowsDriveLetters: WorkerAgentConfig['windowsDriveLetters']
-		temporaryFolderPath: WorkerAgentConfig['temporaryFolderPath']
-		costMultiplier: number
-		considerCPULoad: number | null
-		failurePeriodLimit: number
-		failurePeriod: number
-	}
+	/** Arguments to be passed to spawned workers */
+	worker: WorkerAgentConfig
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace

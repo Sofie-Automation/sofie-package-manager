@@ -622,8 +622,7 @@ export namespace Expectation {
 		}
 		export interface ConversionStep {
 			/**
-			 * Path to the executable.
-			 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+			 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
 			 */
 			executable: string
 			/**
@@ -631,6 +630,7 @@ export namespace Expectation {
 			 * Supported placeholders:
 			 * - {SOURCE} - replaced with the full path of the source file
 			 * - {TARGET} - replaced with the full path of the target file
+			 * - {PRECHECK.0.REGEX.1} replaced with capture group from preCheck
 			 */
 			args: string[]
 
@@ -651,6 +651,50 @@ export namespace Expectation {
 			 * This property is ignored in the final step.
 			 */
 			outputFileName?: string
+
+			/**
+			 * If set, defines one or more operation to run _before_ a conversion step,
+			 * in order to gather information used to modify the conversion step or potentially skip it.
+			 */
+			preChecks?: {
+				/**
+				 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
+				 */
+				executable: string
+				/**
+				 * Arguments to the executable.
+				 * Supported placeholders:
+				 * - {SOURCE} - replaced with the full path of the source file
+				 */
+				args: string[]
+				/**
+				 * Set to true if the executable needs the source to be locally available
+				 * (So PM will copy the source to a local temp folder before running the executable)
+				 */
+				needsLocalSource?: boolean
+
+				/**  */
+				handleOutput: {
+					source: 'stdout' | 'stderr'
+
+					/**
+					 * Regular Expression to run the source into
+					 * You can use capturing groups here, to be used in the conversion step args
+					 * like so: "{PRECHECK.0.REGEX.1}" (first index is the handleOutput index, second is the capture group index)
+					 * */
+					regex: string
+
+					/** Options to use with for the Regular Expression (i/g/m) */
+					regexFlags?: string // igm
+
+					effect?: {
+						/** If true, will only run this conversion step if regex matches. (If undefined, step will run by default) */
+						onlyRunStepIfMatch?: boolean
+						/** If true, will only run this conversion step if regex doesn't match. (If undefined, step will run by default) */
+						onlyRunStepIfNoMatch?: boolean
+					}
+				}[]
+			}[]
 		}
 		export type ExpectedMediaFileConvert = MediaFileConvert // ExpectedType<MediaFileConvert>
 
