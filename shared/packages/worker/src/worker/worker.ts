@@ -197,6 +197,10 @@ export abstract class BaseWorker {
 		}
 		return data
 	}
+	/** Looks up executable alias and returns a path to the executable (as defined in --executableAliases CLI) */
+	public getExecutable(executableAlias: string): string | undefined {
+		return this.agentAPI.config.executableAliases[executableAlias]
+	}
 }
 export interface WorkerLocation {
 	/** The name/identifier of the computer that this runs on */

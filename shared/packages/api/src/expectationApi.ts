@@ -622,8 +622,7 @@ export namespace Expectation {
 		}
 		export interface ConversionStep {
 			/**
-			 * Path to the executable.
-			 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+			 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
 			 */
 			executable: string
 			/**
@@ -659,8 +658,7 @@ export namespace Expectation {
 			 */
 			preChecks?: {
 				/**
-				 * Path to the executable.
-				 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+				 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
 				 */
 				executable: string
 				/**

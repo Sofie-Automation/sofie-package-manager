@@ -186,6 +186,12 @@ const workerArgumentsGeneric = defineArguments({
 		default: parseInt(process.env.WORKER_FAILURE_PERIOD || '', 10) || 5 * 60 * 1000,
 		describe: 'This is the period of time used by "failurePeriodLimit" (milliseconds)',
 	},
+	executableAliases: {
+		type: 'string',
+		default: process.env.WORKER_EXECUTABLE_ALIASES || '',
+		describe:
+			'List of aliases for executables the worker can use. Format: "alias1=path to executable1;alias2=executable2"',
+	},
 })
 /** CLI-argument-definitions for the Worker process */
 const workerArguments = defineArguments({
@@ -458,6 +464,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			pickUpCriticalExpectationsOnly: parseArgBoolean(argv.pickUpCriticalExpectationsOnly) ?? false,
 			failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
 			failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
+			executableAliases: parseExecutableAliases(argv.executableAliases),
 		},
 	}
 }
@@ -497,6 +504,7 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 				pickUpCriticalExpectationsOnly: argv.pickUpCriticalExpectationsOnly,
 				failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
 				failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
+				executableAliases: parseExecutableAliases(argv.executableAliases),
 			},
 		},
 	}
@@ -623,6 +631,32 @@ function parseArgStringList(str: unknown): string[] {
 	}
 
 	return []
+}
+/**
+ * Parses a string of executable aliases into an object.
+ * The string should be in the format alias1=executable1;alias2=executable2
+ */
+function parseExecutableAliases(str: unknown): { [alias: string]: string } {
+	if (typeof str === 'string') {
+		const result: { [alias: string]: string } = {}
+
+		const statements = str.split(';')
+
+		for (const statement of statements) {
+			const words = statement.split('=')
+			if (words.length !== 2) continue
+
+			const [alias, executable] = words
+
+			if (alias && executable) {
+				result[alias] = executable
+			}
+		}
+
+		return result
+	}
+
+	return {}
 }
 
 function parseArgInteger(str: unknown): number | undefined {

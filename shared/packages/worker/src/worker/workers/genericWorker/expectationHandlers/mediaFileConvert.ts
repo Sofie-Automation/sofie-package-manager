@@ -47,15 +47,63 @@ export const MediaFileConvert: ExpectationHandlerGenericWorker = {
 		if (!isMediaFileConvert(exp)) throw new Error(`Wrong exp.type: "${exp.type}"`)
 
 		for (const conversion of exp.endRequirement.version.conversions) {
-			const status = await worker.executables.getExecutableStatus(conversion.executable)
-			if (status !== null) {
-				return {
-					support: false,
-					knownReason: true,
-					reason: {
-						user: `There is an issue with the Worker ("${conversion.executable}" not found)`,
-						tech: `Cannot access "${conversion.executable}" on the worker. Reason: ${status}`,
-					},
+			{
+				// Check that the executable alias is defined in config:
+				const executable = worker.getExecutable(conversion.executable)
+
+				if (!executable) {
+					return {
+						support: false,
+						knownReason: true,
+						reason: {
+							user: `There is an issue with the Worker, the alias "${conversion.executable}" is not configured`,
+							tech: `The conversion alias "${conversion.executable}" is not found in the worker configuration (check CLI argument --executableAliases)`,
+						},
+					}
+				}
+
+				// Check that the executable is actually accessible:
+				const status = await worker.executables.getExecutableStatus(executable)
+				if (status !== null) {
+					return {
+						support: false,
+						knownReason: true,
+						reason: {
+							user: `There is an issue with the Worker ("${executable}" not found)`,
+							tech: `Cannot access "${executable}" on the worker. Reason: ${status}`,
+						},
+					}
+				}
+			}
+
+			if (conversion.preChecks) {
+				for (const preCheck of conversion.preChecks) {
+					// Check that the executable alias is defined in config:
+					const executable = worker.getExecutable(preCheck.executable)
+
+					// Check that the executable is actually accessible:
+					if (!executable) {
+						return {
+							support: false,
+							knownReason: true,
+							reason: {
+								user: `There is an issue with the Worker, the alias "${preCheck.executable}" is not configured`,
+								tech: `The preCheck alias "${preCheck.executable}" is not found in the worker configuration (check CLI argument --executableAliases)`,
+							},
+						}
+					}
+
+					const status = await worker.executables.getExecutableStatus(executable)
+					if (status !== null) {
+						return {
+							support: false,
+							knownReason: true,
+							reason: {
+								user: `There is an issue with the Worker ("${executable}" not found)`,
+								tech: `Cannot access "${executable}" on the worker. Reason: ${status}`,
+							},
+						}
+					}
 				}
 			}
 		}
@@ -381,6 +429,7 @@ class MediaConversion {
 			const isFinalStep = i === this.exp.endRequirement.version.conversions.length - 1
 
 			const operation: MediaConversionOperation = new MediaConversionOperation(
+				this.worker,
 				this.logger.category(`Step ${i + 1}`),
 				this,
 				prevOperation,
@@ -476,6 +525,7 @@ class MediaConversionOperation {
 	}
 
 	constructor(
+		private worker: BaseWorker,
 		private logger: LoggerInstance,
 		private parent: MediaConversion,
 		previousOperation: MediaConversionOperation | null,
@@ -668,7 +718,11 @@ class MediaConversionOperation {
 		const args = this.replaceStringsInArgs(preCheck.args, {
 			SOURCE: escapeFilePath(sourcePath),
 		})
-		this.logger.debug(`Spawning process: ${preCheck.executable} ${args.join(' ')}`)
+
+		const executable = this.worker.getExecutable(preCheck.executable)
+		if (!executable) throw new Error(`The preCheck alias "${preCheck.executable}" is not configured`)
+
+		this.logger.debug(`Spawning process: ${executable} ${args.join(' ')}`)
 
 		// Optimization: Just collect data that will be used later:
 		let usesStdOut = false
@@ -685,7 +739,7 @@ class MediaConversionOperation {
 			let stdout = ''
 			let stderr = ''
 			spawnProcess(
-				preCheck.executable,
+				executable,
 				args,
 				() => resolve({ stdout, stderr }), // On Done
 				(err) => reject(err), // On Error
@@ -882,13 +936,16 @@ class MediaConversionOperation {
 		argsReplaceStrings.SOURCE = escapeFilePath(sourcePath)
 		argsReplaceStrings.TARGET = escapeFilePath(targetPath)
 
+		const executable = this.worker.getExecutable(this.conversion.executable)
+		if (!executable) throw new Error(`The conversion alias "${this.conversion.executable}" is not configured`)
+
 		const args = this.replaceStringsInArgs(this.conversion.args, argsReplaceStrings)
 
-		this.logger.debug(`Spawning process: ${this.conversion.executable} ${args.join(' ')}`)
+		this.logger.debug(`Spawning process: ${executable} ${args.join(' ')}`)
 
 		await new Promise<void>((resolve, reject) => {
 			spawnProcess(
-				this.conversion.executable,
+				executable,
 				args,
 				() => {
 					// On Done
