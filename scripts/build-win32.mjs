@@ -113,6 +113,7 @@ if (!executableName) {
 		extraArgs.push('--assets', assets.join(','))
 	}
 
+	// If this is modified, make sure to update the `prepare-for-build32.js` too.
 	await pkg.exec([
 		path.join(basePath, './dist/index.js'),
 		// '--debug',
