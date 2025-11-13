@@ -53,5 +53,7 @@ packageManagerAPI.findValue = realPackageManagerAPI.findValue
 packageManagerAPI.DataStore = realPackageManagerAPI.DataStore
 packageManagerAPI.stringifyError = realPackageManagerAPI.stringifyError
 packageManagerAPI.waitTime = realPackageManagerAPI.waitTime
+packageManagerAPI.isRunningInTest = realPackageManagerAPI.isRunningInTest
+packageManagerAPI.isRunningInDevelopment = realPackageManagerAPI.isRunningInDevelopment
 
 module.exports = packageManagerAPI

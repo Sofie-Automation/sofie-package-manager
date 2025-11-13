@@ -35,6 +35,7 @@ import {
 	Cost,
 	LeveledLogMethodLight,
 	isRunningInDevelopment,
+	isRunningInTest,
 } from '@sofie-package-manager/api'
 
 import { WorkforceAPI } from './workforceApi'
@@ -335,7 +336,8 @@ export class AppContainer {
 
 			return args
 		}
-		if (isRunningInDevelopment()) {
+
+		if (isRunningInDevelopment() || isRunningInTest()) {
 			// Process runs as a node process, we're probably in development mode.
 			const appType = protectString<AppType>('worker')
 			this.availableApps.set(appType, {
