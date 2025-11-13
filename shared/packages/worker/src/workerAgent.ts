@@ -23,7 +23,6 @@ import {
 	Reason,
 	stringifyError,
 	WorkerStatusReport,
-	setLogLevel,
 	AppContainerWorkerAgent,
 	deferGets,
 	promiseTimeout,
@@ -360,7 +359,7 @@ export class WorkerAgent {
 		this.expectationManagers.delete(managerId)
 	}
 	public async setLogLevel(logLevel: LogLevel): Promise<void> {
-		setLogLevel(logLevel)
+		this.logger.setLogLevel(logLevel)
 	}
 	async _debugKill(): Promise<void> {
 		this.terminate()

@@ -207,7 +207,7 @@ yarn test
 yarn start:single-app
 
 # Start the single-app in local-only mode, using packages from expectedPackages.json
-yarn start:single-app -- -- --watchFiles=true --noCore=true --logLevel=debug
+yarn start:single-app -- -- --watchFiles=true --noCore=true --logLevel=debug --executableAliases=ffmpeg=D:\git\nrkno\package-manager\ffmpeg.exe
 
 
 

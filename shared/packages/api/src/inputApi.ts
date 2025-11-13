@@ -163,8 +163,7 @@ export namespace ExpectedPackage {
 			checkSumType?: 'sha' | 'md5' | 'whatever'
 			conversions?: {
 				/**
-				 * Path to the executable.
-				 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+				 * Executable alias. Need to be defined in --executableAliases.
 				 */
 				executable: string
 				/**
@@ -200,8 +199,7 @@ export namespace ExpectedPackage {
 				 */
 				preChecks?: {
 					/**
-					 * Path to the executable.
-					 * Note: If this ends with '.exe', but runs on a non-Windows system, the '.exe' will be removed.
+					 * Executable alias. Need to be defined in --executableAliases.
 					 */
 					executable: string
 					/**

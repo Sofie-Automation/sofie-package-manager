@@ -3,7 +3,6 @@ import {
 	ClientConnectionOptions,
 	LoggerInstance,
 	LogLevel,
-	setLogLevel,
 	Status,
 	StatusCode,
 	Statuses,
@@ -61,7 +60,7 @@ export class WorkforceConnection {
 	public async init(): Promise<void> {
 		await this.workforceAPI.init(this.workForceConnectionOptions, {
 			setLogLevel: async (logLevel: LogLevel): Promise<void> => {
-				setLogLevel(logLevel)
+				this.logger.setLogLevel(logLevel)
 			},
 			_debugKill: async (): Promise<void> => {
 				// This is for testing purposes only
