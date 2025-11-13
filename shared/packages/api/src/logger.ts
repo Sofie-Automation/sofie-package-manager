@@ -1,7 +1,7 @@
 import _ from 'underscore'
 import * as Winston from 'winston'
 import { ProcessConfig } from './config'
-import { isRunningInTest, literal, stringifyError } from './lib'
+import { isRunningInDevelopment, isRunningInTest, literal, stringifyError } from './lib'
 
 const { combine, label, json, timestamp, printf } = Winston.format
 
@@ -95,7 +95,7 @@ export function setupLogger(
 
 	// Setup logging --------------------------------------
 	const logPath = config.process.logPath
-	const isProduction = !process.execPath.match(/node.exe$/)
+	const isProduction = !isRunningInDevelopment()
 
 	let logger: Winston.Logger
 
