@@ -4,7 +4,6 @@ import {
 	setupLogger,
 	initializeLogger,
 	ProcessConfig,
-	Expectation,
 	Accessor,
 } from '@sofie-package-manager/api'
 import { Content, KairosClipAccessorHandle } from '../kairosClip'
@@ -41,11 +40,34 @@ test('checkHandleBasic', () => {
 		})
 	}
 
-	//
-	expect(() => getKairosAccessor({}, {}).checkHandleBasic()).toThrow('KairosClipAccessor: ref not set!')
+	expect(() => getKairosAccessor({}, {})).toThrow('Bad input data: neither content.ref nor accessor.ref are set!')
+
+	expect(getKairosAccessor({}, { ref: REF_RAMREC }).checkHandleBasic()).toMatchObject({
+		success: false,
+		reason: {
+			tech: `Accessor host not set`,
+		},
+	})
 
 	// All OK:
-	expect(getKairosAccessor({}, { ref: REF_RAMREC }).checkHandleBasic()).toMatchObject({
+	expect(
+		getKairosAccessor(
+			{
+				host: '127.0.0.1',
+			},
+			{ ref: REF_RAMREC }
+		).checkHandleBasic()
+	).toMatchObject({
+		success: true,
+	})
+	expect(
+		getKairosAccessor(
+			{
+				host: '127.0.0.1',
+			},
+			{ ref: REF_STILL }
+		).checkHandleBasic()
+	).toMatchObject({
 		success: true,
 	})
 })

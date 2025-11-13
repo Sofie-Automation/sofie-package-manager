@@ -53,7 +53,7 @@ export class KairosClipAccessorHandle<Metadata> extends GenericAccessorHandle<Me
 
 		// Verify content data:
 		if (!this.content.onlyContainerAccess) {
-			if (!this.ref) throw new Error('Bad input data: neither content.ref nor accessor.ref are set!')
+			if (!this.ref) throw new Error('Bad input data: ref is falsy!') // this should never throw, as this.ref would throw first
 		}
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
@@ -63,7 +63,7 @@ export class KairosClipAccessorHandle<Metadata> extends GenericAccessorHandle<Me
 		if (this.content.onlyContainerAccess) throw new Error('onlyContainerAccess is set!')
 
 		const ref = this.accessor.ref || this.content.ref
-		if (!ref) throw new Error(`KairosClipAccessor: ref not set!`)
+		if (!ref) throw new Error(`Bad input data: neither content.ref nor accessor.ref are set!`)
 
 		return ref
 	}
@@ -106,18 +106,29 @@ export class KairosClipAccessorHandle<Metadata> extends GenericAccessorHandle<Me
 				success: false,
 				knownReason: true,
 				reason: {
-					user: `Accessor host not set`,
+					user: `Missing host in configuration`,
 					tech: `Accessor host not set`,
 				},
 			}
 		}
+		if (!this.accessor.ref && !this.content.ref) {
+			return {
+				success: false,
+				knownReason: true,
+				reason: {
+					user: `Missing reference in configuration`,
+					tech: `Neither Accessor ref nor content ref are set`,
+				},
+			}
+		}
+		// Just an additional check to see that this.ref works:
 		if (!this.ref) {
 			return {
 				success: false,
 				knownReason: true,
 				reason: {
-					user: `ref not set`,
-					tech: `ref not set`,
+					user: `Internal error (ref is falsy)`,
+					tech: `Internal error: ref not set`,
 				},
 			}
 		}

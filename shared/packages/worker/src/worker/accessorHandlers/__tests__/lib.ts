@@ -11,6 +11,17 @@ export class PassiveTestWorker extends BaseWorker {
 					sourcePackageStabilityThreshold: 0,
 					windowsDriveLetters: ['X', 'Y', 'Z'],
 					temporaryFolderPath: undefined,
+
+					appContainerURL: null,
+					considerCPULoad: null,
+					costMultiplier: 1,
+					executableAliases: {},
+					failurePeriod: 60000,
+					failurePeriodLimit: 0,
+					networkIds: [],
+					pickUpCriticalExpectationsOnly: false,
+					resourceId: '',
+					workforceURL: null,
 				},
 				location: {
 					// localComputerId?: string
