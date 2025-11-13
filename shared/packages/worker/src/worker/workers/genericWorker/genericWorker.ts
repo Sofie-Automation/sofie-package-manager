@@ -37,6 +37,7 @@ import { PackageIframesScan } from './expectationHandlers/packageIframesScan'
 import { ExecutableDependencyHandler } from './lib/executableDependencyHandler'
 import { MediaFileConvert } from './expectationHandlers/mediaFileConvert'
 import path from 'path'
+import { KairosLoadToRam } from './expectationHandlers/kairosLoadToRam'
 
 export type ExpectationHandlerGenericWorker = ExpectationHandler<GenericWorker>
 
@@ -107,6 +108,8 @@ export class GenericWorker extends BaseWorker {
 				return FileCopyProxy
 			case Expectation.Type.FILE_VERIFY:
 				return FileVerify
+			case Expectation.Type.PACKAGE_KAIROS_LOAD_TO_RAM:
+				return KairosLoadToRam
 			case Expectation.Type.PACKAGE_SCAN:
 				return PackageScan
 			case Expectation.Type.PACKAGE_DEEP_SCAN:

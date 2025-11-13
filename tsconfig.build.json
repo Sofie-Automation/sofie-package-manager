@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "node16",
 		"target": "es2020",
 		"noImplicitAny": true,
-		"moduleResolution": "node",
+		"moduleResolution": "node16",
 		"sourceMap": true,
 		"declaration": true,
 		"declarationMap": true,
