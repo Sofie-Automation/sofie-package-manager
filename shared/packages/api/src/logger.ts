@@ -226,8 +226,6 @@ function getCategory(outerLogger: LoggerInstance, outerCategory: string) {
 			}
 		}
 
-		console.log('getCategory', fullCategory)
-
 		if (!outerLogger.getLogLevel) {
 			throw new Error('outerLogger does not have getLogLevel method!')
 		}

@@ -5,6 +5,7 @@ import { WorkerAgentConfig } from './worker'
 import { AppContainerConfig } from './appContainer'
 import { protectString } from './ProtectedString'
 import { AppContainerId, WorkerAgentId } from './ids'
+import { countOccurrences } from './lib'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -170,11 +171,7 @@ const workerArgumentsGeneric = defineArguments({
 		describe:
 			'If set, the worker will consider the CPU load of the system it runs on before it accepts jobs. Set to a value between 0 and 1, the worker will accept jobs if the CPU load is below the configured value.',
 	},
-	pickUpCriticalExpectationsOnly: {
-		type: 'boolean',
-		default: process.env.WORKER_PICK_UP_CRITICAL_EXPECTATIONS_ONLY === '1' || false,
-		describe: 'If set to 1, the worker will only pick up expectations that are marked as critical for playout.',
-	},
+
 	failurePeriodLimit: {
 		type: 'number',
 		default: parseInt(process.env.WORKER_FAILURE_PERIOD_LIMIT || '', 10) || 0,
@@ -206,6 +203,11 @@ const workerArguments = defineArguments({
 		describe: 'The URL to the AppContainer',
 	},
 	workerId: { type: 'string', default: process.env.WORKER_ID || 'worker0', describe: 'Unique id of the worker' },
+	pickUpCriticalExpectationsOnly: {
+		type: 'boolean',
+		default: process.env.WORKER_PICK_UP_CRITICAL_EXPECTATIONS_ONLY === '1' || false,
+		describe: 'If set to 1, the worker will only pick up expectations that are marked as critical for playout.',
+	},
 
 	...workerArgumentsGeneric,
 })
@@ -437,6 +439,8 @@ export interface WorkerConfig {
 		workforceURL: string | null
 		appContainerURL: string | null
 		workerId: WorkerAgentId
+		/** If true, the worker will only pick up expectations that are marked as "critical" */
+		pickUpCriticalExpectationsOnly: boolean
 	} & WorkerAgentConfig
 }
 export async function getWorkerConfig(): Promise<WorkerConfig> {
@@ -453,6 +457,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			workforceURL: argv.workforceURL,
 			appContainerURL: argv.appContainerURL,
 			workerId: protectString<WorkerAgentId>(argv.workerId),
+			pickUpCriticalExpectationsOnly: parseArgBoolean(argv.pickUpCriticalExpectationsOnly) ?? false,
 
 			sourcePackageStabilityThreshold: parseArgInteger(argv.sourcePackageStabilityThreshold),
 			windowsDriveLetters: parseArgStringList(argv.windowsDriveLetters),
@@ -461,7 +466,6 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			networkIds: parseArgStringList(argv.networkIds),
 			costMultiplier: parseArgFloat(argv.costMultiplier) ?? 1,
 			considerCPULoad: parseArgFloat(argv.considerCPULoad) ?? null,
-			pickUpCriticalExpectationsOnly: parseArgBoolean(argv.pickUpCriticalExpectationsOnly) ?? false,
 			failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
 			failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
 			executableAliases: parseExecutableAliases(argv.executableAliases),
@@ -501,7 +505,6 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 				networkIds: parseArgStringList(argv.networkIds),
 				costMultiplier: parseArgFloat(argv.costMultiplier) ?? 1,
 				considerCPULoad: parseArgFloat(argv.considerCPULoad) ?? null,
-				pickUpCriticalExpectationsOnly: argv.pickUpCriticalExpectationsOnly,
 				failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
 				failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
 				executableAliases: parseExecutableAliases(argv.executableAliases),
@@ -618,6 +621,34 @@ export function getProcessArgv(): string[] {
 	// If the first argument is just '--', remove it:
 	if (args[0] === '--') args = args.slice(1)
 
+	// Fix an issue when arguments are escaped and contains spaces:
+
+	// for example: --myArg="this is hard" becomes ['--myArg="this', 'is', 'hard"']
+	for (let i = 0; i < args.length; i++) {
+		const m = args[i].match(/=*(["'])/)
+		if (m) {
+			const quote = m[1] // " or '
+
+			// check if the arg contains only one quote
+			if (countOccurrences(args[i], quote) !== 1) continue
+
+			// check future args
+			let argCombined = args[i]
+
+			for (let j = i + 1; j < args.length; j++) {
+				argCombined += ' ' + args[j]
+				if (args[j].includes(quote)) {
+					// Found the end
+					//
+					// Combine the args in between and remove used args:
+					args[i] = argCombined
+					args.splice(i + 1, j - i)
+					break
+				}
+			}
+		}
+	}
+
 	return args
 }
 
@@ -637,6 +668,15 @@ function parseArgStringList(str: unknown): string[] {
  * The string should be in the format alias1=executable1;alias2=executable2
  */
 function parseExecutableAliases(str: unknown): { [alias: string]: string } {
+	if (typeof str === 'string' && str.startsWith('"') && str.endsWith('"')) {
+		// the string is escaped
+		try {
+			str = JSON.parse(str)
+		} catch {
+			// ignore parse errors
+		}
+	}
+
 	if (typeof str === 'string') {
 		const result: { [alias: string]: string } = {}
 
@@ -646,7 +686,8 @@ function parseExecutableAliases(str: unknown): { [alias: string]: string } {
 			const words = statement.split('=')
 			if (words.length !== 2) continue
 
-			const [alias, executable] = words
+			const alias = words[0]
+			const executable = words[1]
 
 			if (alias && executable) {
 				result[alias] = executable

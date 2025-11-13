@@ -445,3 +445,12 @@ export function isRunningInDevelopment(): boolean {
 			path.basename(process.execPath) === 'node') // linux
 	)
 }
+export function countOccurrences(haystack: string, needle: string): number {
+	let count = 0
+	let pos = haystack.indexOf(needle)
+	while (pos !== -1) {
+		count++
+		pos = haystack.indexOf(needle, pos + needle.length)
+	}
+	return count
+}

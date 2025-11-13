@@ -93,11 +93,6 @@ export interface WorkerAgentConfig {
 	considerCPULoad: number | null
 
 	/**
-	 * If true, the worker will only pick up expectations that are marked as "critical"
-	 */
-	pickUpCriticalExpectationsOnly: boolean
-
-	/**
 	 * If set, the worker will count the number of periods of time where it encounters errors while working and will restart once the number of consequent periods of time is exceeded.
 	 */
 	failurePeriodLimit: number

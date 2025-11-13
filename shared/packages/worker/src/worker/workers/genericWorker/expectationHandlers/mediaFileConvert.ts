@@ -57,7 +57,11 @@ export const MediaFileConvert: ExpectationHandlerGenericWorker = {
 						knownReason: true,
 						reason: {
 							user: `There is an issue with the Worker, the alias "${conversion.executable}" is not configured`,
-							tech: `The conversion alias "${conversion.executable}" is not found in the worker configuration (check CLI argument --executableAliases)`,
+							tech: `The conversion alias "${
+								conversion.executable
+							}" is not found in the worker configuration (check CLI argument --executableAliases) (${JSON.stringify(
+								worker.agentAPI.config.executableAliases
+							)})`,
 						},
 					}
 				}
@@ -88,7 +92,11 @@ export const MediaFileConvert: ExpectationHandlerGenericWorker = {
 							knownReason: true,
 							reason: {
 								user: `There is an issue with the Worker, the alias "${preCheck.executable}" is not configured`,
-								tech: `The preCheck alias "${preCheck.executable}" is not found in the worker configuration (check CLI argument --executableAliases)`,
+								tech: `The preCheck alias "${
+									preCheck.executable
+								}" is not found in the worker configuration (check CLI argument --executableAliases) (${JSON.stringify(
+									worker.agentAPI.config.executableAliases
+								)})`,
 							},
 						}
 					}

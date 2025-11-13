@@ -319,12 +319,10 @@ export class AppContainer {
 					argValue = workerArgs.failurePeriod?.toString()
 				} else if (key === 'sourcePackageStabilityThreshold') {
 					argValue = workerArgs.sourcePackageStabilityThreshold?.toString()
-				} else if (key === 'pickUpCriticalExpectationsOnly') {
-					argValue = workerArgs.pickUpCriticalExpectationsOnly ? 'true' : 'false'
 				} else if (key === 'executableAliases') {
 					argValue = workerArgs.executableAliases
 						? Object.entries<string>(workerArgs.executableAliases)
-								.map((k, v) => `${k}=${v}`)
+								.map(([k, v]) => `${k}=${v}`)
 								.join(';')
 						: undefined
 				} else {
