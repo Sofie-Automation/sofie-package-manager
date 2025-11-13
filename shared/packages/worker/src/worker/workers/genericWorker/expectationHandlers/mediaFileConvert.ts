@@ -585,25 +585,7 @@ class MediaConversionOperation {
 			// Move pointer to current target:
 			operationPointer = operationTargetPointer
 		} else {
-			// Skip this conversion step!
-
-			// just copy the file
-
-			// // Prepare target pointer:
-			// const operationTargetPointer = await this.prepareTargetPointer(operationPointer)
-
-			// const sourcePath = await this.getAccessorFullPath(operationPointer.lookup.handle)
-
-			// const localLookup = await this.lookupLocalAccessorHandle(
-			// 	[localPackageContainer.packageContainer],
-			// 	path.basename(sourcePath),
-			// 	operationPointer
-			// )
-
-			// if (!localLookup.ready)
-			// 	throw new Error(`Internal Error: localLookup is not ready: ${localLookup.reason.tech}`)
-
-			// await this.copyFile(this.parent.lookupSource, localLookup, 'prepare source', this.reportPrepareLocal)
+			// Skip this conversion step
 
 			this.reportPrepare(1)
 			this.reportProgress(1)
@@ -655,7 +637,7 @@ class MediaConversionOperation {
 			// Run PreCheck:
 			reportPreCheck(0.1)
 
-			const preCheckResult = await this.executePreCheck(result.operationPointer, preCheck)
+			const preCheckResult = await this.executePreCheck(i, result.operationPointer, preCheck)
 			reportPreCheck(0.7)
 
 			for (let handleOutputIndex = 0; handleOutputIndex < preCheck.handleOutput.length; handleOutputIndex++) {
@@ -716,6 +698,7 @@ class MediaConversionOperation {
 	}
 
 	private async executePreCheck(
+		stepIndex: number,
 		operationPointer: OperationPointer,
 		preCheck: Required<Expectation.Version.ConversionStep>['preChecks'][0]
 	): Promise<{
@@ -728,9 +711,10 @@ class MediaConversionOperation {
 		})
 
 		const executable = this.worker.getExecutable(preCheck.executable)
-		if (!executable) throw new Error(`The preCheck alias "${preCheck.executable}" is not configured`)
+		if (!executable)
+			throw new Error(`The preCheck alias "${preCheck.executable}" is not configured (at step ${stepIndex})`)
 
-		this.logger.debug(`Spawning process: ${executable} ${args.join(' ')}`)
+		this.logger.debug(`PreCheck step ${stepIndex}: Spawning process: ${executable} ${args.join(' ')}`)
 
 		// Optimization: Just collect data that will be used later:
 		let usesStdOut = false
