@@ -9,6 +9,10 @@ export class TrackedPackageContainerPackageAPI {
 
 	public updatePackageContainerPackageStatus(trackedExp: TrackedExpectation, isRemoved: boolean): void {
 		for (const fromPackage of trackedExp.exp.fromPackages) {
+			// Note: If an expectation is from multiple packages and one of them is removed,
+			// it'll result in reportPackageContainerPackageStatus() never being called for that package.
+			// This situation is handled by PackageManager.removeInvalidPackageContainerPackageStatus().
+
 			for (const packageContainer of trackedExp.exp.endRequirement.targets) {
 				if (isRemoved) {
 					this.tracker.callbacks.reportPackageContainerPackageStatus(
