@@ -113,7 +113,7 @@ export function scanWithFFProbe(
 				ffProbeProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 				ffProbeProcess?.kill()
 				sourceStream?.cancel()
-				reject('Cancelled')
+				reject(new Error('Cancelled'))
 			})
 
 			ffProbeProcess = spawn(getFFProbeExecutable(), args, {
@@ -246,7 +246,7 @@ export function scanFieldOrder(
 		onCancel(() => {
 			ffmpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 			ffmpegProcess?.kill()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffmpegProcess = execFile(
@@ -350,7 +350,7 @@ export function scanMoreInfo(
 		onCancel(() => {
 			cancelled = true
 			killFFMpeg()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffMpegProcess = spawn(getFFMpegExecutable(), args, {
@@ -545,7 +545,7 @@ function scanLoudnessStream(
 		onCancel(() => {
 			ffmpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 			ffmpegProcess?.kill()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffmpegProcess = execFile(
@@ -732,7 +732,7 @@ export function scanIframes(
 		onCancel(() => {
 			cancelled = true
 			killFFMpeg()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffMpegProcess = spawn(getFFProbeExecutable(), args, {

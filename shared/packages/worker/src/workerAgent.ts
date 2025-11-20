@@ -801,7 +801,7 @@ export class WorkerAgent {
 					return new Promise((_resolve, reject) => {
 						// Simulate a timed out message:
 						setTimeout(() => {
-							reject('Timeout')
+							reject(new Error('Timeout'))
 						}, 200)
 					})
 				try {

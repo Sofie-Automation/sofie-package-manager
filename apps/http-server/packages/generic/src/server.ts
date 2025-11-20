@@ -163,7 +163,7 @@ export class PackageProxyServer {
 					resolve()
 				})
 			} else {
-				reject('No port provided')
+				reject(new Error('No port provided'))
 			}
 		})
 	}
