@@ -2240,6 +2240,7 @@ __metadata:
     "@parcel/watcher": "npm:^2.3.0"
     "@sofie-package-manager/api": "npm:1.53.0-alpha.4"
     "@types/deep-diff": "npm:^1.0.0"
+    "@types/node": "npm:^24"
     "@types/node-fetch": "npm:^2.5.8"
     "@types/proper-lockfile": "npm:^4.1.4"
     "@types/ssh2-sftp-client": "npm:^9.0.4"
@@ -2741,39 +2742,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
-  version: 18.19.29
-  resolution: "@types/node@npm:18.19.29"
+"@types/node@npm:*, @types/node@npm:^24":
+  version: 24.10.1
+  resolution: "@types/node@npm:24.10.1"
   dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 10/9a3572b488f875ca1b545cc96980f1cb54dd05da16b2dc0cc3c3cb49ceafc3a5e417f4741c711c7bb81a67a0ddd29f546dcb077e4cb9b98a492fbaf373b1fbdc
+    undici-types: "npm:~7.16.0"
+  checksum: 10/ddac8c97be5f7401e31ea0e9316c6e864993c6cd06689b7f9874ecfb576ef8349f2d14298248a08b94a6dd029570a46a285cddc4d50e524817f1a3730b29a86e
   languageName: node
   linkType: hard
 
 "@types/node@npm:^18.11.18":
-  version: 18.19.123
-  resolution: "@types/node@npm:18.19.123"
+  version: 18.19.130
+  resolution: "@types/node@npm:18.19.130"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10/b5e6c524d9c8d03cb972bc31588a3a20f5a177d6cd1b97c2ba74e2260fe1d6218315ebbfbae8ccc7a78f55830ab3953b3793bcf74883f07a268253d49fa64efa
+  checksum: 10/ebb85c6edcec78df926de27d828ecbeb1b3d77c165ceef95bfc26e171edbc1924245db4eb2d7d6230206fe6b1a1f7665714fe1c70739e9f5980d8ce31af6ef82
   languageName: node
   linkType: hard
 
 "@types/node@npm:^22.7.7":
-  version: 22.18.12
-  resolution: "@types/node@npm:22.18.12"
+  version: 22.19.1
+  resolution: "@types/node@npm:22.19.1"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/41b8853302deac6895aa978193fcab53bf8d1f6f5df5fad38e2a33c2c853c3689e905c9dde373e45bb87273b2690e5ac2d6f40809fe72f45264952ba3ae3b196
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^24":
-  version: 24.9.1
-  resolution: "@types/node@npm:24.9.1"
-  dependencies:
-    undici-types: "npm:~7.16.0"
-  checksum: 10/eacbd06621616825042428dd6105d0c2f86d67b5f05f99db9fa89fe1cc173d5e65e604a9a61f1ce52ad915d09f2119e7468816ca1a22bb7a3cf5f3c131413c86
+  checksum: 10/40d5368faa6d9be6c27ebca2362734bc9e035a742e0b5cafee40ba3b355d7cfcaedbc93618c76465451e53f1af0c811b4b85ee9b85e2e942f34a4c5310fa047b
   languageName: node
   linkType: hard
 
