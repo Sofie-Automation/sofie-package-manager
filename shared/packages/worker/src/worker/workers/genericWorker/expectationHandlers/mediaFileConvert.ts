@@ -18,6 +18,7 @@ import {
 	escapeFilePath,
 	PackageContainerExpectation,
 	LoggerInstance,
+	startTimer,
 } from '@sofie-package-manager/api'
 import {
 	isFileShareAccessorHandle,
@@ -182,7 +183,7 @@ export const MediaFileConvert: ExpectationHandlerGenericWorker = {
 		if (!isMediaFileConvert(exp)) throw new Error(`Wrong exp.type: "${exp.type}"`)
 		// Copies the file from Source to Target
 
-		// const timer = startTimer()
+		const timer = startTimer()
 
 		const lookupSource = await lookupConvertSources(worker, exp)
 		if (!lookupSource.ready) throw new Error(`Can't start working due to source: ${lookupSource.reason.tech}`)
@@ -271,6 +272,16 @@ export const MediaFileConvert: ExpectationHandlerGenericWorker = {
 				await targetHandle.finalizePackage(fileOperation)
 
 				progressFinalize(1)
+
+				const duration = timer.get()
+				workInProgress._reportComplete(
+					actualSourceVersionHash,
+					{
+						user: `Conversion completed in ${Math.round(duration / 100) / 10}s`,
+						tech: `Completed at ${Date.now()}`,
+					},
+					undefined
+				)
 			})
 
 			return workInProgress

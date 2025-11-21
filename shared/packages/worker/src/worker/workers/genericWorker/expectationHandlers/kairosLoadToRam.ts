@@ -134,35 +134,45 @@ export const KairosLoadToRam: ExpectationHandlerGenericWorker = {
 					targetHandle
 						.getMediaStatus()
 						.then((status: MediaObject | undefined) => {
-							if (cancelled) return
-
-							if (status === undefined) {
-								if (checkInterval) clearInterval(checkInterval)
-								workInProgress._reportError({
-									user: `Error when loading into RAM: clip not found`,
-									tech: `Clip "${targetHandle.packageName}" not found`,
-								})
-							} else if (status.status === MediaStatus.LOADING) {
+							if (cancelled) {
+								if (checkInterval !== null) clearInterval(checkInterval)
+								return
+							}
+							if (status?.status === MediaStatus.LOADING) {
 								workInProgress._reportProgress(null, status.loadProgress)
-							} else if (status.status === MediaStatus.ERROR) {
-								if (checkInterval) clearInterval(checkInterval)
-								workInProgress._reportError({
-									user: `Error when loading into RAM: Error in Kairos`,
-									tech: `Kairos Error when loading into RAM (at loadProgress ${status.loadProgress})`,
-								})
-							} else if (status.status === MediaStatus.LOAD) {
-								workInProgress._reportComplete(
-									'',
-									{
-										user: `Loaded into RAM`,
-										tech: `Completed`,
-									},
-									undefined
-								)
-							} else if (status.status === MediaStatus.NOT_LOADED) {
-								// Nothing?
 							} else {
-								assertNever(status.status)
+								// All other statuses means we should stop checking:
+								if (checkInterval !== null) clearInterval(checkInterval)
+
+								if (status === undefined) {
+									workInProgress._reportError({
+										user: `Error when loading into RAM: clip not found`,
+										tech: `Clip "${targetHandle.packageName}" not found`,
+									})
+								} else if (status.status === MediaStatus.ERROR) {
+									workInProgress._reportError({
+										user: `Error when loading into RAM: Error in Kairos`,
+										tech: `Kairos Error when loading into RAM (at loadProgress ${status.loadProgress})`,
+									})
+								} else if (status.status === MediaStatus.LOAD) {
+									workInProgress._reportComplete(
+										'',
+										{
+											user: `Loaded into RAM`,
+											tech: `Completed`,
+										},
+										undefined
+									)
+								} else if (status.status === MediaStatus.NOT_LOADED) {
+									// Nothing?
+
+									workInProgress._reportError({
+										user: `Error when loading into RAM: Unhandled returned status`,
+										tech: `Unhandled status: ${JSON.stringify(status)}`,
+									})
+								} else {
+									assertNever(status.status)
+								}
 							}
 						})
 						.catch((err) => {

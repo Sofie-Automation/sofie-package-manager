@@ -289,15 +289,6 @@ function getSideEffectOfExpectation(
 			expectations[loudness.id] = loudness
 		}
 
-		if (expectation0.sideEffect?.kairosLoadToRam) {
-			const kairosLoadToRam = generatePackageKairosLoadToRam(
-				packageContainers,
-				expectation,
-				expectation0.sideEffect.kairosLoadToRam,
-				settings
-			)
-			if (kairosLoadToRam) expectations[kairosLoadToRam.id] = kairosLoadToRam
-		}
 		if (expectation0.sideEffect?.iframes) {
 			const iframes = generatePackageIframes(expectation, settings)
 			expectations[iframes.id] = iframes
@@ -352,6 +343,23 @@ function getSideEffectOfExpectation(
 				settings
 			)
 			expectations[loudness.id] = loudness
+		}
+	}
+
+	if (
+		expectation0.type === Expectation.Type.FILE_COPY ||
+		expectation0.type === Expectation.Type.FILE_VERIFY ||
+		expectation0.type === Expectation.Type.FILE_COPY_PROXY ||
+		expectation0.type === Expectation.Type.MEDIA_FILE_CONVERT
+	) {
+		if (expectation0.sideEffect?.kairosLoadToRam) {
+			const kairosLoadToRam = generatePackageKairosLoadToRam(
+				packageContainers,
+				expectation0,
+				expectation0.sideEffect.kairosLoadToRam,
+				settings
+			)
+			if (kairosLoadToRam) expectations[kairosLoadToRam.id] = kairosLoadToRam
 		}
 	}
 	return expectations

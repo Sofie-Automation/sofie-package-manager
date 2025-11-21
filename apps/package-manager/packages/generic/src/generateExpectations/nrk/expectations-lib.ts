@@ -444,7 +444,7 @@ export function generatePackageIframes(
 /** Defines a package that should be loaded into RAM on a Kairos Vision mixer */
 export function generatePackageKairosLoadToRam(
 	packageContainers: PackageContainers,
-	expectation: SomeClipCopyExpectation,
+	expectation: SomeClipCopyExpectation | Expectation.MediaFileConvert,
 	packageSettings: ExpectedPackage.SideEffectKairosLoadToRamSettings,
 	settings: PackageManagerSettings
 ): Expectation.PackageKairosLoadToRam | null {
@@ -456,6 +456,8 @@ export function generatePackageKairosLoadToRam(
 		filePath = expectation.endRequirement.content.filePath
 	} else if (expectation.type === Expectation.Type.FILE_COPY_PROXY) {
 		filePath = expectation.endRequirement.content.filePath
+	} else if (expectation.type === Expectation.Type.MEDIA_FILE_CONVERT) {
+		filePath = expectation.endRequirement.content.filePath
 	} else {
 		return null
 	}
@@ -465,7 +467,8 @@ export function generatePackageKairosLoadToRam(
 	for (const target of expectation.endRequirement.targets) {
 		for (const accessor of Object.values<AccessorOnPackage.Any>(target.accessors)) {
 			if (accessor.type === Accessor.AccessType.FTP) {
-				const fullPath = path.join(accessor.basePath ?? '', filePath)
+				const fullPath = path.join(accessor.basePath ?? '', filePath).replace(/\\/g, '/')
+
 				// 'ramrec/Sofie/movie.mp4
 
 				if (fullPath.startsWith('ramrec/')) {
@@ -500,7 +503,7 @@ export function generatePackageKairosLoadToRam(
 	}
 
 	return {
-		id: protectString<ExpectationId>(expectation.id + '_iframes'),
+		id: protectString<ExpectationId>(expectation.id + '_loadToRam'),
 		priority: expectation.priority + PriorityAdditions.IFRAMES_SCAN,
 		managerId: expectation.managerId,
 		type: Expectation.Type.PACKAGE_KAIROS_LOAD_TO_RAM,

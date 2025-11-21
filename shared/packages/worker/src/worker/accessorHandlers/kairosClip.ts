@@ -274,10 +274,20 @@ export class KairosClipAccessorHandle<Metadata> extends GenericAccessorHandle<Me
 		const kairos = await this.getKairosConnection()
 
 		if (ref.realm === 'media-ramrec') {
+			const ramrec = await kairos.getMediaRamRec(ref)
+			if (!ramrec) throw new Error(`MediaRamRec "${refToPath(ref)}" not found on Kairos`)
+
+			if (ramrec.status === MediaStatus.LOAD && ramrec.loadProgress === 1) return // already loaded
+
 			await kairos.updateMediaRamRec(ref, {
 				status: MediaStatus.LOAD,
 			})
 		} else if (ref.realm === 'media-still') {
+			const still = await kairos.getMediaStill(ref)
+			if (!still) throw new Error(`MediaStill "${refToPath(ref)}" not found on Kairos`)
+
+			if (still.status === MediaStatus.LOAD && still.loadProgress === 1) return // already loaded
+
 			await kairos.updateMediaStill(ref, {
 				status: MediaStatus.LOAD,
 			})
