@@ -467,11 +467,7 @@ export function scanMoreInfo(
 			if (ffMpegProcess) {
 				killFFMpeg()
 
-				reject(
-					`Error parsing FFMpeg data. Error: "${err} ${
-						err && typeof err === 'object' ? (err as Error).stack : ''
-					}", context: "${context}" `
-				)
+				reject(`Error parsing FFMpeg data. Error: ${stringifyError(err)}, context: "${context}" `)
 			}
 		}
 
@@ -755,11 +751,7 @@ export function scanIframes(
 			if (ffMpegProcess) {
 				killFFMpeg()
 
-				reject(
-					`Error parsing FFMpeg data. Error: "${err} ${
-						err && typeof err === 'object' ? (err as Error).stack : ''
-					}", context: "${context}" `
-				)
+				reject(`Error parsing FFMpeg data. Error: ${stringifyError(err)}, context: "${context}" `)
 			}
 		}
 

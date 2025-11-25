@@ -153,7 +153,7 @@ export class PackageProxyServer {
 		})
 
 		this.app.on('error', (err) => {
-			this.logger.error(`Server error: ${err}`)
+			this.logger.error(`Server error: ${stringifyError(err)}`)
 		})
 
 		return new Promise<void>((resolve, reject) => {
