@@ -156,9 +156,9 @@ const workerArgumentsGeneric = defineArguments({
 	allowedExpectationTypes: {
 		type: 'string',
 		default: process.env.WORKER_ALLOWED_EXPECTATION_TYPES || '',
-		describe: `A semicolon-separated list of allowed expectation types for this worker. Allowed options are ${Object.values<string>(
+		describe: `A semicolon-separated list of allowed expectation types for this worker. Allowed options are: ${Object.values<string>(
 			Expectation.Type
-		)}`,
+		).join(', ')}. (Empty means "all types are allowed")`,
 	},
 	resourceId: {
 		type: 'string',
