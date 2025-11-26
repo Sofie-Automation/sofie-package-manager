@@ -89,8 +89,6 @@ export class WorkerAgent {
 	private initWorkForceAPIPromise?: { resolve: () => void; reject: (reason?: any) => void }
 	private initAppContainerAPIPromise?: { resolve: () => void; reject: (reason?: any) => void }
 	private cpuTracker = new CPUTracker()
-	/** When true, this worker should only accept expectation that are critical for playout */
-	private isOnlyForCriticalExpectations = false
 	private logger: LoggerInstance
 
 	private workerStorageDeferRead = deferGets(async (dataId: DataId) => {
@@ -165,7 +163,6 @@ export class WorkerAgent {
 			})
 		}
 
-		this.isOnlyForCriticalExpectations = this.config.worker.pickUpCriticalExpectationsOnly
 		// Todo: Different types of workers:
 		this._worker = new GenericWorker(
 			this.logger,
@@ -330,7 +327,7 @@ export class WorkerAgent {
 	// 	return this._busyMethodCount === 0
 	// }
 	private async doesWorkerSupportExpectation(exp: Expectation.Any): Promise<ReturnTypeDoYouSupportExpectation> {
-		if (this.isOnlyForCriticalExpectations && !exp.workOptions.requiredForPlayout) {
+		if (this.config.worker.pickUpCriticalExpectationsOnly && !exp.workOptions.requiredForPlayout) {
 			return {
 				support: false,
 				knownReason: true,
@@ -338,6 +335,23 @@ export class WorkerAgent {
 					user: 'Worker is reserved for playout-critical operations',
 					tech: 'Worker is reserved for `workOptions.requiredForPlayout` expectations',
 				},
+			}
+		}
+
+		if (this.config.worker.allowedExpectationTypes) {
+			if (!this.config.worker.allowedExpectationTypes.includes(exp.type)) {
+				return {
+					support: false,
+					reason: {
+						user: 'This worker is not allowed to work on this type of expectation',
+						tech: `Expectation type "${
+							exp.type
+						}" is not in allowedExpectationTypes: [${this.config.worker.allowedExpectationTypes.join(
+							', '
+						)}] for this worker`,
+					},
+					knownReason: true,
+				}
 			}
 		}
 

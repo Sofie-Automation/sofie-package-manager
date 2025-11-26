@@ -153,6 +153,11 @@ const workerArguments = defineArguments({
 		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
 		describe: 'A temporary, local file path where the worker can store temporary artifacts',
 	},
+	allowedExpectationTypes: {
+		type: 'string',
+		default: process.env.WORKER_ALLOWED_EXPECTATION_TYPES || '',
+		describe: 'A semicolon-separated list of allowed expectation types for this worker',
+	},
 	resourceId: {
 		type: 'string',
 		default: process.env.WORKER_NETWORK_ID || 'default',
@@ -465,6 +470,7 @@ export interface WorkerConfig {
 		costMultiplier: number
 		considerCPULoad: number | null
 		pickUpCriticalExpectationsOnly: boolean
+		allowedExpectationTypes: string[] | null
 		failurePeriodLimit: number
 		failurePeriod: number
 	} & WorkerAgentConfig
@@ -488,6 +494,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
 			windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
 			temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
+			allowedExpectationTypes: argv.allowedExpectationTypes ? argv.allowedExpectationTypes.split(';') : null,
 			costMultiplier:
 				(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) || 1,
 			considerCPULoad:
