@@ -5,6 +5,7 @@ import { WorkerAgentConfig } from './worker'
 import { AppContainerConfig } from './appContainer'
 import { protectString } from './ProtectedString'
 import { AppContainerId, WorkerAgentId } from './ids'
+import { Expectation } from './expectationApi'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -156,7 +157,9 @@ const workerArguments = defineArguments({
 	allowedExpectationTypes: {
 		type: 'string',
 		default: process.env.WORKER_ALLOWED_EXPECTATION_TYPES || '',
-		describe: 'A semicolon-separated list of allowed expectation types for this worker',
+		describe: `A semicolon-separated list of allowed expectation types for this worker. Allowed options are ${Object.values<string>(
+			Expectation.Type
+		)}`,
 	},
 	resourceId: {
 		type: 'string',
