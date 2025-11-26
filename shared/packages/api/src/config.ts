@@ -152,6 +152,11 @@ const workerArgumentsGeneric = defineArguments({
 		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
 		describe: 'A temporary, local file path where the worker can store temporary artifacts',
 	},
+	allowedExpectationTypes: {
+		type: 'string',
+		default: process.env.WORKER_ALLOWED_EXPECTATION_TYPES || '',
+		describe: 'A semicolon-separated list of allowed expectation types for this worker',
+	},
 	resourceId: {
 		type: 'string',
 		default: process.env.WORKER_NETWORK_ID || 'default',
@@ -443,6 +448,9 @@ export interface WorkerConfig {
 		workerId: WorkerAgentId
 		/** If true, the worker will only pick up expectations that are marked as "critical" */
 		pickUpCriticalExpectationsOnly: boolean
+		allowedExpectationTypes: string[] | null
+		failurePeriodLimit: number
+		failurePeriod: number
 	} & WorkerAgentConfig
 }
 export async function getWorkerConfig(): Promise<WorkerConfig> {
@@ -464,6 +472,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			sourcePackageStabilityThreshold: parseArgInteger(argv.sourcePackageStabilityThreshold),
 			windowsDriveLetters: parseArgStringList(argv.windowsDriveLetters),
 			temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
+			allowedExpectationTypes: parseArgStringList(argv.allowedExpectationTypes, null),
 			resourceId: argv.resourceId,
 			networkIds: parseArgStringList(argv.networkIds),
 			costMultiplier: parseArgFloat(argv.costMultiplier) ?? 1,
@@ -503,6 +512,7 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 				sourcePackageStabilityThreshold: parseArgInteger(argv.sourcePackageStabilityThreshold),
 				windowsDriveLetters: parseArgStringList(argv.windowsDriveLetters),
 				temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
+				allowedExpectationTypes: parseArgStringList(argv.allowedExpectationTypes, null),
 				resourceId: argv.resourceId,
 				networkIds: parseArgStringList(argv.networkIds),
 				costMultiplier: parseArgFloat(argv.costMultiplier) ?? 1,
@@ -658,12 +668,12 @@ export function getProcessArgv(): string[] {
  * Parses a string of executable aliases into an object.
  * The string should be in the format alias1=executable1;alias2=executable2
  */
-function parseArgStringList(str: unknown): string[] {
+function parseArgStringList<T = never[]>(str: unknown, fallback: any = []): string[] | T {
 	if (typeof str === 'string') {
 		return str.split(';')
 	}
 
-	return []
+	return fallback
 }
 
 /**

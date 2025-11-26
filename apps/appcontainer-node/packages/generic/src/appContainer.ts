@@ -326,6 +326,10 @@ export class AppContainer {
 								.map(([k, v]) => `${k}=${v}`)
 								.join(';')
 						: undefined
+				} else if (key === 'allowedExpectationTypes') {
+					argValue = workerArgs.allowedExpectationTypes
+						? workerArgs.allowedExpectationTypes.join(';')
+						: undefined
 				} else {
 					assertNever(key)
 					this.logger.error(`Unknown worker argument key: "${key}"=${workerArgs[key]}`)
