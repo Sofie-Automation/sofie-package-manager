@@ -9,7 +9,7 @@ export interface SpawnedProcess {
  * Convenience method to spawn a process.
  * Returns a promise that resolves when the process has started.
  */
-export async function spawnProcess(
+export function spawnProcess(
 	/** Path to the executable */
 	executable: string,
 	/** CLI arguments to send into to process */
@@ -19,7 +19,7 @@ export async function spawnProcess(
 	onProgress: (progress: number) => void,
 	// onStart?: (ffMpegProcess: ChildProcessWithoutNullStreams) => void,
 	log?: (str: string) => void
-): Promise<SpawnedProcess> {
+): SpawnedProcess {
 	const processName = `process-name: ${executable}`
 	log?.(`${processName}: spawn..`)
 	let execProcess: ChildProcessWithoutNullStreams | undefined = spawn(executable, args, {

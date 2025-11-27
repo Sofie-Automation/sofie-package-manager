@@ -679,32 +679,29 @@ class MediaConversionOperation {
 
 		this.logger.debug(`Spawning process: ${this.conversion.executable} ${args.join(' ')}`)
 
-		await new Promise<void>((resolve, reject) => {
-			spawnProcess(
-				this.conversion.executable,
-				args,
-				() => {
-					// On Done
-					resolve()
-				},
-				(err) => {
-					// On Error
-					reject(err)
-				},
-				(progress: number) => {
-					// On Progress
-					this.reportProgress(progress)
-				}
-				// this.logger.silly
-			)
-				.then((p) => {
-					this.spawnedProcess = p
-				})
-				.catch(reject)
-				.finally(() => {
-					this.spawnedProcess = undefined
-				})
-		})
+		try {
+			await new Promise<void>((resolve, reject) => {
+				this.spawnedProcess = spawnProcess(
+					this.conversion.executable,
+					args,
+					() => {
+						// On Done
+						resolve()
+					},
+					(err) => {
+						// On Error
+						reject(err)
+					},
+					(progress: number) => {
+						// On Progress
+						this.reportProgress(progress)
+					}
+					// this.logger.silly
+				)
+			})
+		} finally {
+			this.spawnedProcess = undefined
+		}
 	}
 	/**
 	 * Remove file from temporary source
