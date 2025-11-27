@@ -42,6 +42,7 @@ import { MonitorInProgress } from '../lib/monitorInProgress'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import * as path from 'path'
+import { PassThrough } from 'stream'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -367,6 +368,10 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		await this.prepareFileAccess()
 		await this.fileHandler.clearPackageRemoval(this.filePath)
 
@@ -377,7 +382,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		// Remove the file if it already exists:
 		if (await this.unlinkIfExists(fullPath)) this.logOperation(`Put package stream: Remove file "${fullPath}"`)
 
-		const writeStream = sourceStream.pipe(fs.createWriteStream(this.fullPath))
+		const writeStream = passThroughStream.pipe(fs.createWriteStream(this.fullPath))
 
 		const streamWrapper: PutPackageHandler = new PutPackageHandler(() => {
 			// can't really abort the write stream

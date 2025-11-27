@@ -35,6 +35,7 @@ import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 import { GenericFileHandler } from './lib/GenericFileHandler'
 import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
 import { createFTPClient, FTPClientBase, FTPOptions } from './lib/FTPClient/index'
+import { PassThrough } from 'stream'
 
 export interface Content {
 	/** This is set when the class-instance is only going to be used for PackageContainer access.*/
@@ -222,6 +223,10 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		// important that this is a 'write', so that it doesn't go into a deadlock with getPackageReadStream() in case of an upload/download to the same accessorPackageContainer
 		const ftp = await this.prepareFTPClient('write')
 
@@ -237,7 +242,7 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 			})
 		})
 
-		const pResponse = ftp.upload(sourceStream, fullPath)
+		const pResponse = ftp.upload(passThroughStream, fullPath)
 
 		pResponse
 			.then(() => {

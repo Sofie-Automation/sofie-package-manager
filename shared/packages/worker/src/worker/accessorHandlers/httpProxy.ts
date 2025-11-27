@@ -33,6 +33,7 @@ import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAcc
 import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
 import { GenericFileHandler } from './lib/GenericFileHandler'
+import { PassThrough } from 'stream'
 
 /** Accessor handle for accessing files in HTTP- */
 export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
@@ -192,15 +193,19 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const formData = new FormData()
-		formData.append('file', sourceStream)
+		formData.append('file', passThroughStream)
 
 		const fetch = fetchWithController(this.fullUrl, {
 			method: 'POST',
 			body: formData,
-			refreshStream: sourceStream, // pass in the source stream to avoid the fetch-timeout to fire
+			refreshStream: passThroughStream, // pass in the source stream to avoid the fetch-timeout to fire
 		})
 		const streamHandler: PutPackageHandler = new PutPackageHandler(() => {
 			fetch.controller.abort()
@@ -428,7 +433,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		if (this.isBadHTTPResponseCode(result.status)) {
 			const text = await result.text()
 			throw new Error(
-				`storeJSON: Bad response: [${result.status}]: ${result.statusText}, POST ${fullPath}, ${text}`
+				`writeFile: Bad response: [${result.status}]: ${result.statusText}, POST ${fullPath}, ${text}`
 			)
 		}
 	}
@@ -446,7 +451,9 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		})
 		if (this.isBadHTTPResponseCode(result.status)) {
 			const text = await result.text()
-			throw new Error(`storeJSON: Bad response: [${result.status}]: ${result.statusText}, GET /packages ${text}`)
+			throw new Error(
+				`listFilesInDir: Bad response: [${result.status}]: ${result.statusText}, GET /packages ${text}`
+			)
 		}
 
 		// from http-server:

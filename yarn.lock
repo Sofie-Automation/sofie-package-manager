@@ -763,7 +763,7 @@ __metadata:
     koa-range: "npm:^0.3.0"
     koa-router: "npm:^8.0.8"
     mime-types: "npm:^2.1.28"
-    pechkin: "npm:^1.0.1"
+    pechkin: "npm:^2.2.0"
     pretty-bytes: "npm:^5.5.0"
     rimraf: "npm:^5.0.5"
     tslib: "npm:^2.1.0"
@@ -11313,12 +11313,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pechkin@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "pechkin@npm:1.0.1"
+"pechkin@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "pechkin@npm:2.2.0"
   dependencies:
     busboy: "npm:^1.6.0"
-  checksum: 10/192f320a54db7438720f872ac89a75534e809bfe5666d492bb7abe504cb8db645bb0852c776139de74fa069d9c024df62d789c8cf13452b610b1b72bfbed28f1
+  checksum: 10/3bd6f03361518d773995a8fd4af14667237366ae8dda2b49174326a0f69dc21a4f12faeccbacb8aab7fd599dc96d01fe3f09eb16a8e2f7a41f7149e96a9f00a5
   languageName: node
   linkType: hard
 

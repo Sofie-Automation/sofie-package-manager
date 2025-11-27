@@ -34,6 +34,7 @@ import { BaseWorker } from '../worker'
 import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
+import { PassThrough } from 'stream'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -245,6 +246,10 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
@@ -254,7 +259,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		// Remove the file if it exists:
 		if (await this.unlinkIfExists(fullPath)) this.logOperation(`Put package stream: Remove file "${fullPath}"`)
 
-		const writeStream = sourceStream.pipe(fs.createWriteStream(fullPath))
+		const writeStream = passThroughStream.pipe(fs.createWriteStream(fullPath))
 
 		const streamWrapper: PutPackageHandler = new PutPackageHandler(() => {
 			writeStream.destroy()
