@@ -735,39 +735,35 @@ class MediaConversionOperation {
 			else if (handle.source === 'stdout') usesStdOut = true
 		})
 
-		return await new Promise<{
-			stdout: string
-			stderr: string
-		}>((resolve, reject) => {
-			let stdout = ''
-			let stderr = ''
-			spawnProcess(
-				executable,
-				args,
-				() => resolve({ stdout, stderr }), // On Done
-				(err) => reject(err), // On Error
-				noop // on Progress
-				// ,this.logger.silly
-			)
-				.then((p) => {
-					this.spawnedProcess = p
-
-					if (usesStdOut) {
-						p.execProcess.stdout.on('data', (data: Buffer) => {
-							stdout += data.toString()
-						})
-					}
-					if (usesStdErr) {
-						p.execProcess.stderr.on('data', (data: Buffer) => {
-							stderr += data.toString()
-						})
-					}
-				})
-				.catch(reject)
-				.finally(() => {
-					this.spawnedProcess = undefined
-				})
-		})
+		try {
+			return await new Promise<{
+				stdout: string
+				stderr: string
+			}>((resolve, reject) => {
+				let stdout = ''
+				let stderr = ''
+				this.spawnedProcess = spawnProcess(
+					executable,
+					args,
+					() => resolve({ stdout, stderr }), // On Done
+					(err) => reject(err), // On Error
+					noop // on Progress
+					// ,this.logger.silly
+				)
+				if (usesStdOut) {
+					this.spawnedProcess.execProcess.stdout.on('data', (data: Buffer) => {
+						stdout += data.toString()
+					})
+				}
+				if (usesStdErr) {
+					this.spawnedProcess.execProcess.stderr.on('data', (data: Buffer) => {
+						stderr += data.toString()
+					})
+				}
+			})
+		} finally {
+			this.spawnedProcess = undefined
+		}
 	}
 
 	/**
@@ -946,32 +942,29 @@ class MediaConversionOperation {
 
 		this.logger.debug(`Spawning process: ${executable} ${args.join(' ')}`)
 
-		await new Promise<void>((resolve, reject) => {
-			spawnProcess(
-				executable,
-				args,
-				() => {
-					// On Done
-					resolve()
-				},
-				(err) => {
-					// On Error
-					reject(err)
-				},
-				(progress: number) => {
-					// On Progress
-					this.reportProgress(progress)
-				}
-				// this.logger.silly
-			)
-				.then((p) => {
-					this.spawnedProcess = p
-				})
-				.catch(reject)
-				.finally(() => {
-					this.spawnedProcess = undefined
-				})
-		})
+		try {
+			await new Promise<void>((resolve, reject) => {
+				this.spawnedProcess = spawnProcess(
+					executable,
+					args,
+					() => {
+						// On Done
+						resolve()
+					},
+					(err) => {
+						// On Error
+						reject(err)
+					},
+					(progress: number) => {
+						// On Progress
+						this.reportProgress(progress)
+					}
+					// this.logger.silly
+				)
+			})
+		} finally {
+			this.spawnedProcess = undefined
+		}
 	}
 	/**
 	 * Remove file from temporary source
