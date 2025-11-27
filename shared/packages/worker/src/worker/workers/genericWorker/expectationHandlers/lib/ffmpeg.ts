@@ -40,19 +40,33 @@ export async function spawnFFMpeg<Metadata>(
 	onStart?: (ffMpegProcess: ChildProcessWithoutNullStreams) => void,
 	log?: (str: string) => void
 ): Promise<FFMpegProcess> {
-	let FFMpegIsDone = false
-	let uploadIsDone = false
+	const { pipeStdOut, args: args2 } = await prepareSpawnFFMpegProcess(args, targetHandle)
 
-	const maybeDone = () => {
-		if (FFMpegIsDone && uploadIsDone) {
-			onDone().catch((error) => {
-				// workInProgress._reportError(error)
-				onFail(error).catch((error) => log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(error)}`))
-			})
-		}
-	}
-
+	return spawnFFMpegProcess({
+		pipeStdOut,
+		args: args2,
+		targetHandle,
+		onDone,
+		onFail,
+		onProgress,
+		onStart,
+		log,
+	})
+}
+/**
+ * Prepare for spawning an ffmpeg process by ensuring target paths exist etc.
+ */
+async function prepareSpawnFFMpegProcess<Metadata>(
+	/** Arguments to send into ffmpeg, excluding the final arguments for output */
+	args: string[],
+	targetHandle:
+		| LocalFolderAccessorHandle<Metadata>
+		| FileShareAccessorHandle<Metadata>
+		| HTTPProxyAccessorHandle<Metadata>
+		| FTPAccessorHandle<Metadata>
+): Promise<{ pipeStdOut: boolean; args: string[] }> {
 	let pipeStdOut = false
+
 	if (isLocalFolderAccessorHandle(targetHandle)) {
 		await fsMkDir(path.dirname(targetHandle.fullPath), { recursive: true }) // Create folder if it doesn't exist
 		args.push(escapeFilePath(targetHandle.fullPath))
@@ -76,11 +90,43 @@ export async function spawnFFMpeg<Metadata>(
 		throw new Error(`Unsupported Target AccessHandler`)
 	}
 
-	log?.('ffmpeg: spawn..')
-	let ffMpegProcess: ChildProcessWithoutNullStreams | undefined = spawn(getFFMpegExecutable(), args, {
+	return { pipeStdOut, args }
+}
+/** Spawn an ffmpeg process and make it to output its content to the target */
+function spawnFFMpegProcess<Metadata>(props: {
+	/** Arguments to send into ffmpeg, excluding the final arguments for output */
+	args: string[]
+	targetHandle:
+		| LocalFolderAccessorHandle<Metadata>
+		| FileShareAccessorHandle<Metadata>
+		| HTTPProxyAccessorHandle<Metadata>
+		| FTPAccessorHandle<Metadata>
+	onDone: () => Promise<void>
+	onFail: (err?: any) => Promise<void>
+	onProgress?: (progress: number) => Promise<void>
+	onStart?: (ffMpegProcess: ChildProcessWithoutNullStreams) => void
+	log?: (str: string) => void
+	pipeStdOut: boolean
+}): FFMpegProcess {
+	let FFMpegIsDone = false
+	let uploadIsDone = false
+
+	const maybeDone = () => {
+		if (FFMpegIsDone && uploadIsDone) {
+			props.onDone().catch((error) => {
+				// workInProgress._reportError(error)
+				props
+					.onFail(error)
+					.catch((error) => props.log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(error)}`))
+			})
+		}
+	}
+
+	props.log?.('ffmpeg: spawn..')
+	let ffMpegProcess: ChildProcessWithoutNullStreams | undefined = spawn(getFFMpegExecutable(), props.args, {
 		windowsVerbatimArguments: true, // To fix an issue with ffmpeg.exe on Windows
 	})
-	log?.('ffmpeg: spawned')
+	props.log?.('ffmpeg: spawned')
 
 	function killFFMpeg() {
 		// ensure this function doesn't throw, since it is called from various error event handlers
@@ -92,35 +138,14 @@ export async function spawnFFMpeg<Metadata>(
 		}
 		ffMpegProcess = undefined
 	}
-	onStart?.(ffMpegProcess)
+	props.onStart?.(ffMpegProcess)
 
-	if (pipeStdOut) {
-		log?.('ffmpeg: pipeStdOut')
-		if (!ffMpegProcess.stdout) {
-			throw new Error('No stdout stream available')
-		}
-
-		const writeStream = await targetHandle.putPackageStream(ffMpegProcess.stdout)
-		writeStream.on('error', (err) => {
-			onFail(err).catch((error) => log?.(`onFail callback failed: ${stringifyError(error)}`))
-			log?.('ffmpeg: pipeStdOut err: ' + stringifyError(err))
-			killFFMpeg()
-		})
-		writeStream.once('close', () => {
-			uploadIsDone = true
-
-			maybeDone()
-			log?.('ffmpeg: pipeStdOut done')
-		})
-	} else {
-		uploadIsDone = true // no upload
-	}
 	const lastFewLines: string[] = []
 
 	ffMpegProcess.stderr.on('data', (data) => {
 		const str = data.toString()
 
-		log?.('ffmpeg:' + str)
+		props.log?.('ffmpeg:' + str)
 
 		lastFewLines.push(str)
 
@@ -129,20 +154,22 @@ export async function spawnFFMpeg<Metadata>(
 		}
 	})
 	ffmpegInterpretProgress(ffMpegProcess, (progress) => {
-		onProgress?.(progress).catch((err) => log?.(`spawnFFMpeg onProgress update failed: ${stringifyError(err)}`))
+		props
+			.onProgress?.(progress)
+			.catch((err) => props.log?.(`spawnFFMpeg onProgress update failed: ${stringifyError(err)}`))
 	})
 	const onClose = (code: number | null) => {
 		if (ffMpegProcess) {
-			log?.('ffmpeg: close ' + code)
+			props.log?.('ffmpeg: close ' + code)
 			ffMpegProcess = undefined
 			if (code === 0) {
 				FFMpegIsDone = true
 				maybeDone()
 			} else {
 				// workInProgress._reportError(new Error(`FFMpeg exit code ${code}: ${lastFewLines.join('\n')}`))
-				onFail(new Error(`FFMpeg exit code ${code}: ${lastFewLines.join('\n')}`)).catch((err) =>
-					log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(err)}`)
-				)
+				props
+					.onFail(new Error(`FFMpeg exit code ${code}: ${lastFewLines.join('\n')}`))
+					.catch((err) => props.log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(err)}`))
 			}
 		}
 	}
@@ -153,14 +180,45 @@ export async function spawnFFMpeg<Metadata>(
 		onClose(code)
 	})
 	ffMpegProcess.on('error', (err) => {
-		log?.(`spawnFFMpeg error: ${stringifyError(err)}`)
+		props.log?.(`spawnFFMpeg error: ${stringifyError(err)}`)
 	})
+	// ffMpegProcess.signalCode
+
+	if (props.pipeStdOut) {
+		props.log?.('ffmpeg: pipeStdOut')
+		if (!ffMpegProcess.stdout) {
+			throw new Error('No stdout stream available')
+		}
+
+		props.targetHandle
+			.putPackageStream(ffMpegProcess.stdout)
+			.then((writeStream) => {
+				writeStream.on('error', (err) => {
+					props.onFail(err).catch((error) => props.log?.(`onFail callback failed: ${stringifyError(error)}`))
+					props.log?.('ffmpeg: pipeStdOut err: ' + stringifyError(err))
+					killFFMpeg()
+				})
+				writeStream.once('close', () => {
+					uploadIsDone = true
+
+					maybeDone()
+					props.log?.('ffmpeg: pipeStdOut done')
+				})
+			})
+			.catch((err) => {
+				props.onFail(err).catch((error) => props.log?.(`onFail callback failed: ${stringifyError(error)}`))
+			})
+	} else {
+		uploadIsDone = true // no upload
+	}
 
 	return {
-		pid: ffMpegProcess.pid ?? 0,
+		pid: ffMpegProcess?.pid ?? 0,
 		cancel: () => {
 			killFFMpeg()
-			onFail(`Cancelled`).catch((err) => log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(err)}`))
+			props
+				.onFail(`Cancelled`)
+				.catch((err) => props.log?.(`spawnFFMpeg onFail callback failed: ${stringifyError(err)}`))
 		},
 	}
 }
