@@ -180,6 +180,8 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 					continue
 				} else if ((e as any).code === 'ELOCKED') {
 					// Already locked, try again later:
+					this.logger.debug(`File is already locked, trying again later...`)
+
 					await this.sleep(this.RETRY_TIMEOUT)
 					continue
 				} else {
@@ -201,6 +203,7 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 				} else {
 					if (lockCompromisedError) {
 						// The lock was compromised. Try again:
+						this.logger.warn(`File lock was compromised, trying again later... (${lockCompromisedError})`)
 						continue
 					}
 
@@ -302,15 +305,23 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 			if (lockFileContentStr) {
 				try {
 					lockFileContent = JSON.parse(lockFileContentStr)
-				} catch {
+				} catch (e) {
 					// ignore
+					this.logger.warn(`Unable to parse Lock file content: (${e})`)
 				}
 			}
 			if (lockFileContent) {
 				const lockedDate = new Date(lockFileContent.date)
+				const lockAge = Date.now() - lockedDate.getTime()
 
-				if (Math.abs(Date.now() - lockedDate.getTime()) < 10 * 1000) {
-					// The lock file is not too old, so we can use it.
+				if (Math.abs(lockAge) < 10 * 1000) {
+					// The lock file is in place and rather new,
+					// wait and try again later:
+
+					this.logger.debug(
+						`File is already locked, trying again later... (date: ${lockFileContent.date}, age: ${lockAge} ms)`
+					)
+
 					// Try again later:
 					await this.sleep(this.RETRY_TIMEOUT)
 					continue
@@ -335,6 +346,13 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 			const checkLockFileContent = await this.readIfExists(fileLockPath)
 			if (checkLockFileContent !== myLockFileContents) {
 				// Dang it, someone else got the lock before us.
+
+				this.logger.debug(
+					`File was locked by someone else, trying again later... (${JSON.stringify(
+						checkLockFileContent
+					)} vs ${JSON.stringify(myLockFileContents)})`
+				)
+
 				// Try again later:
 				await this.sleep(this.RETRY_TIMEOUT)
 				continue
