@@ -307,7 +307,7 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 					lockFileContent = JSON.parse(lockFileContentStr)
 				} catch (e) {
 					// ignore
-					this.logger.warn(`Unable to parse Lock file content: (${e})`)
+					this.logger.debug(`Unable to parse Lock file content: (${e}, ${lockFileContentStr})`)
 				}
 			}
 			if (lockFileContent) {
