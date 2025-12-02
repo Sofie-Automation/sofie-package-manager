@@ -2,6 +2,8 @@
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { AccessorOnPackage, PackageContainerOnPackage } from './inputApi'
 import { AccessorId, ExpectationId, ExpectationManagerId, ExpectedPackageId } from './ids'
+// eslint-disable-next-line node/no-missing-import
+import { MediaRamRecRef, MediaStillRef } from 'kairos-lib'
 
 /*
  * This file contains definitions for Expectations, the internal data structure upon which the Package Manager operates.
@@ -29,6 +31,7 @@ export namespace Expectation {
 		| JsonDataCopy
 		| FileVerify
 		| RenderHTML
+		| PackageKairosLoadToRam
 
 	/** Defines the Expectation type, used to separate the different Expectations */
 	export enum Type {
@@ -44,6 +47,7 @@ export namespace Expectation {
 		PACKAGE_DEEP_SCAN = 'package_deep_scan',
 		PACKAGE_LOUDNESS_SCAN = 'package_loudness_scan',
 		PACKAGE_IFRAMES_SCAN = 'package_iframes_scan',
+		PACKAGE_KAIROS_LOAD_TO_RAM = 'package_kairos_load_to_ram',
 
 		QUANTEL_CLIP_COPY = 'quantel_clip_copy',
 		// QUANTEL_CLIP_SCAN = 'quantel_clip_scan',
@@ -232,6 +236,22 @@ export namespace Expectation {
 		endRequirement: {
 			targets: SpecificPackageContainerOnPackage.CorePackage[]
 			content: null // not using content, entries are stored using this.fromPackages
+			version: null
+		}
+		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay
+	}
+	/** Defines a package that should be loaded into RAM on a Kairos Vision mixer */
+	export interface PackageKairosLoadToRam extends Base {
+		type: Type.PACKAGE_KAIROS_LOAD_TO_RAM
+
+		startRequirement: {
+			sources: []
+		}
+		endRequirement: {
+			targets: SpecificPackageContainerOnPackage.KairosClip[]
+			content: {
+				ref: MediaRamRecRef | MediaStillRef
+			}
 			version: null
 		}
 		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay
@@ -487,6 +507,12 @@ export namespace Expectation {
 		export interface QuantelClip extends PackageContainerOnPackage {
 			accessors: {
 				[accessorId: AccessorId]: AccessorOnPackage.Quantel
+			}
+		}
+		/** Defines a PackageContainer for Kairos clips, stored on a Kairos Vision Mixer servers. */
+		export interface KairosClip extends PackageContainerOnPackage {
+			accessors: {
+				[accessorId: AccessorId]: AccessorOnPackage.KairosClip
 			}
 		}
 

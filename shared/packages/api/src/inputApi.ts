@@ -1,5 +1,7 @@
 import { StatusCode as SofieStatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
 import { PackageContainerId, ExpectedPackageId, AccessorId } from './ids'
+/* eslint-disable node/no-missing-import */
+import type { MediaRamRecRef, MediaStillRef } from 'kairos-lib'
 
 // import { assertTrue, EnumExtends, assertEnumValuesExtends } from './lib'
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -100,6 +102,9 @@ export namespace ExpectedPackage {
 			/** Should the package be scanned for I-frames */
 			iframes?: SideEffectIframesScanSettings
 
+			/** Should the package be loaded into the RAM on a KAIROS vision mixer */
+			kairosLoadToRam?: SideEffectKairosLoadToRamSettings
+
 			/** Other custom configuration */
 			[key: string]: any
 		}
@@ -136,6 +141,14 @@ export namespace ExpectedPackage {
 	export type SideEffectLoudnessSettingsChannelSpec = `${number}` | `${number}+${number}`
 
 	export type SideEffectIframesScanSettings = Record<string, never>
+
+	export type SideEffectKairosLoadToRamSettings = {
+		/**
+		 * PackageContainer for the Kairos.
+		 * This must be pointing towards a Kairos-Accessor!
+		 */
+		containerId: PackageContainerId
+	}
 
 	export interface ExpectedPackageMediaFile extends Base {
 		type: PackageType.MEDIA_FILE
@@ -348,6 +361,7 @@ export namespace Accessor {
 		| CorePackageCollection
 		| AtemMediaStore
 		| FTP
+		| KairosClip
 
 	export enum AccessType {
 		LOCAL_FOLDER = 'local_folder',
@@ -358,6 +372,7 @@ export namespace Accessor {
 		CORE_PACKAGE_INFO = 'core_package_info',
 		ATEM_MEDIA_STORE = 'atem_media_store',
 		FTP = 'ftp',
+		KAIROS_CLIP = 'kairos_clip',
 	}
 
 	/** Generic (used in extends) */
@@ -447,6 +462,15 @@ export namespace Accessor {
 		/** FileFlow Export profile name. Used for copying clips into CIFS file shares */
 		fileflowProfile?: string
 	}
+	export interface KairosClip extends Base {
+		type: AccessType.KAIROS_CLIP
+
+		/** IP address / host to the Kairos vision mixer */
+		host: string
+
+		/** Defaults to 3005 */
+		port?: number
+	}
 	/** Virtual PackageContainer used for piping data into core */
 	export interface CorePackageCollection extends Base {
 		type: Accessor.AccessType.CORE_PACKAGE_INFO
@@ -518,6 +542,7 @@ export namespace AccessorOnPackage {
 		| CorePackageCollection
 		| AtemMediaStore
 		| FTP
+		| KairosClip
 
 	export interface LocalFolder extends Partial<Accessor.LocalFolder> {
 		/** Path to the file (starting from .folderPath). If not set, the filePath of the ExpectedPackage will be used */
@@ -549,6 +574,9 @@ export namespace AccessorOnPackage {
 	export interface FTP extends Partial<Accessor.FTP> {
 		/** path to resource (combined with .basePath gives the full path), for example: /folder/myFile */
 		path?: string
+	}
+	export interface KairosClip extends Partial<Accessor.KairosClip> {
+		ref?: MediaRamRecRef | MediaStillRef
 	}
 }
 

@@ -1,4 +1,5 @@
-import { ExpectedPackageWrap } from '../../packageManager'
+import * as path from 'path'
+import { ExpectedPackageWrap, PackageContainers } from '../../packageManager'
 import { PackageManagerSettings } from '../../generated/options'
 import {
 	Accessor,
@@ -12,6 +13,9 @@ import {
 	PackageContainerId,
 	protectString,
 	ExpectationId,
+	AccessorOnPackage,
+	AccessorId,
+	objectEntries,
 } from '@sofie-package-manager/api'
 import {
 	ExpectedPackageWrapHTMLTemplate,
@@ -21,6 +25,8 @@ import {
 	PriorityAdditions,
 } from './types'
 import { CORE_COLLECTION_ACCESSOR_ID } from './lib'
+// eslint-disable-next-line node/no-missing-import
+import { MediaRamRecRef, MediaStillRef, protocolEncodeStr, refMediaRamRec, refMediaStill, refToPath } from 'kairos-lib'
 
 type SomeClipCopyExpectation =
 	| Expectation.FileCopy
@@ -422,6 +428,108 @@ export function generatePackageIframes(
 				},
 			],
 			content: null,
+			version: null,
+		},
+		workOptions: {
+			...expectation.workOptions,
+			allowWaitForCPU: true,
+			requiredForPlayout: false,
+			usesCPUCount: 1,
+			removeDelay: settings.delayRemovalPackageInfo,
+		},
+		dependsOnFulfilled: [expectation.id],
+		triggerByFulfilledIds: [expectation.id],
+	}
+}
+/** Defines a package that should be loaded into RAM on a Kairos Vision mixer */
+export function generatePackageKairosLoadToRam(
+	packageContainers: PackageContainers,
+	expectation: SomeClipCopyExpectation | Expectation.MediaFileConvert,
+	packageSettings: ExpectedPackage.SideEffectKairosLoadToRamSettings,
+	settings: PackageManagerSettings
+): Expectation.PackageKairosLoadToRam | null {
+	let filePath: string
+
+	if (expectation.type === Expectation.Type.FILE_COPY) {
+		filePath = expectation.endRequirement.content.filePath
+	} else if (expectation.type === Expectation.Type.FILE_VERIFY) {
+		filePath = expectation.endRequirement.content.filePath
+	} else if (expectation.type === Expectation.Type.FILE_COPY_PROXY) {
+		filePath = expectation.endRequirement.content.filePath
+	} else if (expectation.type === Expectation.Type.MEDIA_FILE_CONVERT) {
+		filePath = expectation.endRequirement.content.filePath
+	} else {
+		return null
+	}
+
+	let ref: undefined | MediaRamRecRef | MediaStillRef = undefined
+
+	for (const target of expectation.endRequirement.targets) {
+		for (const accessor of Object.values<AccessorOnPackage.Any>(target.accessors)) {
+			if (accessor.type === Accessor.AccessType.FTP) {
+				const fullPath = path.join(accessor.basePath ?? '', filePath).replace(/\\/g, '/')
+
+				// 'ramrec/Sofie/movie.mp4
+
+				if (fullPath.startsWith('ramrec/')) {
+					const localPaths = fullPath
+						.replace(/^ramrec\//, '')
+						.split('/')
+						.map(protocolEncodeStr)
+
+					ref = refMediaRamRec(localPaths)
+				} else if (fullPath.startsWith('stills/')) {
+					const localPaths = fullPath
+						.replace(/^stills\//, '')
+						.split('/')
+						.map(protocolEncodeStr)
+
+					ref = refMediaStill(localPaths)
+				}
+			}
+		}
+	}
+
+	if (!ref) return null
+
+	const packageContainer = packageContainers[packageSettings.containerId]
+	if (!packageContainer) return null
+
+	const accessors: { [accessorId: AccessorId]: AccessorOnPackage.KairosClip } = {}
+	for (const [accessorId, accessor] of objectEntries(packageContainer.accessors)) {
+		if (accessor.type === Accessor.AccessType.KAIROS_CLIP) {
+			accessors[accessorId] = accessor
+		}
+	}
+
+	return {
+		id: protectString<ExpectationId>(expectation.id + '_loadToRam'),
+		priority: expectation.priority + PriorityAdditions.IFRAMES_SCAN,
+		managerId: expectation.managerId,
+		type: Expectation.Type.PACKAGE_KAIROS_LOAD_TO_RAM,
+		fromPackages: expectation.fromPackages,
+
+		statusReport: {
+			label: `Load into RAM`,
+			description: `Load ${refToPath(ref)} into RAM on KAIROS`,
+			displayRank: 15,
+			sendReport: expectation.statusReport.sendReport,
+		},
+
+		startRequirement: {
+			sources: [],
+		},
+		endRequirement: {
+			targets: [
+				{
+					containerId: packageSettings.containerId,
+					label: 'Container for Kairos RAM load',
+					accessors,
+				},
+			],
+			content: {
+				ref,
+			},
 			version: null,
 		},
 		workOptions: {

@@ -9,6 +9,7 @@ import { LocalFolderAccessorHandle } from './localFolder'
 import { QuantelAccessorHandle } from './quantel'
 import { ATEMAccessorHandle } from './atem'
 import { FTPAccessorHandle } from './ftp'
+import { KairosClipAccessorHandle } from './kairosClip'
 
 export function getAccessorHandle<Metadata>(
 	worker: BaseWorker,
@@ -53,6 +54,8 @@ export function getAccessorStaticHandle(accessor: AccessorOnPackage.Any) {
 		return ATEMAccessorHandle
 	} else if (accessor.type === Accessor.AccessType.FTP) {
 		return FTPAccessorHandle
+	} else if (accessor.type === Accessor.AccessType.KAIROS_CLIP) {
+		return KairosClipAccessorHandle
 	} else {
 		assertNever(accessor.type) // Assert  so as to not forget to add an if-clause above
 		throw new Error(`Unsupported Accessor type "${accessor.type}"`)
@@ -99,6 +102,11 @@ export function isFTPAccessorHandle<Metadata>(
 ): accessorHandler is FTPAccessorHandle<Metadata> {
 	return accessorHandler.type === FTPAccessorHandle.type
 }
+export function isKairosClipAccessorHandle<Metadata>(
+	accessorHandler: GenericAccessorHandle<Metadata>
+): accessorHandler is KairosClipAccessorHandle<Metadata> {
+	return accessorHandler.type === KairosClipAccessorHandle.type
+}
 
 /** Returns a generic value for how costly it is to use an Accessor type. A higher value means that it is more expensive to access the accessor */
 export function getAccessorCost(accessorType: Accessor.AccessType | undefined): number {
@@ -109,6 +117,7 @@ export function getAccessorCost(accessorType: Accessor.AccessType | undefined): 
 		case Accessor.AccessType.QUANTEL:
 			return 1
 		case Accessor.AccessType.ATEM_MEDIA_STORE:
+		case Accessor.AccessType.KAIROS_CLIP:
 			return 1
 		case Accessor.AccessType.CORE_PACKAGE_INFO:
 			return 2
