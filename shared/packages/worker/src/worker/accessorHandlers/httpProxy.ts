@@ -348,7 +348,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		if (this.isBadHTTPResponseCode(result.status)) {
 			const text = await result.text()
 			throw new Error(
-				`deletePackageIfExists: Bad response: [${result.status}]: ${result.statusText}, DELETE ${this.fullUrl}, ${text}`
+				`deletePackageIfExists: Bad response: [${result.status}]: ${result.statusText}, DELETE ${url}, ${text}`
 			)
 		}
 		return true
