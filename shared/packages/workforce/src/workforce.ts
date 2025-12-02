@@ -16,7 +16,6 @@ import {
 	hashObj,
 	Statuses,
 	StatusCode,
-	setLogLevel,
 	mapEntries,
 	ExpectationManagerId,
 	AppContainerId,
@@ -379,7 +378,7 @@ export class Workforce {
 	}
 
 	public setLogLevel(logLevel: LogLevel): void {
-		setLogLevel(logLevel)
+		this.logger.setLogLevel(logLevel)
 	}
 	public async setLogLevelOfApp(appId: AnyProtectedString, logLevel: LogLevel): Promise<void> {
 		const workerAgent = this.workerAgents.get(appId as WorkerAgentId)

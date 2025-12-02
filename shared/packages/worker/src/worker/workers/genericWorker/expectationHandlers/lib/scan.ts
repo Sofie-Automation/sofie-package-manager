@@ -113,7 +113,7 @@ export function scanWithFFProbe(
 				ffProbeProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 				ffProbeProcess?.kill()
 				sourceStream?.cancel()
-				reject('Cancelled')
+				reject(new Error('Cancelled'))
 			})
 
 			ffProbeProcess = spawn(getFFProbeExecutable(), args, {
@@ -246,7 +246,7 @@ export function scanFieldOrder(
 		onCancel(() => {
 			ffmpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 			ffmpegProcess?.kill()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffmpegProcess = execFile(
@@ -350,7 +350,7 @@ export function scanMoreInfo(
 		onCancel(() => {
 			cancelled = true
 			killFFMpeg()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffMpegProcess = spawn(getFFMpegExecutable(), args, {
@@ -467,11 +467,7 @@ export function scanMoreInfo(
 			if (ffMpegProcess) {
 				killFFMpeg()
 
-				reject(
-					`Error parsing FFMpeg data. Error: "${err} ${
-						err && typeof err === 'object' ? (err as Error).stack : ''
-					}", context: "${context}" `
-				)
+				reject(`Error parsing FFMpeg data. Error: ${stringifyError(err)}, context: "${context}" `)
 			}
 		}
 
@@ -545,7 +541,7 @@ function scanLoudnessStream(
 		onCancel(() => {
 			ffmpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 			ffmpegProcess?.kill()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffmpegProcess = execFile(
@@ -732,7 +728,7 @@ export function scanIframes(
 		onCancel(() => {
 			cancelled = true
 			killFFMpeg()
-			reject('Cancelled')
+			reject(new Error('Cancelled'))
 		})
 
 		ffMpegProcess = spawn(getFFProbeExecutable(), args, {
@@ -755,11 +751,7 @@ export function scanIframes(
 			if (ffMpegProcess) {
 				killFFMpeg()
 
-				reject(
-					`Error parsing FFMpeg data. Error: "${err} ${
-						err && typeof err === 'object' ? (err as Error).stack : ''
-					}", context: "${context}" `
-				)
+				reject(`Error parsing FFMpeg data. Error: ${stringifyError(err)}, context: "${context}" `)
 			}
 		}
 

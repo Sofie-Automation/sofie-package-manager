@@ -111,6 +111,7 @@ export const defaultTestConfig: SingleAppConfig = {
 			considerCPULoad: null,
 			failurePeriod: 0,
 			failurePeriodLimit: 0,
+			sourcePackageStabilityThreshold: 0,
 		},
 	},
 }

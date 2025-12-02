@@ -436,11 +436,21 @@ export function isRunningInTest(): boolean {
 	// Note: JEST_WORKER_ID is set when running in unit tests
 	return process.env.JEST_WORKER_ID !== undefined
 }
+/** Returns true if the process is running in development mode */
 export function isRunningInDevelopment(): boolean {
 	return (
 		!isRunningInTest() &&
-		// Process runs as a node process, we're probably in development mode.:
-		(process.execPath.endsWith('node.exe') || // windows
-			process.execPath.endsWith('node')) // linux
+		// If process runs as a node process, we're probably in development mode:
+		(path.basename(process.execPath) === 'node.exe' || // windows
+			path.basename(process.execPath) === 'node') // linux
 	)
+}
+export function countOccurrences(haystack: string, needle: string): number {
+	let count = 0
+	let pos = haystack.indexOf(needle)
+	while (pos !== -1) {
+		count++
+		pos = haystack.indexOf(needle, pos + needle.length)
+	}
+	return count
 }

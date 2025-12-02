@@ -1,7 +1,7 @@
 import _ from 'underscore'
 import * as Winston from 'winston'
 import { ProcessConfig } from './config'
-import { isRunningInTest, literal, stringifyError } from './lib'
+import { isRunningInDevelopment, isRunningInTest, literal, stringifyError } from './lib'
 
 const { combine, label, json, timestamp, printf } = Winston.format
 
@@ -20,6 +20,8 @@ export interface LoggerInstance {
 	silly: LeveledLogMethodLight
 
 	category: (category: string) => LoggerInstance
+	getLogLevel: () => LogLevel
+	setLogLevel: (level: LogLevel) => void
 }
 /** This is a subset of Winston.LeveledLogMethod */
 export type LeveledLogMethodLight = (msg: any, data?: any) => void
@@ -63,11 +65,11 @@ export function initializeLogger(config: { process: ProcessConfig }): void {
 		setLogLevel(initialLogLevel)
 	}
 }
-export function getLogLevel(): LogLevel {
+function getLogLevel(): LogLevel {
 	if (!loggerContainer) throw new Error('Logging has not been set up! initializeLogger() must be called first.')
 	return logLevel
 }
-export function setLogLevel(level: LogLevel, startup = false): void {
+function setLogLevel(level: LogLevel, startup = false): void {
 	if (!loggerContainer) throw new Error('Logging has not been set up! initializeLogger() must be called first.')
 	if (logLevel !== level || startup) {
 		logLevel = level
@@ -95,7 +97,7 @@ export function setupLogger(
 
 	// Setup logging --------------------------------------
 	const logPath = config.process.logPath
-	const isProduction = !process.execPath.match(/node.exe$/)
+	const isProduction = !isRunningInDevelopment()
 
 	let logger: Winston.Logger
 
@@ -161,9 +163,11 @@ export function setupLogger(
 		}
 		if (initialLogLevel) setLogLevel(initialLogLevel, true)
 	}
-	// Somewhat of a hack, inject the category method:
+	// Somewhat of a hack, inject the extra methods:
 	const loggerInstance = logger as any as LoggerInstance
 
+	loggerInstance.getLogLevel = getLogLevel
+	loggerInstance.setLogLevel = setLogLevel
 	loggerInstance.category = getCategory(loggerInstance, '')
 
 	if (filterFcn) {
@@ -212,7 +216,7 @@ function getCategory(outerLogger: LoggerInstance, outerCategory: string) {
 
 		const fullCategory = `${outerCategory ? `${outerCategory}.` : ''}${subCategory}`
 
-		const createLogMethod = (type: keyof LoggerInstance) => {
+		const createLogMethod = (type: 'error' | 'warn' | 'info' | 'debug' | 'verbose' | 'silly') => {
 			return (msg: any, data?: any) => {
 				let msgStr = `${fullCategory}: ${safeStringify(msg)}`
 
@@ -220,6 +224,13 @@ function getCategory(outerLogger: LoggerInstance, outerCategory: string) {
 
 				outerLogger[type](msgStr)
 			}
+		}
+
+		if (!outerLogger.getLogLevel) {
+			throw new Error('outerLogger does not have getLogLevel method!')
+		}
+		if (!outerLogger.setLogLevel) {
+			throw new Error('outerLogger does not have setLogLevel method!')
 		}
 
 		return literal<LoggerInstance>({
@@ -230,6 +241,8 @@ function getCategory(outerLogger: LoggerInstance, outerCategory: string) {
 			verbose: createLogMethod('verbose'),
 			silly: createLogMethod('silly'),
 			category: getCategory(outerLogger, fullCategory),
+			getLogLevel: outerLogger.getLogLevel,
+			setLogLevel: outerLogger.setLogLevel,
 		})
 	}
 }
