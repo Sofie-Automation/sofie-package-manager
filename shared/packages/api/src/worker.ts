@@ -73,6 +73,9 @@ export interface WorkerAgentConfig {
 
 	/** A temporary, local file path where the worker can store temporary artifacts */
 	temporaryFolderPath?: string
+
+	/** A list of allowed expectation types for this worker */
+	allowedExpectationTypes?: string[] | null
 }
 export type ReturnTypeDoYouSupportPackageContainer =
 	| {

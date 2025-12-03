@@ -5,6 +5,7 @@ import { WorkerAgentConfig } from './worker'
 import { AppContainerConfig } from './appContainer'
 import { protectString } from './ProtectedString'
 import { AppContainerId, WorkerAgentId } from './ids'
+import { Expectation } from './expectationApi'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -152,6 +153,13 @@ const workerArguments = defineArguments({
 		type: 'string',
 		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
 		describe: 'A temporary, local file path where the worker can store temporary artifacts',
+	},
+	allowedExpectationTypes: {
+		type: 'string',
+		default: process.env.WORKER_ALLOWED_EXPECTATION_TYPES || '',
+		describe: `A semicolon-separated list of allowed expectation types for this worker. Allowed options are: ${Object.values<string>(
+			Expectation.Type
+		).join(', ')}. (Empty means "all types are allowed")`,
 	},
 	resourceId: {
 		type: 'string',
@@ -465,6 +473,7 @@ export interface WorkerConfig {
 		costMultiplier: number
 		considerCPULoad: number | null
 		pickUpCriticalExpectationsOnly: boolean
+		allowedExpectationTypes: string[] | null
 		failurePeriodLimit: number
 		failurePeriod: number
 	} & WorkerAgentConfig
@@ -488,6 +497,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
 			windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
 			temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
+			allowedExpectationTypes: argv.allowedExpectationTypes ? argv.allowedExpectationTypes.split(';') : null,
 			costMultiplier:
 				(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) || 1,
 			considerCPULoad:
