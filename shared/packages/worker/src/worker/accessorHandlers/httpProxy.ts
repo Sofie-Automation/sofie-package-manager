@@ -192,15 +192,21 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
-		await this.fileHandler.clearPackageRemoval(this.filePath)
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
+		if (ENABLE_HTTP_PROXY_DELAY_REMOVAL && this.fileHandler) {
+			await this.fileHandler.clearPackageRemoval(this.filePath)
+		}
 
 		const formData = new FormData()
-		formData.append('file', sourceStream)
+		formData.append('file', passThroughStream)
 
 		const fetch = fetchWithController(this.fullUrl, {
 			method: 'POST',
 			body: formData,
-			refreshStream: sourceStream, // pass in the source stream to avoid the fetch-timeout to fire
+			refreshStream: passThroughStream, // pass in the source stream to avoid the fetch-timeout to fire
 		})
 		const streamHandler: PutPackageHandler = new PutPackageHandler(() => {
 			fetch.controller.abort()
