@@ -21,6 +21,11 @@ export const processOptions = defineArguments({
 		describe: 'Set to true to allow all SSL certificates (only use this in a safe, local environment)',
 	},
 	certificates: { type: 'string', describe: 'SSL Certificates' },
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, will match filenames ignoring their file extensions',
+	},
 })
 /** CLI-argument-definitions for the Workforce process */
 const workforceArguments = defineArguments({
@@ -329,12 +334,14 @@ export interface ProcessConfig {
 	unsafeSSL: boolean
 	/** Paths to certificates to load, for SSL-connections */
 	certificates: string[]
+	matchFilenamesWithoutExtension: boolean
 }
 export function getProcessConfig(argv: {
 	logPath: string | undefined
 	logLevel: string | undefined
 	unsafeSSL: boolean
 	certificates: string | undefined
+	matchFilenamesWithoutExtension: boolean
 }): ProcessConfig {
 	const certs: string[] = (argv.certificates || process.env.CERTIFICATES || '').split(';') || []
 	return {
@@ -342,6 +349,7 @@ export function getProcessConfig(argv: {
 		logLevel: argv.logLevel,
 		unsafeSSL: argv.unsafeSSL,
 		certificates: _.compact(certs),
+		matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 	}
 }
 // Configuration for the Workforce Application: ------------------------------
