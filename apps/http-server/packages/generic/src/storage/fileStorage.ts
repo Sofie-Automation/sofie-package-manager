@@ -187,14 +187,20 @@ export class FileStorage extends Storage {
 		if (!(await this.exists(fullPath))) {
 			return { code: 404, reason: 'Package not found' }
 		}
-
-		await fsUnlink(fullPath)
-
-		const meta: ResponseMeta = {
-			statusCode: 200,
+		try {
+			await fsUnlink(fullPath)
+			const meta: ResponseMeta = {
+				statusCode: 200,
+			}
+			return { meta, body: { message: `Deleted "${paramPath}"` } }
+		} catch (err) {
+			if (`${err}`.includes('ENOENT')) {
+				// File already deleted
+				return { code: 404, reason: 'Package not found' }
+			}
+			// else
+			throw err
 		}
-
-		return { meta, body: { message: `Deleted "${paramPath}"` } }
 	}
 
 	private async exists(fullPath: string) {
