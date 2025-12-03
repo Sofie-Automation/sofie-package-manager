@@ -1,6 +1,10 @@
 import { spawn } from 'child_process'
 import { stringifyError } from './lib'
 
+export interface ExecutableAliasSource {
+	getExecutable: (executableAlias: string) => string | undefined
+}
+
 export interface OverriddenFFMpegExecutables {
 	ffmpeg: string
 	ffprobe: string
@@ -19,21 +23,29 @@ export interface FFMpegProcess {
 	pid: number
 	cancel: () => void
 }
-export function getFFMpegExecutable(): string {
+
+export function getFFMpegExecutable(worker: ExecutableAliasSource): string {
 	if (overriddenFFMpegPaths) return overriddenFFMpegPaths.ffmpeg
-	return process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+	const executable = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+	const aliasExecutable = worker.getExecutable(executable)
+	if (aliasExecutable) return aliasExecutable
+	else return executable
 }
-export function getFFProbeExecutable(): string {
+export function getFFProbeExecutable(worker: ExecutableAliasSource): string {
 	if (overriddenFFMpegPaths) return overriddenFFMpegPaths.ffprobe
-	return process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+	const executable = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+	const aliasExecutable = worker.getExecutable(executable)
+	if (aliasExecutable) return aliasExecutable
+	else return executable
 }
+
 /** Check if FFMpeg is available, returns null if no error found */
-export async function testFFMpeg(): Promise<string | null> {
-	return testFFExecutable(getFFMpegExecutable())
+export async function testFFMpeg(worker: ExecutableAliasSource): Promise<string | null> {
+	return testFFExecutable(getFFMpegExecutable(worker))
 }
 /** Check if FFProbe is available */
-export async function testFFProbe(): Promise<string | null> {
-	return testFFExecutable(getFFProbeExecutable())
+export async function testFFProbe(worker: ExecutableAliasSource): Promise<string | null> {
+	return testFFExecutable(getFFProbeExecutable(worker))
 }
 export async function testFFExecutable(ffExecutable: string): Promise<string | null> {
 	return new Promise<string | null>((resolve) => {

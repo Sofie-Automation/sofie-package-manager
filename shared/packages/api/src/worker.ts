@@ -100,6 +100,11 @@ export interface WorkerAgentConfig {
 	 * This is the period of time used by "failurePeriodLimit" (milliseconds)
 	 */
 	failurePeriod: number
+
+	/**
+	 * List of aliases for executables the worker can use.
+	 */
+	executableAliases: { [alias: string]: string }
 }
 export type ReturnTypeDoYouSupportPackageContainer =
 	| {

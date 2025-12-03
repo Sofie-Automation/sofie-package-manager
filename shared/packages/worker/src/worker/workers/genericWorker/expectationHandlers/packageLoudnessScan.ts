@@ -25,7 +25,7 @@ import {
 } from './lib/scan'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import { LoudnessScanResult, PackageInfoType } from './lib/coreApi'
-import { ProgressParts } from './progressParts'
+import { ProgressParts } from '../lib/progressParts'
 
 /**
  * Performs a "deep scan" of the source package and saves the result file into the target PackageContainer (a Sofie Core collection)
@@ -198,7 +198,7 @@ export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 			progressSetup(1)
 
 			// Scan with FFProbe:
-			currentProcess = scanWithFFProbe(sourceHandle)
+			currentProcess = scanWithFFProbe(worker, sourceHandle)
 			const ffProbeScan: FFProbeScanResult = await currentProcess
 			const hasAudioStream =
 				ffProbeScan.streams && ffProbeScan.streams.some((stream) => stream.codec_type === 'audio')
@@ -206,9 +206,15 @@ export const PackageLoudnessScan: ExpectationHandlerGenericWorker = {
 			let result: LoudnessScanResult | undefined = undefined
 
 			if (hasAudioStream) {
-				currentProcess = scanLoudness(sourceHandle, ffProbeScan, exp.endRequirement.version, (progress) => {
-					progressScan(progress)
-				})
+				currentProcess = scanLoudness(
+					worker,
+					sourceHandle,
+					ffProbeScan,
+					exp.endRequirement.version,
+					(progress) => {
+						progressScan(progress)
+					}
+				)
 				result = await currentProcess
 			}
 

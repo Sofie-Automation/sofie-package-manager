@@ -11,7 +11,7 @@ import {
 	scanWithFFProbe,
 } from '../lib/scan'
 import { mock } from 'jest-mock-extended'
-import { Expectation, literal, LoggerInstance } from '@sofie-package-manager/api'
+import { ExecutableAliasSource, Expectation, literal, LoggerInstance } from '@sofie-package-manager/api'
 import { LoudnessScanResult } from '../lib/coreApi'
 import { previewFFMpegArguments, thumbnailFFMpegArguments } from '../lib'
 import { callSpawnFFmpeg, runForEachFFMpegRelease, SamplesDir } from '../../../../../__tests__/ffmpegHelper'
@@ -37,7 +37,7 @@ runForEachFFMpegRelease(() => {
 		const fileHandleMock = createLocalFolderAccessorHandleMock(clipPath)
 
 		it('ffprobe scan', async () => {
-			const probeResult = await scanWithFFProbe(fileHandleMock)
+			const probeResult = await scanWithFFProbe(aliasSource, fileHandleMock)
 			expect(probeResult).toMatchObject(
 				literal<FFProbeScanResult>({
 					filePath: expect.anything(),
@@ -67,7 +67,7 @@ runForEachFFMpegRelease(() => {
 				fieldOrder: true,
 			}
 
-			const fieldOrder = await scanFieldOrder(fileHandleMock, targetVersion)
+			const fieldOrder = await scanFieldOrder(aliasSource, fileHandleMock, targetVersion)
 			expect(fieldOrder).toBe('progressive')
 		})
 
@@ -76,7 +76,7 @@ runForEachFFMpegRelease(() => {
 				fieldOrder: false,
 			}
 
-			const fieldOrder = await scanFieldOrder(fileHandleMock, targetVersion)
+			const fieldOrder = await scanFieldOrder(aliasSource, fileHandleMock, targetVersion)
 			expect(fieldOrder).toBe('unknown')
 		})
 
@@ -90,7 +90,13 @@ runForEachFFMpegRelease(() => {
 			const fakeFFProbeScanResult = null as any as FFProbeScanResult // This is not used
 			const onProgress = jest.fn()
 
-			const loudness = await scanLoudness(fileHandleMock, fakeFFProbeScanResult, targetVersion, onProgress)
+			const loudness = await scanLoudness(
+				aliasSource,
+				fileHandleMock,
+				fakeFFProbeScanResult,
+				targetVersion,
+				onProgress
+			)
 			expect(loudness).toEqual(
 				literal<LoudnessScanResult>({
 					channels: {
@@ -125,8 +131,15 @@ runForEachFFMpegRelease(() => {
 
 			const logger = mock<LoggerInstance>()
 
-			const probeResult = await scanWithFFProbe(fileHandleMock)
-			const scanInfo = await scanMoreInfo(fileHandleMock, probeResult, targetVersion, onProgress, logger)
+			const probeResult = await scanWithFFProbe(aliasSource, fileHandleMock)
+			const scanInfo = await scanMoreInfo(
+				aliasSource,
+				fileHandleMock,
+				probeResult,
+				targetVersion,
+				onProgress,
+				logger
+			)
 
 			expect(scanInfo).toEqual(
 				literal<ScanMoreInfoResult>({
@@ -187,3 +200,6 @@ runForEachFFMpegRelease(() => {
 		})
 	})
 })
+const aliasSource: ExecutableAliasSource = {
+	getExecutable: () => undefined,
+}

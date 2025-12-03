@@ -44,7 +44,7 @@ import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder
 import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle'
 import { ByteCounter } from '../../../lib/streamByteCounter'
 import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch'
-import { ProgressParts, ProgressPart } from './progressParts'
+import { ProgressParts, ProgressPart } from '../lib/progressParts'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer
@@ -699,6 +699,13 @@ class HTMLRenderer {
 			scale !== undefined && `--zoom=${scale}`,
 			`--outputPath=${escapeFilePath(this.outputPath)}`,
 			`--background=${this.exp.endRequirement.version.renderer?.background ?? 'default'}`,
+			`--executableAliases=${
+				this.worker.agentAPI.config.executableAliases
+					? Object.entries<string>(this.worker.agentAPI.config.executableAliases)
+							.map(([k, v]) => `${k}=${v}`)
+							.join(';')
+					: ''
+			}`,
 			`--interactive=true`,
 		])
 		this.htmlRendererProcess = spawnHtmlRendererExecutable(args, {

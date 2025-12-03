@@ -271,7 +271,7 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				}
 
 				// Scan with FFProbe:
-				ffProbeProcess = scanWithFFProbe(sourceHandle)
+				ffProbeProcess = scanWithFFProbe(worker, sourceHandle)
 				const ffProbeScan: FFProbeScanResult = await ffProbeProcess
 				ffProbeProcess = undefined
 				const hasVideoStream =
@@ -283,6 +283,7 @@ export const MediaFileThumbnail: ExpectationHandlerGenericWorker = {
 				const fileOperation = await targetHandle.prepareForOperation('Generate thumbnail', lookupSource.handle)
 
 				ffMpegProcess = await spawnFFMpeg(
+					worker,
 					args,
 					targetHandle,
 					async () => {

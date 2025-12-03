@@ -8,6 +8,7 @@ import {
 	LoggerInstance,
 	escapeFilePath,
 	stringifyError,
+	ExecutableAliasSource,
 } from '@sofie-package-manager/api'
 import {
 	isQuantelClipAccessorHandle,
@@ -36,6 +37,7 @@ import { MAX_EXEC_BUFFER } from '../../../../lib/lib'
 import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg'
 import { GenericAccessorHandle, PackageReadStream } from '../../../../accessorHandlers/genericHandle'
 import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
+import { BaseWorker } from '../../../../worker'
 
 export interface FFProbeScanResultStream {
 	index: number
@@ -51,6 +53,7 @@ export interface FFProbeScanResult {
 	}
 }
 export function scanWithFFProbe(
+	worker: BaseWorker | ExecutableAliasSource,
 	sourceHandle:
 		| LocalFolderAccessorHandle<any>
 		| FileShareAccessorHandle<any>
@@ -116,7 +119,7 @@ export function scanWithFFProbe(
 				reject(new Error('Cancelled'))
 			})
 
-			ffProbeProcess = spawn(getFFProbeExecutable(), args, {
+			ffProbeProcess = spawn(getFFProbeExecutable(worker), args, {
 				// maxBuffer: MAX_EXEC_BUFFER,
 				windowsVerbatimArguments: true, // To fix an issue with ffprobe.exe on Windows
 			})
@@ -217,6 +220,7 @@ function fixJSONResult(obj: any): void {
 }
 
 export function scanFieldOrder(
+	worker: BaseWorker | ExecutableAliasSource,
 	sourceHandle: FFMpegSupportedSourceHandles,
 	targetVersion: Expectation.PackageDeepScan['endRequirement']['version']
 ): CancelablePromise<FieldOrder> {
@@ -226,7 +230,7 @@ export function scanFieldOrder(
 			return
 		}
 
-		const file = getFFMpegExecutable()
+		const file = getFFMpegExecutable(worker)
 		const args = [
 			'-hide_banner',
 			'-filter:v',
@@ -288,6 +292,7 @@ export interface ScanMoreInfoResult {
 }
 
 export function scanMoreInfo(
+	worker: BaseWorker | ExecutableAliasSource,
 	sourceHandle: FFMpegSupportedSourceHandles,
 	previouslyScanned: FFProbeScanResult,
 	targetVersion: Expectation.PackageDeepScan['endRequirement']['version'],
@@ -353,7 +358,7 @@ export function scanMoreInfo(
 			reject(new Error('Cancelled'))
 		})
 
-		ffMpegProcess = spawn(getFFMpegExecutable(), args, {
+		ffMpegProcess = spawn(getFFMpegExecutable(worker), args, {
 			windowsVerbatimArguments: true, // To fix an issue with ffmpeg.exe on Windows
 		})
 
@@ -505,6 +510,7 @@ export function scanMoreInfo(
 }
 
 function scanLoudnessStream(
+	worker: BaseWorker | ExecutableAliasSource,
 	sourceHandle: FFMpegSupportedSourceHandles,
 	_previouslyScanned: FFProbeScanResult,
 	channelSpec: string,
@@ -532,7 +538,7 @@ function scanLoudnessStream(
 
 		filterString += 'ebur128=peak=true[out]'
 
-		const file = getFFMpegExecutable()
+		const file = getFFMpegExecutable(worker)
 		const args = ['-nostats', '-filter_complex', filterString, '-map', '[out]', '-f', 'null', '-']
 
 		args.push(...(await getFFMpegInputArgsFromAccessorHandle(sourceHandle)))
@@ -598,6 +604,7 @@ function scanLoudnessStream(
 }
 
 export function scanLoudness(
+	worker: BaseWorker | ExecutableAliasSource,
 	sourceHandle: FFMpegSupportedSourceHandles,
 	previouslyScanned: FFProbeScanResult,
 	targetVersion: Expectation.PackageLoudnessScan['endRequirement']['version'],
@@ -609,7 +616,7 @@ export function scanLoudness(
 ): CancelablePromise<LoudnessScanResult> {
 	return new CancelablePromise<LoudnessScanResult>(async (resolve, _reject, onCancel) => {
 		async function getStreamIntegratedLoudness(channelSpec: `${number}` | `${number}+${number}`, filter: string) {
-			const resultPromise = scanLoudnessStream(sourceHandle, previouslyScanned, channelSpec, filter)
+			const resultPromise = scanLoudnessStream(worker, sourceHandle, previouslyScanned, channelSpec, filter)
 			onCancel(() => {
 				resultPromise.cancel()
 			})
@@ -632,7 +639,7 @@ export function scanLoudness(
 
 		for (const channelSpec of targetVersion.channels) {
 			try {
-				const resultPromise = scanLoudnessStream(sourceHandle, previouslyScanned, channelSpec)
+				const resultPromise = scanLoudnessStream(worker, sourceHandle, previouslyScanned, channelSpec)
 				onCancel(() => {
 					resultPromise.cancel()
 				})
@@ -688,6 +695,7 @@ export function scanLoudness(
 }
 const EPSILON = 0.00001
 export function scanIframes(
+	worker: BaseWorker | ExecutableAliasSource,
 	sourceHandle: FFMpegSupportedSourceHandles,
 	_targetVersion: Expectation.PackageIframesScan['endRequirement']['version'],
 	/** Callback which is called when there is some new progress */
@@ -731,7 +739,7 @@ export function scanIframes(
 			reject(new Error('Cancelled'))
 		})
 
-		ffMpegProcess = spawn(getFFProbeExecutable(), args, {
+		ffMpegProcess = spawn(getFFProbeExecutable(worker), args, {
 			windowsVerbatimArguments: true, // To fix an issue with ffmpeg.exe on Windows
 		})
 

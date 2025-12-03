@@ -25,7 +25,7 @@ import {
 } from './lib/scan'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import { CompressionType, IframesScanResult, PackageInfoType } from './lib/coreApi'
-import { ProgressParts } from './progressParts'
+import { ProgressParts } from '../lib/progressParts'
 
 /**
  * Performs an I-frames scan of the source package
@@ -198,7 +198,7 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 			progressSetup(1)
 
 			// Scan with FFProbe:
-			currentProcess = scanWithFFProbe(sourceHandle)
+			currentProcess = scanWithFFProbe(worker, sourceHandle)
 			const ffProbeScan: FFProbeScanResult = await currentProcess
 			const hasVideoStream =
 				ffProbeScan.streams && ffProbeScan.streams.some((stream) => stream.codec_type === 'video')
@@ -211,6 +211,7 @@ export const PackageIframesScan: ExpectationHandlerGenericWorker = {
 					let ignoreNextCancelError = false
 
 					const scanIframesProcess = scanIframes(
+						worker,
 						sourceHandle,
 						null,
 						(progress) => {

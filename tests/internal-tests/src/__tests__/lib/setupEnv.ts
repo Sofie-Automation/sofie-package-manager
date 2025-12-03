@@ -88,6 +88,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		pickUpCriticalExpectationsOnly: false,
 		failurePeriod: 0,
 		failurePeriodLimit: 0,
+		executableAliases: {},
 	},
 	quantelHTTPTransformerProxy: {
 		port: 0,
@@ -111,6 +112,7 @@ export const defaultTestConfig: SingleAppConfig = {
 			considerCPULoad: null,
 			failurePeriod: 0,
 			failurePeriodLimit: 0,
+			executableAliases: {},
 			sourcePackageStabilityThreshold: 0,
 		},
 	},

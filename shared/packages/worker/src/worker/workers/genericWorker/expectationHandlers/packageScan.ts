@@ -183,7 +183,7 @@ export const PackageScan: ExpectationHandlerGenericWorker = {
 			workInProgress._reportProgress(sourceVersionHash, 0.1)
 
 			// Scan with FFProbe:
-			currentProcess = scanWithFFProbe(sourceHandle)
+			currentProcess = scanWithFFProbe(worker, sourceHandle)
 			const scanResult = await currentProcess
 			workInProgress._reportProgress(sourceVersionHash, 0.5)
 			currentProcess = undefined

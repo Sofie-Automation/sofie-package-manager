@@ -56,7 +56,7 @@ export class GenericWorker extends BaseWorker {
 	) {
 		super(logger.category('GenericWorker'), agentAPI, sendMessageToManager, GenericWorker.type)
 
-		this.executables = new ExecutableDependencyHandler(logger.category('ExecutableDependencyHandler'))
+		this.executables = new ExecutableDependencyHandler(logger.category('ExecutableDependencyHandler'), this)
 
 		this.logger.debug(`Worker started`)
 	}
