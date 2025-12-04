@@ -31,13 +31,13 @@ import { MonitorInProgress } from '../lib/monitorInProgress'
 import { fetchWithController, fetchWithTimeout } from './lib/fetch'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
-import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
+import { JSONWriteFilesBestEffortHandler, JSONWriteFilesNoLockHandler } from './lib/json-write-file'
 import { GenericFileHandler } from './lib/GenericFileHandler'
 import { PassThrough } from 'stream'
 
-// Feature flag to disable delayed removal for HTTP-Proxy accessor
-// Due to issues with acquiring file lock for the json file...
-const ENABLE_HTTP_PROXY_DELAY_REMOVAL = false
+// Feature flag to enable the usage of a lock file when writing the delay-removal json file.
+// This is false due to issues with acquiring file lock for the json file on the http-proxy server.
+const ENABLE_LOCK_FILE = false
 
 /** Accessor handle for accessing files in HTTP- */
 export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
@@ -50,7 +50,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 	private workOptions: Expectation.WorkOptions.RemoveDelay
 	private accessor: AccessorOnPackage.HTTPProxy
 
-	public fileHandler: GenericFileOperationsHandler | undefined = undefined
+	public fileHandler: GenericFileOperationsHandler
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.HTTPProxy>) {
 		super({
@@ -70,30 +70,32 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
 			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
 
-		if (ENABLE_HTTP_PROXY_DELAY_REMOVAL) {
-			const fileHandler: GenericFileHandler = {
-				logOperation: this.logOperation.bind(this),
-				unlinkIfExists: this.deletePackageIfExists.bind(this),
-				getFullPath: this.getFullPath.bind(this),
-				getMetadataPath: this.getMetadataPath.bind(this),
-				fileExists: this.fileExists.bind(this),
-				readFile: this.readFile.bind(this),
-				readFileIfExists: this.readFileIfExists.bind(this),
-				writeFile: this.writeFile.bind(this),
-				listFilesInDir: this.listFilesInDir.bind(this),
-				removeDirIfExists: this.removeDirIfExists.bind(this),
-				rename: this.rename.bind(this),
-			}
-			const jsonWriter = this.worker.cacheData(this.type, 'jsonWriter', () => {
-				return new JSONWriteFilesBestEffortHandler(fileHandler, this.worker.logger)
-			})
-			this.fileHandler = new GenericFileOperationsHandler(
-				fileHandler,
-				jsonWriter,
-				this.workOptions,
-				this.worker.logger
-			)
+		const fileHandler: GenericFileHandler = {
+			logOperation: this.logOperation.bind(this),
+			unlinkIfExists: this.deletePackageIfExists.bind(this),
+			getFullPath: this.getFullPath.bind(this),
+			getMetadataPath: this.getMetadataPath.bind(this),
+			fileExists: this.fileExists.bind(this),
+			readFile: this.readFile.bind(this),
+			readFileIfExists: this.readFileIfExists.bind(this),
+			writeFile: this.writeFile.bind(this),
+			listFilesInDir: this.listFilesInDir.bind(this),
+			removeDirIfExists: this.removeDirIfExists.bind(this),
+			rename: this.rename.bind(this),
 		}
+		const jsonWriter = this.worker.cacheData(this.type, 'jsonWriter', () => {
+			const writer = ENABLE_LOCK_FILE
+				? new JSONWriteFilesBestEffortHandler(fileHandler, this.worker.logger)
+				: new JSONWriteFilesNoLockHandler(fileHandler, this.worker.logger)
+			writer.USE_TEMPORARY_FILE = false
+			return writer
+		})
+		this.fileHandler = new GenericFileOperationsHandler(
+			fileHandler,
+			jsonWriter,
+			this.workOptions,
+			this.worker.logger
+		)
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
 		return defaultDoYouSupportAccess(worker, accessor)
@@ -180,11 +182,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		// await this.fileHandler.clearPackageRemoval(this.filePath)
 	}
 	async removePackage(reason: string): Promise<void> {
-		if (ENABLE_HTTP_PROXY_DELAY_REMOVAL && this.fileHandler) {
-			await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
-		} else {
-			await this.deletePackageIfExists(this.fullUrl)
-		}
+		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 	async getPackageReadStream(): Promise<PackageReadStream> {
 		const fetch = fetchWithController(this.fullUrl)
@@ -208,9 +206,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		const passThroughStream = new PassThrough({ allowHalfOpen: false })
 		sourceStream.pipe(passThroughStream)
 
-		if (ENABLE_HTTP_PROXY_DELAY_REMOVAL && this.fileHandler) {
-			await this.fileHandler.clearPackageRemoval(this.filePath)
-		}
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const formData = new FormData()
 		formData.append('file', passThroughStream)
@@ -251,9 +247,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		if (ENABLE_HTTP_PROXY_DELAY_REMOVAL && this.fileHandler) {
-			await this.fileHandler.clearPackageRemoval(this.filePath)
-		}
+		await this.fileHandler.clearPackageRemoval(this.filePath)
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
