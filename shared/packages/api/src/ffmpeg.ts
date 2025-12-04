@@ -26,17 +26,15 @@ export interface FFMpegProcess {
 
 export function getFFMpegExecutable(worker: ExecutableAliasSource): string {
 	if (overriddenFFMpegPaths) return overriddenFFMpegPaths.ffmpeg
-	const executable = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
-	const aliasExecutable = worker.getExecutable(executable)
+	const aliasExecutable = worker.getExecutable('ffmpeg')
 	if (aliasExecutable) return aliasExecutable
-	else return executable
+	else return process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
 }
 export function getFFProbeExecutable(worker: ExecutableAliasSource): string {
 	if (overriddenFFMpegPaths) return overriddenFFMpegPaths.ffprobe
-	const executable = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
-	const aliasExecutable = worker.getExecutable(executable)
+	const aliasExecutable = worker.getExecutable('ffprobe')
 	if (aliasExecutable) return aliasExecutable
-	else return executable
+	else return process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
 }
 
 /** Check if FFMpeg is available, returns null if no error found */

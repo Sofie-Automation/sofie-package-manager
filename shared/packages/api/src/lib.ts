@@ -436,7 +436,10 @@ export function isRunningInTest(): boolean {
 	// Note: JEST_WORKER_ID is set when running in unit tests
 	return process.env.JEST_WORKER_ID !== undefined
 }
-/** Returns true if the process is running in development mode */
+/**
+ * Returns true if the process is running in development mode.
+ * This is NOT the same as when running unit tests! (use isRunningInTest() for that)
+ * */
 export function isRunningInDevelopment(): boolean {
 	return (
 		!isRunningInTest() &&

@@ -338,7 +338,6 @@ export class AppContainer {
 		}
 
 		if (isRunningInDevelopment() || isRunningInTest()) {
-			// Process runs as a node process, we're probably in development mode.
 			const appType = protectString<AppType>('worker')
 			this.availableApps.set(appType, {
 				file: process.execPath,
@@ -652,9 +651,7 @@ export class AppContainer {
 		availableApp: AvailableAppInfo,
 		useCriticalOnlyMode: boolean
 	): cp.ChildProcess {
-		const cwd = isRunningInDevelopment()
-			? undefined // Process runs as a node process, we're probably in development mode.
-			: path.dirname(process.execPath) // Process runs as a node process, we're probably in development mode.
+		const cwd = isRunningInDevelopment() ? undefined : path.dirname(process.execPath)
 
 		let inspectPort: number | undefined = undefined
 		if (isNodeRunningInDebugMode()) {
