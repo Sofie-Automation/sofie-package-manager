@@ -17,7 +17,6 @@ import {
 	PackageContainerExpectation,
 	Reason,
 	stringifyError,
-	setLogLevel,
 	isNodeRunningInDebugMode,
 	INNER_ACTION_TIMEOUT,
 	DataStore,
@@ -33,9 +32,10 @@ import {
 	DataId,
 	LockId,
 	protectString,
-	getLogLevel,
 	Cost,
 	LeveledLogMethodLight,
+	isRunningInDevelopment,
+	isRunningInTest,
 } from '@sofie-package-manager/api'
 
 import { WorkforceAPI } from './workforceApi'
@@ -283,9 +283,9 @@ export class AppContainer {
 
 	private async discoverAvailableApps() {
 		const getWorkerArgs = (appId: AppId, pickUpCriticalExpectationsOnly: boolean): string[] => {
-			return [
+			const args: string[] = [
 				// Set initial loglevel to be same as appContainer:
-				`--logLevel=${getLogLevel()}`,
+				`--logLevel=${this.logger.getLogLevel()}`,
 
 				`--workerId=${appId}`,
 				pickUpCriticalExpectationsOnly ? `--pickUpCriticalExpectationsOnly=true` : '',
@@ -296,38 +296,48 @@ export class AppContainer {
 				this.config.process.certificates.length
 					? `--certificates=${this.config.process.certificates.join(';')}`
 					: '',
-
-				this.config.appContainer.worker.windowsDriveLetters
-					? `--windowsDriveLetters=${this.config.appContainer.worker.windowsDriveLetters?.join(';')}`
-					: '',
-				this.config.appContainer.worker.temporaryFolderPath
-					? `--temporaryFolderPath=${this.config.appContainer.worker.temporaryFolderPath}`
-					: '',
-				this.config.appContainer.worker.costMultiplier
-					? `--costMultiplier=${this.config.appContainer.worker.costMultiplier}`
-					: '',
-				this.config.appContainer.worker.considerCPULoad
-					? `--considerCPULoad=${this.config.appContainer.worker.considerCPULoad}`
-					: '',
-				this.config.appContainer.worker.resourceId
-					? `--resourceId=${this.config.appContainer.worker.resourceId}`
-					: '',
-				this.config.appContainer.worker.networkIds.length
-					? `--networkIds=${this.config.appContainer.worker.networkIds.join(';')}`
-					: '',
-				this.config.appContainer.worker.failurePeriodLimit
-					? `--failurePeriodLimit=${this.config.appContainer.worker.failurePeriodLimit}`
-					: '',
-				this.config.appContainer.worker.failurePeriod
-					? `--failurePeriod=${this.config.appContainer.worker.failurePeriod}`
-					: '',
 			]
+
+			const workerArgs = this.config.appContainer.worker
+			const keys = Object.keys(workerArgs) as (keyof AppContainerProcessConfig['appContainer']['worker'])[]
+			for (const key of keys) {
+				let argValue: string | undefined = undefined
+				if (key === 'windowsDriveLetters') {
+					argValue = workerArgs.windowsDriveLetters?.join(';')
+				} else if (key === 'temporaryFolderPath') {
+					argValue = workerArgs.temporaryFolderPath
+				} else if (key === 'costMultiplier') {
+					argValue = workerArgs.costMultiplier?.toString()
+				} else if (key === 'considerCPULoad') {
+					argValue = workerArgs.considerCPULoad?.toString()
+				} else if (key === 'resourceId') {
+					argValue = workerArgs.resourceId
+				} else if (key === 'networkIds') {
+					argValue = workerArgs.networkIds.join(';')
+				} else if (key === 'failurePeriodLimit') {
+					argValue = workerArgs.failurePeriodLimit?.toString()
+				} else if (key === 'failurePeriod') {
+					argValue = workerArgs.failurePeriod?.toString()
+				} else if (key === 'sourcePackageStabilityThreshold') {
+					argValue = workerArgs.sourcePackageStabilityThreshold?.toString()
+				} else if (key === 'executableAliases') {
+					argValue = workerArgs.executableAliases
+						? Object.entries<string>(workerArgs.executableAliases)
+								.map(([k, v]) => `${k}=${v}`)
+								.join(';')
+						: undefined
+				} else {
+					assertNever(key)
+					this.logger.error(`Unknown worker argument key: "${key}"=${workerArgs[key]}`)
+				}
+
+				if (argValue) args.push(`--${key}=${argValue}`)
+			}
+
+			return args
 		}
-		if (
-			path.basename(process.execPath) === 'node.exe' || // windows
-			path.basename(process.execPath) === 'node' // linux
-		) {
-			// Process runs as a node process, we're probably in development mode.
+
+		if (isRunningInDevelopment() || isRunningInTest()) {
 			const appType = protectString<AppType>('worker')
 			this.availableApps.set(appType, {
 				file: process.execPath,
@@ -381,7 +391,7 @@ export class AppContainer {
 	}
 	async setLogLevel(logLevel: LogLevel): Promise<void> {
 		this.logger.info(`Setting log level to "${logLevel}"`)
-		setLogLevel(logLevel)
+		this.logger.setLogLevel(logLevel)
 	}
 	async _debugKill(): Promise<void> {
 		// This is for testing purposes only
@@ -414,7 +424,11 @@ export class AppContainer {
 		if (this.availableApps.size === 0) {
 			this.logger.error('No apps available')
 		} else {
-			this.logger.debug(`Available apps: ${Array.from(this.availableApps.keys()).join(', ')}`)
+			this.logger.debug(
+				`Available apps: ${Array.from(this.availableApps.entries())
+					.map(([key, app]) => `${key}:${app.file}`)
+					.join(', ')}`
+			)
 		}
 
 		let lastNotSupportReason: ExpectedPackageStatusAPI.Reason = {
@@ -470,7 +484,11 @@ export class AppContainer {
 		if (this.availableApps.size === 0) {
 			this.logger.error('No apps available')
 		} else {
-			this.logger.debug(`Available apps: ${Array.from(this.availableApps.keys()).join(', ')}`)
+			this.logger.debug(
+				`Available apps: ${Array.from(this.availableApps.entries())
+					.map(([key, app]) => `${key}:${app.file}`)
+					.join(', ')}`
+			)
 		}
 
 		for (const [appType, availableApp] of this.availableApps.entries()) {
@@ -633,10 +651,7 @@ export class AppContainer {
 		availableApp: AvailableAppInfo,
 		useCriticalOnlyMode: boolean
 	): cp.ChildProcess {
-		const isRunningInDevelopmentMode = process.execPath.endsWith('node.exe') || process.execPath.endsWith('node')
-		const cwd = isRunningInDevelopmentMode
-			? undefined // Process runs as a node process, we're probably in development mode.
-			: path.dirname(process.execPath) // Process runs as a node process, we're probably in development mode.
+		const cwd = isRunningInDevelopment() ? undefined : path.dirname(process.execPath)
 
 		let inspectPort: number | undefined = undefined
 		if (isNodeRunningInDebugMode()) {

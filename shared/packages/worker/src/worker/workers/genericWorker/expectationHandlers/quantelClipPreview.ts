@@ -238,6 +238,7 @@ export const QuantelClipPreview: ExpectationHandlerGenericWorker = {
 				const quantelOperation = await targetHandle.prepareForOperation('Generate preview', lookupSource.handle)
 
 				ffMpegProcess = await spawnFFMpeg(
+					worker,
 					args,
 					targetHandle,
 					async () => {

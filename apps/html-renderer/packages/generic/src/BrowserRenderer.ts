@@ -369,9 +369,17 @@ export class BrowserRenderer implements InteractiveAPI {
 		const logger = this.logger.category('FFMpeg')
 		await new Promise<void>((resolve, reject) => {
 			let logTrace = ''
-			const child = spawn(getFFMpegExecutable(), args, {
-				windowsVerbatimArguments: true, // To fix an issue with ffmpeg.exe on Windows
-			})
+			const child = spawn(
+				getFFMpegExecutable({
+					getExecutable: (executableAlias: string): string | undefined => {
+						return this.options.executableAliases[executableAlias]
+					},
+				}),
+				args,
+				{
+					windowsVerbatimArguments: true, // To fix an issue with ffmpeg.exe on Windows
+				}
+			)
 
 			child.stdout.on('data', (data) => {
 				options?.onStdout?.(data.toString())

@@ -271,7 +271,7 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				}
 
 				// Scan with FFProbe:
-				ffProbeProcess = scanWithFFProbe(sourceHandle)
+				ffProbeProcess = scanWithFFProbe(worker, sourceHandle)
 				const ffProbeScan: FFProbeScanResult = await ffProbeProcess
 				ffProbeProcess = undefined
 				const hasVideoStream =
@@ -293,6 +293,7 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				const fileOperation = await targetHandle.prepareForOperation('Generate preview', lookupSource.handle)
 
 				ffMpegProcess = await spawnFFMpeg(
+					worker,
 					args,
 					targetHandle,
 					// actualSourceVersionHash,

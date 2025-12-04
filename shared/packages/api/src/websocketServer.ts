@@ -43,7 +43,7 @@ export class WebsocketServer extends HelpfulEventEmitter {
 		this.wss.on('connection', (ws) => {
 			// A new client has connected
 
-			const client = new ClientConnection(ws, this.logger, async () => Promise.reject('Not setup yet'))
+			const client = new ClientConnection(ws, this.logger, async () => Promise.reject(new Error('Not setup yet')))
 			this.clients.push(client)
 
 			client.once('close', () => {

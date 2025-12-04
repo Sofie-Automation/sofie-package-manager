@@ -140,6 +140,7 @@ export const FileCopyProxy: ExpectationHandlerGenericWorker = {
 					const args = proxyFFMpegArguments(sourceHTTPHandle.fullUrl, false, targetHandle)
 
 					ffMpegProcess = await spawnFFMpeg(
+						worker,
 						args,
 						targetHandle,
 						async () => {

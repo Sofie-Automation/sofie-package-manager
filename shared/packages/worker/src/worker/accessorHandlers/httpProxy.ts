@@ -31,8 +31,13 @@ import { MonitorInProgress } from '../lib/monitorInProgress'
 import { fetchWithController, fetchWithTimeout } from './lib/fetch'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
-import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
+import { JSONWriteFilesBestEffortHandler, JSONWriteFilesNoLockHandler } from './lib/json-write-file'
 import { GenericFileHandler } from './lib/GenericFileHandler'
+import { PassThrough } from 'stream'
+
+// Feature flag to enable the usage of a lock file when writing the delay-removal json file.
+// This is false due to issues with acquiring file lock for the json file on the http-proxy server.
+const ENABLE_LOCK_FILE = false
 
 /** Accessor handle for accessing files in HTTP- */
 export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
@@ -79,7 +84,11 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 			rename: this.rename.bind(this),
 		}
 		const jsonWriter = this.worker.cacheData(this.type, 'jsonWriter', () => {
-			return new JSONWriteFilesBestEffortHandler(fileHandler, this.worker.logger)
+			const writer = ENABLE_LOCK_FILE
+				? new JSONWriteFilesBestEffortHandler(fileHandler, this.worker.logger)
+				: new JSONWriteFilesNoLockHandler(fileHandler, this.worker.logger)
+			writer.USE_TEMPORARY_FILE = false
+			return writer
 		})
 		this.fileHandler = new GenericFileOperationsHandler(
 			fileHandler,
@@ -169,7 +178,8 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		return this.convertHeadersToVersion(header.headers)
 	}
 	async ensurePackageFulfilled(): Promise<void> {
-		await this.fileHandler.clearPackageRemoval(this.filePath)
+		// N/A
+		// await this.fileHandler.clearPackageRemoval(this.filePath)
 	}
 	async removePackage(reason: string): Promise<void> {
 		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
@@ -192,15 +202,19 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const formData = new FormData()
-		formData.append('file', sourceStream)
+		formData.append('file', passThroughStream)
 
 		const fetch = fetchWithController(this.fullUrl, {
 			method: 'POST',
 			body: formData,
-			refreshStream: sourceStream, // pass in the source stream to avoid the fetch-timeout to fire
+			refreshStream: passThroughStream, // pass in the source stream to avoid the fetch-timeout to fire
 		})
 		const streamHandler: PutPackageHandler = new PutPackageHandler(() => {
 			fetch.controller.abort()
@@ -428,7 +442,7 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		if (this.isBadHTTPResponseCode(result.status)) {
 			const text = await result.text()
 			throw new Error(
-				`storeJSON: Bad response: [${result.status}]: ${result.statusText}, POST ${fullPath}, ${text}`
+				`writeFile: Bad response: [${result.status}]: ${result.statusText}, POST ${fullPath}, ${text}`
 			)
 		}
 	}
@@ -446,7 +460,9 @@ export class HTTPProxyAccessorHandle<Metadata> extends GenericAccessorHandle<Met
 		})
 		if (this.isBadHTTPResponseCode(result.status)) {
 			const text = await result.text()
-			throw new Error(`storeJSON: Bad response: [${result.status}]: ${result.statusText}, GET /packages ${text}`)
+			throw new Error(
+				`listFilesInDir: Bad response: [${result.status}]: ${result.statusText}, GET /packages ${text}`
+			)
 		}
 
 		// from http-server:

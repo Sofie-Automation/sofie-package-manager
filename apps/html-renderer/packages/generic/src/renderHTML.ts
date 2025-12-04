@@ -18,6 +18,7 @@ export interface RenderHTMLOptions {
 	background?: string
 
 	tempFolder?: string
+	executableAliases: { [alias: string]: string }
 	outputFolder?: string
 	/** Scripts to execute */
 	scripts: {
@@ -43,7 +44,11 @@ export async function renderHTML(options: RenderHTMLOptions): Promise<{
 	exitCode: number
 }> {
 	try {
-		const testFFMpegResult = await testFFMpeg()
+		const testFFMpegResult = await testFFMpeg({
+			getExecutable: (executableAlias: string): string | undefined => {
+				return options.executableAliases[executableAlias]
+			},
+		})
 		if (testFFMpegResult) {
 			throw new Error(`Cannot access FFMpeg executable: ${testFFMpegResult}`)
 		}

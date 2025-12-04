@@ -9,6 +9,9 @@ export abstract class JSONWriteHandler {
 	/** How many times to wait a before trying again, in case of a failed write lock. Defaults to 10. */
 	public LOCK_ATTEMPTS_COUNT = 10
 
+	/** Whether to write to a temporary file first. Defaults to true. */
+	public USE_TEMPORARY_FILE = true
+
 	private readonly updateJSONFileBatches = new Map<string, BatchOperation>()
 
 	protected logger: LoggerInstance
@@ -47,9 +50,11 @@ export abstract class JSONWriteHandler {
 			this.logger.error(e)
 		}
 
+		if (!this.USE_TEMPORARY_FILE) return undefined
+
 		// Second try; Check if there is a temporary file, to use instead?
 		try {
-			const tmpPath = JSONWriteHandler.getTmpPath(filePath)
+			const tmpPath = this.getFirstWriteFilePath(filePath)
 
 			const str = await this.readIfExists(tmpPath)
 			if (str !== undefined) {
@@ -130,6 +135,13 @@ export abstract class JSONWriteHandler {
 			} else throw e
 		}
 	}
+	/**
+	 * Returns the path to write to first (temporary file or the real file)
+	 */
+	getFirstWriteFilePath(filePath: string): string {
+		if (this.USE_TEMPORARY_FILE) return JSONWriteHandler.getTmpPath(filePath)
+		return filePath
+	}
 	static getTmpPath(filePath: string): string {
 		return filePath + '.tmp'
 	}
@@ -154,7 +166,7 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 		 */
 		cbManipulate: (oldValue: T | undefined) => T | undefined
 	): Promise<void> {
-		const tmpFilePath = JSONWriteHandler.getTmpPath(filePath)
+		const writeFilePathFirst = this.getFirstWriteFilePath(filePath)
 		let lockCompromisedError: Error | undefined = undefined
 
 		// Retry up to 10 times at locking and writing the file:
@@ -180,6 +192,8 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 					continue
 				} else if ((e as any).code === 'ELOCKED') {
 					// Already locked, try again later:
+					this.logger.debug(`File is already locked, trying again later...`)
+
 					await this.sleep(this.RETRY_TIMEOUT)
 					continue
 				} else {
@@ -201,6 +215,7 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 				} else {
 					if (lockCompromisedError) {
 						// The lock was compromised. Try again:
+						this.logger.warn(`File lock was compromised, trying again later... (${lockCompromisedError})`)
 						continue
 					}
 
@@ -210,18 +225,19 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 					// by overwriting the file with an empty one.
 
 					// Write to a temporary file first, to avoid corrupting the file in case of a process exit:
-					await this.fileHandler.writeFile(tmpFilePath, fileData)
-
-					// Rename file:
-					await this.rename(tmpFilePath, filePath)
-
-					try {
+					await this.fileHandler.writeFile(writeFilePathFirst, fileData)
+					if (this.USE_TEMPORARY_FILE) {
 						// Rename file:
-						await this.rename(tmpFilePath, filePath)
-					} catch (e) {
-						// If renaming fails, try writing directly to the file instead:
-						await this.fileHandler.writeFile(filePath, fileData)
-						await this.fileHandler.unlinkIfExists(tmpFilePath)
+						await this.rename(writeFilePathFirst, filePath)
+
+						try {
+							// Rename file:
+							await this.rename(writeFilePathFirst, filePath)
+						} catch (e) {
+							// If renaming fails, try writing directly to the file instead:
+							await this.fileHandler.writeFile(filePath, fileData)
+							await this.fileHandler.unlinkIfExists(writeFilePathFirst)
+						}
 					}
 				}
 
@@ -274,7 +290,7 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 		 */
 		cbManipulate: (oldValue: T | undefined) => T | undefined
 	): Promise<void> {
-		const tmpFilePath = JSONWriteHandler.getTmpPath(filePath)
+		const writeFilePathFirst = this.getFirstWriteFilePath(filePath)
 		const fileLockPath = filePath + '.lock'
 
 		// Before locking the file for writing, we can do a quick check to see if we
@@ -302,15 +318,23 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 			if (lockFileContentStr) {
 				try {
 					lockFileContent = JSON.parse(lockFileContentStr)
-				} catch {
+				} catch (e) {
 					// ignore
+					this.logger.debug(`Unable to parse Lock file content: (${e}, ${lockFileContentStr})`)
 				}
 			}
 			if (lockFileContent) {
 				const lockedDate = new Date(lockFileContent.date)
+				const lockAge = Date.now() - lockedDate.getTime()
 
-				if (Math.abs(Date.now() - lockedDate.getTime()) < 10 * 1000) {
-					// The lock file is not too old, so we can use it.
+				if (Math.abs(lockAge) < 10 * 1000) {
+					// The lock file is in place and rather new,
+					// wait and try again later:
+
+					this.logger.debug(
+						`File is already locked, trying again later... (date: ${lockFileContent.date}, age: ${lockAge} ms)`
+					)
+
 					// Try again later:
 					await this.sleep(this.RETRY_TIMEOUT)
 					continue
@@ -335,6 +359,13 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 			const checkLockFileContent = await this.readIfExists(fileLockPath)
 			if (checkLockFileContent !== myLockFileContents) {
 				// Dang it, someone else got the lock before us.
+
+				this.logger.debug(
+					`File was locked by someone else, trying again later... (${JSON.stringify(
+						checkLockFileContent
+					)} vs ${JSON.stringify(myLockFileContents)})`
+				)
+
 				// Try again later:
 				await this.sleep(this.RETRY_TIMEOUT)
 				continue
@@ -361,28 +392,90 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 		} else {
 			if (newValueStr === undefined || newValueStr === '') {
 				// undefined means remove the file
-				await this.fileHandler.unlinkIfExists(tmpFilePath)
-				await this.fileHandler.unlinkIfExists(filePath)
+				await this.fileHandler.unlinkIfExists(writeFilePathFirst)
+				if (this.USE_TEMPORARY_FILE) {
+					await this.fileHandler.unlinkIfExists(filePath)
+				}
 			} else {
 				const fileData = Buffer.from(newValueStr, 'utf-8')
 				// Write to a temporary file first, to avoid corrupting the file in case of a process exit:
-				await this.fileHandler.writeFile(tmpFilePath, fileData)
+				await this.fileHandler.writeFile(writeFilePathFirst, fileData)
 
-				try {
-					// Rename file:
-					await this.rename(tmpFilePath, filePath)
-				} catch (e) {
-					// Renaming failed.
-					// (rename might not be supported on all file systems, such as some ftp servers)
-					// Instead, try writing directly to the file instead:
-					await this.fileHandler.writeFile(filePath, fileData)
-					await this.fileHandler.unlinkIfExists(tmpFilePath)
+				if (this.USE_TEMPORARY_FILE) {
+					try {
+						// Rename file:
+						await this.rename(writeFilePathFirst, filePath)
+					} catch (e) {
+						// Renaming failed.
+						// (rename might not be supported on all file systems, such as some ftp servers)
+						// Instead, try writing directly to the file instead:
+						await this.fileHandler.writeFile(filePath, fileData)
+						await this.fileHandler.unlinkIfExists(writeFilePathFirst)
+					}
 				}
 			}
 		}
 
 		// Release lock:
 		await this.fileHandler.unlinkIfExists(fileLockPath)
+	}
+}
+
+/**
+ * This class is worse than the JSONWriteFilesBestEffortHandler, as it doesn't use lock files at all.
+ * It exists only for compatibility with file systems that do not support creating lock files.
+
+ */
+export class JSONWriteFilesNoLockHandler extends JSONWriteHandler {
+	/**
+	 * A "safe" way to write JSON data to a file. Takes measures to avoid writing corrupt data to a file due to
+	 * 1. Multiple processes writing to the same file (uses a lock file)
+	 * 2. Writing corrupt files due to process exit (write to temporary file and rename)
+	 */
+	async updateJSONFile<T>(
+		filePath: string,
+		/**
+		 * Callback to modify the JSON value.
+		 * @returns The value to write to the file (or undefined to remove the file)
+		 */
+		cbManipulate: (oldValue: T | undefined) => T | undefined
+	): Promise<void> {
+		const writeFilePathFirst = this.getFirstWriteFilePath(filePath)
+
+		// Read the JSON file:
+		const oldValue = await this.readJSONFile(filePath)
+
+		const newValue = cbManipulate(oldValue?.value)
+		const newValueStr = newValue !== undefined ? JSON.stringify(newValue) : undefined
+
+		if (oldValue?.str === newValueStr) {
+			// do nothing
+		} else {
+			if (newValueStr === undefined || newValueStr === '') {
+				// undefined means remove the file
+				await this.fileHandler.unlinkIfExists(writeFilePathFirst)
+				if (this.USE_TEMPORARY_FILE) {
+					await this.fileHandler.unlinkIfExists(filePath)
+				}
+			} else {
+				const fileData = Buffer.from(newValueStr, 'utf-8')
+				// Write to a temporary file first, to avoid corrupting the file in case of a process exit:
+				await this.fileHandler.writeFile(writeFilePathFirst, fileData)
+
+				if (this.USE_TEMPORARY_FILE) {
+					try {
+						// Rename file:
+						await this.rename(writeFilePathFirst, filePath)
+					} catch (e) {
+						// Renaming failed.
+						// (rename might not be supported on all file systems, such as some ftp servers)
+						// Instead, try writing directly to the file instead:
+						await this.fileHandler.writeFile(filePath, fileData)
+						await this.fileHandler.unlinkIfExists(writeFilePathFirst)
+					}
+				}
+			}
+		}
 	}
 }
 

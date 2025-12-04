@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import { LoggerInstance, stringifyError, testHtmlRenderer } from '@sofie-package-manager/api'
+import { ExecutableAliasSource, LoggerInstance, stringifyError, testHtmlRenderer } from '@sofie-package-manager/api'
 import { testFFMpeg, testFFProbe } from '../expectationHandlers/lib/ffmpeg'
 
 export class ExecutableDependencyHandler {
@@ -19,7 +19,7 @@ export class ExecutableDependencyHandler {
 		}
 	> = new Map()
 
-	constructor(private logger: LoggerInstance) {}
+	constructor(private logger: LoggerInstance, private worker: ExecutableAliasSource) {}
 
 	/**
 	 * Returns null if all is well, otherwise an error message
@@ -59,16 +59,12 @@ export class ExecutableDependencyHandler {
 	}
 
 	public async checkExecutables(): Promise<void> {
-		this.testFFMpeg = await testFFMpeg()
-		this.testFFProbe = await testFFProbe()
+		this.testFFMpeg = await testFFMpeg(this.worker)
+		this.testFFProbe = await testFFProbe(this.worker)
 		this.testHTMLRenderer = await testHtmlRenderer()
 	}
 
 	async testFFExecutable(executable: string): Promise<string | null> {
-		if (executable.endsWith('.exe') && process.platform !== 'win32') {
-			executable = executable.slice(0, -4) // remove .exe
-		}
-
 		return new Promise<string | null>((resolve) => {
 			const execProcess = spawn(executable, ['-v'])
 

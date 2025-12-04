@@ -36,6 +36,8 @@ function getAccessorTypePriority(accessor: AccessorOnPackage.Any): number {
 		return 99999
 	} else if (accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE) {
 		return 99999
+	} else if (accessor.type === Accessor.AccessType.KAIROS_CLIP) {
+		return 99999
 	} else {
 		assertNever(accessor.type)
 		return 99999

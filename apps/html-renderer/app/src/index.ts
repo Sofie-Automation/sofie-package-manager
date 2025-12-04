@@ -227,6 +227,7 @@ async function main(): Promise<void> {
 		background: config.htmlRenderer.background,
 		outputFolder: config.htmlRenderer.outputPath ?? '',
 		tempFolder: config.htmlRenderer.tempPath ?? 'tmp',
+		executableAliases: config.htmlRenderer.executableAliases ?? {},
 		url,
 		scripts,
 		interactive,

@@ -3,13 +3,14 @@ import { ffmpegInterpretProgress } from './ffmpeg'
 import { stringifyError } from '@sofie-package-manager/api'
 
 export interface SpawnedProcess {
+	execProcess: ChildProcessWithoutNullStreams
 	cancel: () => void
 }
 /**
  * Convenience method to spawn a process.
  * Returns a promise that resolves when the process has started.
  */
-export async function spawnProcess(
+export function spawnProcess(
 	/** Path to the executable */
 	executable: string,
 	/** CLI arguments to send into to process */
@@ -17,9 +18,8 @@ export async function spawnProcess(
 	onDone: () => void,
 	onError: (err?: any) => void,
 	onProgress: (progress: number) => void,
-	// onStart?: (ffMpegProcess: ChildProcessWithoutNullStreams) => void,
 	log?: (str: string) => void
-): Promise<SpawnedProcess> {
+): SpawnedProcess {
 	const processName = `process-name: ${executable}`
 	log?.(`${processName}: spawn..`)
 	let execProcess: ChildProcessWithoutNullStreams | undefined = spawn(executable, args, {
@@ -75,7 +75,7 @@ export async function spawnProcess(
 				onDone()
 			} else {
 				// workInProgress._reportError(new Error(`FFMpeg exit code ${code}: ${lastFewLines.join('\n')}`))
-				onError(new Error(`${processName} exit code ${code}: ${lastFewLines.join('\n')}`))
+				onError(new Error(`${processName} exit code ${code}: ${lastFewLines.join('\n')} (${args.join(' ')})`))
 			}
 		}
 	}
@@ -111,6 +111,7 @@ export async function spawnProcess(
 	}
 
 	return {
+		execProcess,
 		cancel: () => {
 			// Called if the process should be cancelled
 

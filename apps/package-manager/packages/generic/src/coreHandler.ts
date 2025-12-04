@@ -29,8 +29,6 @@ import {
 	Status,
 	stringifyError,
 	hashObj,
-	setLogLevel,
-	getLogLevel,
 	ensureValidValue,
 	DEFAULT_LOG_LEVEL,
 	ExpectationId,
@@ -245,10 +243,10 @@ export class CoreHandler {
 			this.deviceSettings = device?.deviceSettings || {}
 
 			const logLevel = this.deviceSettings['logLevel'] ?? DEFAULT_LOG_LEVEL
-			if (logLevel !== getLogLevel()) {
-				setLogLevel(logLevel)
+			if (logLevel !== this.logger.getLogLevel()) {
+				this.logger.setLogLevel(logLevel)
 
-				this.logger.info('Loglevel: ' + getLogLevel())
+				this.logger.info('Loglevel: ' + this.logger.getLogLevel())
 
 				// this.logger.debug('Test debug logging')
 				// this.logger.verbose('Test verbose')
