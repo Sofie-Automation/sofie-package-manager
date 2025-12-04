@@ -19,6 +19,7 @@ import {
 	PackageContainerExpectation,
 	LoggerInstance,
 	startTimer,
+	ExpectedPackage,
 } from '@sofie-package-manager/api'
 import {
 	isFileShareAccessorHandle,
@@ -549,7 +550,7 @@ class MediaConversionOperation {
 		private parent: MediaConversion,
 		previousOperation: MediaConversionOperation | null,
 		private exp: Expectation.MediaFileConvert,
-		private conversion: Expectation.Version.ConversionStep,
+		private conversion: ExpectedPackage.ConversionStep,
 		private isFinalStep: boolean
 	) {
 		const isFirst = previousOperation === null
@@ -711,7 +712,7 @@ class MediaConversionOperation {
 	private async executePreCheck(
 		stepIndex: number,
 		operationPointer: OperationPointer,
-		preCheck: Required<Expectation.Version.ConversionStep>['preChecks'][0]
+		preCheck: Required<ExpectedPackage.ConversionStep>['preChecks'][0]
 	): Promise<{
 		stdout: string
 		stderr: string

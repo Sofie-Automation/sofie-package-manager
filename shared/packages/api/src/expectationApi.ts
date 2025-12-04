@@ -1,6 +1,6 @@
 // eslint-disable-next-line node/no-extraneous-import
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { AccessorOnPackage, PackageContainerOnPackage } from './inputApi'
+import * as InputApi from './inputApi'
 import { AccessorId, ExpectationId, ExpectationManagerId, ExpectedPackageId } from './ids'
 // eslint-disable-next-line node/no-missing-import
 import { MediaRamRecRef, MediaStillRef } from 'kairos-lib'
@@ -85,11 +85,11 @@ export namespace Expectation {
 
 		/** Contains info for determining that work can start (and is used to perform the work) */
 		startRequirement: {
-			sources: PackageContainerOnPackage[]
+			sources: InputApi.PackageContainerOnPackage[]
 		}
 		/** Contains info for determining that work can end (and is used to perform the work) */
 		endRequirement: {
-			targets: PackageContainerOnPackage[]
+			targets: InputApi.PackageContainerOnPackage[]
 			content: any
 			version: any
 		}
@@ -405,71 +405,15 @@ export namespace Expectation {
 				// empty
 			}
 			version: {
-				renderer?: {
-					/** Renderer width, defaults to 1920 */
-					width?: number
-					/** Renderer height, defaults to 1080 */
-					height?: number
-					/**
-					 * Scale the rendered width and height with this value, and also zoom the content accordingly.
-					 * For example, if the width is 1920 and scale is 0.5, the width will be scaled to 960.
-					 * (Defaults to 1)
-					 */
-					scale?: number
-					/** Background color, #RRGGBB, CSS-string, "transparent" or "default" (defaults to "default") */
-					background?: string
-					userAgent?: string
-				}
+				renderer?: InputApi.ExpectedPackage.HTMLRendererOptions
 
 				/**
 				 * Convenience settings for a template that follows the typical CasparCG steps;
 				 * update(data); play(); stop();
 				 * If this is set, steps are overridden */
-				casparCG?: {
-					/**
-					 * Data to send into the update() function of a CasparCG Template.
-					 * Strings will be piped through as-is, objects will be JSON.stringified.
-					 */
-					data: { [key: string]: any } | null | string
+				casparCG?: InputApi.ExpectedPackage.HTMLRendererCasparCGOptions
 
-					/** How long to wait between each action in a CasparCG template, (default: 1000ms) */
-					delay?: number
-				}
-
-				steps?: (
-					| { do: 'waitForLoad' }
-					| { do: 'sleep'; duration: number }
-					| {
-							do: 'sendHTTPCommand'
-							url: string
-							/** GET, POST, PUT etc.. */
-							method: string
-							body?: ArrayBuffer | ArrayBufferView | NodeJS.ReadableStream | string | URLSearchParams
-
-							headers?: Record<string, string>
-					  }
-					| { do: 'takeScreenshot'; fileName: string }
-					| { do: 'startRecording'; fileName: string }
-					| { do: 'stopRecording' }
-					| { do: 'cropRecording'; fileName: string }
-					| { do: 'executeJs'; js: string }
-					// Store an object in memory
-					| {
-							do: 'storeObject'
-							key: string
-							/** The value to store into memory. Either an object, or a JSON-stringified object */
-							value: Record<string, any> | string
-					  }
-					// Modify an object in memory. Path is a dot-separated string
-					| { do: 'modifyObject'; key: string; path: string; value: any }
-					// Send an object to the renderer as a postMessage (so basically does a executeJs: window.postMessage(memory[key]))
-					| {
-							do: 'injectObject'
-							key: string
-							/** The method to receive the value. Defaults to window.postMessage */
-							receivingFunction?: string
-					  }
-				)[]
+				steps?: InputApi.ExpectedPackage.HTMLRendererStep[]
 			}
 		}
 	}
@@ -478,74 +422,74 @@ export namespace Expectation {
 	// eslint-disable-next-line @typescript-eslint/no-namespace
 	export namespace SpecificPackageContainerOnPackage {
 		/** Defines a PackageContainer for "Files" (ie the stuff stored on a hard drive or equivalent). Contains the various accessors that support reading files. */
-		export interface FileSource extends PackageContainerOnPackage {
+		export interface FileSource extends InputApi.PackageContainerOnPackage {
 			accessors: {
 				[accessorId: AccessorId]:
-					| AccessorOnPackage.LocalFolder
-					| AccessorOnPackage.FileShare
-					| AccessorOnPackage.HTTP
-					| AccessorOnPackage.HTTPProxy
-					| AccessorOnPackage.Quantel
+					| InputApi.AccessorOnPackage.LocalFolder
+					| InputApi.AccessorOnPackage.FileShare
+					| InputApi.AccessorOnPackage.HTTP
+					| InputApi.AccessorOnPackage.HTTPProxy
+					| InputApi.AccessorOnPackage.Quantel
 			}
 		}
 		/** Defines a PackageContainer for "Files" (ie the stuff stored on a hard drive or equivalent). Contains the various accessors that support writing files. */
-		export interface FileTarget extends PackageContainerOnPackage {
+		export interface FileTarget extends InputApi.PackageContainerOnPackage {
 			accessors: {
 				[accessorId: AccessorId]:
-					| AccessorOnPackage.LocalFolder
-					| AccessorOnPackage.FileShare
-					| AccessorOnPackage.HTTPProxy
+					| InputApi.AccessorOnPackage.LocalFolder
+					| InputApi.AccessorOnPackage.FileShare
+					| InputApi.AccessorOnPackage.HTTPProxy
 			}
 		}
 		/** Defines a PackageContainer for CorePackage (A collection in Sofie-Core accessible through an API). */
-		export interface CorePackage extends PackageContainerOnPackage {
+		export interface CorePackage extends InputApi.PackageContainerOnPackage {
 			accessors: {
-				[accessorId: AccessorId]: AccessorOnPackage.CorePackageCollection
+				[accessorId: AccessorId]: InputApi.AccessorOnPackage.CorePackageCollection
 			}
 		}
 		/** Defines a PackageContainer for Quantel clips, stored on Quantel servers. */
-		export interface QuantelClip extends PackageContainerOnPackage {
+		export interface QuantelClip extends InputApi.PackageContainerOnPackage {
 			accessors: {
-				[accessorId: AccessorId]: AccessorOnPackage.Quantel
+				[accessorId: AccessorId]: InputApi.AccessorOnPackage.Quantel
 			}
 		}
 		/** Defines a PackageContainer for Kairos clips, stored on a Kairos Vision Mixer servers. */
-		export interface KairosClip extends PackageContainerOnPackage {
+		export interface KairosClip extends InputApi.PackageContainerOnPackage {
 			accessors: {
-				[accessorId: AccessorId]: AccessorOnPackage.KairosClip
+				[accessorId: AccessorId]: InputApi.AccessorOnPackage.KairosClip
 			}
 		}
 
 		/** Defines a PackageContainer for reading JSON data. */
-		export interface JSONDataSource extends PackageContainerOnPackage {
+		export interface JSONDataSource extends InputApi.PackageContainerOnPackage {
 			accessors: {
 				[accessorId: string]:
-					| AccessorOnPackage.LocalFolder
-					| AccessorOnPackage.FileShare
-					| AccessorOnPackage.HTTP
-					| AccessorOnPackage.HTTPProxy
+					| InputApi.AccessorOnPackage.LocalFolder
+					| InputApi.AccessorOnPackage.FileShare
+					| InputApi.AccessorOnPackage.HTTP
+					| InputApi.AccessorOnPackage.HTTPProxy
 			}
 		}
 
 		/** Defines a PackageContainer for writing JSON data. */
-		export interface JSONDataTarget extends PackageContainerOnPackage {
+		export interface JSONDataTarget extends InputApi.PackageContainerOnPackage {
 			accessors: {
 				[accessorId: string]:
-					| AccessorOnPackage.LocalFolder
-					| AccessorOnPackage.FileShare
-					| AccessorOnPackage.HTTPProxy
-					| AccessorOnPackage.CorePackageCollection
+					| InputApi.AccessorOnPackage.LocalFolder
+					| InputApi.AccessorOnPackage.FileShare
+					| InputApi.AccessorOnPackage.HTTPProxy
+					| InputApi.AccessorOnPackage.CorePackageCollection
 			}
 		}
 
 		/** Defines a PackageContainer for reading a HTML file. */
-		export interface HTMLFileSource extends PackageContainerOnPackage {
+		export interface HTMLFileSource extends InputApi.PackageContainerOnPackage {
 			accessors: {
 				[accessorId: string]:
-					| AccessorOnPackage.LocalFolder
-					| AccessorOnPackage.FileShare
-					| AccessorOnPackage.HTTP
-					| AccessorOnPackage.HTTPProxy
+					| InputApi.AccessorOnPackage.LocalFolder
+					| InputApi.AccessorOnPackage.FileShare
+					| InputApi.AccessorOnPackage.HTTP
+					| InputApi.AccessorOnPackage.HTTPProxy
 			}
 		}
 	}
@@ -647,84 +591,9 @@ export namespace Expectation {
 			/**
 			 * List of conversion steps to perform, in order.
 			 */
-			conversions: ConversionStep[]
+			conversions: InputApi.ExpectedPackage.ConversionStep[]
 		}
-		export interface ConversionStep {
-			/**
-			 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
-			 */
-			executable: string
-			/**
-			 * Arguments to the executable.
-			 * Supported placeholders:
-			 * - {SOURCE} - replaced with the full path of the source file
-			 * - {TARGET} - replaced with the full path of the target file
-			 * - {PRECHECK.0.REGEX.1} replaced with capture group from preCheck
-			 */
-			args: string[]
 
-			/**
-			 * Set to true if the executable needs the source to be locally available
-			 * (So PM will copy the source to a local temp folder before running the executable)
-			 */
-			needsLocalSource?: boolean
-			/**
-			 * Set to true if the executable needs the target to be locally available
-			 * (So PM will create the target in a local temp folder, and then copy it to the actual target when done)
-			 */
-			needsLocalTarget?: boolean
-
-			/**
-			 * Force the output filename from this step.
-			 * This can be useful in multi-step scenarios where you want to specify the inter-step filename.
-			 * This property is ignored in the final step.
-			 */
-			outputFileName?: string
-
-			/**
-			 * If set, defines one or more operation to run _before_ a conversion step,
-			 * in order to gather information used to modify the conversion step or potentially skip it.
-			 */
-			preChecks?: {
-				/**
-				 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
-				 */
-				executable: string
-				/**
-				 * Arguments to the executable.
-				 * Supported placeholders:
-				 * - {SOURCE} - replaced with the full path of the source file
-				 */
-				args: string[]
-				/**
-				 * Set to true if the executable needs the source to be locally available
-				 * (So PM will copy the source to a local temp folder before running the executable)
-				 */
-				needsLocalSource?: boolean
-
-				/**  */
-				handleOutput: {
-					source: 'stdout' | 'stderr'
-
-					/**
-					 * Regular Expression to run the source into
-					 * You can use capturing groups here, to be used in the conversion step args
-					 * like so: "{PRECHECK.0.REGEX.1}" (first index is the handleOutput index, second is the capture group index)
-					 * */
-					regex: string
-
-					/** Options to use with for the Regular Expression (i/g/m) */
-					regexFlags?: string // igm
-
-					effect?: {
-						/** If true, will only run this conversion step if regex matches. (If undefined, step will run by default) */
-						onlyRunStepIfMatch?: boolean
-						/** If true, will only run this conversion step if regex doesn't match. (If undefined, step will run by default) */
-						onlyRunStepIfNoMatch?: boolean
-					}
-				}[]
-			}[]
-		}
 		export type ExpectedMediaFileConvert = MediaFileConvert // ExpectedType<MediaFileConvert>
 
 		export interface MediaFilePreview extends Base {

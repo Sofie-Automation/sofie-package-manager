@@ -161,82 +161,7 @@ export namespace ExpectedPackage {
 			modifiedDate?: number // timestamp (ms)
 			checksum?: string
 			checkSumType?: 'sha' | 'md5' | 'whatever'
-			conversions?: {
-				/**
-				 * Executable alias. Need to be defined in --executableAliases.
-				 */
-				executable: string
-				/**
-				 * Arguments to the executable.
-				 * Supported placeholders:
-				 * - {SOURCE} - replaced with the full path of the source file
-				 * - {TARGET} - replaced with the full path of the target file
-				 * - {PRECHECK.0.REGEX.1} replaced with capture group from preCheck
-				 */
-				args: string[]
-
-				/**
-				 * Set to true if the executable needs the source to be locally available
-				 * (So PM will copy the source to a local temp folder before running the executable)
-				 */
-				needsLocalSource?: boolean
-				/**
-				 * Set to true if the executable needs the target to be locally available
-				 * (So PM will create the target in a local temp folder, and then copy it to the actual target when done)
-				 */
-				needsLocalTarget?: boolean
-
-				/**
-				 * Force the output filename from this step.
-				 * This can be useful in multi-step scenarios where you want to specify the inter-step filename.
-				 * This property is ignored in the final step.
-				 */
-				outputFileName?: string
-
-				/**
-				 * If set, defines one or more operation to run _before_ a conversion step,
-				 * in order to gather information used to modify the conversion step or potentially skip it.
-				 */
-				preChecks?: {
-					/**
-					 * Executable alias. Need to be defined in --executableAliases.
-					 */
-					executable: string
-					/**
-					 * Arguments to the executable.
-					 * Supported placeholders:
-					 * - {SOURCE} - replaced with the full path of the source file
-					 */
-					args: string[]
-					/**
-					 * Set to true if the executable needs the source to be locally available
-					 * (So PM will copy the source to a local temp folder before running the executable)
-					 */
-					needsLocalSource?: boolean
-
-					/**  */
-					handleOutput: {
-						source: 'stdout' | 'stderr'
-
-						/**
-						 * Regular Expression to run the source into
-						 * You can use capturing groups here, to be used in the conversion step args
-						 * like so: "{PRECHECK.0.REGEX.1}" (first index is the handleOutput index, second is the capture group index)
-						 * */
-						regex: string
-
-						/** Options to use with for the Regular Expression (i/g/m) */
-						regexFlags?: string // igm
-
-						effect?: {
-							/** If true, will only run this conversion step if regex matches. (If undefined, step will run by default) */
-							onlyRunStepIfMatch?: boolean
-							/** If true, will only run this conversion step if regex doesn't match. (If undefined, step will run by default) */
-							onlyRunStepIfNoMatch?: boolean
-						}
-					}[]
-				}[]
-			}[]
+			conversions?: ConversionStep[]
 		}
 		sources: {
 			containerId: PackageContainerId
@@ -248,6 +173,83 @@ export namespace ExpectedPackage {
 					| AccessorOnPackage.HTTPProxy
 					| AccessorOnPackage.Quantel
 			}
+		}[]
+	}
+
+	export interface ConversionStep {
+		/**
+		 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
+		 */
+		executable: string
+		/**
+		 * Arguments to the executable.
+		 * Supported placeholders:
+		 * - {SOURCE} - replaced with the full path of the source file
+		 * - {TARGET} - replaced with the full path of the target file
+		 * - {PRECHECK.0.REGEX.1} replaced with capture group from preCheck
+		 */
+		args: string[]
+
+		/**
+		 * Set to true if the executable needs the source to be locally available
+		 * (So PM will copy the source to a local temp folder before running the executable)
+		 */
+		needsLocalSource?: boolean
+		/**
+		 * Set to true if the executable needs the target to be locally available
+		 * (So PM will create the target in a local temp folder, and then copy it to the actual target when done)
+		 */
+		needsLocalTarget?: boolean
+
+		/**
+		 * Force the output filename from this step.
+		 * This can be useful in multi-step scenarios where you want to specify the inter-step filename.
+		 * This property is ignored in the final step.
+		 */
+		outputFileName?: string
+
+		/**
+		 * If set, defines one or more operation to run _before_ a conversion step,
+		 * in order to gather information used to modify the conversion step or potentially skip it.
+		 */
+		preChecks?: {
+			/**
+			 * The executable to run. Note: This executable must be available on the worker running the expectation using the --executableAliases option.
+			 */
+			executable: string
+			/**
+			 * Arguments to the executable.
+			 * Supported placeholders:
+			 * - {SOURCE} - replaced with the full path of the source file
+			 */
+			args: string[]
+			/**
+			 * Set to true if the executable needs the source to be locally available
+			 * (So PM will copy the source to a local temp folder before running the executable)
+			 */
+			needsLocalSource?: boolean
+
+			/**  */
+			handleOutput: {
+				source: 'stdout' | 'stderr'
+
+				/**
+				 * Regular Expression to run the source into
+				 * You can use capturing groups here, to be used in the conversion step args
+				 * like so: "{PRECHECK.0.REGEX.1}" (first index is the handleOutput index, second is the capture group index)
+				 * */
+				regex: string
+
+				/** Options to use with for the Regular Expression (i/g/m) */
+				regexFlags?: string // igm
+
+				effect?: {
+					/** If true, will only run this conversion step if regex matches. (If undefined, step will run by default) */
+					onlyRunStepIfMatch?: boolean
+					/** If true, will only run this conversion step if regex doesn't match. (If undefined, step will run by default) */
+					onlyRunStepIfNoMatch?: boolean
+				}
+			}[]
 		}[]
 	}
 	export interface ExpectedPackageQuantelClip extends Base {
@@ -298,71 +300,15 @@ export namespace ExpectedPackage {
 			path: string
 		}
 		version: {
-			renderer?: {
-				/** Renderer width, defaults to 1920 */
-				width?: number
-				/** Renderer height, defaults to 1080 */
-				height?: number
-				/**
-				 * Scale the rendered width and height with this value, and also zoom the content accordingly.
-				 * For example, if the width is 1920 and scale is 0.5, the width will be scaled to 960.
-				 * (Defaults to 1)
-				 */
-				scale?: number
-				/** Background color, #RRGGBB, CSS-string, "transparent" or "default" (defaults to "default") */
-				background?: string
-				userAgent?: string
-			}
+			renderer?: HTMLRendererOptions
 
 			/**
 			 * Convenience settings for a template that follows the typical CasparCG steps;
 			 * update(data); play(); stop();
 			 * If this is set, steps are overridden */
-			casparCG?: {
-				/**
-				 * Data to send into the update() function of a CasparCG Template.
-				 * Strings will be piped through as-is, objects will be JSON.stringified.
-				 */
-				data: { [key: string]: any } | null | string
+			casparCG?: HTMLRendererCasparCGOptions
 
-				/** How long to wait between each action in a CasparCG template, (default: 1000ms) */
-				delay?: number
-			}
-
-			steps?: (
-				| { do: 'waitForLoad' }
-				| { do: 'sleep'; duration: number }
-				| {
-						do: 'sendHTTPCommand'
-						url: string
-						/** GET, POST, PUT etc.. */
-						method: string
-						body?: ArrayBuffer | ArrayBufferView | NodeJS.ReadableStream | string | URLSearchParams
-
-						headers?: Record<string, string>
-				  }
-				| { do: 'takeScreenshot'; fileName: string }
-				| { do: 'startRecording'; fileName: string }
-				| { do: 'stopRecording' }
-				| { do: 'cropRecording'; fileName: string }
-				| { do: 'executeJs'; js: string }
-				// Store an object in memory
-				| {
-						do: 'storeObject'
-						key: string
-						/** The value to store into memory. Either an object, or a JSON-stringified object */
-						value: Record<string, any> | string
-				  }
-				// Modify an object in memory. Path is a dot-separated string
-				| { do: 'modifyObject'; key: string; path: string; value: any }
-				// Send an object to the renderer as a postMessage (so basically does a executeJs: window.postMessage(memory[key]))
-				| {
-						do: 'injectObject'
-						key: string
-						/** The method to receive the value. Defaults to window.postMessage */
-						receivingFunction?: string
-				  }
-			)[]
+			steps?: HTMLRendererStep[]
 		}
 		sources: {
 			containerId: PackageContainerId
@@ -375,6 +321,64 @@ export namespace ExpectedPackage {
 			}
 		}[]
 	}
+	export interface HTMLRendererOptions {
+		/** Renderer width, defaults to 1920 */
+		width?: number
+		/** Renderer height, defaults to 1080 */
+		height?: number
+		/**
+		 * Scale the rendered width and height with this value, and also zoom the content accordingly.
+		 * For example, if the width is 1920 and scale is 0.5, the width will be scaled to 960.
+		 * (Defaults to 1)
+		 */
+		scale?: number
+		/** Background color, #RRGGBB, CSS-string, "transparent" or "default" (defaults to "default") */
+		background?: string
+		userAgent?: string
+	}
+	export interface HTMLRendererCasparCGOptions {
+		/**
+		 * Data to send into the update() function of a CasparCG Template.
+		 * Strings will be piped through as-is, objects will be JSON.stringified.
+		 */
+		data: { [key: string]: any } | null | string
+
+		/** How long to wait between each action in a CasparCG template, (default: 1000ms) */
+		delay?: number
+	}
+	export type HTMLRendererStep =
+		| { do: 'waitForLoad' }
+		| { do: 'sleep'; duration: number }
+		| {
+				do: 'sendHTTPCommand'
+				url: string
+				/** GET, POST, PUT etc.. */
+				method: string
+				body?: ArrayBuffer | ArrayBufferView | NodeJS.ReadableStream | string | URLSearchParams
+
+				headers?: Record<string, string>
+		  }
+		| { do: 'takeScreenshot'; fileName: string }
+		| { do: 'startRecording'; fileName: string }
+		| { do: 'stopRecording' }
+		| { do: 'cropRecording'; fileName: string }
+		| { do: 'executeJs'; js: string }
+		// Store an object in memory
+		| {
+				do: 'storeObject'
+				key: string
+				/** The value to store into memory. Either an object, or a JSON-stringified object */
+				value: Record<string, any> | string
+		  }
+		// Modify an object in memory. Path is a dot-separated string
+		| { do: 'modifyObject'; key: string; path: string; value: any }
+		// Send an object to the renderer as a postMessage (so basically does a executeJs: window.postMessage(memory[key]))
+		| {
+				do: 'injectObject'
+				key: string
+				/** The method to receive the value. Defaults to window.postMessage */
+				receivingFunction?: string
+		  }
 }
 
 /** A PackageContainer defines a place that contains Packages, that can be read or written to.
@@ -631,4 +635,5 @@ export interface PackageContainerOnPackage extends Omit<PackageContainer, 'acces
 
 	accessors: { [accessorId: AccessorId]: AccessorOnPackage.Any }
 }
+// --------------------------------------------------------------------------------------------------------------------
 // Note: Not re-exporting ExpectedPackageStatusAPI in this file, since that is purely a Sofie-Core API
