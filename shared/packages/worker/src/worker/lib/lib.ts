@@ -32,6 +32,8 @@ function getAccessorTypePriority(accessor: AccessorOnPackage.Any): number {
 		return 4
 	} else if (accessor.type === Accessor.AccessType.FTP) {
 		return 5
+	} else if (accessor.type === Accessor.AccessType.S3) {
+		return 6
 	} else if (accessor.type === Accessor.AccessType.CORE_PACKAGE_INFO) {
 		return 99999
 	} else if (accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE) {

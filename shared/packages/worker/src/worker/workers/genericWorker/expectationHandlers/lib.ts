@@ -4,6 +4,7 @@ import {
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { prioritizeAccessors } from '../../../lib/lib'
 import { AccessorContext, GenericAccessorHandle } from '../../../accessorHandlers/genericHandle'
@@ -31,6 +32,7 @@ import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder
 import { FileShareAccessorHandle } from '../../../accessorHandlers/fileShare'
 import { HTTPProxyAccessorHandle } from '../../../accessorHandlers/httpProxy'
 import { FTPAccessorHandle } from '../../../accessorHandlers/ftp'
+import { S3AccessorHandle } from '../../../accessorHandlers/s3'
 
 /** Check that a worker has access to the packageContainers through its accessors */
 export function checkWorkerHasAccessToPackageContainersOnPackage(
@@ -532,6 +534,7 @@ export function proxyFFMpegArguments(
 		| FileShareAccessorHandle<any>
 		| HTTPProxyAccessorHandle<any>
 		| FTPAccessorHandle<any>
+		| S3AccessorHandle<any>
 ): string[] {
 	const args = [
 		'-hide_banner',
@@ -555,6 +558,8 @@ export function proxyFFMpegArguments(
 	} else if (isHTTPProxyAccessorHandle(targetHandle)) {
 		targetPath = ''
 	} else if (isFTPAccessorHandle(targetHandle)) {
+		targetPath = ''
+	} else if (isS3AccessorHandle(targetHandle)) {
 		targetPath = ''
 	} else {
 		assertNever(targetHandle)

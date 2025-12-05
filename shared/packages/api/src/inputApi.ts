@@ -410,6 +410,7 @@ export namespace Accessor {
 		| AtemMediaStore
 		| FTP
 		| KairosClip
+		| S3
 
 	export enum AccessType {
 		LOCAL_FOLDER = 'local_folder',
@@ -421,6 +422,7 @@ export namespace Accessor {
 		ATEM_MEDIA_STORE = 'atem_media_store',
 		FTP = 'ftp',
 		KAIROS_CLIP = 'kairos_clip',
+		S3 = 's3',
 	}
 
 	/** Generic (used in extends) */
@@ -574,6 +576,23 @@ export namespace Accessor {
 		/** Name/Id of the network the share exists on. Used to differ between different local networks. Leave empty if globally accessible. */
 		networkId?: string
 	}
+
+	/** Definition of access to a generic FTP/SFTP endpoint. (Read-access only) */
+	export interface S3 extends Base {
+		type: AccessType.S3
+
+		/** Identifier of the S3 bucket  */
+		bucketId: string
+
+		/** AWS Access key */
+		accessKey: string
+
+		/** AWS Secret access key */
+		secretAccessKey: string
+
+		/** AWS region of the bucket */
+		region: string
+	}
 }
 /**
  * AccessorOnPackage contains interfaces for Accessor definitions that are put ON the Package.
@@ -591,6 +610,7 @@ export namespace AccessorOnPackage {
 		| AtemMediaStore
 		| FTP
 		| KairosClip
+		| S3
 
 	export interface LocalFolder extends Partial<Accessor.LocalFolder> {
 		/** Path to the file (starting from .folderPath). If not set, the filePath of the ExpectedPackage will be used */
@@ -623,8 +643,14 @@ export namespace AccessorOnPackage {
 		/** path to resource (combined with .basePath gives the full path), for example: /folder/myFile */
 		path?: string
 	}
+
 	export interface KairosClip extends Partial<Accessor.KairosClip> {
 		ref?: MediaRamRecRef | MediaStillRef
+	}
+
+	export interface S3 extends Partial<Accessor.S3> {
+		/** key of resource */
+		filePath?: string
 	}
 }
 

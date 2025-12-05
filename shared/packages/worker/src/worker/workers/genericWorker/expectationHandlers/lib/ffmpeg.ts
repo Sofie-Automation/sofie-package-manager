@@ -6,6 +6,7 @@ import {
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../../accessorHandlers/accessor'
 import { FileShareAccessorHandle } from '../../../../accessorHandlers/fileShare'
 import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy'
@@ -24,6 +25,7 @@ import {
 } from '@sofie-package-manager/api'
 import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
 import { BaseWorker } from '../../../../worker'
+import { S3AccessorHandle } from '../../../../accessorHandlers/s3'
 
 export { FFMpegProcess, testFFMpeg, testFFProbe, overrideFFMpegExecutables, getFFProbeExecutable, getFFMpegExecutable }
 
@@ -36,7 +38,8 @@ export async function spawnFFMpeg<Metadata>(
 		| LocalFolderAccessorHandle<Metadata>
 		| FileShareAccessorHandle<Metadata>
 		| HTTPProxyAccessorHandle<Metadata>
-		| FTPAccessorHandle<Metadata>,
+		| FTPAccessorHandle<Metadata>
+		| S3AccessorHandle<Metadata>,
 	onDone: () => Promise<void>,
 	onFail: (err?: any) => Promise<void>,
 	onProgress?: (progress: number) => Promise<void>,
@@ -68,6 +71,7 @@ async function prepareSpawnFFMpegProcess<Metadata>(
 		| FileShareAccessorHandle<Metadata>
 		| HTTPProxyAccessorHandle<Metadata>
 		| FTPAccessorHandle<Metadata>
+		| S3AccessorHandle<Metadata>
 ): Promise<{ pipeStdOut: boolean; args: string[] }> {
 	let pipeStdOut = false
 
@@ -89,6 +93,9 @@ async function prepareSpawnFFMpegProcess<Metadata>(
 		} else {
 			args.push(escapeFilePath(targetHandle.ftpUrl.url))
 		}
+	} else if (isS3AccessorHandle(targetHandle)) {
+		pipeStdOut = true
+		args.push('pipe:1')
 	} else {
 		assertNever(targetHandle)
 		throw new Error(`Unsupported Target AccessHandler`)
@@ -106,6 +113,7 @@ function spawnFFMpegProcess<Metadata>(props: {
 		| FileShareAccessorHandle<Metadata>
 		| HTTPProxyAccessorHandle<Metadata>
 		| FTPAccessorHandle<Metadata>
+		| S3AccessorHandle<Metadata>
 	onDone: () => Promise<void>
 	onFail: (err?: any) => Promise<void>
 	onProgress?: (progress: number) => Promise<void>
