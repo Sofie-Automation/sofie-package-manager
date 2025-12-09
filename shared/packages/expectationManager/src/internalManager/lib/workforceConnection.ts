@@ -43,7 +43,7 @@ export class WorkforceConnection {
 			this.workforceAPI
 				.registerExpectationManager(
 					this.manager.managerId,
-					this.manager.expectationManagerServer.serverAccessUrl
+					this.manager.expectationManagerServer.serverAccessUrls
 				)
 				.then(() => {
 					this.initWorkForceAPIPromise?.resolve() // To finish the init() function

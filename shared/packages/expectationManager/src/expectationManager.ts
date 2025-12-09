@@ -17,6 +17,7 @@ import {
 	AppId,
 	WorkerAgentId,
 	mapToObject,
+	URLMap,
 } from '@sofie-package-manager/api'
 import { InternalManager } from './internalManager/internalManager'
 import { ExpectationTrackerConstants } from './lib/constants'
@@ -32,7 +33,7 @@ export class ExpectationManager {
 		logger: LoggerInstance,
 		managerId: ExpectationManagerId,
 		serverOptions: ExpectationManagerServerOptions,
-		serverAccessBaseUrl: string | undefined,
+		serverAccessBaseUrls: URLMap | undefined,
 		workForceConnectionOptions: ClientConnectionOptions,
 		callbacks: ExpectationManagerCallbacks,
 		options?: ExpectationManagerOptions
@@ -42,7 +43,7 @@ export class ExpectationManager {
 			managerId,
 			serverOptions,
 			/** At what url the ExpectationManager can be reached on */
-			serverAccessBaseUrl,
+			serverAccessBaseUrls,
 			workForceConnectionOptions,
 			callbacks,
 			options

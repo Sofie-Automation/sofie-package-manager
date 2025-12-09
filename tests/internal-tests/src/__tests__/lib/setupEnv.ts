@@ -68,7 +68,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		deviceToken: '',
 		disableWatchdog: true,
 		port: null,
-		accessUrl: null,
+		accessURLs: null,
 		workforceURL: null,
 		watchFiles: false,
 		noCore: false,

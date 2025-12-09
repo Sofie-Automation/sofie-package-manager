@@ -6,6 +6,7 @@ import {
 	WorkerStatusReport,
 	ExpectationManagerId,
 	WorkforceId,
+	URLMap,
 } from '@sofie-package-manager/api'
 
 /**
@@ -38,7 +39,7 @@ export class WorkerAgentAPI
 		return this._sendMessage('getStatusReport')
 	}
 
-	async expectationManagerAvailable(id: ExpectationManagerId, url: string): Promise<void> {
+	async expectationManagerAvailable(id: ExpectationManagerId, url: URLMap): Promise<void> {
 		return this._sendMessage('expectationManagerAvailable', id, url)
 	}
 	async expectationManagerGone(id: ExpectationManagerId): Promise<void> {

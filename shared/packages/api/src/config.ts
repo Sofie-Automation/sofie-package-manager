@@ -6,6 +6,7 @@ import { AppContainerConfig } from './appContainer'
 import { protectString } from './ProtectedString'
 import { AppContainerId, WorkerAgentId } from './ids'
 import { countOccurrences } from './lib'
+import { URLMap } from './methods'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -100,7 +101,7 @@ const packageManagerArguments = defineArguments({
 		default: parseInt(process.env.PACKAGE_MANAGER_PORT || '', 10) || 8060,
 		describe: 'The port number to start the Package Manager websocket server on',
 	},
-	accessUrl: {
+	accessURL: {
 		type: 'string',
 		default: process.env.PACKAGE_MANAGER_URL || 'ws://localhost:8060',
 		describe: 'The URL where Package Manager websocket server can be accessed',
@@ -395,7 +396,7 @@ export interface PackageManagerConfig {
 		disableWatchdog: boolean
 
 		port: number | null
-		accessUrl: string | null
+		accessURLs: URLMap | null
 		workforceURL: string | null
 
 		watchFiles: boolean
@@ -412,6 +413,29 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 		}).argv
 	)
 
+	const accessURLs: URLMap = {
+		'*': '',
+	}
+
+	let fallBackURL: string | null = null
+
+	argv.accessURL.split(';').forEach((networkIdAndURLPair: string) => {
+		let [networkId, url] = networkIdAndURLPair.split('@', 2)
+		if (!url) {
+			url = networkId
+			networkId = '*'
+		}
+
+		if (networkId === '*' || !fallBackURL) {
+			fallBackURL = url
+		}
+		accessURLs[networkId] = url
+	})
+
+	if (fallBackURL === null) throw new Error(`Error: At least one accessURL must be specified!`)
+
+	accessURLs['*'] = fallBackURL
+
 	return {
 		process: getProcessConfig(argv),
 		packageManager: {
@@ -422,7 +446,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 			disableWatchdog: argv.disableWatchdog,
 
 			port: argv.port,
-			accessUrl: argv.accessUrl,
+			accessURLs,
 			workforceURL: argv.workforceURL,
 
 			watchFiles: argv.watchFiles,
