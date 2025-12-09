@@ -28,7 +28,7 @@ export class ExpectationManagerServer {
 		logger: LoggerInstance,
 		private manager: InternalManager,
 		private serverOptions: ExpectationManagerServerOptions,
-		private serverAccessBaseUrls: URLMap | undefined,
+		private readonly serverAccessBaseUrls: URLMap | undefined,
 		private workForceConnectionOptions: ClientConnectionOptions
 	) {
 		this.logger = logger.category('ExpMgrServer')
@@ -97,18 +97,16 @@ export class ExpectationManagerServer {
 			this._serverAccessUrls = {
 				'*': '__internal',
 			}
+		} else if (this.serverAccessBaseUrls) {
+			this._serverAccessUrls = this.serverAccessBaseUrls
 		} else {
-			if (this.serverAccessBaseUrls) {
-				this._serverAccessUrls = this.serverAccessBaseUrls
-			} else {
-				let url = 'ws://127.0.0.1'
-				if (this.serverOptions.type === 'websocket' && this.serverOptions.port === 0) {
-					// When the configured port i 0, the next free port is picked
-					url += `:${this.manager.expectationManagerServer.websocketServer?.port}`
-				}
-				this._serverAccessUrls = {
-					'*': url,
-				}
+			let url = 'ws://127.0.0.1'
+			if (this.serverOptions.type === 'websocket' && this.serverOptions.port === 0) {
+				// When the configured port i 0, the next free port is picked
+				url += `:${this.manager.expectationManagerServer.websocketServer?.port}`
+			}
+			this._serverAccessUrls = {
+				'*': url,
 			}
 		}
 		if (!this._serverAccessUrls) throw new Error(`ExpectationManager.serverAccessUrl not set!`)

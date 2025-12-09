@@ -104,7 +104,8 @@ const packageManagerArguments = defineArguments({
 	accessURL: {
 		type: 'string',
 		default: process.env.PACKAGE_MANAGER_URL || 'ws://localhost:8060',
-		describe: 'The URL where Package Manager websocket server can be accessed',
+		describe:
+			'A list of URLs where Package Manager websocket server can be accessed and the respective networkIds where they should be used. No networkId or a `*` means a catch-all public URL. ("networkA@ws://10.0.0.1;networkB@ws://192.168.0.1;ws://public.com")',
 	},
 	workforceURL: {
 		type: 'string',

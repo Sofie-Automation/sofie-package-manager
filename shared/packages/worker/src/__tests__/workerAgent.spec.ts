@@ -32,8 +32,7 @@ jest.mock('../workforceApi.ts', () => {
 	}
 })
 
-const mockInit = jest.fn(function (connectionOptions: ClientConnectionOptions, clientMethods: any) {
-	void connectionOptions, clientMethods
+const mockInit = jest.fn(function (_connectionOptions: ClientConnectionOptions, _clientMethods: any) {
 	return Promise.resolve()
 })
 
@@ -41,8 +40,8 @@ jest.mock('../expectationManagerApi.ts', () => {
 	return {
 		ExpectationManagerAPI: jest.fn().mockImplementation(function () {
 			return {
-				on: function (event: string, cb: (...args: any[]) => void) {
-					void event, cb
+				on: function (_event: string, _cb: (...args: any[]) => void) {
+					// do nothing
 				},
 				init: mockInit,
 			}

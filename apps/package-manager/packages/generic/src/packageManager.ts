@@ -114,7 +114,7 @@ export class PackageManagerHandler {
 		logger: LoggerInstance,
 		private managerId: ExpectationManagerId,
 		private serverOptions: ExpectationManagerServerOptions,
-		private serverAccessUrls: URLMap | undefined,
+		private readonly serverAccessUrls: URLMap | undefined,
 		private workForceConnectionOptions: ClientConnectionOptions,
 		concurrency: number | undefined,
 		chaosMonkey: boolean
