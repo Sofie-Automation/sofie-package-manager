@@ -15,6 +15,7 @@ const processConfig: ProcessConfig = {
 	logLevel: undefined,
 	unsafeSSL: false,
 	certificates: [],
+	matchFilenamesWithoutExtension: false,
 }
 const REF_STILL = refMediaStill(['myStill'])
 const REF_RAMREC = refMediaRamRec(['myRamrec'])

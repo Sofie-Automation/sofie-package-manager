@@ -20,6 +20,7 @@ const processConfig: ProcessConfig = {
 	logLevel: undefined,
 	unsafeSSL: false,
 	certificates: [],
+	matchFilenamesWithoutExtension: false,
 }
 initializeLogger({ process: processConfig })
 
