@@ -161,7 +161,8 @@ function setup() {
 			sourcePackageStabilityThreshold: 0,
 			executableAliases: {},
 			temporaryFolderPath: undefined,
-			windowsDriveLetters: undefined
+			windowsDriveLetters: undefined,
+			allowedExpectationTypes: null,
 		},
 	} satisfies WorkerConfig
 

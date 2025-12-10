@@ -22,6 +22,7 @@ export class PassiveTestWorker extends BaseWorker {
 					pickUpCriticalExpectationsOnly: false,
 					resourceId: '',
 					workforceURL: null,
+					allowedExpectationTypes: null,
 				},
 				location: {
 					// localComputerId?: string

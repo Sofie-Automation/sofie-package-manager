@@ -105,6 +105,11 @@ export interface WorkerAgentConfig {
 	 * List of aliases for executables the worker can use.
 	 */
 	executableAliases: { [alias: string]: string }
+
+	/**
+	 * A list of allowed expectation types for this worker
+	 */
+	allowedExpectationTypes: string[] | null
 }
 export type ReturnTypeDoYouSupportPackageContainer =
 	| {
