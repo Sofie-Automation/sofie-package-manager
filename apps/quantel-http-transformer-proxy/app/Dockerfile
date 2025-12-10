@@ -44,6 +44,7 @@ FROM node:24-alpine
 
 COPY --from=builder /src /src
 
+RUN apk add --no-cache dumb-init
 
 WORKDIR /src/apps/quantel-http-transformer-proxy/app
 ENV QUANTEL_HTTP_TRANSFORMER_PROXY_PORT=8080
