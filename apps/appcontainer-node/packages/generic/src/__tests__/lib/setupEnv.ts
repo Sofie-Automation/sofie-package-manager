@@ -23,7 +23,6 @@ export async function prepareTestEnviromnent(debugLogging: boolean): Promise<voi
 			logPath: undefined,
 			unsafeSSL: false,
 			logLevel: debugLogging ? LogLevel.DEBUG : LogLevel.INFO,
-			matchFilenamesWithoutExtension: false,
 		},
 	}
 
@@ -48,6 +47,11 @@ export async function setupAppContainer(partialAppContainerConfig: Partial<AppCo
 					resourceId: '',
 					windowsDriveLetters: [],
 					temporaryFolderPath: '',
+					matchFilenamesWithoutExtension: false,
+					failurePeriod: 0,
+					failurePeriodLimit: 0,
+					executableAliases: {},
+					sourcePackageStabilityThreshold: 0,
 				},
 				workforceURL: null,
 			},
@@ -58,7 +62,6 @@ export async function setupAppContainer(partialAppContainerConfig: Partial<AppCo
 			logLevel: undefined,
 			logPath: undefined,
 			unsafeSSL: false,
-			matchFilenamesWithoutExtension: false,
 		},
 	})
 

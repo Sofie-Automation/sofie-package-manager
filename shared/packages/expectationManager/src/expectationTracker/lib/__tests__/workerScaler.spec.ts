@@ -29,7 +29,6 @@ const config = {
 		logLevel: undefined,
 		unsafeSSL: false,
 		certificates: [],
-		matchFilenamesWithoutExtension: false,
 	}),
 }
 initializeLogger(config)

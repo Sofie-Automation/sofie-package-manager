@@ -210,7 +210,7 @@ export async function doFileCopyExpectation(
 
 			let sourcePath: string
 			let targetPath: string
-			if (worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
+			if (worker.agentAPI.config.matchFilenamesWithoutExtension) {
 				const resolved = await resolveFileWithoutExtension(sourceHandle.fullPath)
 				switch (resolved.result) {
 					case 'found':

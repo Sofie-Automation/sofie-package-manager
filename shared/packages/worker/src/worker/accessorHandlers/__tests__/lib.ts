@@ -6,11 +6,14 @@ const defaultProcessConfig: ProcessConfig = {
 	logLevel: undefined,
 	unsafeSSL: false,
 	certificates: [],
-	matchFilenamesWithoutExtension: false,
 }
 
 export class PassiveTestWorker extends BaseWorker {
-	constructor(logger: LoggerInstance, processConfig: ProcessConfig = defaultProcessConfig) {
+	constructor(
+		logger: LoggerInstance,
+		processConfig: ProcessConfig = defaultProcessConfig,
+		matchFilenamesWithoutExtension = false
+	) {
 		super(
 			logger,
 			{
@@ -31,6 +34,7 @@ export class PassiveTestWorker extends BaseWorker {
 					resourceId: '',
 					workforceURL: null,
 					allowedExpectationTypes: null,
+					matchFilenamesWithoutExtension,
 				},
 				processConfig,
 				location: {

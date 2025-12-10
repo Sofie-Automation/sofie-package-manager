@@ -104,7 +104,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		const fullPath = this.fullPath
 
 		// If matchFilenamesWithoutExtension is disabled, just return the fullPath
-		if (!this.worker.agentAPI.processConfig.matchFilenamesWithoutExtension) {
+		if (!this.worker.agentAPI.config.matchFilenamesWithoutExtension) {
 			this._resolvedFullPath = fullPath
 			return this._resolvedFullPath
 		}

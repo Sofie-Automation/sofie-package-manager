@@ -110,6 +110,11 @@ export interface WorkerAgentConfig {
 	 * A list of allowed expectation types for this worker
 	 */
 	allowedExpectationTypes: string[] | null
+
+	/**
+	 * If true, the worker will match and use files without file extensions (in supported accessors only)
+	 */
+	matchFilenamesWithoutExtension: boolean
 }
 export type ReturnTypeDoYouSupportPackageContainer =
 	| {

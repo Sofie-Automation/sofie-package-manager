@@ -49,7 +49,6 @@ export const defaultTestConfig: SingleAppConfig = {
 		unsafeSSL: false,
 		certificates: [],
 		logLevel: LogLevel.INFO,
-		matchFilenamesWithoutExtension: false,
 	},
 	workforce: {
 		port: null,
@@ -61,6 +60,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		apiKeyRead: '',
 		apiKeyWrite: '',
 		cleanFileAge: -1,
+		matchFilenamesWithoutExtension: false,
 	},
 	packageManager: {
 		coreHost: '',
@@ -91,6 +91,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		failurePeriod: 0,
 		failurePeriodLimit: 0,
 		executableAliases: {},
+		matchFilenamesWithoutExtension: false,
 	},
 	quantelHTTPTransformerProxy: {
 		port: 0,
@@ -117,6 +118,7 @@ export const defaultTestConfig: SingleAppConfig = {
 			executableAliases: {},
 			sourcePackageStabilityThreshold: 0,
 			allowedExpectationTypes: null,
+			matchFilenamesWithoutExtension: false,
 		},
 	},
 }
@@ -228,7 +230,6 @@ export async function prepareTestEnvironment(debugLogging: boolean): Promise<Tes
 			logPath: undefined,
 			unsafeSSL: false,
 			logLevel: debugLogging ? LogLevel.DEBUG : LogLevel.INFO,
-			matchFilenamesWithoutExtension: false,
 		},
 	}
 	initializeLogger(config)

@@ -296,7 +296,6 @@ export class AppContainer {
 				this.config.process.certificates.length
 					? `--certificates=${this.config.process.certificates.join(';')}`
 					: '',
-				this.config.process.matchFilenamesWithoutExtension ? '--matchFilenamesWithoutExtension=true' : '',
 			]
 
 			const workerArgs = this.config.appContainer.worker
@@ -331,6 +330,8 @@ export class AppContainer {
 					argValue = workerArgs.allowedExpectationTypes
 						? workerArgs.allowedExpectationTypes.join(';')
 						: undefined
+				} else if (key === 'matchFilenamesWithoutExtension') {
+					// This is handled separately above, skip it here
 				} else {
 					assertNever(key)
 					this.logger.error(`Unknown worker argument key: "${key}"=${workerArgs[key]}`)

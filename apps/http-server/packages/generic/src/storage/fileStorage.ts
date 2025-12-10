@@ -103,7 +103,7 @@ export class FileStorage extends Storage {
 		let fullPath = path.join(this._basePath, paramPath)
 
 		if (!(await this.exists(fullPath))) {
-			if (!this.config.process.matchFilenamesWithoutExtension) {
+			if (!this.config.httpServer.matchFilenamesWithoutExtension) {
 				return { found: false, code: 404, reason: 'Package not found' }
 			}
 

@@ -28,29 +28,19 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 				logLevel: undefined,
 				unsafeSSL: false,
 				certificates: [],
-				matchFilenamesWithoutExtension: true,
 			},
 		})
 	})
-	const processConfigWithExtensionMatching: ProcessConfig = {
+	const processConfig: ProcessConfig = {
 		logPath: undefined,
 		logLevel: undefined,
 		unsafeSSL: false,
 		certificates: [],
-		matchFilenamesWithoutExtension: true,
-	}
-
-	const processConfigWithoutExtensionMatching: ProcessConfig = {
-		logPath: undefined,
-		logLevel: undefined,
-		unsafeSSL: false,
-		certificates: [],
-		matchFilenamesWithoutExtension: false,
 	}
 
 	test('should resolve file with single extension match', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = path.join('test', 'folder')
 		const expectedPath = path.join(folderPath, 'testfile.mp4')
@@ -81,8 +71,8 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 	})
 
 	test('should throw error when multiple files match', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = path.join('test', 'folder')
 
@@ -112,8 +102,8 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 	})
 
 	test('should throw error when no files match', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = path.join('test', 'folder')
 
@@ -138,8 +128,8 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 	})
 
 	test('should resolve file with compound extension', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = path.join('test', 'folder')
 		const expectedPath = path.join(folderPath, 'archive.tar.gz')
@@ -168,8 +158,8 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 	})
 
 	test('should not use extension matching when feature is disabled', async () => {
-		const logger = setupLogger({ process: processConfigWithoutExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithoutExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, false)
 
 		const resolveSpy = mockResolveFileWithoutExtension
 
@@ -194,8 +184,8 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 	})
 
 	test('should handle directory read errors', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = path.join('test', 'folder')
 

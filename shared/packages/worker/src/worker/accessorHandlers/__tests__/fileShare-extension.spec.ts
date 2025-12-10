@@ -28,29 +28,19 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 				logLevel: undefined,
 				unsafeSSL: false,
 				certificates: [],
-				matchFilenamesWithoutExtension: true,
 			},
 		})
 	})
-	const processConfigWithExtensionMatching: ProcessConfig = {
+	const processConfig: ProcessConfig = {
 		logPath: undefined,
 		logLevel: undefined,
 		unsafeSSL: false,
 		certificates: [],
-		matchFilenamesWithoutExtension: true,
-	}
-
-	const processConfigWithoutExtensionMatching: ProcessConfig = {
-		logPath: undefined,
-		logLevel: undefined,
-		unsafeSSL: false,
-		certificates: [],
-		matchFilenamesWithoutExtension: false,
 	}
 
 	test('should resolve file with single extension match', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		// Use platform-specific UNC path on Windows, or regular path on Unix
 		const folderPath = process.platform === 'win32' 
@@ -84,8 +74,8 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 	})
 
 	test('should throw error when multiple files match', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		// Use platform-specific UNC path on Windows, or regular path on Unix
 		const folderPath = process.platform === 'win32' 
@@ -118,8 +108,8 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 	})
 
 	test('should throw error when no files match', async () => {
-		const logger = setupLogger({ process: processConfigWithExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		// Use platform-specific UNC path on Windows, or regular path on Unix
 		const folderPath = process.platform === 'win32' 
@@ -147,8 +137,8 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 	})
 
 	test('should not use extension matching when feature is disabled', async () => {
-		const logger = setupLogger({ process: processConfigWithoutExtensionMatching }, '')
-		const worker = new PassiveTestWorker(logger, processConfigWithoutExtensionMatching)
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, false)
 
 		const resolveSpy = mockResolveFileWithoutExtension
 
