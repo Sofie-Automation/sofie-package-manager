@@ -596,10 +596,11 @@ export namespace Accessor {
 		/** Base URL for the S3 bucket */
 		s3PublicBaseUrl: string
 
-		/** S3 endpoint (obligatory for non-AWS S3 deployments) */
+		/** S3 endpoint (obligatory for non-AWS S3 deployments). If undefined, AWS S3 is assumed */
 		endpoint?: string
 
-		/** If true, forces path-style URLs (required for some S3-compatible storage solutions) */
+		/** If true, forces path-style URLs (required for some S3-compatible storage solutions that use path-style URLs for buckets)
+		 * i.e. use this is bucket URL is `http://localhost/test` instead of `http://test.localhost` */
 		forcePathStyle?: boolean
 	}
 }

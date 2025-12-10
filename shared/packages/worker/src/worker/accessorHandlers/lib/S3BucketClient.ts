@@ -11,10 +11,22 @@ import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/pack
 import { Readable } from 'node:stream'
 import { Upload } from '@aws-sdk/lib-storage'
 
+import { stringifyError } from '@sofie-package-manager/api'
+
 export type ListFilesResultItem = {
 	name: string
 	isDirectory: boolean
 	lastModified: number | undefined
+}
+
+export interface S3Options {
+	bucketId: string
+	accessKey: string
+	secretAccessKey: string
+	region: string
+	s3PublicBaseUrl: string
+	endpoint?: string | undefined
+	forcePathStyle?: boolean | undefined
 }
 
 export type FileInfoReturnType =
@@ -31,21 +43,14 @@ export type FileInfoReturnType =
 
 export class S3BucketClient {
 	private readonly s3Client: S3Client
-	constructor(
-		private readonly bucketId: string,
-		private readonly region: string,
-		private readonly accessKey: string,
-		private readonly secretAccessKey: string,
-		private readonly endpoint?: string,
-		private readonly forcePathStyle: boolean = false
-	) {
+	constructor(private readonly options: S3Options) {
 		this.s3Client = new S3Client({
-			forcePathStyle: this.forcePathStyle,
-			region: this.region,
-			endpoint: this.endpoint,
+			forcePathStyle: this.options.forcePathStyle,
+			region: this.options.region,
+			endpoint: this.options.endpoint,
 			credentials: {
-				accessKeyId: this.accessKey,
-				secretAccessKey: this.secretAccessKey,
+				accessKeyId: this.options.accessKey,
+				secretAccessKey: this.options.secretAccessKey,
 			},
 		})
 	}
@@ -59,7 +64,7 @@ export class S3BucketClient {
 			const upload = new Upload({
 				client: this.s3Client,
 				params: {
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Key: fullPath,
 					Body: content,
 				},
@@ -68,8 +73,9 @@ export class S3BucketClient {
 
 			await upload.done()
 		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err)
-			throw new Error(`Failed to write '${fullPath}' to bucket '${this.bucketId}': ${message}`)
+			throw new Error(
+				`Failed to write '${fullPath}' to bucket '${this.options.bucketId}': ${stringifyError(err)}`
+			)
 		}
 	}
 
@@ -77,7 +83,7 @@ export class S3BucketClient {
 		try {
 			const result = await this.s3Client.send(
 				new HeadObjectCommand({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Key: fullPath,
 				})
 			)
@@ -105,7 +111,7 @@ export class S3BucketClient {
 							user: 'The requested file does not exist in the S3 storage bucket',
 					  }
 					: {
-							tech: `S3 Error: ${reason} err: ${err?.message || JSON.stringify(err)}`,
+							tech: `S3 Error: ${reason} err: ${stringifyError(err)}`,
 							user: 'An unknown error occurred when trying to access the S3 storage bucket',
 					  },
 			}
@@ -116,15 +122,16 @@ export class S3BucketClient {
 		try {
 			const result = await this.s3Client.send(
 				new DeleteObjectCommand({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Key: fullPath,
 				})
 			)
 
 			return result.$metadata.httpStatusCode === 204
 		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err)
-			throw new Error(`Failed to remove '${fullPath}' from bucket '${this.bucketId}': ${message}`)
+			throw new Error(
+				`Failed to remove '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(err)}`
+			)
 		}
 	}
 
@@ -138,7 +145,7 @@ export class S3BucketClient {
 			try {
 				const response: ListObjectsV2CommandOutput = await this.s3Client.send(
 					new ListObjectsV2Command({
-						Bucket: this.bucketId,
+						Bucket: this.options.bucketId,
 						Prefix: prefix,
 						Delimiter: '/',
 						ContinuationToken: continuationToken,
@@ -152,8 +159,11 @@ export class S3BucketClient {
 					...S3BucketClient.getFilesFromListResponse(response.Contents, prefix)
 				)
 			} catch (err) {
-				const message = err instanceof Error ? err.message : String(err)
-				throw new Error(`Failed to list files in '${fullPath}' from bucket '${this.bucketId}': ${message}`)
+				throw new Error(
+					`Failed to list files in '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(
+						err
+					)}`
+				)
 			}
 		} while (continuationToken)
 
@@ -184,15 +194,15 @@ export class S3BucketClient {
 	async renameFile(from: string, to: string): Promise<void> {
 		await this.s3Client.send(
 			new CopyObjectCommand({
-				Bucket: this.bucketId,
-				CopySource: `${this.bucketId}/${from}`,
+				Bucket: this.options.bucketId,
+				CopySource: `${this.options.bucketId}/${from}`,
 				Key: to,
 			})
 		)
 
 		await this.s3Client.send(
 			new DeleteObjectCommand({
-				Bucket: this.bucketId,
+				Bucket: this.options.bucketId,
 				Key: from,
 			})
 		)
@@ -204,7 +214,7 @@ export class S3BucketClient {
 		try {
 			const listResult = await this.s3Client.send(
 				new ListObjectsV2Command({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Prefix: fullPath,
 					MaxKeys: 1,
 				})
@@ -232,7 +242,7 @@ export class S3BucketClient {
 				knownReason: false,
 				reason: {
 					user: `Error response from S3`,
-					tech: `S3: [${err?.code}]: ${err?.message}`,
+					tech: `S3: [${err?.code}]: ${stringifyError(err)}`,
 				},
 			}
 		}
@@ -242,7 +252,7 @@ export class S3BucketClient {
 		try {
 			const response = await this.s3Client.send(
 				new GetObjectCommand({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Key: fullPath,
 				}),
 				{ abortSignal }
@@ -254,8 +264,7 @@ export class S3BucketClient {
 
 			return response.Body.transformToWebStream()
 		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err)
-			throw new Error(`Failed to read '${fullPath}' from bucket: ${message}`)
+			throw new Error(`Failed to read '${fullPath}' from bucket: ${stringifyError(err)}`)
 		}
 	}
 
@@ -263,15 +272,16 @@ export class S3BucketClient {
 		try {
 			const result = await this.s3Client.send(
 				new DeleteObjectCommand({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Key: fullPath,
 				})
 			)
 
 			return result.DeleteMarker === true || result.VersionId !== undefined
 		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err)
-			throw new Error(`Failed to unlink '${fullPath}' from bucket '${this.bucketId}': ${message}`)
+			throw new Error(
+				`Failed to unlink '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(err)}`
+			)
 		}
 	}
 
@@ -280,7 +290,7 @@ export class S3BucketClient {
 
 		const listResult = await this.s3Client.send(
 			new ListObjectsV2Command({
-				Bucket: this.bucketId,
+				Bucket: this.options.bucketId,
 				Prefix: dirPath,
 			})
 		)
@@ -292,7 +302,7 @@ export class S3BucketClient {
 		const deletePromises = listResult.Contents.map(async (object) =>
 			this.s3Client.send(
 				new DeleteObjectCommand({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Key: object.Key,
 				})
 			)
@@ -304,7 +314,7 @@ export class S3BucketClient {
 		while (continuationToken) {
 			const nextListResult = await this.s3Client.send(
 				new ListObjectsV2Command({
-					Bucket: this.bucketId,
+					Bucket: this.options.bucketId,
 					Prefix: dirPath,
 					ContinuationToken: continuationToken,
 				})
@@ -314,7 +324,7 @@ export class S3BucketClient {
 				const deletePromises = nextListResult.Contents.map(async (object) =>
 					this.s3Client.send(
 						new DeleteObjectCommand({
-							Bucket: this.bucketId,
+							Bucket: this.options.bucketId,
 							Key: object.Key,
 						})
 					)
@@ -352,10 +362,13 @@ export class S3BucketClient {
 	}
 
 	private static sanitizeDirName(fullPath: string) {
-		return fullPath
-			? fullPath.replace(/^\//, '').endsWith('/')
-				? fullPath.replace(/^\//, '')
-				: `${fullPath.replace(/^\//, '')}/`
-			: ''
+		if (!fullPath) return ''
+		else {
+			const fullPathWithoutStartingSlash = fullPath.replace(/^\//, '')
+
+			return fullPathWithoutStartingSlash.endsWith('/')
+				? fullPathWithoutStartingSlash.replace(/^\//, '')
+				: `${fullPathWithoutStartingSlash.replace(/^\//, '')}/`
+		}
 	}
 }

@@ -25,6 +25,80 @@
 				}
 			}
 		},
+		"thumbnails0": {
+			"label": "Thumbnails",
+			"accessors": {
+				"local": {
+					"type": "http_proxy",
+					"label": "http proxy",
+					"baseUrl": "http://localhost:8080/package",
+					"allowRead": true,
+					"allowWrite": true
+				}
+			}
+		},
+		"thumbnails0_local": {
+			"label": "Thumbnails",
+			"accessors": {
+				"local": {
+					"type": "local_folder",
+					"label": "Local",
+					"folderPath": "C:\\temp\\thumbnails",
+					"allowRead": true,
+					"allowWrite": true
+				}
+			}
+		},
+		"http0": {
+			"label": "Local HTTP",
+			"accessors": {
+				"http": {
+					"type": "http",
+					"label": "http",
+					"baseUrl": "http://127.0.0.1:8080",
+					"allowRead": true,
+					"allowWrite": false
+				}
+			}
+		},
+		"core0": {
+			"label": "Core",
+			"accessors": {
+				"packageInfo0": {
+					"type": "core_package_info",
+					"label": "Package Info",
+					"allowRead": true,
+					"allowWrite": true
+				}
+			}
+		},
+		"ftp": {
+			"label": "FTP",
+			"accessors": {
+				"ftp": {
+					"type": "ftp",
+					"label": "FTP",
+					"host": "127.0.0.1",
+					"serverType": "sftp",
+					"allowRead": true,
+					"allowWrite": true,
+					"username": "test",
+					"password": "test"
+				}
+			}
+		},
+		"theinternet": {
+			"label": "HTTP",
+			"accessors": {
+				"http": {
+					"type": "http",
+					"label": "http",
+					"baseUrl": "",
+					"allowRead": true,
+					"allowWrite": false
+				}
+			}
+		},
 		"s3": {
 			"label": "S3",
 			"accessors": {
@@ -42,41 +116,122 @@
 					"forcePathStyle": true
 				}
 			}
-		},
-		"thumbnails0_local": {
-			"label": "Thumbnails",
-			"accessors": {
-				"local": {
-					"type": "local_folder",
-					"label": "Local",
-					"folderPath": "C:\\temp\\thumbnails",
-					"allowRead": true,
-					"allowWrite": true
-				}
-			}
 		}
 	},
 	"expectedPackages": [
 		{
 			"type": "media_file",
 			"_id": "test",
-			"contentVersionHash": "abc12234",
+			"contentVersionHash": "abc1234",
 			"content": {
 				"filePath": "amb.mp4"
 			},
 			"version": {},
 			"sources": [
 				{
-					"containerId": "s3",
+					"containerId": "source0",
 					"accessors": {
 						"local": {
-							"type": "s3",
+							"type": "local_folder",
 							"filePath": "amb.mp4"
 						}
 					}
 				}
 			],
-			"layers": ["target0"]
+			"layers": ["target0"],
+			"sideEffect": {
+				"previewContainerId": null,
+				"previewPackageSettings": null,
+				"thumbnailContainerId": "thumbnails0_local",
+				"thumbnailPackageSettings": {
+					"path": "thumbnail.png"
+				},
+				"loudnessPackageSettings": {
+					"channelSpec": ["0", "0+1"],
+					"inPhaseDifference": true,
+					"balanceDifference": true
+				},
+				"iframes": true
+			}
+		},
+		{
+			"type": "json_data",
+			"_id": "json0",
+			"contentVersionHash": "abc1234",
+			"content": {
+				"path": "test.json"
+			},
+			"version": {},
+			"sources": [
+				{
+					"containerId": "http0",
+					"accessors": {
+						"local": {
+							"type": "http",
+							"isImmutable": true
+						}
+					}
+				}
+			],
+			"layers": ["core0"],
+			"sideEffect": {}
+		},
+		{
+			"type": "html_template",
+			"_id": "test-html",
+			"contentVersionHash": "abc1234",
+			"content": {
+				"path": "https://www.bouncingdvdlogo.com/"
+			},
+			"version": {
+				"renderer": {
+					"width": 1920,
+					"height": 1080,
+					"scale": 0.25,
+					"background": "black"
+				},
+				"steps": [
+					{
+						"do": "waitForLoad"
+					},
+					{
+						"do": "startRecording",
+						"fileName": "bouncingdvdlogo_recording.webm"
+					},
+					{
+						"do": "sleep",
+						"duration": 1000
+					},
+					{
+						"do": "takeScreenshot",
+						"fileName": "bouncingdvdlogo_screenshot.png"
+					},
+					{
+						"do": "sleep",
+						"duration": 2000
+					},
+					{
+						"do": "stopRecording"
+					},
+					{
+						"do": "cropRecording",
+						"fileName": "bouncingdvdlogo_recording-cropped.webm"
+					}
+				]
+			},
+			"sources": [
+				{
+					"containerId": "theinternet",
+					"accessors": {
+						"http": {
+							"type": "http",
+							"url": ""
+						}
+					}
+				}
+			],
+			"layers": ["thumbnails0_local"],
+			"sideEffect": {}
 		}
 	],
 	"settings": {

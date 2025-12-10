@@ -31,7 +31,7 @@ import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAcc
 import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 import { GenericFileHandler } from './lib/GenericFileHandler'
 import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
-import { S3BucketClient } from './lib/S3BucketClient'
+import { S3BucketClient, S3Options } from './lib/S3BucketClient'
 import { Readable } from 'node:stream'
 
 export interface Content {
@@ -40,13 +40,11 @@ export interface Content {
 	filePath: string
 }
 
-type S3Options = Omit<Accessor.S3, 'type' | 'label' | 'allowRead' | 'allowWrite' | 'basePath' | 'networkId'>
-
 /** Accessor handle for accessing files in a s3 bucket */
 export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
 	static readonly type = 's3'
 	private readonly content: Content
-	private readonly workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
+	private readonly workOptions: Expectation.WorkOptions.RemoveDelay
 	private readonly accessor: AccessorOnPackage.S3
 
 	public fileHandler: GenericFileOperationsHandler
@@ -62,8 +60,6 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 
 		if (this.workOptions.removeDelay && typeof this.workOptions.removeDelay !== 'number')
 			throw new Error('Bad input data: workOptions.removeDelay is not a number!')
-		if (this.workOptions.useTemporaryFilePath && typeof this.workOptions.useTemporaryFilePath !== 'boolean')
-			throw new Error('Bad input data: workOptions.useTemporaryFilePath is not a boolean!')
 
 		const fileHandler: GenericFileHandler = {
 			logOperation: this.logOperation.bind(this),
@@ -238,9 +234,7 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
 		const s3 = await this.getS3Client()
 
-		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
-
-		await s3.removeFileIfExists(fullPath)
+		await s3.removeFileIfExists(this.fullPath)
 
 		const abortController = new AbortController()
 
@@ -248,14 +242,14 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 			abortController.abort()
 		})
 
-		const pResponse = s3.writeFile(fullPath, Readable.from(sourceStream), abortController)
+		const pResponse = s3.writeFile(this.fullPath, Readable.from(sourceStream), abortController)
 
 		pResponse
 			.then(() => {
 				streamWrapper.emit('close')
 			})
 			.catch((err) => {
-				const err2 = new Error(`S3 upload threw for path "${fullPath}": ${err}`)
+				const err2 = new Error(`S3 upload threw for path "${this.fullPath}": ${err}`)
 				if (err instanceof Error) err2.stack += `Original stack:\n${err.stack}`
 				streamWrapper.emit('error', err2)
 			})
@@ -277,17 +271,6 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
 		operation.logDone()
-
-		if (this.workOptions.useTemporaryFilePath) {
-			const s3 = await this.getS3Client()
-
-			if (await s3.removeFileIfExists(this.fullPath)) {
-				this.logOperation(`Finalize package: Remove file "${this.fullPath}"`)
-			}
-
-			await s3.renameFile(this.temporaryFilePath, this.fullPath)
-			this.logOperation(`Finalize package: Rename file "${this.temporaryFilePath}" to "${this.fullPath}"`)
-		}
 	}
 
 	// Note: We handle metadata by storing a metadata json-file to the side of the file.
@@ -322,6 +305,7 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 	async updateMetadata(metadata: Metadata): Promise<void> {
 		await this.writeFile(this.metadataPath, JSON.stringify(metadata))
 	}
+
 	async removeMetadata(): Promise<void> {
 		const s3 = await this.getS3Client()
 
@@ -406,102 +390,26 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 		}
 	}
 
+	static readonly clientCacheDuration = 10 * 60 * 1000
+
 	private async getS3Client(): Promise<S3BucketClient> {
-		let client = this.getS3ClientFromCache(
-			this.s3Options.region,
-			this.s3Options.accessKey,
-			this.s3Options.secretAccessKey,
-			this.s3Options.s3PublicBaseUrl,
-			this.s3Options.endpoint,
-			this.s3Options.forcePathStyle
+		return this.worker.cacheData(
+			this.type,
+			S3AccessorHandle.getCacheKeyForS3Client(this.s3Options),
+			() => new S3BucketClient(this.s3Options),
+			S3AccessorHandle.clientCacheDuration
 		)
-
-		if (!client) {
-			client = this.createNewS3Client()
-
-			this.cacheS3Client(
-				client,
-				this.s3Options.region,
-				this.s3Options.accessKey,
-				this.s3Options.secretAccessKey,
-				this.s3Options.s3PublicBaseUrl,
-				this.s3Options.endpoint,
-				this.s3Options.forcePathStyle
-			)
-		}
-
-		return client
 	}
 
-	private getS3ClientFromCache(
-		region: string,
-		accessKey: string,
-		secretAccessKey: string,
-		publicBaseUrl: string,
-		endpoint?: string,
-		forcePathStyle?: boolean
-	): S3BucketClient | undefined {
-		const accessorCache = this.worker.accessorCache as {
-			[accessorType: string]: S3BucketClient | undefined
-		}
-
-		return accessorCache[
-			S3AccessorHandle.getCacheKeyForS3Client(
-				accessKey,
-				secretAccessKey,
-				region,
-				publicBaseUrl,
-				endpoint,
-				forcePathStyle
-			)
-		]
-	}
-
-	private cacheS3Client(
-		client: S3BucketClient,
-		region: string,
-		accessKey: string,
-		secretAccessKey: string,
-		publicBaseUrl: string,
-		endpoint?: string,
-		forcePathStyle?: boolean
-	): void {
-		const accessorCache = this.worker.accessorCache as {
-			[accessorType: string]: S3BucketClient | undefined
-		}
-
-		accessorCache[
-			S3AccessorHandle.getCacheKeyForS3Client(
-				accessKey,
-				secretAccessKey,
-				region,
-				publicBaseUrl,
-				endpoint,
-				forcePathStyle
-			)
-		] = client
-	}
-
-	static getCacheKeyForS3Client(
-		accessKey: string,
-		secretAccessKey: string,
-		region: string,
-		publicBaseUrl: string,
-		endpoint?: string,
-		forcePathStyle?: boolean
-	): string {
-		return JSON.stringify([accessKey, secretAccessKey, region, publicBaseUrl, endpoint, forcePathStyle])
-	}
-
-	private createNewS3Client(): S3BucketClient {
-		return new S3BucketClient(
-			this.s3Options.bucketId,
-			this.s3Options.region,
-			this.s3Options.accessKey,
-			this.s3Options.secretAccessKey,
-			this.s3Options.endpoint,
-			this.s3Options.forcePathStyle
-		)
+	static getCacheKeyForS3Client(options: S3Options): string {
+		return JSON.stringify([
+			options.accessKey,
+			options.secretAccessKey,
+			options.region,
+			options.s3PublicBaseUrl,
+			options.endpoint,
+			options.forcePathStyle,
+		])
 	}
 
 	async unlinkIfExists(fullPath: string): Promise<boolean> {
@@ -577,10 +485,6 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 		return filePath.replace(/\\/g, '/')
 	}
 
-	/** Full path to a temporary file */
-	get temporaryFilePath(): string {
-		return this.fullPath + '.pmtemp'
-	}
 	/** Full path to the metadata file */
 	private get metadataPath() {
 		return this.fullPath + '_metadata.json'
