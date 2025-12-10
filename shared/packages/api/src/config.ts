@@ -414,29 +414,6 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 		}).argv
 	)
 
-	const accessURLs: URLMap = {
-		'*': '',
-	}
-
-	let fallBackURL: string | null = null
-
-	argv.accessURL.split(';').forEach((networkIdAndURLPair: string) => {
-		let [networkId, url] = networkIdAndURLPair.split('@', 2)
-		if (!url) {
-			url = networkId
-			networkId = '*'
-		}
-
-		if (networkId === '*' || !fallBackURL) {
-			fallBackURL = url
-		}
-		accessURLs[networkId] = url
-	})
-
-	if (fallBackURL === null) throw new Error(`Error: At least one accessURL must be specified!`)
-
-	accessURLs['*'] = fallBackURL
-
 	return {
 		process: getProcessConfig(argv),
 		packageManager: {
@@ -447,7 +424,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 			disableWatchdog: argv.disableWatchdog,
 
 			port: argv.port,
-			accessURLs,
+			accessURLs: parseNetworkScopedURLs(argv.accessURL),
 			workforceURL: argv.workforceURL,
 
 			watchFiles: argv.watchFiles,
@@ -688,6 +665,52 @@ function parseArgStringList(str: unknown): string[] {
 
 	return []
 }
+
+/**
+ * Parses a string of networked-scoped URLs into a URLMap - an object with at least a '*' key for the fallback URL.
+ * The string should be in the format network1@schema:host;network2@schema://host;schema:host.public
+ */
+export function parseNetworkScopedURLs(str: unknown): URLMap | null {
+	if (typeof str === 'string' && str.startsWith('"') && str.endsWith('"')) {
+		// the string is escaped
+		try {
+			str = JSON.parse(str)
+		} catch {
+			// ignore parse errors
+		}
+	}
+
+	const accessURLs: URLMap = {
+		'*': '',
+	}
+
+	let fallBackURL: string | null = null
+
+	if (typeof str !== 'string' || str.length === 0) return null
+
+	str.split(';').forEach((networkIdAndURLPair: string) => {
+		let [networkId, url] = networkIdAndURLPair.split('@', 2)
+		if (!url) {
+			url = networkId
+			networkId = '*'
+		}
+
+		if (networkId === '*' || !fallBackURL) {
+			fallBackURL = url
+		}
+		accessURLs[networkId] = url
+	})
+
+	if (fallBackURL === null) {
+		// this will never happen, but for type safety:
+		throw new Error(`Error: At least one accessURL must be specified!`)
+	}
+
+	accessURLs['*'] = fallBackURL
+
+	return accessURLs
+}
+
 /**
  * Parses a string of executable aliases into an object.
  * The string should be in the format alias1=executable1;alias2=executable2

@@ -1,5 +1,5 @@
 import { protectString } from '@sofie-automation/server-core-integration'
-import { ClientConnectionOptions, LoggerInstance } from '@sofie-package-manager/api'
+import { ClientConnectionOptions, LoggerInstance, WorkerConfig } from '@sofie-package-manager/api'
 import { WorkforceAPI } from '../workforceApi'
 import { ExpectationManagerAPI } from '../expectationManagerApi'
 
@@ -70,7 +70,7 @@ describe('WorkerAgent', () => {
 				...o.workerConfig.worker,
 				networkIds: ['net2'],
 			}
-		})
+		} satisfies WorkerConfig)
 		await workerAgent.init()
 
 		expect(WorkforceAPI).toHaveBeenCalledTimes(1)
@@ -90,7 +90,7 @@ describe('WorkerAgent', () => {
 				...o.workerConfig.worker,
 				networkIds: [],
 			},
-		})
+		} satisfies WorkerConfig)
 		await workerAgent.init()
 
 		expect(WorkforceAPI).toHaveBeenCalledTimes(1)
@@ -110,7 +110,7 @@ describe('WorkerAgent', () => {
 				...o.workerConfig.worker,
 				networkIds: ['net-nonexistent'],
 			},
-		})
+		} satisfies WorkerConfig)
 		await workerAgent.init()
 
 		expect(WorkforceAPI).toHaveBeenCalledTimes(1)
@@ -159,8 +159,11 @@ function setup() {
 			resourceId: 'res1',
 			workforceURL: 'ws:workforce.local',
 			sourcePackageStabilityThreshold: 0,
+			executableAliases: {},
+			temporaryFolderPath: undefined,
+			windowsDriveLetters: undefined
 		},
-	}
+	} satisfies WorkerConfig
 
 	const expectationManagerAccessURLs = {
 		net1: 'ws://expectation-manager.net1.local',
