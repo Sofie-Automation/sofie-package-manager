@@ -8,6 +8,7 @@ import {
 	PackageContainerExpectation,
 	ExpectationManagerId,
 	AppId,
+	URLMap,
 } from '@sofie-package-manager/api'
 
 /**
@@ -23,9 +24,9 @@ export class WorkforceAPI
 		super(logger.category('WorkforceAPI'), id, 'expectationManager')
 	}
 
-	async registerExpectationManager(managerId: ExpectationManagerId, url: string): Promise<void> {
+	async registerExpectationManager(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
 		// Note: This call is ultimately received in shared/packages/workforce/src/workforce.ts
-		return this._sendMessage('registerExpectationManager', managerId, url)
+		return this._sendMessage('registerExpectationManager', managerId, urls)
 	}
 	async getStatusReport(): Promise<WorkforceStatusReport> {
 		// Note: This call is ultimately received in shared/packages/workforce/src/workforce.ts

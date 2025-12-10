@@ -44,6 +44,10 @@ export interface MethodsInterfaceBase {
 	id: PartyId
 }
 
+/** A list of URLs which can be used to access the same resource from different networks. The key is a `networkId` string.
+ * The value under the `*` key is a fallback URL that can be used if no other suitable URLs are found. */
+export type URLMap = { '*': string; [id: string]: string }
+
 /** Methods used by ExpectationManager and WorkForce */
 export namespace WorkForceExpectationManager {
 	/** Methods on WorkForce, called by ExpectationManager */
@@ -58,7 +62,7 @@ export namespace WorkForceExpectationManager {
 		requestResourcesForExpectation: (exp: Expectation.Any) => Promise<boolean>
 		requestResourcesForPackageContainer: (packageContainer: PackageContainerExpectation) => Promise<boolean>
 
-		registerExpectationManager: (managerId: ExpectationManagerId, url: string) => Promise<void>
+		registerExpectationManager: (managerId: ExpectationManagerId, urls: URLMap) => Promise<void>
 	}
 	/** Methods on ExpectationManager, called by WorkForce */
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -82,13 +86,13 @@ export namespace WorkForceWorkerAgent {
 		_debugSendKillConnections: () => Promise<void>
 		getStatusReport: () => Promise<WorkerStatusReport>
 
-		expectationManagerAvailable: (id: ExpectationManagerId, url: string) => Promise<void>
+		expectationManagerAvailable: (id: ExpectationManagerId, urls: URLMap) => Promise<void>
 		expectationManagerGone: (id: ExpectationManagerId) => Promise<void>
 	}
 	/** Methods on WorkForce, called by WorkerAgent */
 	export interface WorkForce extends MethodsInterfaceBase {
 		id: WorkerAgentId
-		getExpectationManagerList: () => Promise<{ id: ExpectationManagerId; url: string }[]>
+		getExpectationManagerList: () => Promise<{ id: ExpectationManagerId; urls: URLMap }[]>
 	}
 }
 

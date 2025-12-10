@@ -24,6 +24,8 @@ import {
 	AppType,
 	AppId,
 	AnyProtectedString,
+	URLMap,
+	deepEqual,
 } from '@sofie-package-manager/api'
 import { AppContainerAPI } from './appContainerApi'
 import { ExpectationManagerAPI } from './expectationManagerApi'
@@ -48,7 +50,7 @@ export class Workforce {
 		ExpectationManagerId,
 		{
 			api: ExpectationManagerAPI
-			url?: string
+			urls?: URLMap
 		}
 	> = new Map()
 	public appContainers: Map<
@@ -262,14 +264,14 @@ export class Workforce {
 		return {
 			id: clientId,
 
-			getExpectationManagerList: async (): Promise<{ id: ExpectationManagerId; url: string }[]> => {
-				const list: { id: ExpectationManagerId; url: string }[] = []
+			getExpectationManagerList: async (): Promise<{ id: ExpectationManagerId; urls: URLMap }[]> => {
+				const list: { id: ExpectationManagerId; urls: URLMap }[] = []
 
 				for (const [id, entry] of this.expectationManagers.entries()) {
-					if (entry.url) {
+					if (entry.urls) {
 						list.push({
 							id: id,
-							url: entry.url,
+							urls: entry.urls,
 						})
 					}
 				}
@@ -288,8 +290,8 @@ export class Workforce {
 			setLogLevelOfApp: async (appId: AnyProtectedString, logLevel: LogLevel): Promise<void> => {
 				return this.setLogLevelOfApp(appId, logLevel)
 			},
-			registerExpectationManager: async (managerId: ExpectationManagerId, url: string): Promise<void> => {
-				await this.registerExpectationManager(managerId, url)
+			registerExpectationManager: async (managerId: ExpectationManagerId, urls: URLMap): Promise<void> => {
+				await this.registerExpectationManager(managerId, urls)
 			},
 			requestResourcesForExpectation: async (exp: Expectation.Any): Promise<boolean> => {
 				return this.requestResourcesForExpectation(exp)
@@ -328,23 +330,23 @@ export class Workforce {
 		}, 1)
 	}
 
-	public async registerExpectationManager(managerId: ExpectationManagerId, url: string): Promise<void> {
+	public async registerExpectationManager(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
 		let em = this.expectationManagers.get(managerId)
-		if (!em || em.url !== url) {
+		if (!em || deepEqual(em.urls, urls)) {
 			// Added/Changed
 
-			this.logger.info(`Workforce: Register ExpectationManager (${managerId}) at url "${url}"`)
+			this.logger.info(`Workforce: Register ExpectationManager (${managerId}) at URLs: ${JSON.stringify(urls)}`)
 
 			// Announce the new expectation manager to the workerAgents:
 			for (const workerAgent of this.workerAgents.values()) {
-				await workerAgent.api.expectationManagerAvailable(managerId, url)
+				await workerAgent.api.expectationManagerAvailable(managerId, urls)
 			}
 			em = this.expectationManagers.get(managerId)
 		}
 		if (!em) {
 			throw new Error(`Internal Error: (registerExpectationManager) ExpectationManager "${managerId}" not found!`)
 		}
-		em.url = url
+		em.urls = urls
 	}
 	public async requestResourcesForExpectation(exp: Expectation.Any): Promise<boolean> {
 		return this.workerHandler.requestResourcesForExpectation(exp)
@@ -360,7 +362,7 @@ export class Workforce {
 			expectationManagers: mapEntries(this.expectationManagers, (id, expMan) => {
 				return {
 					id: id,
-					url: expMan.url,
+					urls: expMan.urls,
 				}
 			}),
 			appContainers: mapEntries(this.appContainers, (id, appContainer) => {

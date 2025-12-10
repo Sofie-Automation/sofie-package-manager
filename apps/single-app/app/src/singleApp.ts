@@ -13,7 +13,9 @@ export async function startSingleApp(): Promise<void> {
 
 	// Override some of the arguments, as they arent used in the single-app
 	config.packageManager.port = 0 // 0 = Set the packageManager port to whatever is available
-	config.packageManager.accessUrl = 'ws:127.0.0.1'
+	config.packageManager.accessURLs = {
+		'*': 'ws:127.0.0.1',
+	}
 	config.packageManager.workforceURL = null // Filled in later
 
 	// Override some of the other arguments, and use the single-app specific ones instead:

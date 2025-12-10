@@ -6,6 +6,7 @@ import { AppContainerConfig } from './appContainer'
 import { protectString } from './ProtectedString'
 import { AppContainerId, WorkerAgentId } from './ids'
 import { countOccurrences } from './lib'
+import { URLMap } from './methods'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -100,10 +101,11 @@ const packageManagerArguments = defineArguments({
 		default: parseInt(process.env.PACKAGE_MANAGER_PORT || '', 10) || 8060,
 		describe: 'The port number to start the Package Manager websocket server on',
 	},
-	accessUrl: {
+	accessURL: {
 		type: 'string',
 		default: process.env.PACKAGE_MANAGER_URL || 'ws://localhost:8060',
-		describe: 'The URL where Package Manager websocket server can be accessed',
+		describe:
+			'A list of URLs where Package Manager websocket server can be accessed and the respective networkIds where they should be used. No networkId or a `*` means a catch-all public URL. ("networkA@ws://10.0.0.1;networkB@ws://192.168.0.1;ws://public.com")',
 	},
 	workforceURL: {
 		type: 'string',
@@ -395,7 +397,7 @@ export interface PackageManagerConfig {
 		disableWatchdog: boolean
 
 		port: number | null
-		accessUrl: string | null
+		accessURLs: URLMap | null
 		workforceURL: string | null
 
 		watchFiles: boolean
@@ -422,7 +424,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 			disableWatchdog: argv.disableWatchdog,
 
 			port: argv.port,
-			accessUrl: argv.accessUrl,
+			accessURLs: parseNetworkScopedURLs(argv.accessURL),
 			workforceURL: argv.workforceURL,
 
 			watchFiles: argv.watchFiles,
@@ -663,6 +665,52 @@ function parseArgStringList(str: unknown): string[] {
 
 	return []
 }
+
+/**
+ * Parses a string of networked-scoped URLs into a URLMap - an object with at least a '*' key for the fallback URL.
+ * The string should be in the format network1@schema:host;network2@schema://host;schema:host.public
+ */
+export function parseNetworkScopedURLs(str: unknown): URLMap | null {
+	if (typeof str === 'string' && str.startsWith('"') && str.endsWith('"')) {
+		// the string is escaped
+		try {
+			str = JSON.parse(str)
+		} catch {
+			// ignore parse errors
+		}
+	}
+
+	const accessURLs: URLMap = {
+		'*': '',
+	}
+
+	let fallBackURL: string | null = null
+
+	if (typeof str !== 'string' || str.length === 0) return null
+
+	str.split(';').forEach((networkIdAndURLPair: string) => {
+		let [networkId, url] = networkIdAndURLPair.split('@', 2)
+		if (!url) {
+			url = networkId
+			networkId = '*'
+		}
+
+		if (networkId === '*' || !fallBackURL) {
+			fallBackURL = url
+		}
+		accessURLs[networkId] = url
+	})
+
+	if (fallBackURL === null) {
+		// this will never happen, but for type safety:
+		throw new Error(`Error: At least one accessURL must be specified!`)
+	}
+
+	accessURLs['*'] = fallBackURL
+
+	return accessURLs
+}
+
 /**
  * Parses a string of executable aliases into an object.
  * The string should be in the format alias1=executable1;alias2=executable2

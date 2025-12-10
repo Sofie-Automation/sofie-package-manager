@@ -22,7 +22,7 @@ export async function startProcess(
 	if (config.packageManager.disableWatchdog) logger.info('Watchdog is disabled!')
 	if (startInInternalMode) {
 		config.packageManager.port = null
-		config.packageManager.accessUrl = null
+		config.packageManager.accessURLs = null
 		config.packageManager.workforceURL = null
 	}
 

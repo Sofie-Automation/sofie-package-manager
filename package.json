@@ -17,7 +17,7 @@
 		"setup": "lerna bootstrap",
 		"reset": "node scripts/reset.js",
 		"build": "lerna run build --stream",
-		"build:changed": "lerna run build --since head --exclude-dependents --stream",
+		"build:changed": "lerna run build --since HEAD --exclude-dependents --stream",
 		"lint": "lerna exec --parallel --no-bail -- run -T eslint . --ext .ts,.tsx",
 		"lintfix": "yarn lint --fix",
 		"lint:changed": "lerna exec --since origin/main --include-dependents -- eslint . --ext .js,.jsx,.ts,.tsx",

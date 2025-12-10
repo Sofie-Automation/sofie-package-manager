@@ -39,6 +39,8 @@ import {
 	Cost,
 	assertNever,
 	KnownReason,
+	URLMap,
+	deepEqual,
 } from '@sofie-package-manager/api'
 
 import { AppContainerAPI } from './appContainerApi'
@@ -69,7 +71,7 @@ export class WorkerAgent {
 	private expectationManagers: Map<
 		ExpectationManagerId,
 		{
-			url: string
+			urls: URLMap
 			api: ExpectationManagerAPI
 		}
 	> = new Map()
@@ -266,8 +268,8 @@ export class WorkerAgent {
 			_debugSendKillConnections: async () => this._debugSendKillConnections(),
 			getStatusReport: async () => this.getStatusReport(),
 
-			expectationManagerAvailable: async (id: ExpectationManagerId, url: string) =>
-				this.expectationManagerAvailable(id, url),
+			expectationManagerAvailable: async (id: ExpectationManagerId, urls: URLMap) =>
+				this.expectationManagerAvailable(id, urls),
 			expectationManagerGone: async (id: ExpectationManagerId) => this.expectationManagerGone(id),
 		})
 		// Wait for this.workforceAPI to be ready before continuing:
@@ -347,13 +349,13 @@ export class WorkerAgent {
 	): Promise<ReturnTypeDoYouSupportExpectation> {
 		return this._worker.doYouSupportPackageContainer(packageContainer)
 	}
-	private async expectationManagerAvailable(managerId: ExpectationManagerId, url: string): Promise<void> {
+	private async expectationManagerAvailable(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
 		const existing = this.expectationManagers.get(managerId)
 		if (existing) {
 			existing.api.terminate()
 		}
 
-		await this.connectToExpectationManager(managerId, url)
+		await this.connectToExpectationManager(managerId, urls)
 	}
 	private async expectationManagerGone(managerId: ExpectationManagerId): Promise<void> {
 		this.expectationManagers.delete(managerId)
@@ -624,10 +626,10 @@ export class WorkerAgent {
 		return workInProgress
 	}
 
-	private async connectToExpectationManager(managerId: ExpectationManagerId, url: string): Promise<void> {
-		this.logger.info(`Worker: Connecting to Expectation Manager "${managerId}" at url "${url}"`)
+	private async connectToExpectationManager(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
+		this.logger.info(`Worker: Connecting to Expectation Manager "${managerId}"...`)
 		const expectationManager = {
-			url: url,
+			urls: urls,
 			api: new ExpectationManagerAPI(this.id, this.logger),
 		}
 		expectationManager.api.on('disconnected', () => {
@@ -845,6 +847,10 @@ export class WorkerAgent {
 				}
 			}) as any
 		}
+
+		const url = this.findMatchingURL(urls)
+		this.logger.info(`Worker: Connecting to Expectation Manager "${managerId}", selected URL "${url}"...`)
+
 		// Connect to the ExpectationManager:
 		if (url === '__internal') {
 			// This is used for an internal connection:
@@ -857,21 +863,43 @@ export class WorkerAgent {
 			expectationManager.api.hook(managerHookHook)
 		}
 
-		const connectionOptions: ClientConnectionOptions =
-			url === '__internal' ? { type: 'internal' } : { type: 'websocket', url: expectationManager.url }
+		let connectionOptions: ClientConnectionOptions
 
+		if (url === '__internal') {
+			connectionOptions = { type: 'internal' }
+		} else {
+			connectionOptions = {
+				type: 'websocket',
+				url,
+			}
+		}
 		await expectationManager.api.init(connectionOptions, methods)
 	}
 
-	private async updateListOfExpectationManagers(newExpectationManagers: { id: ExpectationManagerId; url: string }[]) {
+	private findMatchingURL(urls: URLMap): string {
+		const networkIds = this.config.worker.networkIds || []
+
+		for (const networkId of networkIds) {
+			const url = urls[networkId]
+			if (url) return url
+		}
+
+		// Fallback to 'default' URL:
+		const defaultUrl = urls['*']
+		return defaultUrl
+	}
+
+	private async updateListOfExpectationManagers(
+		newExpectationManagers: { id: ExpectationManagerId; urls: URLMap }[]
+	) {
 		const ids = new Set<ExpectationManagerId>()
 		for (const newEm of newExpectationManagers) {
 			ids.add(newEm.id)
 
 			const em = this.expectationManagers.get(newEm.id)
-			if (!em || em.url !== newEm.url) {
+			if (!em || !deepEqual(em.urls, newEm.urls)) {
 				// added or changed
-				await this.expectationManagerAvailable(newEm.id, newEm.url)
+				await this.expectationManagerAvailable(newEm.id, newEm.urls)
 			}
 		}
 		// Removed

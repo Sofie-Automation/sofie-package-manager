@@ -2,6 +2,7 @@ import {
 	AdapterClient,
 	ExpectationManagerId,
 	LoggerInstance,
+	URLMap,
 	WorkForceWorkerAgent,
 	WorkerAgentId,
 } from '@sofie-package-manager/api'
@@ -18,7 +19,7 @@ export class WorkforceAPI
 	constructor(public id: WorkerAgentId, logger: LoggerInstance) {
 		super(logger.category('WorkforceAPI'), id, 'workerAgent')
 	}
-	async getExpectationManagerList(): Promise<{ id: ExpectationManagerId; url: string }[]> {
+	async getExpectationManagerList(): Promise<{ id: ExpectationManagerId; urls: URLMap }[]> {
 		return this._sendMessage('getExpectationManagerList', undefined)
 	}
 }

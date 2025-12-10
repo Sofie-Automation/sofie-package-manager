@@ -64,6 +64,7 @@ import {
 	objectKeys,
 	objectValues,
 	mapToObject,
+	URLMap,
 } from '@sofie-package-manager/api'
 import deepExtend from 'deep-extend'
 import clone = require('fast-clone')
@@ -113,7 +114,7 @@ export class PackageManagerHandler {
 		logger: LoggerInstance,
 		private managerId: ExpectationManagerId,
 		private serverOptions: ExpectationManagerServerOptions,
-		private serverAccessUrl: string | undefined,
+		private readonly serverAccessUrls: URLMap | undefined,
 		private workForceConnectionOptions: ClientConnectionOptions,
 		concurrency: number | undefined,
 		chaosMonkey: boolean
@@ -125,7 +126,7 @@ export class PackageManagerHandler {
 			this.logger,
 			this.managerId,
 			this.serverOptions,
-			this.serverAccessUrl,
+			this.serverAccessUrls,
 			this.workForceConnectionOptions,
 			this.callbacksHandler,
 			{
