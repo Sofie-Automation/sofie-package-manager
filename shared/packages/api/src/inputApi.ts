@@ -592,6 +592,15 @@ export namespace Accessor {
 
 		/** AWS region of the bucket */
 		region: string
+
+		/** Base URL for the S3 bucket */
+		s3PublicBaseUrl: string
+
+		/** S3 endpoint (obligatory for non-AWS S3 deployments) */
+		endpoint?: string
+
+		/** If true, forces path-style URLs (required for some S3-compatible storage solutions) */
+		forcePathStyle?: boolean
 	}
 }
 /**

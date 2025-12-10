@@ -40,7 +40,7 @@ export interface Content {
 	filePath: string
 }
 
-type S3Options = Omit<Required<Accessor.S3>, 'type' | 'label' | 'allowRead' | 'allowWrite' | 'basePath' | 'networkId'>
+type S3Options = Omit<Accessor.S3, 'type' | 'label' | 'allowRead' | 'allowWrite' | 'basePath' | 'networkId'>
 
 /** Accessor handle for accessing files in a s3 bucket */
 export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> {
@@ -385,17 +385,24 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 		const secretAccessKey = this.accessor.secretAccessKey
 		const bucketId = this.accessor.bucketId
 		const region = this.accessor.region
+		const s3PublicBaseUrl = this.accessor.s3PublicBaseUrl
+		const endpoint = this.accessor.endpoint
+		const forcePathStyle = this.accessor.forcePathStyle
 
 		if (accessKey === undefined) throw new Error('S3AccessorHandle: accessKey is not set!')
 		if (secretAccessKey === undefined) throw new Error('S3AccessorHandle: secretAccessKey is not set!')
 		if (bucketId === undefined) throw new Error('S3AccessorHandle: bucketId is not set!')
 		if (region === undefined) throw new Error('S3AccessorHandle: region is not set!')
+		if (s3PublicBaseUrl === undefined) throw new Error('S3AccessorHandle: s3PublicBaseUrl is not set!')
 
 		return {
 			accessKey,
 			secretAccessKey,
 			bucketId,
 			region,
+			s3PublicBaseUrl,
+			endpoint,
+			forcePathStyle,
 		}
 	}
 
@@ -403,13 +410,24 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 		let client = this.getS3ClientFromCache(
 			this.s3Options.region,
 			this.s3Options.accessKey,
-			this.s3Options.secretAccessKey
+			this.s3Options.secretAccessKey,
+			this.s3Options.s3PublicBaseUrl,
+			this.s3Options.endpoint,
+			this.s3Options.forcePathStyle
 		)
 
 		if (!client) {
 			client = this.createNewS3Client()
 
-			this.cacheS3Client(this.s3Options.region, this.s3Options.accessKey, this.s3Options.secretAccessKey, client)
+			this.cacheS3Client(
+				client,
+				this.s3Options.region,
+				this.s3Options.accessKey,
+				this.s3Options.secretAccessKey,
+				this.s3Options.s3PublicBaseUrl,
+				this.s3Options.endpoint,
+				this.s3Options.forcePathStyle
+			)
 		}
 
 		return client
@@ -418,25 +436,61 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 	private getS3ClientFromCache(
 		region: string,
 		accessKey: string,
-		secretAccessKey: string
+		secretAccessKey: string,
+		publicBaseUrl: string,
+		endpoint?: string,
+		forcePathStyle?: boolean
 	): S3BucketClient | undefined {
 		const accessorCache = this.worker.accessorCache as {
 			[accessorType: string]: S3BucketClient | undefined
 		}
 
-		return accessorCache[S3AccessorHandle.getCacheKeyForS3Client(accessKey, secretAccessKey, region)]
+		return accessorCache[
+			S3AccessorHandle.getCacheKeyForS3Client(
+				accessKey,
+				secretAccessKey,
+				region,
+				publicBaseUrl,
+				endpoint,
+				forcePathStyle
+			)
+		]
 	}
 
-	private cacheS3Client(region: string, accessKey: string, secretAccessKey: string, client: S3BucketClient): void {
+	private cacheS3Client(
+		client: S3BucketClient,
+		region: string,
+		accessKey: string,
+		secretAccessKey: string,
+		publicBaseUrl: string,
+		endpoint?: string,
+		forcePathStyle?: boolean
+	): void {
 		const accessorCache = this.worker.accessorCache as {
 			[accessorType: string]: S3BucketClient | undefined
 		}
 
-		accessorCache[S3AccessorHandle.getCacheKeyForS3Client(accessKey, secretAccessKey, region)] = client
+		accessorCache[
+			S3AccessorHandle.getCacheKeyForS3Client(
+				accessKey,
+				secretAccessKey,
+				region,
+				publicBaseUrl,
+				endpoint,
+				forcePathStyle
+			)
+		] = client
 	}
 
-	static getCacheKeyForS3Client(accessKey: string, secretAccessKey: string, region: string): string {
-		return JSON.stringify([accessKey, secretAccessKey, region])
+	static getCacheKeyForS3Client(
+		accessKey: string,
+		secretAccessKey: string,
+		region: string,
+		publicBaseUrl: string,
+		endpoint?: string,
+		forcePathStyle?: boolean
+	): string {
+		return JSON.stringify([accessKey, secretAccessKey, region, publicBaseUrl, endpoint, forcePathStyle])
 	}
 
 	private createNewS3Client(): S3BucketClient {
@@ -444,7 +498,9 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 			this.s3Options.bucketId,
 			this.s3Options.region,
 			this.s3Options.accessKey,
-			this.s3Options.secretAccessKey
+			this.s3Options.secretAccessKey,
+			this.s3Options.endpoint,
+			this.s3Options.forcePathStyle
 		)
 	}
 
@@ -546,11 +602,7 @@ export class S3AccessorHandle<Metadata> extends GenericAccessorHandle<Metadata> 
 		return fullUrl + '_metadata.json'
 	}
 
-	get s3PublicBaseUrl(): string {
-		return `https://${this.accessor.bucketId}.s3-${this.accessor.region}.amazonaws.com/`
-	}
-
 	getFullS3PublicUrl(): string {
-		return this.s3PublicBaseUrl + this.fullPath
+		return this.accessor.s3PublicBaseUrl + this.fullPath
 	}
 }

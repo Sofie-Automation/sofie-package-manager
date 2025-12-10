@@ -35,10 +35,14 @@ export class S3BucketClient {
 		private readonly bucketId: string,
 		private readonly region: string,
 		private readonly accessKey: string,
-		private readonly secretAccessKey: string
+		private readonly secretAccessKey: string,
+		private readonly endpoint?: string,
+		private readonly forcePathStyle: boolean = false
 	) {
 		this.s3Client = new S3Client({
+			forcePathStyle: this.forcePathStyle,
 			region: this.region,
+			endpoint: this.endpoint,
 			credentials: {
 				accessKeyId: this.accessKey,
 				secretAccessKey: this.secretAccessKey,

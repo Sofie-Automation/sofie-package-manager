@@ -1,231 +1,85 @@
 {
-    "description": "This file is intended for debugging use. By passing the argument --watchFiles=true, the application will monitor this file as a second source of packages, so we can fiddle without going through Core",
-    "packageContainers": {
-        "source0": {
-            "label": "Source 0",
-            "accessors": {
-                "local": {
-                    "type": "local_folder",
-                    "label": "Local",
-                    "folderPath": "C:\\temp\\source0",
-                    "allowRead": true,
-                    "allowWrite": false
-                }
-            }
-        },
-        "target0": {
-            "label": "Target 0",
-            "accessors": {
-                "local": {
-                    "type": "local_folder",
-                    "label": "Local",
-                    "folderPath": "C:\\temp\\target0",
-                    "allowRead": true,
-                    "allowWrite": true
-                }
-            }
-        },
-        "thumbnails0": {
-            "label": "Thumbnails",
-            "accessors": {
-                "local": {
-                    "type": "http_proxy",
-                    "label": "http proxy",
-                    "baseUrl": "http://localhost:8080/package",
-                    "allowRead": true,
-                    "allowWrite": true
-                }
-            }
-        },
-        "thumbnails0_local": {
-            "label": "Thumbnails",
-            "accessors": {
-                "local": {
-                    "type": "local_folder",
-                    "label": "Local",
-                    "folderPath": "C:\\temp\\thumbnails",
-                    "allowRead": true,
-                    "allowWrite": true
-                }
-            }
-        },
-        "http0": {
-            "label": "Local HTTP",
-            "accessors": {
-                "http": {
-                    "type": "http",
-                    "label": "http",
-                    "baseUrl": "http://127.0.0.1:8080",
-                    "allowRead": true,
-                    "allowWrite": false
-                }
-            }
-        },
-        "core0": {
-            "label": "Core",
-            "accessors": {
-                "packageInfo0": {
-                    "type": "core_package_info",
-                    "label": "Package Info",
-                    "allowRead": true,
-                    "allowWrite": true
-                }
-            }
-        },
-        "ftp": {
-            "label": "FTP",
-            "accessors": {
-                "ftp": {
-                    "type": "ftp",
-                    "label": "FTP",
-                    "host": "127.0.0.1",
-                    "serverType": "sftp",
-                    "allowRead": true,
-                    "allowWrite": true,
-                    "username": "test",
-                    "password": "test"
-                }
-            }
-        },
-        "theinternet": {
-            "label": "HTTP",
-            "accessors": {
-                "http": {
-                    "type": "http",
-                    "label": "http",
-                    "baseUrl": "",
-                    "allowRead": true,
-                    "allowWrite": false
-                }
-            }
-        }
-    },
-    "expectedPackages": [
-        {
-            "type": "media_file",
-            "_id": "test",
-            "contentVersionHash": "abc1234",
-            "content": {
-                "filePath": "amb.mp4"
-            },
-            "version": {},
-            "sources": [
-                {
-                    "containerId": "source0",
-                    "accessors": {
-                        "local": {
-                            "type": "local_folder",
-                            "filePath": "amb.mp4"
-                        }
-                    }
-                }
-            ],
-            "layers": [
-                "target0"
-            ],
-            "sideEffect": {
-                "previewContainerId": null,
-                "previewPackageSettings": null,
-                "thumbnailContainerId": "thumbnails0_local",
-                "thumbnailPackageSettings": {
-                    "path": "thumbnail.png"
-                },
-                "loudnessPackageSettings": {
-                    "channelSpec": [
-                        "0",
-                        "0+1"
-                    ],
-                    "inPhaseDifference": true,
-                    "balanceDifference": true
-                },
-                "iframes": true
-            }
-        },
-        {
-            "type": "json_data",
-            "_id": "json0",
-            "contentVersionHash": "abc1234",
-            "content": {
-                "path": "test.json"
-            },
-            "version": {},
-            "sources": [
-                {
-                    "containerId": "http0",
-                    "accessors": {
-                        "local": {
-                            "type": "http",
-                            "isImmutable": true
-                        }
-                    }
-                }
-            ],
-            "layers": [
-                "core0"
-            ],
-            "sideEffect": {}
-        },
-        {
-            "type": "html_template",
-            "_id": "test-html",
-            "contentVersionHash": "abc1234",
-            "content": {
-                "path": "https://www.bouncingdvdlogo.com/"
-            },
-            "version": {
-                "renderer": {
-                    "width": 1920,
-                    "height": 1080,
-                    "scale": 0.25,
-                    "background": "black"
-                },
-                "steps": [
-                    {
-                        "do": "waitForLoad"
-                    },
-                    {
-                        "do": "startRecording",
-                        "fileName": "bouncingdvdlogo_recording.webm"
-                    },
-                    {
-                        "do": "sleep",
-                        "duration": 1000
-                    },
-                    {
-                        "do": "takeScreenshot",
-                        "fileName": "bouncingdvdlogo_screenshot.png"
-                    },
-                    {
-                        "do": "sleep",
-                        "duration": 2000
-                    },
-                    {
-                        "do": "stopRecording"
-                    },
-                    {
-                        "do": "cropRecording",
-                        "fileName": "bouncingdvdlogo_recording-cropped.webm"
-                    }
-                ]
-            },
-            "sources": [
-                {
-                    "containerId": "theinternet",
-                    "accessors": {
-                        "http": {
-                            "type": "http",
-                            "url": ""
-                        }
-                    }
-                }
-            ],
-            "layers": [
-                "thumbnails0_local"
-            ],
-            "sideEffect": {}
-        }
-    ],
-    "settings": {
-        "delayRemoval": 5000
-    }
+	"description": "This file is intended for debugging use. By passing the argument --watchFiles=true, the application will monitor this file as a second source of packages, so we can fiddle without going through Core",
+	"packageContainers": {
+		"source0": {
+			"label": "Source 0",
+			"accessors": {
+				"local": {
+					"type": "local_folder",
+					"label": "Local",
+					"folderPath": "C:\\temp\\source0",
+					"allowRead": true,
+					"allowWrite": false
+				}
+			}
+		},
+		"target0": {
+			"label": "Target 0",
+			"accessors": {
+				"local": {
+					"type": "local_folder",
+					"label": "Local",
+					"folderPath": "C:\\temp\\target0",
+					"allowRead": true,
+					"allowWrite": true
+				}
+			}
+		},
+		"s3": {
+			"label": "S3",
+			"accessors": {
+				"s3": {
+					"type": "s3",
+					"label": "S3",
+					"region": "auto",
+					"bucketId": "test",
+					"accessKey": "minioadmin",
+					"secretAccessKey": "minioadmin",
+					"allowRead": true,
+					"allowWrite": true,
+					"s3PublicBaseUrl": "http://localhost:9000/test",
+					"endpoint": "http://localhost:9000",
+					"forcePathStyle": true
+				}
+			}
+		},
+		"thumbnails0_local": {
+			"label": "Thumbnails",
+			"accessors": {
+				"local": {
+					"type": "local_folder",
+					"label": "Local",
+					"folderPath": "C:\\temp\\thumbnails",
+					"allowRead": true,
+					"allowWrite": true
+				}
+			}
+		}
+	},
+	"expectedPackages": [
+		{
+			"type": "media_file",
+			"_id": "test",
+			"contentVersionHash": "abc12234",
+			"content": {
+				"filePath": "amb.mp4"
+			},
+			"version": {},
+			"sources": [
+				{
+					"containerId": "s3",
+					"accessors": {
+						"local": {
+							"type": "s3",
+							"filePath": "amb.mp4"
+						}
+					}
+				}
+			],
+			"layers": ["target0"]
+		}
+	],
+	"settings": {
+		"delayRemoval": 5000
+	}
 }
