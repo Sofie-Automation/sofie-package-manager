@@ -32,7 +32,6 @@ import {
 	betterPathResolve,
 	betterPathIsAbsolute,
 	isRunningInTest,
-	resolveFileWithoutExtension,
 } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
 import { GenericWorker } from '../workers/genericWorker/genericWorker'
@@ -75,7 +74,6 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	private content: Content
 	protected workOptions: Expectation.WorkOptions.RemoveDelay & Expectation.WorkOptions.UseTemporaryFilePath
 	private accessor: AccessorOnPackage.FileShare
-	private _resolvedFullPath: string | undefined
 
 	constructor(arg: AccessorConstructorProps<AccessorOnPackage.FileShare>) {
 		super({
@@ -113,40 +111,6 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	/** Full path to the package */
 	get fullPath(): string {
 		return this.getFullPath(this.filePath)
-	}
-	/**
-	 * Get the resolved full path to the package.
-	 * If matchFilenamesWithoutExtension is enabled, this will resolve the path to include the file extension.
-	 * For FFmpeg/FFprobe operations, use this instead of fullPath.
-	 * The result is memoized after the first call.
-	 */
-	async getResolvedFullPath(): Promise<string> {
-		if (this._resolvedFullPath !== undefined) {
-			return this._resolvedFullPath
-		}
-
-		const fullPath = this.fullPath
-
-		// If matchFilenamesWithoutExtension is disabled, just return the fullPath
-		if (!this.worker.agentAPI.config.matchFilenamesWithoutExtension) {
-			this._resolvedFullPath = fullPath
-			return this._resolvedFullPath
-		}
-
-		// Resolve the file with any extension
-		const resolution = await resolveFileWithoutExtension(fullPath)
-
-		switch (resolution.result) {
-			case 'found':
-				this._resolvedFullPath = resolution.fullPath
-				return this._resolvedFullPath
-			case 'multiple':
-				throw new Error(`Multiple files found matching "${fullPath}": ${resolution.matches.join(', ')}`)
-			case 'notFound':
-				throw new Error(`File not found: "${fullPath}"`)
-			case 'error':
-				throw new Error(`Error resolving file "${fullPath}": ${stringifyError(resolution.error, true)}`)
-		}
 	}
 	static doYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
 		if (!isFileShareSupportedOnCurrentPlatform()) return false
