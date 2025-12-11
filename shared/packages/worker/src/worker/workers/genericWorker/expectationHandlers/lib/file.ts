@@ -9,7 +9,6 @@ import {
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	startTimer,
-	resolveFileWithoutExtension,
 } from '@sofie-package-manager/api'
 import {
 	isATEMAccessorHandle,
@@ -208,26 +207,17 @@ export async function doFileCopyExpectation(
 				lookupSource.handle
 			)
 
-			let sourcePath: string
+			// Use getResolvedFullPath() which handles extension resolution and caching
+			const sourcePath = await sourceHandle.getResolvedFullPath()
+
+			// For target path, append extension if it was resolved
 			let targetPath: string
 			if (worker.agentAPI.config.matchFilenamesWithoutExtension) {
-				const resolved = await resolveFileWithoutExtension(sourceHandle.fullPath)
-				switch (resolved.result) {
-					case 'found':
-						sourcePath = resolved.fullPath
-						targetPath = exp.workOptions.useTemporaryFilePath
-							? targetHandle.temporaryFilePath
-							: targetHandle.fullPath + resolved.extension
-						break
-					case 'notFound':
-						throw new Error(`File not found: "${sourceHandle.fullPath}"`)
-					case 'multiple':
-						throw new Error(`Multiple files found matching: "${sourceHandle.fullPath}"`)
-					case 'error':
-						throw resolved.error
-				}
+				const sourceExtension = sourcePath.slice(sourceHandle.fullPath.length)
+				targetPath = exp.workOptions.useTemporaryFilePath
+					? targetHandle.temporaryFilePath
+					: targetHandle.fullPath + sourceExtension
 			} else {
-				sourcePath = sourceHandle.fullPath
 				targetPath = exp.workOptions.useTemporaryFilePath
 					? targetHandle.temporaryFilePath
 					: targetHandle.fullPath
