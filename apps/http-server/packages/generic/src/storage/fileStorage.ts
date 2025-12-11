@@ -114,7 +114,13 @@ export class FileStorage extends Storage {
 					fullPath = resolution.fullPath
 					break
 				case 'multiple':
-					return { found: false, code: 409, reason: 'Multiple files found' }
+					return {
+						found: false,
+						code: 409,
+						reason: `Multiple files found: ${resolution.matches.join(
+							', '
+						)}. Please specify the exact filename including extension.`,
+					}
 				case 'notFound':
 					return { found: false, code: 404, reason: 'Package not found' }
 				case 'error':
