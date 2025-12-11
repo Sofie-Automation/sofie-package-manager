@@ -3,7 +3,7 @@ jest.mock('../workforceApi.ts')
 jest.mock('../workerAgentApi.ts')
 
 //@ts-ignore mock
-import { mockClearAllProcesses } from 'child_process'
+import { mockClearAllProcesses } from 'node:child_process'
 import {
 	getWorkerCount,
 	getWorkerId,

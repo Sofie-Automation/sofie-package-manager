@@ -1,6 +1,6 @@
 import Koa from 'koa'
 import Router from 'koa-router'
-import { Readable, Writable } from 'stream'
+import { Readable, Writable } from 'node:stream'
 
 export type CTX = Koa.ParameterizedContext<any, Router.IRouterParamContext<any, any>>
 export type CTXPost = Koa.ParameterizedContext<any, Router.IRouterParamContext<any, any>>

@@ -1,5 +1,5 @@
 import { app, ipcMain } from 'electron'
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 import { LoggerInstance, testFFMpeg } from '@sofie-package-manager/api'
 import { sleep } from '@sofie-automation/shared-lib/dist/lib/lib'
 import { BrowserRenderer } from './BrowserRenderer'

@@ -11,7 +11,7 @@ import {
 	WorkerAgentId,
 } from '@sofie-package-manager/api'
 // @ts-ignore mock
-import { mockOnNewProcess, mockListAllProcesses, mockClearAllProcesses } from 'child_process'
+import { mockOnNewProcess, mockListAllProcesses, mockClearAllProcesses } from 'node:child_process'
 import { AppContainer } from '../../appContainer'
 import deepExtend from 'deep-extend'
 import { WorkerAgentAPI } from '../../workerAgentApi'

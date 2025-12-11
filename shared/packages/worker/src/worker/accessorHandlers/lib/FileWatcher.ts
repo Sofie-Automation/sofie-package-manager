@@ -1,5 +1,5 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import ParcelWatcher from '@parcel/watcher'
 import { HelpfulEventEmitter, assertNever, stringifyError } from '@sofie-package-manager/api'
 

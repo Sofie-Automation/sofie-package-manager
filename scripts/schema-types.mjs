@@ -1,5 +1,5 @@
 import { compileFromFile } from 'json-schema-to-typescript'
-import * as fs from 'fs/promises'
+import * as fs from 'node:fs/promises'
 
 /** ********************************************************
  *

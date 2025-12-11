@@ -1,5 +1,5 @@
-import fsOrg from 'fs'
-import { promisify } from 'util'
+import fsOrg from 'node:fs'
+import { promisify } from 'node:util'
 // eslint-disable-next-line node/no-extraneous-import
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import {

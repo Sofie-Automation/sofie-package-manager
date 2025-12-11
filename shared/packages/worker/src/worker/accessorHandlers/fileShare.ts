@@ -1,5 +1,5 @@
-import { promisify } from 'util'
-import fs from 'fs'
+import { promisify } from 'node:util'
+import fs from 'node:fs'
 import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
@@ -36,13 +36,13 @@ import {
 import { BaseWorker } from '../worker'
 import { GenericWorker } from '../workers/genericWorker/genericWorker'
 import networkDrive from 'windows-network-drive'
-import { exec } from 'child_process'
+import { exec } from 'node:child_process'
 import { FileShareAccessorHandleType, GenericFileAccessorHandle } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-import * as path from 'path'
-import { PassThrough } from 'stream'
+import * as path from 'node:path'
+import { PassThrough } from 'node:stream'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)

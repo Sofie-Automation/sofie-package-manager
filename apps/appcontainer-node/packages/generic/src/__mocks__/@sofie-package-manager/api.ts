@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
 const packageManagerAPI: any = jest.createMockFromModule('@sofie-package-manager/api')
 const realPackageManagerAPI = jest.requireActual('@sofie-package-manager/api')

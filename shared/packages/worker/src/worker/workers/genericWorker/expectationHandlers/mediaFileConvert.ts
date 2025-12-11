@@ -35,7 +35,7 @@ import { GenericAccessorHandle } from '../../../accessorHandlers/genericHandle'
 import { doFileCopyExpectation, isFileFulfilled } from './lib/file'
 import { ProgressPart, ProgressParts } from '../lib/progressParts'
 
-import path from 'path'
+import path from 'node:path'
 import { SpawnedProcess, spawnProcess } from './lib/spawnProcess'
 
 /**

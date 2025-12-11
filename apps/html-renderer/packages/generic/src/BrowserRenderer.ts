@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
-import * as path from 'path'
-import * as fs from 'fs'
-import { spawn } from 'child_process'
+import * as path from 'node:path'
+import * as fs from 'node:fs'
+import { spawn } from 'node:child_process'
 import { InteractiveAPI, RenderHTMLOptions } from './renderHTML'
 import { escapeFilePath, getFFMpegExecutable, LoggerInstance } from '@sofie-package-manager/api'
 

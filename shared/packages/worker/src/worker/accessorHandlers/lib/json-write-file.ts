@@ -1,4 +1,4 @@
-// import { promises as fs } from 'fs'
+// import { promises as fs } from 'node:fs'
 import * as LockFile from 'proper-lockfile'
 import { GenericFileHandler } from './GenericFileHandler'
 import { LoggerInstance } from '@sofie-package-manager/api'

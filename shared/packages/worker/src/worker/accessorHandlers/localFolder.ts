@@ -1,6 +1,6 @@
-import path from 'path'
-import { promisify } from 'util'
-import fs from 'fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
+import fs from 'node:fs'
 import {
 	PackageReadInfo,
 	PutPackageHandler,
@@ -34,7 +34,7 @@ import { BaseWorker } from '../worker'
 import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)

@@ -1,4 +1,4 @@
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
+import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
 import { ffmpegInterpretProgress } from './ffmpeg'
 import { stringifyError } from '@sofie-package-manager/api'
 

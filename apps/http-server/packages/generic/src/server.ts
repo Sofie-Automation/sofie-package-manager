@@ -1,8 +1,8 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 
-import fs from 'fs'
+import fs from 'node:fs'
 import Koa from 'koa'
-import path from 'path'
+import path from 'node:path'
 import Router from 'koa-router'
 import cors from '@koa/cors'
 import bodyParser from 'koa-bodyparser'

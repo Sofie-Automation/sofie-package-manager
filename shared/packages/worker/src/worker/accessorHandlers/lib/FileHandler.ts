@@ -1,6 +1,6 @@
-import path from 'path'
-import { promisify } from 'util'
-import fs from 'fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
+import fs from 'node:fs'
 import {
 	ExpectedPackage,
 	StatusCode,

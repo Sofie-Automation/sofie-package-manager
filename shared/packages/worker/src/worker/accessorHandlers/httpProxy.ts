@@ -33,7 +33,7 @@ import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAcc
 import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 import { JSONWriteFilesBestEffortHandler, JSONWriteFilesNoLockHandler } from './lib/json-write-file'
 import { GenericFileHandler } from './lib/GenericFileHandler'
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
 
 // Feature flag to enable the usage of a lock file when writing the delay-removal json file.
 // This is false due to issues with acquiring file lock for the json file on the http-proxy server.

@@ -1,7 +1,7 @@
-import fs from 'fs'
-import EventEmitter from 'events'
-import { promisify } from 'util'
-import path from 'path'
+import fs from 'node:fs'
+import EventEmitter from 'node:events'
+import { promisify } from 'node:util'
+import path from 'node:path'
 
 /* eslint-disable no-console */
 

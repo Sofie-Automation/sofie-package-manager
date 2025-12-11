@@ -1,6 +1,6 @@
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import path from 'path'
-import { mkdir as fsMkDir } from 'fs/promises'
+import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
+import path from 'node:path'
+import { mkdir as fsMkDir } from 'node:fs/promises'
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,

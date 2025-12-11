@@ -1,4 +1,4 @@
-import * as os from 'os'
+import * as os from 'node:os'
 
 /** If a cpu usage is below this, it is considered to be idle */
 const IDLE_CPU_THRESHOLD = 0.25

@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
 /**
  * Convenience class to track progress of multiple parts with different weights.

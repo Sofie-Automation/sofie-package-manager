@@ -1,5 +1,5 @@
-import * as path from 'path'
-import { PassThrough, Readable } from 'stream'
+import * as path from 'node:path'
+import { PassThrough, Readable } from 'node:stream'
 import SFTP from 'ssh2-sftp-client'
 import { LoggerInstance } from '@sofie-package-manager/api'
 import { FileDownloadReturnType, FileExistsReturnType, FileInfoReturnType, FTPClientBase, FTPOptions } from './base'

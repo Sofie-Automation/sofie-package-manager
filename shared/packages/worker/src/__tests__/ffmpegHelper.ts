@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import { LocalFolderAccessorHandle } from '../worker/accessorHandlers/localFolder'
 import { overrideFFMpegExecutables, spawnFFMpeg } from '../worker/workers/genericWorker/expectationHandlers/lib/ffmpeg'
 import { ExecutableAliasSource } from '@sofie-package-manager/api'

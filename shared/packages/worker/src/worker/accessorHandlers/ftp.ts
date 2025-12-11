@@ -25,7 +25,7 @@ import {
 	MonitorId,
 } from '@sofie-package-manager/api'
 import { BaseWorker } from '../worker'
-import * as path from 'path'
+import * as path from 'node:path'
 import * as FTP from 'basic-ftp'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
@@ -35,7 +35,7 @@ import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
 import { GenericFileHandler } from './lib/GenericFileHandler'
 import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
 import { createFTPClient, FTPClientBase, FTPOptions } from './lib/FTPClient/index'
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
 
 export interface Content {
 	/** This is set when the class-instance is only going to be used for PackageContainer access.*/

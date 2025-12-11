@@ -1,4 +1,4 @@
-import * as path from 'path'
+import * as path from 'node:path'
 import { ExpectedPackageWrap, PackageContainers } from '../../packageManager'
 import { PackageManagerSettings } from '../../generated/options'
 import {

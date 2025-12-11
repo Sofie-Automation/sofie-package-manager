@@ -1,7 +1,7 @@
 import { Expectation, LoggerInstance, Reason, stringifyError } from '@sofie-package-manager/api'
 import { JSONWriteHandler } from './json-write-file'
 import { DelayPackageRemovalEntry, GenericFileHandler } from './GenericFileHandler'
-import * as path from 'path'
+import * as path from 'node:path'
 
 /**
  * Provides a set of convenience methods for file-based operations

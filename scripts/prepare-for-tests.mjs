@@ -5,12 +5,12 @@
  * and puts them into `.ffmpeg/` at the root of the repository.
  */
 
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import { pipeline } from 'node:stream'
 import { promisify } from 'node:util'
 import { createWriteStream } from 'node:fs'
-import path from 'path'
-import cp from 'child_process'
+import path from 'node:path'
+import cp from 'node:child_process'
 import fetch from 'node-fetch'
 
 console.log(`Preparing for tests...`)

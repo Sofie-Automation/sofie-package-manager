@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import xml from 'xml-js'
 import { stringifyError } from '@sofie-package-manager/api'
 import { CancelablePromise } from '../../../lib/cancelablePromise'

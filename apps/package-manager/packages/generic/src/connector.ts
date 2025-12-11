@@ -16,9 +16,9 @@ import {
 import { ExpectationManager, ExpectationManagerServerOptions } from '@sofie-package-manager/expectation-manager'
 import { CoreHandler, CoreConfig } from './coreHandler'
 import { PackageContainers, PackageManagerHandler } from './packageManager'
-import fs from 'fs'
-import { promisify } from 'util'
-import path from 'path'
+import fs from 'node:fs'
+import { promisify } from 'node:util'
+import path from 'node:path'
 import { PackageManagerSettings } from './generated/options'
 
 const fsAccess = promisify(fs.access)

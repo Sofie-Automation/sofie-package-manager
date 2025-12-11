@@ -1,7 +1,7 @@
 import { GenericFileHandler } from '../GenericFileHandler'
 import { JSONWriteHandler, JSONWriteFilesLockHandler, JSONWriteFilesBestEffortHandler } from '../json-write-file'
-import { promises as fs } from 'fs'
-import * as path from 'path'
+import { promises as fs } from 'node:fs'
+import * as path from 'node:path'
 
 const logger = {
 	error: jest.fn((message: string) => console.log('ERROR', message)),

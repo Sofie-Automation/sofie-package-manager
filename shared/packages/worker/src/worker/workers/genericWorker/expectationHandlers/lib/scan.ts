@@ -1,4 +1,4 @@
-import { execFile, ChildProcess, spawn } from 'child_process'
+import { execFile, ChildProcess, spawn } from 'node:child_process'
 import csvParser from 'csv-parser'
 import {
 	Expectation,

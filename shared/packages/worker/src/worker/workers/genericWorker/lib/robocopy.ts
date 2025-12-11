@@ -1,6 +1,6 @@
-import * as cp from 'child_process'
-import * as fs from 'fs'
-import * as path from 'path'
+import * as cp from 'node:child_process'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import { CancelablePromise } from '../../../lib/cancelablePromise'
 
 export function roboCopyFile(src: string, dst: string, progress?: (progress: number) => void): CancelablePromise<void> {

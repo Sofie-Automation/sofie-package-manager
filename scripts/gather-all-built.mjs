@@ -1,8 +1,8 @@
 /* eslint-disable node/no-unpublished-require */
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import { glob } from 'glob'
 import fse from 'fs-extra'
-import path from 'path'
+import path from 'node:path'
 
 /*
 This script gathers all files in the deploy/ folders of the various apps

@@ -1,12 +1,12 @@
-import fs from 'fs'
-import path from 'path'
-import { promisify } from 'util'
+import fs from 'node:fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
 import mime from 'mime-types'
 import prettyBytes from 'pretty-bytes'
 import { asyncPipe, CTXPost } from '../lib'
 import { betterPathResolve, HTTPServerConfig, LoggerInstance } from '@sofie-package-manager/api'
 import { BadResponse, PackageInfo, ResponseMeta, Storage } from './storage'
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 
 // Note: Explicit types here, due to that for some strange reason, promisify wont pass through the correct typings.
 const fsStat = promisify(fs.stat)

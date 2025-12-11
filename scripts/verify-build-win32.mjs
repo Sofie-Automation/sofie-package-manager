@@ -1,10 +1,10 @@
 /* eslint-disable node/no-unpublished-import, node/no-extraneous-import, no-console */
 
-import childProcess from 'child_process'
-import path from 'path'
-import fs from 'fs/promises'
-import process from 'process'
-import { promisify } from 'util'
+import childProcess from 'node:child_process'
+import path from 'node:path'
+import fs from 'node:fs/promises'
+import process from 'node:process'
+import { promisify } from 'node:util'
 
 const exec = promisify(childProcess.exec)
 

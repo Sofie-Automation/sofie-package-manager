@@ -1,6 +1,6 @@
-import { tmpdir } from 'os'
-import path from 'path'
-import { stat as fsStat, unlink as fsUnlink } from 'fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { stat as fsStat, unlink as fsUnlink } from 'node:fs/promises'
 import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
 import {
 	FFProbeScanResult,

@@ -1,5 +1,5 @@
 import { ProcessConfig } from './config'
-import fs from 'fs'
+import fs from 'node:fs'
 import { LoggerInstance } from './logger'
 
 // export function setupProcess(config: ProcessConfig): void {}

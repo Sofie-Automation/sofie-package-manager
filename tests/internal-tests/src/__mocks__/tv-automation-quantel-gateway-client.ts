@@ -1,9 +1,9 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 // eslint-disable-next-line node/no-unpublished-import
 import { Q, ClipSearchQuery } from 'tv-automation-quantel-gateway-client' // note: this is a mocked module
 
-import { Agent as HTTPAgent } from 'http'
-import { Agent as HTTPSAgent } from 'https'
+import { Agent as HTTPAgent } from 'node:http'
+import { Agent as HTTPSAgent } from 'node:https'
 
 /* eslint-disable no-console */
 

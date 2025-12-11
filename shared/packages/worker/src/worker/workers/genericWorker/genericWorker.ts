@@ -14,7 +14,7 @@ import {
 	stringifyError,
 } from '@sofie-package-manager/api'
 import { BaseWorker, GenericWorkerAgentAPI } from '../../worker'
-import fs from 'fs'
+import fs from 'node:fs'
 import { FileCopy } from './expectationHandlers/fileCopy'
 import { FileCopyProxy } from './expectationHandlers/fileCopyProxy'
 import { PackageScan } from './expectationHandlers/packageScan'
@@ -36,7 +36,7 @@ import { RenderHTML } from './expectationHandlers/renderHTML'
 import { PackageIframesScan } from './expectationHandlers/packageIframesScan'
 import { ExecutableDependencyHandler } from './lib/executableDependencyHandler'
 import { MediaFileConvert } from './expectationHandlers/mediaFileConvert'
-import path from 'path'
+import path from 'node:path'
 import { KairosLoadToRam } from './expectationHandlers/kairosLoadToRam'
 
 export type ExpectationHandlerGenericWorker = ExpectationHandler<GenericWorker>

@@ -1,5 +1,5 @@
-import { PassThrough, Readable } from 'stream'
-import * as path from 'path'
+import { PassThrough, Readable } from 'node:stream'
+import * as path from 'node:path'
 import * as FTP from 'basic-ftp'
 import PQueue from 'p-queue'
 import { LoggerInstance } from '@sofie-package-manager/api'

@@ -1,4 +1,4 @@
-import { spawn } from 'child_process'
+import { spawn } from 'node:child_process'
 import { ExecutableAliasSource, LoggerInstance, stringifyError, testHtmlRenderer } from '@sofie-package-manager/api'
 import { testFFMpeg, testFFProbe } from '../expectationHandlers/lib/ffmpeg'
 

@@ -1,6 +1,6 @@
 /* eslint-disable node/no-unpublished-import, no-console */
 
-import path from 'path'
+import path from 'node:path'
 import fse from 'fs-extra'
 import { glob } from 'glob'
 

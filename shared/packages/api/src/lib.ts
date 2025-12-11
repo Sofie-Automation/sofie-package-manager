@@ -1,5 +1,5 @@
-import crypto from 'crypto'
-import path from 'path'
+import crypto from 'node:crypto'
+import path from 'node:path'
 import { compact } from 'underscore'
 import { AnyProtectedString } from './ProtectedString'
 

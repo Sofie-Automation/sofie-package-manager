@@ -1,13 +1,13 @@
 /* eslint-disable node/no-unpublished-import, node/no-extraneous-import, no-console */
 
-import { promisify } from 'util'
-import cp from 'child_process'
-import fs from 'fs/promises'
-import path from 'path'
+import { promisify } from 'node:util'
+import cp from 'node:child_process'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import pkg from '@yao-pkg/pkg'
 import { glob } from 'glob'
 import fse from 'fs-extra'
-import { createRequire } from 'module'
+import { createRequire } from 'node:module'
 
 const exec = promisify(cp.exec)
 const require = createRequire(import.meta.url)

@@ -1,9 +1,9 @@
 // eslint-disable-next-line node/no-unpublished-import
 import wndMock0 from 'windows-network-drive' // Note: this is a mocked module
-import { EventEmitter } from 'events' // Note: this is a mocked module
-import { Readable, Writable } from 'stream'
-import { promisify } from 'util'
-// import * as Path from 'path'
+import { EventEmitter } from 'node:events' // Note: this is a mocked module
+import { Readable, Writable } from 'node:stream'
+import { promisify } from 'node:util'
+// import * as Path from 'node:path'
 
 import type { WNDMockType } from './windows-network-drive'
 
