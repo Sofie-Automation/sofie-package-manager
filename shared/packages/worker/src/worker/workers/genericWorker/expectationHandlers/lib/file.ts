@@ -18,6 +18,7 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../../accessorHandlers/accessor'
 import { ByteCounter } from '../../../../lib/streamByteCounter'
 import { WorkInProgress } from '../../../../lib/workInProgress'
@@ -241,12 +242,14 @@ export async function doFileCopyExpectation(
 			lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupSource.accessor.type === Accessor.AccessType.HTTP ||
 			lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-			lookupSource.accessor.type === Accessor.AccessType.FTP) &&
+			lookupSource.accessor.type === Accessor.AccessType.FTP ||
+			lookupSource.accessor.type === Accessor.AccessType.S3) &&
 		(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
 			lookupTarget.accessor.type === Accessor.AccessType.ATEM_MEDIA_STORE ||
-			lookupTarget.accessor.type === Accessor.AccessType.FTP)
+			lookupTarget.accessor.type === Accessor.AccessType.FTP ||
+			lookupTarget.accessor.type === Accessor.AccessType.S3)
 	) {
 		// We can copy by using file streams
 		if (
@@ -254,7 +257,8 @@ export async function doFileCopyExpectation(
 			!isFileShareAccessorHandle(lookupSource.handle) &&
 			!isHTTPAccessorHandle(lookupSource.handle) &&
 			!isHTTPProxyAccessorHandle(lookupSource.handle) &&
-			!isFTPAccessorHandle(lookupSource.handle)
+			!isFTPAccessorHandle(lookupSource.handle) &&
+			!isS3AccessorHandle(lookupSource.handle)
 		)
 			throw new Error(`Source AccessHandler type is wrong`)
 		if (
@@ -262,7 +266,8 @@ export async function doFileCopyExpectation(
 			!isFileShareAccessorHandle(targetHandle) &&
 			!isHTTPProxyAccessorHandle(targetHandle) &&
 			!isATEMAccessorHandle(targetHandle) &&
-			!isFTPAccessorHandle(targetHandle)
+			!isFTPAccessorHandle(targetHandle) &&
+			!isS3AccessorHandle(targetHandle)
 		)
 			throw new Error(`Target AccessHandler type is wrong`)
 
