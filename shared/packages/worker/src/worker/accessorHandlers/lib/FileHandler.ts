@@ -87,7 +87,11 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 	/** Path to the PackageContainer, ie the folder */
 	protected abstract get folderPath(): string
 	protected abstract get orgFolderPath(): string
-	/** Full path to the package */
+	/**
+	 * Full path to the package
+	 * @deprecated Use getResolvedFullPath() instead, which handles filename resolution without extensions.
+	 * This property should only be used internally.
+	 */
 	protected abstract get fullPath(): string
 
 	public fileHandler: GenericFileOperationsHandler
