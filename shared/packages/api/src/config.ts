@@ -702,7 +702,12 @@ export function parseNetworkScopedURLs(str: unknown): URLMap | null {
 	if (typeof str !== 'string' || str.length === 0) return null
 
 	str.split(';').forEach((networkIdAndURLPair: string) => {
-		let [networkId, url] = networkIdAndURLPair.split('@', 2)
+		const els = networkIdAndURLPair.split('@')
+		let networkId = els.shift()
+		if (networkId === undefined) return // means that networkIdAndURLPair was an empty string
+
+		let url = els.join('@') // in case the URL contains an '@'
+
 		if (!url) {
 			url = networkId
 			networkId = '*'
