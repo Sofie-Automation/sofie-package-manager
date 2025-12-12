@@ -74,11 +74,11 @@ export function scanWithFFProbe(
 			let filePath: string
 			let pipeStdin = false
 			if (isLocalFolderAccessorHandle(sourceHandle)) {
-				inputPath = sourceHandle.fullPath
+				inputPath = await sourceHandle.getResolvedFullPath()
 				filePath = sourceHandle.filePath
 			} else if (isFileShareAccessorHandle(sourceHandle)) {
 				await sourceHandle.prepareFileAccess()
-				inputPath = sourceHandle.fullPath
+				inputPath = await sourceHandle.getResolvedFullPath()
 				filePath = sourceHandle.filePath
 			} else if (isHTTPAccessorHandle(sourceHandle)) {
 				inputPath = sourceHandle.fullUrl
@@ -845,10 +845,12 @@ type FFMpegSupportedSourceHandles =
 async function getFFMpegInputArgsFromAccessorHandle(sourceHandle: FFMpegSupportedSourceHandles): Promise<string[]> {
 	const args: string[] = []
 	if (isLocalFolderAccessorHandle(sourceHandle)) {
-		args.push(`-i`, escapeFilePath(sourceHandle.fullPath))
+		const resolvedPath = await sourceHandle.getResolvedFullPath()
+		args.push(`-i`, escapeFilePath(resolvedPath))
 	} else if (isFileShareAccessorHandle(sourceHandle)) {
 		await sourceHandle.prepareFileAccess()
-		args.push(`-i`, escapeFilePath(sourceHandle.fullPath))
+		const resolvedPath = await sourceHandle.getResolvedFullPath()
+		args.push(`-i`, escapeFilePath(resolvedPath))
 	} else if (isHTTPAccessorHandle(sourceHandle)) {
 		args.push(`-i`, sourceHandle.fullUrl)
 	} else if (isHTTPProxyAccessorHandle(sourceHandle)) {

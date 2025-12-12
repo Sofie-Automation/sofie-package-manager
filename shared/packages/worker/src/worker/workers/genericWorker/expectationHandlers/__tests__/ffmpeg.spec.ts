@@ -22,6 +22,7 @@ function createLocalFolderAccessorHandleMock(fullPath: string): LocalFolderAcces
 			type: LocalFolderAccessorHandle.type,
 			fullPath: fullPath,
 			filePath: path.basename(fullPath),
+			getResolvedFullPath: async () => fullPath,
 		},
 		{
 			fallbackMockImplementation: () => {

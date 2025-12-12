@@ -174,6 +174,7 @@ export class WorkerAgent {
 					localNetworkIds: this.config.worker.networkIds,
 				},
 				config: this.config.worker,
+				processConfig: this.config.process,
 				workerStorageRead: async (dataId: DataId) => {
 					// return this.appContainerAPI.workerStorageRead(dataId)
 

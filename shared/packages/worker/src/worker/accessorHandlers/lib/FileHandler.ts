@@ -17,6 +17,7 @@ import {
 	MonitorId,
 	betterPathJoin,
 	removeBasePath,
+	resolveFileWithoutExtension,
 } from '@sofie-package-manager/api'
 
 import { AccessorConstructorProps, GenericAccessorHandle } from '../genericHandle'
@@ -86,6 +87,12 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 	/** Path to the PackageContainer, ie the folder */
 	protected abstract get folderPath(): string
 	protected abstract get orgFolderPath(): string
+	/**
+	 * Full path to the package
+	 * @deprecated Use getResolvedFullPath() instead, which handles filename resolution without extensions.
+	 * This property should only be used internally.
+	 */
+	protected abstract get fullPath(): string
 
 	public fileHandler: GenericFileOperationsHandler
 
@@ -114,6 +121,43 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 			// Ignore errors
 		}
 		return exists
+	}
+	/**
+	 * Get the resolved full path to the package.
+	 * If matchFilenamesWithoutExtension is enabled, this will resolve the path to include the file extension.
+	 * For FFmpeg/FFprobe operations, use this instead of fullPath.
+	 * The result is cached to avoid repeated file system lookups.
+	 */
+	async getResolvedFullPath(): Promise<string> {
+		const fullPath = this.fullPath
+
+		// If matchFilenamesWithoutExtension is disabled, just return the fullPath
+		if (!this.worker.agentAPI.config.matchFilenamesWithoutExtension) {
+			return fullPath
+		}
+
+		// Use worker cache to avoid repeated file system lookups
+		return await this.worker.cacheData(
+			this._type,
+			`resolvedFullPath:${fullPath}`,
+			async () => {
+				// Resolve the file with any extension
+				const resolution = await resolveFileWithoutExtension(fullPath)
+
+				switch (resolution.result) {
+					case 'found':
+						return resolution.fullPath
+					case 'multiple':
+						throw new Error(`Multiple files found matching "${fullPath}": ${resolution.matches.join(', ')}`)
+					case 'notFound':
+						throw new Error(`File not found: "${fullPath}"`)
+					case 'error':
+						throw new Error(`Error resolving file "${fullPath}": ${stringifyError(resolution.error, true)}`)
+				}
+			},
+			// Cache for 4 hours
+			1000 * 60 * 60 * 4 // 4 hours
+		)
 	}
 	async readFile(fullPath: string): Promise<Buffer> {
 		return fsReadFile(fullPath)

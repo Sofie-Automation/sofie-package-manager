@@ -260,7 +260,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 
 		try {
 			// Check if we can open the file for reading:
-			const fd = await fsOpen(this.fullPath, 'r')
+			const actualFullPath = await this.getResolvedFullPath()
+			const fd = await fsOpen(actualFullPath, 'r')
 
 			// If that worked, we seem to have read access.
 			await fsClose(fd)
@@ -305,7 +306,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		await this.prepareFileAccess()
 
 		try {
-			await fsAccess(this.fullPath, fs.constants.R_OK)
+			const actualFullPath = await this.getResolvedFullPath()
+			await fsAccess(actualFullPath, fs.constants.R_OK)
 			// The file exists
 		} catch (err) {
 			// File is not readable
@@ -340,7 +342,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FileOnDisk> {
 		await this.prepareFileAccess()
-		const stat = await fsStat(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
+		const stat = await fsStat(actualFullPath)
 		return this.convertStatToVersion(stat)
 	}
 	async ensurePackageFulfilled(): Promise<void> {
@@ -353,8 +356,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 
 	async getPackageReadStream(): Promise<{ readStream: NodeJS.ReadableStream; cancel: () => void }> {
 		await this.prepareFileAccess()
+		const actualFullPath = await this.getResolvedFullPath()
 		const readStream = await new Promise<fs.ReadStream>((resolve, reject) => {
-			const rs: fs.ReadStream = fs.createReadStream(this.fullPath)
+			const rs: fs.ReadStream = fs.createReadStream(actualFullPath)
 			rs.once('error', reject)
 			// Wait for the stream to be actually valid before continuing:
 			rs.once('open', () => resolve(rs))

@@ -4,6 +4,7 @@ import {
 	ExpectationManagerWorkerAgent,
 	LoggerInstance,
 	PackageContainerExpectation,
+	ProcessConfig,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeDoYouSupportPackageContainer,
 	ReturnTypeGetCostFortExpectation,
@@ -20,6 +21,7 @@ import { IWorkInProgress } from './lib/workInProgress'
 
 export interface GenericWorkerAgentAPI {
 	config: WorkerConfig['worker']
+	processConfig: ProcessConfig
 	location: WorkerLocation
 	/**
 	 * Acquire a read/write lock to a data point, then write the result of the callback to it.

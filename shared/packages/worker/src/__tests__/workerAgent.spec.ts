@@ -163,6 +163,7 @@ function setup() {
 			temporaryFolderPath: undefined,
 			windowsDriveLetters: undefined,
 			allowedExpectationTypes: null,
+			matchFilenamesWithoutExtension: false,
 		},
 	} satisfies WorkerConfig
 

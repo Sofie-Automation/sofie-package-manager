@@ -1,8 +1,19 @@
-import { protectString, LoggerInstance } from '@sofie-package-manager/api'
+import { protectString, LoggerInstance, ProcessConfig } from '@sofie-package-manager/api'
 import { BaseWorker } from '../../worker'
 
+const defaultProcessConfig: ProcessConfig = {
+	logPath: undefined,
+	logLevel: undefined,
+	unsafeSSL: false,
+	certificates: [],
+}
+
 export class PassiveTestWorker extends BaseWorker {
-	constructor(logger: LoggerInstance) {
+	constructor(
+		logger: LoggerInstance,
+		processConfig: ProcessConfig = defaultProcessConfig,
+		matchFilenamesWithoutExtension = false
+	) {
 		super(
 			logger,
 			{
@@ -23,7 +34,9 @@ export class PassiveTestWorker extends BaseWorker {
 					resourceId: '',
 					workforceURL: null,
 					allowedExpectationTypes: null,
+					matchFilenamesWithoutExtension,
 				},
+				processConfig,
 				location: {
 					// localComputerId?: string
 					localNetworkIds: [],
