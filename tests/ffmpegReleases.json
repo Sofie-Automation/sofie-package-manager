@@ -15,6 +15,10 @@
 		{
 			"id": "6.1",
 			"url": "https://github.com/CasparCG/dependencies/releases/download/ffmpeg-binaries/ffmpeg-6.1-amd64-static.tar.xz"
+		},
+		{
+			"id": "7.0.2",
+			"url": "https://github.com/CasparCG/dependencies/releases/download/ffmpeg-binaries/ffmpeg-7.0.2-amd64-static.tar.xz"
 		}
 	],
 	"win32-x64": [
@@ -37,6 +41,14 @@
 		{
 			"id": "7.0",
 			"url": "https://github.com/CasparCG/dependencies/releases/download/ffmpeg-binaries/ffmpeg-7.0-essentials_build.zip"
+		},
+		{
+			"id": "7.1.1",
+			"url": "https://github.com/CasparCG/dependencies/releases/download/ffmpeg-binaries/ffmpeg-7.1.1-essentials_build.zip"
+		},
+		{
+			"id": "8.0.1",
+			"url": "https://github.com/CasparCG/dependencies/releases/download/ffmpeg-binaries/ffmpeg-8.0.1-essentials_build.zip"
 		}
 	]
 }
