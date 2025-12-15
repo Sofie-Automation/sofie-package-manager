@@ -46,32 +46,36 @@ export async function testFFProbe(worker: ExecutableAliasSource): Promise<string
 	return testFFExecutable(getFFProbeExecutable(worker))
 }
 export async function testFFExecutable(ffExecutable: string): Promise<string | null> {
-	return new Promise<string | null>((resolve) => {
-		const ffMpegProcess = spawn(ffExecutable, ['-version'])
-		let output = ''
-		ffMpegProcess.stderr.on('data', (data) => {
-			const str = data.toString()
-			output += str
-		})
-		ffMpegProcess.stdout.on('data', (data) => {
-			const str = data.toString()
-			output += str
-		})
-		ffMpegProcess.on('error', (err) => {
-			resolve(`Process ${ffExecutable} emitted error: ${stringifyError(err)}`)
-		})
-		ffMpegProcess.on('exit', (code) => {
-			const m = output.match(/version ([\w-]+)/) // version N-102494-g2899fb61d2
+	try {
+		return new Promise<string | null>((resolve) => {
+			const ffMpegProcess = spawn(ffExecutable, ['-version'])
+			let output = ''
+			ffMpegProcess.stderr.on('data', (data) => {
+				const str = data.toString()
+				output += str
+			})
+			ffMpegProcess.stdout.on('data', (data) => {
+				const str = data.toString()
+				output += str
+			})
+			ffMpegProcess.on('error', (err) => {
+				resolve(`Process ${ffExecutable} emitted error: ${stringifyError(err)}`)
+			})
+			ffMpegProcess.on('exit', (code) => {
+				const m = output.match(/version ([\w-]+)/) // version N-102494-g2899fb61d2
 
-			if (code === 0) {
-				if (m) {
-					resolve(null)
+				if (code === 0) {
+					if (m) {
+						resolve(null)
+					} else {
+						resolve(`Process ${ffExecutable} bad version: ${output}`)
+					}
 				} else {
-					resolve(`Process ${ffExecutable} bad version: ${output}`)
+					resolve(`Process ${ffExecutable} exited with code ${code}`)
 				}
-			} else {
-				resolve(`Process ${ffExecutable} exited with code ${code}`)
-			}
+			})
 		})
-	})
+	} catch (err) {
+		return `Error when spawning process ${ffExecutable}: ${stringifyError(err)}`
+	}
 }

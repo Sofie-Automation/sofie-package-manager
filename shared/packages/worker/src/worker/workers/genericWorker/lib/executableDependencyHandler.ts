@@ -65,27 +65,31 @@ export class ExecutableDependencyHandler {
 	}
 
 	async testFFExecutable(executable: string): Promise<string | null> {
-		return new Promise<string | null>((resolve) => {
-			const execProcess = spawn(executable, ['-v'])
+		try {
+			return new Promise<string | null>((resolve) => {
+				const execProcess = spawn(executable, ['-v'])
 
-			// Guard against the process not exiting on its own:
-			const timeout = setTimeout(() => {
-				resolve(execProcess.pid ? null : 'Timed out when checking executable')
-				execProcess.kill()
-			}, 2000)
+				// Guard against the process not exiting on its own:
+				const timeout = setTimeout(() => {
+					resolve(execProcess.pid ? null : 'Timed out when checking executable')
+					execProcess.kill()
+				}, 2000)
 
-			execProcess.on('error', (e) => {
-				clearTimeout(timeout)
-				if (`${e}`.includes('ENOENT')) {
-					resolve(`Executable not found: ${stringifyError(e)}`)
-				} else {
-					resolve(`Error checking Executable: ${stringifyError(e)}`)
-				}
+				execProcess.on('error', (e) => {
+					clearTimeout(timeout)
+					if (`${e}`.includes('ENOENT')) {
+						resolve(`Executable not found: ${stringifyError(e)}`)
+					} else {
+						resolve(`Error checking Executable: ${stringifyError(e)}`)
+					}
+				})
+				execProcess.on('exit', (_code) => {
+					clearTimeout(timeout)
+					resolve(null)
+				})
 			})
-			execProcess.on('exit', (_code) => {
-				clearTimeout(timeout)
-				resolve(null)
-			})
-		})
+		} catch (err) {
+			return `Error when spawning process ${ffExecutable}: ${stringifyError(err)}`
+		}
 	}
 }
