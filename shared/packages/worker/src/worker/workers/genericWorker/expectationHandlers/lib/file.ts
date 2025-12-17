@@ -156,6 +156,7 @@ export async function isFileFulfilled(
 	}
 }
 export async function doFileCopyExpectation(
+	worker: BaseWorker,
 	exp: Expectation.FileCopy | Expectation.FileCopyProxy | Expectation.MediaFileConvert,
 	lookupSource: LookupPackageContainer<UniversalVersion>,
 	lookupTarget: LookupPackageContainer<UniversalVersion>
@@ -206,10 +207,21 @@ export async function doFileCopyExpectation(
 				lookupSource.handle
 			)
 
-			const sourcePath = sourceHandle.fullPath
-			const targetPath = exp.workOptions.useTemporaryFilePath
-				? targetHandle.temporaryFilePath
-				: targetHandle.fullPath
+			// Use getResolvedFullPath() which handles extension resolution and caching
+			const sourcePath = await sourceHandle.getResolvedFullPath()
+
+			// For target path, append extension if it was resolved
+			let targetPath: string
+			if (worker.agentAPI.config.matchFilenamesWithoutExtension) {
+				const sourceExtension = sourcePath.slice(sourceHandle.fullPath.length)
+				targetPath = exp.workOptions.useTemporaryFilePath
+					? targetHandle.temporaryFilePath
+					: targetHandle.fullPath + sourceExtension
+			} else {
+				targetPath = exp.workOptions.useTemporaryFilePath
+					? targetHandle.temporaryFilePath
+					: targetHandle.fullPath
+			}
 
 			copying = roboCopyFile(sourcePath, targetPath, (progress: number) => {
 				workInProgress._reportProgress(actualSourceVersionHash, progress / 100)

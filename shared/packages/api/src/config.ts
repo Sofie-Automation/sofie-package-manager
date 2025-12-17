@@ -66,6 +66,11 @@ const httpServerArguments = defineArguments({
 		default: process.env.HTTP_SERVER_BASE_PATH || './fileStorage',
 		describe: 'The internal path to use for file storage',
 	},
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.HTTP_SERVER_MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, the HTTP-server will ignore file extensions when serving files',
+	},
 })
 /** CLI-argument-definitions for the Package Manager process */
 const packageManagerArguments = defineArguments({
@@ -198,6 +203,11 @@ const workerArgumentsGeneric = defineArguments({
 		default: process.env.WORKER_EXECUTABLE_ALIASES || '',
 		describe:
 			'List of aliases for executables the worker can use. Format: "alias1=path to executable1;alias2=executable2"',
+	},
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, the worker will match and use files without file extensions (in supported accessors only)',
 	},
 })
 /** CLI-argument-definitions for the Worker process */
@@ -369,6 +379,8 @@ export interface HTTPServerConfig {
 		apiKeyWrite: string | undefined
 		/** Clean up (remove) files older than this age (in seconds). 0 or -1 means that it's disabled. */
 		cleanFileAge: number
+		/** If true, the HTTP-server will ignore file extensions when serving files */
+		matchFilenamesWithoutExtension: boolean
 	}
 }
 export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
@@ -391,6 +403,7 @@ export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
 			apiKeyRead: argv.apiKeyRead,
 			apiKeyWrite: argv.apiKeyWrite,
 			cleanFileAge: argv.cleanFileAge,
+			matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 		},
 	}
 }
@@ -483,6 +496,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 			failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
 			failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
 			executableAliases: parseExecutableAliases(argv.executableAliases),
+			matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 		},
 	}
 }
@@ -523,6 +537,7 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 				failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
 				failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
 				executableAliases: parseExecutableAliases(argv.executableAliases),
+				matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 			},
 		},
 	}

@@ -155,7 +155,8 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	}
 	async checkPackageReadAccess(): Promise<AccessorHandlerCheckPackageReadAccessResult> {
 		try {
-			await fsAccess(this.fullPath, fs.constants.R_OK)
+			const actualFullPath = await this.getResolvedFullPath()
+			await fsAccess(actualFullPath, fs.constants.R_OK)
 			// The file exists and can be read
 		} catch (err) {
 			// File is not readable
@@ -170,10 +171,12 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		}
 		return { success: true }
 	}
+
 	async tryPackageRead(): Promise<AccessorHandlerTryPackageReadResult> {
 		try {
 			// Check if we can open the file for reading:
-			const fd = await fsOpen(this.fullPath, 'r')
+			const actualFullPath = await this.getResolvedFullPath()
+			const fd = await fsOpen(actualFullPath, 'r')
 
 			// If that worked, we seem to have read access.
 			await fsClose(fd)
@@ -221,7 +224,8 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		return { success: true }
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FileOnDisk> {
-		const stat = await fsStat(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
+		const stat = await fsStat(actualFullPath)
 		return this.convertStatToVersion(stat)
 	}
 	async ensurePackageFulfilled(): Promise<void> {

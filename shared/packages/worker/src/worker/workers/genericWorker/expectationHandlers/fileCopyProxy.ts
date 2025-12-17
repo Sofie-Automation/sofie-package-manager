@@ -181,7 +181,7 @@ export const FileCopyProxy: ExpectationHandlerGenericWorker = {
 		}
 		// Fallback:
 		if (workInProgress === null) {
-			workInProgress = await doFileCopyExpectation(exp, lookupSource, lookupTarget)
+			workInProgress = await doFileCopyExpectation(worker, exp, lookupSource, lookupTarget)
 		}
 		if (workInProgress === null) {
 			throw new Error(
