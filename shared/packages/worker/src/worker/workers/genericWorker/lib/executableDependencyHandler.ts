@@ -89,7 +89,7 @@ export class ExecutableDependencyHandler {
 				})
 			})
 		} catch (err) {
-			return `Error when spawning process ${ffExecutable}: ${stringifyError(err)}`
+			return `Error when spawning process ${executable}: ${stringifyError(err)}`
 		}
 	}
 }
