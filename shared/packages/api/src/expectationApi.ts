@@ -531,6 +531,8 @@ export namespace Expectation {
 			| ExpectedJSONData
 			| ExpectedFTPFile
 			| ExpectedUnspecified
+			| ExpectedS3Resource
+
 		export type Any =
 			| FileOnDisk
 			| MediaFileThumbnail
@@ -542,6 +544,8 @@ export namespace Expectation {
 			| JSONData
 			| FTPFile
 			| Unspecified
+			| S3Resource
+
 		export interface Base {
 			type: Type
 		}
@@ -559,6 +563,7 @@ export namespace Expectation {
 			JSON_DATA = 'json_data',
 			FTP_FILE = 'ftp_file',
 			UNSPECIFIED = 'unspecified',
+			S3_RESOURCE = 's3_resource',
 		}
 		type ExpectedType<T extends Base> = Partial<T> & Pick<T, 'type'>
 
@@ -674,5 +679,13 @@ export namespace Expectation {
 			type: Type.UNSPECIFIED
 		}
 		export type ExpectedUnspecified = ExpectedType<Unspecified>
+
+		export interface S3Resource extends Base {
+			type: Type.S3_RESOURCE
+			fileSize: number
+			modifiedDate: number
+		}
+
+		export type ExpectedS3Resource = ExpectedType<S3Resource>
 	}
 }

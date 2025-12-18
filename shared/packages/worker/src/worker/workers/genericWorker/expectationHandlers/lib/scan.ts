@@ -17,6 +17,7 @@ import {
 	isHTTPProxyAccessorHandle,
 	isHTTPAccessorHandle,
 	isFTPAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../../accessorHandlers/accessor'
 import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
 import { QuantelAccessorHandle } from '../../../../accessorHandlers/quantel'
@@ -38,6 +39,7 @@ import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg'
 import { GenericAccessorHandle, PackageReadStream } from '../../../../accessorHandlers/genericHandle'
 import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
 import { BaseWorker } from '../../../../worker'
+import { S3AccessorHandle } from '../../../../accessorHandlers/s3'
 
 export interface FFProbeScanResultStream {
 	index: number
@@ -61,6 +63,7 @@ export function scanWithFFProbe(
 		| HTTPProxyAccessorHandle<any>
 		| QuantelAccessorHandle<any>
 		| FTPAccessorHandle<any>
+		| S3AccessorHandle<any>
 ): CancelablePromise<FFProbeScanResult> {
 	return new CancelablePromise<FFProbeScanResult>(async (resolve, reject, onCancel) => {
 		if (
@@ -68,7 +71,8 @@ export function scanWithFFProbe(
 			isFileShareAccessorHandle(sourceHandle) ||
 			isHTTPAccessorHandle(sourceHandle) ||
 			isHTTPProxyAccessorHandle(sourceHandle) ||
-			isFTPAccessorHandle(sourceHandle)
+			isFTPAccessorHandle(sourceHandle) ||
+			isS3AccessorHandle(sourceHandle)
 		) {
 			let inputPath: string
 			let filePath: string
@@ -95,6 +99,9 @@ export function scanWithFFProbe(
 					inputPath = sourceHandle.ftpUrl.url
 					filePath = sourceHandle.filePath
 				}
+			} else if (isS3AccessorHandle(sourceHandle)) {
+				inputPath = sourceHandle.getFullS3PublicUrl()
+				filePath = sourceHandle.filePath
 			} else {
 				assertNever(sourceHandle)
 				throw new Error('Unknown handle')
@@ -841,6 +848,7 @@ type FFMpegSupportedSourceHandles =
 	| HTTPProxyAccessorHandle<any>
 	| QuantelAccessorHandle<any>
 	| FTPAccessorHandle<any>
+	| S3AccessorHandle<any>
 
 async function getFFMpegInputArgsFromAccessorHandle(sourceHandle: FFMpegSupportedSourceHandles): Promise<string[]> {
 	const args: string[] = []
@@ -857,6 +865,8 @@ async function getFFMpegInputArgsFromAccessorHandle(sourceHandle: FFMpegSupporte
 		args.push(`-i`, sourceHandle.fullUrl)
 	} else if (isFTPAccessorHandle(sourceHandle)) {
 		args.push(`-i`, sourceHandle.ftpUrl.url)
+	} else if (isS3AccessorHandle(sourceHandle)) {
+		args.push(`-i`, sourceHandle.getFullS3PublicUrl())
 	} else if (isQuantelClipAccessorHandle(sourceHandle)) {
 		const httpStreamURL = await sourceHandle.getTransformerStreamURL()
 
@@ -878,6 +888,7 @@ const FFMPEG_SUPPORTED_SOURCE_ACCESSORS: Set<Accessor.AccessType | undefined> = 
 	Accessor.AccessType.HTTP_PROXY,
 	Accessor.AccessType.QUANTEL,
 	Accessor.AccessType.FTP,
+	Accessor.AccessType.S3,
 ])
 
 export function isAnFFMpegSupportedSourceAccessor(sourceAccessorOnPackage: AccessorOnPackage.Any): boolean {
@@ -892,13 +903,15 @@ export function isAnFFMpegSupportedSourceAccessorHandle(
 	| HTTPAccessorHandle<any>
 	| HTTPProxyAccessorHandle<any>
 	| QuantelAccessorHandle<any>
-	| FTPAccessorHandle<any> {
+	| FTPAccessorHandle<any>
+	| S3AccessorHandle<any> {
 	return (
 		isLocalFolderAccessorHandle(sourceHandle) ||
 		isFileShareAccessorHandle(sourceHandle) ||
 		isHTTPAccessorHandle(sourceHandle) ||
 		isHTTPProxyAccessorHandle(sourceHandle) ||
 		isQuantelClipAccessorHandle(sourceHandle) ||
-		isFTPAccessorHandle(sourceHandle)
+		isFTPAccessorHandle(sourceHandle) ||
+		isS3AccessorHandle(sourceHandle)
 	)
 }

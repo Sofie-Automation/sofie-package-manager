@@ -73,6 +73,7 @@ export function makeUniversalVersion(
 			Expectation.Version.Type.QUANTEL_CLIP,
 			Expectation.Version.Type.JSON_DATA,
 			Expectation.Version.Type.MEDIA_FILE_CONVERT,
+			Expectation.Version.Type.S3_RESOURCE,
 		].includes(version.type)
 	) {
 		throw new Error(`getAllVersionProperties: Unsupported type "${version.type}"`)
@@ -92,6 +93,8 @@ export function makeUniversalVersion(
 					? version.contentLength
 					: version.type === Expectation.Version.Type.JSON_DATA
 					? version.size
+					: version.type === Expectation.Version.Type.S3_RESOURCE
+					? version.fileSize
 					: undefined,
 		},
 
@@ -101,6 +104,8 @@ export function makeUniversalVersion(
 				version.type === Expectation.Version.Type.FILE_ON_DISK
 					? version.modifiedDate
 					: version.type === Expectation.Version.Type.FTP_FILE
+					? version.modifiedDate
+					: version.type === Expectation.Version.Type.S3_RESOURCE
 					? version.modifiedDate
 					: version.type === Expectation.Version.Type.HTTP_FILE
 					? version.modified

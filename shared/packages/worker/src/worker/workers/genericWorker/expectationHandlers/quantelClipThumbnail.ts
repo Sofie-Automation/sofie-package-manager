@@ -21,6 +21,7 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
 import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
@@ -189,7 +190,8 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 			(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-				lookupTarget.accessor.type === Accessor.AccessType.FTP)
+				lookupTarget.accessor.type === Accessor.AccessType.FTP ||
+				lookupTarget.accessor.type === Accessor.AccessType.S3)
 		) {
 			if (!isQuantelClipAccessorHandle(sourceHandle)) throw new Error(`Source AccessHandler type is wrong`)
 
@@ -197,7 +199,8 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
 				!isHTTPProxyAccessorHandle(targetHandle) &&
-				!isFTPAccessorHandle(targetHandle)
+				!isFTPAccessorHandle(targetHandle) &&
+				!isS3AccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
