@@ -687,7 +687,7 @@ export function getProcessArgv(): string[] {
  * The string should be in the format alias1=executable1;alias2=executable2
  */
 function parseArgStringList<T = never[]>(str: unknown, fallback: any = []): string[] | T {
-	if (typeof str === 'string') {
+	if (typeof str === 'string' && str !== '') {
 		return str.split(';')
 	}
 
