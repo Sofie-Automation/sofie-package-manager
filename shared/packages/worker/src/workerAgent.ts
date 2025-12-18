@@ -346,10 +346,8 @@ export class WorkerAgent {
 					support: false,
 					reason: {
 						user: 'This worker is not allowed to work on this type of expectation',
-						tech: `Expectation type "${
-							exp.type
-						}" is not in allowedExpectationTypes: [${this.config.worker.allowedExpectationTypes.join(
-							', '
+						tech: `Expectation type "${exp.type}" is not in --allowedExpectationTypes: [${JSON.stringify(
+							this.config.worker.allowedExpectationTypes
 						)}] for this worker`,
 					},
 					knownReason: true,
