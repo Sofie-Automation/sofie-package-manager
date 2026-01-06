@@ -10,6 +10,7 @@ import { QuantelAccessorHandle } from './quantel'
 import { ATEMAccessorHandle } from './atem'
 import { FTPAccessorHandle } from './ftp'
 import { KairosClipAccessorHandle } from './kairosClip'
+import { S3AccessorHandle } from './s3'
 
 export function getAccessorHandle<Metadata>(
 	worker: BaseWorker,
@@ -56,6 +57,8 @@ export function getAccessorStaticHandle(accessor: AccessorOnPackage.Any) {
 		return FTPAccessorHandle
 	} else if (accessor.type === Accessor.AccessType.KAIROS_CLIP) {
 		return KairosClipAccessorHandle
+	} else if (accessor.type === Accessor.AccessType.S3) {
+		return S3AccessorHandle
 	} else {
 		assertNever(accessor.type) // Assert  so as to not forget to add an if-clause above
 		throw new Error(`Unsupported Accessor type "${accessor.type}"`)
@@ -108,6 +111,12 @@ export function isKairosClipAccessorHandle<Metadata>(
 	return accessorHandler.type === KairosClipAccessorHandle.type
 }
 
+export function isS3AccessorHandle<Metadata>(
+	accessorHandler: GenericAccessorHandle<Metadata>
+): accessorHandler is S3AccessorHandle<Metadata> {
+	return accessorHandler.type === S3AccessorHandle.type
+}
+
 /** Returns a generic value for how costly it is to use an Accessor type. A higher value means that it is more expensive to access the accessor */
 export function getAccessorCost(accessorType: Accessor.AccessType | undefined): number {
 	switch (accessorType) {
@@ -127,6 +136,7 @@ export function getAccessorCost(accessorType: Accessor.AccessType | undefined): 
 			return 2
 		case Accessor.AccessType.HTTP_PROXY:
 		case Accessor.AccessType.HTTP:
+		case Accessor.AccessType.S3:
 			return 3
 
 		case undefined:

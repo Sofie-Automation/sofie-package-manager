@@ -29,6 +29,8 @@
 		"rimraf": "^5.0.5"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.943.0",
+		"@aws-sdk/lib-storage": "^3.943.0",
 		"@parcel/watcher": "^2.3.0",
 		"@sofie-package-manager/api": "1.53.0-alpha.4",
 		"abort-controller": "^3.0.0",

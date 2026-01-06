@@ -15,6 +15,7 @@ import {
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
 import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
@@ -113,13 +114,15 @@ export const FileVerify: ExpectationHandlerGenericWorker = {
 			lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 			lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 			lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-			lookupTarget.accessor.type === Accessor.AccessType.FTP
+			lookupTarget.accessor.type === Accessor.AccessType.FTP ||
+			lookupTarget.accessor.type === Accessor.AccessType.S3
 		) {
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
 				!isHTTPProxyAccessorHandle(targetHandle) &&
-				!isFTPAccessorHandle(targetHandle)
+				!isFTPAccessorHandle(targetHandle) &&
+				!isS3AccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
