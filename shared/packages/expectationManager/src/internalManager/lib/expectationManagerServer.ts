@@ -104,22 +104,22 @@ export class ExpectationManagerServer {
 				'*': 'ws://127.0.0.1',
 			}
 		}
-		this.logger.info(`##### type: ${this.workForceConnectionOptions.type}`)
+		this.logger.debug(`##### type: ${this.workForceConnectionOptions.type}`)
 		if (this.serverOptions.type === 'websocket' && this.serverOptions.port === 0) {
-			this.logger.info(`##### this.serverOptions.port: ${this.serverOptions.port}`)
+			this.logger.debug(`##### this.serverOptions.port: ${this.serverOptions.port}`)
 			// When the configured port i 0, the next free port is picked
 			for (const key of Object.keys(this._serverAccessUrls)) {
 				// If no port was specified in the url, add it:
 				if (!this._serverAccessUrls[key].match(/\/\/[^/]+:\d/)) {
-					this.logger.info(`updateing ${key}`)
+					this.logger.debug(`updateing ${key}`)
 					this._serverAccessUrls[key] += `:${this.manager.expectationManagerServer.websocketServer?.port}`
 				}
 			}
 		}
 
-		this.logger.info(`##### this.serverAccessBaseUrls: ${JSON.stringify(this.serverAccessBaseUrls)}`)
-		this.logger.info(`##### websocketServer?.port: ${this.manager.expectationManagerServer.websocketServer?.port}`)
-		this.logger.info(`##### this._serverAccessUrls: ${JSON.stringify(this._serverAccessUrls)}`)
+		this.logger.debug(`##### this.serverAccessBaseUrls: ${JSON.stringify(this.serverAccessBaseUrls)}`)
+		this.logger.debug(`##### websocketServer?.port: ${this.manager.expectationManagerServer.websocketServer?.port}`)
+		this.logger.debug(`##### this._serverAccessUrls: ${JSON.stringify(this._serverAccessUrls)}`)
 
 		if (!this._serverAccessUrls) throw new Error(`ExpectationManager.serverAccessUrl not set!`)
 	}

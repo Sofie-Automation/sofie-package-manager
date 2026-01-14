@@ -26,6 +26,10 @@ export class WebsocketServer extends HelpfulEventEmitter {
 
 		this.wss = new WebSocket.Server({ port: port })
 
+		this.wss.on('listening', () => {
+			this.logger.info(`Listening on port ${port}`)
+		})
+
 		this.wss.on('close', () => {
 			// The websocekt server is closed.
 
