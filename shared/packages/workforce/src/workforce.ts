@@ -331,22 +331,21 @@ export class Workforce {
 	}
 
 	public async registerExpectationManager(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
-		let em = this.expectationManagers.get(managerId)
-		if (!em || deepEqual(em.urls, urls)) {
-			// Added/Changed
+		this.logger.info(`Register ExpectationManager (${managerId}) at URLs: ${JSON.stringify(urls)}`)
 
-			this.logger.info(`Workforce: Register ExpectationManager (${managerId}) at URLs: ${JSON.stringify(urls)}`)
-
-			// Announce the new expectation manager to the workerAgents:
-			for (const workerAgent of this.workerAgents.values()) {
-				await workerAgent.api.expectationManagerAvailable(managerId, urls)
-			}
-			em = this.expectationManagers.get(managerId)
-		}
+		const em = this.expectationManagers.get(managerId)
+		let hasChanged = false
 		if (!em) {
-			throw new Error(`Internal Error: (registerExpectationManager) ExpectationManager "${managerId}" not found!`)
+			hasChanged = true
+		} else if (!deepEqual(em.urls, urls)) {
+			em.urls = urls
+			hasChanged = true
 		}
-		em.urls = urls
+
+		if (hasChanged) {
+			// Announce the new/changed expectation manager to the workerAgents:
+			this.triggerAnnounceExpectationManagersToWorkers(managerId)
+		}
 	}
 	public async requestResourcesForExpectation(exp: Expectation.Any): Promise<boolean> {
 		return this.workerHandler.requestResourcesForExpectation(exp)
@@ -450,5 +449,43 @@ export class Workforce {
 			.catch((error) => {
 				this.logger.error(`Workforce: Error in getRunningApps: ${stringifyError(error)}`)
 			})
+	}
+
+	private expectationManagersToAnnounceTimeout: NodeJS.Timeout | null = null
+	private triggerAnnounceExpectationManagersToWorkers(managerId: ExpectationManagerId): void {
+		this.expectationManagersToAnnounce.add(managerId)
+
+		if (this.expectationManagersToAnnounceTimeout) return // already scheduled to trigger
+
+		// Trigger an announce soon:
+		this.expectationManagersToAnnounceTimeout = setTimeout(() => {
+			this.expectationManagersToAnnounceTimeout = null
+
+			Promise.resolve()
+				.then(async () => {
+					await this._announceExpectationManagersToWorkers()
+				})
+				.catch((err) => {
+					this.logger.error(`Error in _triggerAnnounceExpectationManagersToWorkers: ${stringifyError(err)}`)
+				})
+		}, 1000)
+	}
+
+	private expectationManagersToAnnounce = new Set<ExpectationManagerId>()
+	private async _announceExpectationManagersToWorkers(): Promise<void> {
+		const managerIds = Array.from(this.expectationManagersToAnnounce.values())
+		this.expectationManagersToAnnounce.clear()
+
+		for (const managerId of managerIds) {
+			const em = this.expectationManagers.get(managerId)
+			if (em?.urls) {
+				const urls = em.urls
+				await Promise.all(
+					Array.from(this.workerAgents.values()).map(async (workerAgent) =>
+						workerAgent.api.expectationManagerAvailable(managerId, urls)
+					)
+				)
+			}
+		}
 	}
 }
