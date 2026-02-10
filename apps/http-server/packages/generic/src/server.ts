@@ -140,7 +140,7 @@ export class PackageProxyServer {
 		this.router.get('/uploadForm/:path+', async (ctx) => {
 			// ctx.response.status = result.code
 			ctx.type = 'text/html'
-			ctx.body = (await fsReadFile(path.join(__dirname, '../static/uploadForm.html'), 'utf-8'))
+			ctx.body = (await fsReadFile(path.resolve('../static/uploadForm.html'), 'utf-8'))
 				.replace('$path', `/package/${ctx.params.path}`)
 				.replace('$apiKey', first(ctx.request.query.apiKey) ?? '')
 		})
