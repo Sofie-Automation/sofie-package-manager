@@ -145,7 +145,7 @@ export class PackageManagerHandler {
 
 		this.coreHandler.setPackageManagerHandler(this)
 
-		this.logger.info('PackageManagerHandler init')
+		this.logger.info('PackageManagerHandler init...')
 
 		coreHandler.onConnected(() => {
 			this.setupObservers()
@@ -157,10 +157,20 @@ export class PackageManagerHandler {
 		this.onSettingsChanged()
 		this.triggerUpdatedExpectedPackages()
 
-		await this.callbacksHandler.cleanReportedStatuses()
-		await this.expectationManager.init()
+		try {
+			await this.callbacksHandler.cleanReportedStatuses()
+		} catch (e) {
+			this.logger.error(`Error during cleanReportedStatuses()`)
+			throw e
+		}
+		try {
+			await this.expectationManager.init()
+		} catch (e) {
+			this.logger.error(`Error during expectationManager.init()`)
+			throw e
+		}
 
-		this.logger.info('PackageManagerHandler initialized')
+		this.logger.info('PackageManagerHandler initialized!')
 	}
 	onSettingsChanged(): void {
 		this.settings = {

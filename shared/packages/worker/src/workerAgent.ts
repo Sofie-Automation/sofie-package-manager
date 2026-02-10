@@ -240,6 +240,9 @@ export class WorkerAgent {
 			const pAppContainer = new Promise<void>((resolve, reject) => {
 				this.initAppContainerAPIPromise = { resolve, reject }
 			})
+			if (this.appContainerConnectionOptions.type === 'websocket') {
+				this.logger.info(`Connecting to AppContainer at ${this.appContainerConnectionOptions.url}`)
+			}
 			await this.appContainerAPI.init(this.appContainerConnectionOptions, {
 				setLogLevel: async (logLevel: LogLevel) => this.setLogLevel(logLevel),
 				_debugKill: async () => this._debugKill(),
@@ -260,6 +263,9 @@ export class WorkerAgent {
 		const pWorkForce = new Promise<void>((resolve, reject) => {
 			this.initWorkForceAPIPromise = { resolve, reject }
 		})
+		if (this.workForceConnectionOptions.type === 'websocket') {
+			this.logger.info(`Connecting to Workforce at ${this.workForceConnectionOptions.url}`)
+		}
 		await this.workforceAPI.init(this.workForceConnectionOptions, {
 			setLogLevel: async (logLevel: LogLevel) => this.setLogLevel(logLevel),
 			_debugKill: async () => this._debugKill(),

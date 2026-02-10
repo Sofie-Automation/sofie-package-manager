@@ -58,6 +58,9 @@ export class WorkforceConnection {
 		})
 	}
 	public async init(): Promise<void> {
+		if (this.workForceConnectionOptions.type === 'websocket') {
+			this.logger.info(`Connecting to Workforce at ${this.workForceConnectionOptions.url}`)
+		}
 		await this.workforceAPI.init(this.workForceConnectionOptions, {
 			setLogLevel: async (logLevel: LogLevel): Promise<void> => {
 				this.logger.setLogLevel(logLevel)
