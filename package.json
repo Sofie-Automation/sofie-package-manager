@@ -17,7 +17,7 @@
 		"setup": "lerna bootstrap",
 		"reset": "node scripts/reset.js",
 		"build": "lerna run build --stream",
-		"build:changed": "lerna run build --since head --exclude-dependents --stream",
+		"build:changed": "lerna run build --since HEAD --exclude-dependents --stream",
 		"lint": "lerna exec --parallel --no-bail -- run -T eslint . --ext .ts,.tsx",
 		"lintfix": "yarn lint --fix",
 		"lint:changed": "lerna exec --since origin/main --include-dependents -- eslint . --ext .js,.jsx,.ts,.tsx",
@@ -30,7 +30,7 @@
 		"typecheck": "lerna exec -- tsc --noEmit",
 		"typecheck:changed": "lerna exec --since origin/main --include-dependents -- tsc --noEmit",
 		"build-win32": "node scripts/prepare-for-build32.js && lerna run build-win32 --stream && node scripts/cleanup-after-build32.mjs",
-		"build-win32:ci": "node scripts/prepare-for-build32.js && lerna run build-win32 --stream --concurrency=1 && node scripts/cleanup-after-build32.mjs",
+		"build-win32:ci": "node scripts/prepare-for-build32.js && lerna run build-win32 --stream --concurrency=3 && node scripts/cleanup-after-build32.mjs",
 		"gather-built": "node scripts/gather-all-built.mjs",
 		"sign-executables": "node scripts/sign-executables.mjs",
 		"start:http-server": "lerna run start --stream --scope @http-server/app",
@@ -65,7 +65,7 @@
 		"node-gyp": "^11.4.2",
 		"rimraf": "^5.0.5",
 		"ts-jest": "^29.0.3",
-		"typescript": "~4.9",
+		"typescript": "^5.7.3",
 		"underscore": "^1.13.6"
 	},
 	"engines": {

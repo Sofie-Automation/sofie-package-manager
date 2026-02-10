@@ -23,6 +23,7 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
 import {
@@ -103,7 +104,8 @@ export const FileCopyProxy: ExpectationHandlerGenericWorker = {
 				(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 					lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 					lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-					lookupTarget.accessor.type === Accessor.AccessType.FTP)
+					lookupTarget.accessor.type === Accessor.AccessType.FTP ||
+					lookupTarget.accessor.type === Accessor.AccessType.S3)
 			) {
 				// We can read the source and write the preview directly.
 				if (!isQuantelClipAccessorHandle(sourceHandle)) throw new Error(`Source AccessHandler type is wrong`)
@@ -111,7 +113,8 @@ export const FileCopyProxy: ExpectationHandlerGenericWorker = {
 					!isLocalFolderAccessorHandle(targetHandle) &&
 					!isFileShareAccessorHandle(targetHandle) &&
 					!isHTTPProxyAccessorHandle(targetHandle) &&
-					!isFTPAccessorHandle(targetHandle)
+					!isFTPAccessorHandle(targetHandle) &&
+					!isS3AccessorHandle(targetHandle)
 				)
 					throw new Error(`Target AccessHandler type is wrong`)
 
@@ -140,6 +143,7 @@ export const FileCopyProxy: ExpectationHandlerGenericWorker = {
 					const args = proxyFFMpegArguments(sourceHTTPHandle.fullUrl, false, targetHandle)
 
 					ffMpegProcess = await spawnFFMpeg(
+						worker,
 						args,
 						targetHandle,
 						async () => {
@@ -180,7 +184,7 @@ export const FileCopyProxy: ExpectationHandlerGenericWorker = {
 		}
 		// Fallback:
 		if (workInProgress === null) {
-			workInProgress = await doFileCopyExpectation(exp, lookupSource, lookupTarget)
+			workInProgress = await doFileCopyExpectation(worker, exp, lookupSource, lookupTarget)
 		}
 		if (workInProgress === null) {
 			throw new Error(

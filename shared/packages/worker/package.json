@@ -18,6 +18,7 @@
 	},
 	"devDependencies": {
 		"@types/deep-diff": "^1.0.0",
+		"@types/node": "^24",
 		"@types/node-fetch": "^2.5.8",
 		"@types/proper-lockfile": "^4.1.4",
 		"@types/ssh2-sftp-client": "^9.0.4",
@@ -28,6 +29,8 @@
 		"rimraf": "^5.0.5"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.943.0",
+		"@aws-sdk/lib-storage": "^3.943.0",
 		"@parcel/watcher": "^2.3.0",
 		"@sofie-package-manager/api": "1.53.0-alpha.4",
 		"abort-controller": "^3.0.0",
@@ -36,6 +39,7 @@
 		"csv-parser": "^3.0.0",
 		"deep-diff": "^1.0.2",
 		"form-data": "^4.0.0",
+		"kairos-connection": "^0.2.2",
 		"node-fetch": "^2.6.1",
 		"p-queue": "^6.6.2",
 		"proper-lockfile": "^4.1.2",

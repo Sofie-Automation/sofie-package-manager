@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import { LoggerInstance, stringifyError, testHtmlRenderer } from '@sofie-package-manager/api'
+import { ExecutableAliasSource, LoggerInstance, stringifyError, testHtmlRenderer } from '@sofie-package-manager/api'
 import { testFFMpeg, testFFProbe } from '../expectationHandlers/lib/ffmpeg'
 
 export class ExecutableDependencyHandler {
@@ -19,7 +19,7 @@ export class ExecutableDependencyHandler {
 		}
 	> = new Map()
 
-	constructor(private logger: LoggerInstance) {}
+	constructor(private logger: LoggerInstance, private worker: ExecutableAliasSource) {}
 
 	/**
 	 * Returns null if all is well, otherwise an error message
@@ -59,37 +59,37 @@ export class ExecutableDependencyHandler {
 	}
 
 	public async checkExecutables(): Promise<void> {
-		this.testFFMpeg = await testFFMpeg()
-		this.testFFProbe = await testFFProbe()
+		this.testFFMpeg = await testFFMpeg(this.worker)
+		this.testFFProbe = await testFFProbe(this.worker)
 		this.testHTMLRenderer = await testHtmlRenderer()
 	}
 
 	async testFFExecutable(executable: string): Promise<string | null> {
-		if (executable.endsWith('.exe') && process.platform !== 'win32') {
-			executable = executable.slice(0, -4) // remove .exe
+		try {
+			return new Promise<string | null>((resolve) => {
+				const execProcess = spawn(executable, ['-v'])
+
+				// Guard against the process not exiting on its own:
+				const timeout = setTimeout(() => {
+					resolve(execProcess.pid ? null : 'Timed out when checking executable')
+					execProcess.kill()
+				}, 2000)
+
+				execProcess.on('error', (e) => {
+					clearTimeout(timeout)
+					if (`${e}`.includes('ENOENT')) {
+						resolve(`Executable not found: ${stringifyError(e)}`)
+					} else {
+						resolve(`Error checking Executable: ${stringifyError(e)}`)
+					}
+				})
+				execProcess.on('exit', (_code) => {
+					clearTimeout(timeout)
+					resolve(null)
+				})
+			})
+		} catch (err) {
+			return `Error when spawning process ${executable}: ${stringifyError(err)}`
 		}
-
-		return new Promise<string | null>((resolve) => {
-			const execProcess = spawn(executable, ['-v'])
-
-			// Guard against the process not exiting on its own:
-			const timeout = setTimeout(() => {
-				resolve(execProcess.pid ? null : 'Timed out when checking executable')
-				execProcess.kill()
-			}, 2000)
-
-			execProcess.on('error', (e) => {
-				clearTimeout(timeout)
-				if (`${e}`.includes('ENOENT')) {
-					resolve(`Executable not found: ${stringifyError(e)}`)
-				} else {
-					resolve(`Error checking Executable: ${stringifyError(e)}`)
-				}
-			})
-			execProcess.on('exit', (_code) => {
-				clearTimeout(timeout)
-				resolve(null)
-			})
-		})
 	}
 }

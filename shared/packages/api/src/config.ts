@@ -5,6 +5,9 @@ import { WorkerAgentConfig } from './worker'
 import { AppContainerConfig } from './appContainer'
 import { protectString } from './ProtectedString'
 import { AppContainerId, WorkerAgentId } from './ids'
+import { countOccurrences } from './lib'
+import { URLMap } from './methods'
+import { Expectation } from './expectationApi'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -63,6 +66,11 @@ const httpServerArguments = defineArguments({
 		default: process.env.HTTP_SERVER_BASE_PATH || './fileStorage',
 		describe: 'The internal path to use for file storage',
 	},
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.HTTP_SERVER_MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, the HTTP-server will ignore file extensions when serving files',
+	},
 })
 /** CLI-argument-definitions for the Package Manager process */
 const packageManagerArguments = defineArguments({
@@ -99,10 +107,11 @@ const packageManagerArguments = defineArguments({
 		default: parseInt(process.env.PACKAGE_MANAGER_PORT || '', 10) || 8060,
 		describe: 'The port number to start the Package Manager websocket server on',
 	},
-	accessUrl: {
+	accessURL: {
 		type: 'string',
 		default: process.env.PACKAGE_MANAGER_URL || 'ws://localhost:8060',
-		describe: 'The URL where Package Manager websocket server can be accessed',
+		describe:
+			'A list of URLs where Package Manager websocket server can be accessed and the respective networkIds where they should be used. No networkId or a `*` means a catch-all public URL. ("networkA@ws://10.0.0.1;networkB@ws://192.168.0.1;ws://public.com")',
 	},
 	workforceURL: {
 		type: 'string',
@@ -130,18 +139,14 @@ const packageManagerArguments = defineArguments({
 		describe: 'How many expectation states can be evaluated at the same time',
 	},
 })
-/** CLI-argument-definitions for the Worker process */
-const workerArguments = defineArguments({
-	workerId: { type: 'string', default: process.env.WORKER_ID || 'worker0', describe: 'Unique id of the worker' },
-	workforceURL: {
-		type: 'string',
-		default: process.env.WORKFORCE_URL || 'ws://localhost:8070',
-		describe: 'The URL to the Workforce',
-	},
-	appContainerURL: {
-		type: 'string',
-		default: process.env.APP_CONTAINER_URL || '', // 'ws://localhost:8090',
-		describe: 'The URL to the AppContainer',
+
+/** CLI Arguments that can be passed through via an AppContainer */
+const workerArgumentsGeneric = defineArguments({
+	sourcePackageStabilityThreshold: {
+		type: 'number',
+		default: process.env.WORKER_SOURCE_PACKAGE_STABILITY_THRESHOLD || '',
+		describe:
+			'The time to wait when determining if the source package is stable or not (this is used to wait for growing files). Set to 0 to disable the stability check. Defaults to 4000 ms',
 	},
 	windowsDriveLetters: {
 		type: 'string',
@@ -153,6 +158,13 @@ const workerArguments = defineArguments({
 		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
 		describe: 'A temporary, local file path where the worker can store temporary artifacts',
 	},
+	allowedExpectationTypes: {
+		type: 'string',
+		default: process.env.WORKER_ALLOWED_EXPECTATION_TYPES || '',
+		describe: `A semicolon-separated list of allowed expectation types for this worker. Allowed options are: ${Object.values<string>(
+			Expectation.Type
+		).join(', ')}. (Empty means "all types are allowed")`,
+	},
 	resourceId: {
 		type: 'string',
 		default: process.env.WORKER_NETWORK_ID || 'default',
@@ -161,7 +173,7 @@ const workerArguments = defineArguments({
 	networkIds: {
 		type: 'string',
 		default: process.env.WORKER_NETWORK_ID || 'default',
-		describe: 'Identifier of the local networks this worker has access to ("networkA;networkB")',
+		describe: 'List of identifiers of the local networks this worker has access to. ("networkA;networkB")',
 	},
 	costMultiplier: {
 		type: 'number',
@@ -174,11 +186,7 @@ const workerArguments = defineArguments({
 		describe:
 			'If set, the worker will consider the CPU load of the system it runs on before it accepts jobs. Set to a value between 0 and 1, the worker will accept jobs if the CPU load is below the configured value.',
 	},
-	pickUpCriticalExpectationsOnly: {
-		type: 'boolean',
-		default: process.env.WORKER_PICK_UP_CRITICAL_EXPECTATIONS_ONLY === '1' || false,
-		describe: 'If set to 1, the worker will only pick up expectations that are marked as critical for playout.',
-	},
+
 	failurePeriodLimit: {
 		type: 'number',
 		default: parseInt(process.env.WORKER_FAILURE_PERIOD_LIMIT || '', 10) || 0,
@@ -190,6 +198,38 @@ const workerArguments = defineArguments({
 		default: parseInt(process.env.WORKER_FAILURE_PERIOD || '', 10) || 5 * 60 * 1000,
 		describe: 'This is the period of time used by "failurePeriodLimit" (milliseconds)',
 	},
+	executableAliases: {
+		type: 'string',
+		default: process.env.WORKER_EXECUTABLE_ALIASES || '',
+		describe:
+			'List of aliases for executables the worker can use. Format: "alias1=path to executable1;alias2=executable2"',
+	},
+	matchFilenamesWithoutExtension: {
+		type: 'boolean',
+		default: process.env.MATCH_FILENAMES_WITHOUT_EXTENSION === '1',
+		describe: 'If true, the worker will match and use files without file extensions (in supported accessors only)',
+	},
+})
+/** CLI-argument-definitions for the Worker process */
+const workerArguments = defineArguments({
+	workforceURL: {
+		type: 'string',
+		default: process.env.WORKFORCE_URL || 'ws://localhost:8070',
+		describe: 'The URL to the Workforce',
+	},
+	appContainerURL: {
+		type: 'string',
+		default: process.env.APP_CONTAINER_URL || '', // 'ws://localhost:8090',
+		describe: 'The URL to the AppContainer',
+	},
+	workerId: { type: 'string', default: process.env.WORKER_ID || 'worker0', describe: 'Unique id of the worker' },
+	pickUpCriticalExpectationsOnly: {
+		type: 'boolean',
+		default: process.env.WORKER_PICK_UP_CRITICAL_EXPECTATIONS_ONLY === '1' || false,
+		describe: 'If set to 1, the worker will only pick up expectations that are marked as critical for playout.',
+	},
+
+	...workerArgumentsGeneric,
 })
 /** CLI-argument-definitions for the AppContainer process */
 const appContainerArguments = defineArguments({
@@ -235,48 +275,7 @@ const appContainerArguments = defineArguments({
 	},
 
 	// These are passed-through to the spun-up workers:
-	resourceId: {
-		type: 'string',
-		default: process.env.WORKER_RESOURCE_ID || 'default',
-		describe: 'Identifier of the local resource/computer this worker runs on',
-	},
-	networkIds: {
-		type: 'string',
-		default: process.env.WORKER_NETWORK_ID || 'default',
-		describe: 'Identifier of the local networks this worker has access to ("networkA;networkB")',
-	},
-	windowsDriveLetters: {
-		type: 'string',
-		default: process.env.WORKER_WINDOWS_DRIVE_LETTERS || 'X;Y;Z',
-		describe: 'Which Windows Drive letters can be used to map shares. ("X;Y;Z") ',
-	},
-	temporaryFolderPath: {
-		type: 'string',
-		default: process.env.WORKER_TEMPORARY_FOLDER_PATH || '',
-		describe: 'A temporary, local file path where the worker can store temporary artifacts',
-	},
-	costMultiplier: {
-		type: 'number',
-		default: process.env.WORKER_COST_MULTIPLIER || 1,
-		describe: 'Multiply the cost of the worker with this',
-	},
-	considerCPULoad: {
-		type: 'number',
-		default: process.env.WORKER_CONSIDER_CPU_LOAD || '',
-		describe:
-			'If set, the worker will consider the CPU load of the system it runs on before it accepts jobs. Set to a value between 0 and 1, the worker will accept jobs if the CPU load is below the configured value.',
-	},
-	failurePeriodLimit: {
-		type: 'number',
-		default: parseInt(process.env.WORKER_FAILURE_PERIOD_LIMIT || '', 10) || 0,
-		describe:
-			'If set, the worker will count the number of periods of time where it encounters errors while working and will restart once the number of consequent periods of time is exceeded.',
-	},
-	failurePeriod: {
-		type: 'number',
-		default: parseInt(process.env.WORKER_FAILURE_PERIOD || '', 10) || 5 * 60 * 1000,
-		describe: 'This is the period of time used by "failurePeriodLimit" (milliseconds)',
-	},
+	...workerArgumentsGeneric,
 })
 /** CLI-argument-definitions for the "Single" process */
 const singleAppArguments = defineArguments({
@@ -380,6 +379,8 @@ export interface HTTPServerConfig {
 		apiKeyWrite: string | undefined
 		/** Clean up (remove) files older than this age (in seconds). 0 or -1 means that it's disabled. */
 		cleanFileAge: number
+		/** If true, the HTTP-server will ignore file extensions when serving files */
+		matchFilenamesWithoutExtension: boolean
 	}
 }
 export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
@@ -402,6 +403,7 @@ export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
 			apiKeyRead: argv.apiKeyRead,
 			apiKeyWrite: argv.apiKeyWrite,
 			cleanFileAge: argv.cleanFileAge,
+			matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 		},
 	}
 }
@@ -416,7 +418,7 @@ export interface PackageManagerConfig {
 		disableWatchdog: boolean
 
 		port: number | null
-		accessUrl: string | null
+		accessURLs: URLMap | null
 		workforceURL: string | null
 
 		watchFiles: boolean
@@ -443,7 +445,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 			disableWatchdog: argv.disableWatchdog,
 
 			port: argv.port,
-			accessUrl: argv.accessUrl,
+			accessURLs: parseNetworkScopedURLs(argv.accessURL),
 			workforceURL: argv.workforceURL,
 
 			watchFiles: argv.watchFiles,
@@ -457,14 +459,12 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 export interface WorkerConfig {
 	process: ProcessConfig
 	worker: {
-		// Note: when changing these values, remember to also update appContainer.ts
 		workforceURL: string | null
 		appContainerURL: string | null
-		resourceId: string
-		networkIds: string[]
-		costMultiplier: number
-		considerCPULoad: number | null
+		workerId: WorkerAgentId
+		/** If true, the worker will only pick up expectations that are marked as "critical" */
 		pickUpCriticalExpectationsOnly: boolean
+		allowedExpectationTypes: string[] | null
 		failurePeriodLimit: number
 		failurePeriod: number
 	} & WorkerAgentConfig
@@ -480,26 +480,23 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 	return {
 		process: getProcessConfig(argv),
 		worker: {
-			workerId: protectString<WorkerAgentId>(argv.workerId),
 			workforceURL: argv.workforceURL,
 			appContainerURL: argv.appContainerURL,
+			workerId: protectString<WorkerAgentId>(argv.workerId),
+			pickUpCriticalExpectationsOnly: parseArgBoolean(argv.pickUpCriticalExpectationsOnly) ?? false,
 
-			resourceId: argv.resourceId,
-			networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
-			windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
+			sourcePackageStabilityThreshold: parseArgInteger(argv.sourcePackageStabilityThreshold),
+			windowsDriveLetters: parseArgStringList(argv.windowsDriveLetters),
 			temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
-			costMultiplier:
-				(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) || 1,
-			considerCPULoad:
-				(typeof argv.considerCPULoad === 'string' ? parseFloat(argv.considerCPULoad) : argv.considerCPULoad) ||
-				null,
-			pickUpCriticalExpectationsOnly: argv.pickUpCriticalExpectationsOnly,
-			failurePeriodLimit:
-				(typeof argv.failurePeriodLimit === 'string'
-					? parseInt(argv.failurePeriodLimit)
-					: argv.failurePeriodLimit) || 0,
-			failurePeriod:
-				(typeof argv.failurePeriod === 'string' ? parseInt(argv.failurePeriod) : argv.failurePeriod) || 0,
+			allowedExpectationTypes: parseArgStringList(argv.allowedExpectationTypes, null),
+			resourceId: argv.resourceId,
+			networkIds: parseArgStringList(argv.networkIds),
+			costMultiplier: parseArgFloat(argv.costMultiplier) ?? 1,
+			considerCPULoad: parseArgFloat(argv.considerCPULoad) ?? null,
+			failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
+			failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
+			executableAliases: parseExecutableAliases(argv.executableAliases),
+			matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 		},
 	}
 }
@@ -529,23 +526,18 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 			minCriticalWorkerApps: argv.minCriticalWorkerApps,
 
 			worker: {
-				resourceId: argv.resourceId,
-				networkIds: argv.networkIds ? argv.networkIds.split(';') : [],
-				windowsDriveLetters: argv.windowsDriveLetters ? argv.windowsDriveLetters.split(';') : [],
+				sourcePackageStabilityThreshold: parseArgInteger(argv.sourcePackageStabilityThreshold),
+				windowsDriveLetters: parseArgStringList(argv.windowsDriveLetters),
 				temporaryFolderPath: argv.temporaryFolderPath ? argv.temporaryFolderPath : undefined,
-				costMultiplier:
-					(typeof argv.costMultiplier === 'string' ? parseFloat(argv.costMultiplier) : argv.costMultiplier) ||
-					1,
-				considerCPULoad:
-					(typeof argv.considerCPULoad === 'string'
-						? parseFloat(argv.considerCPULoad)
-						: argv.considerCPULoad) || null,
-				failurePeriodLimit:
-					(typeof argv.failurePeriodLimit === 'string'
-						? parseInt(argv.failurePeriodLimit)
-						: argv.failurePeriodLimit) || 0,
-				failurePeriod:
-					(typeof argv.failurePeriod === 'string' ? parseInt(argv.failurePeriod) : argv.failurePeriod) || 0,
+				allowedExpectationTypes: parseArgStringList(argv.allowedExpectationTypes, null),
+				resourceId: argv.resourceId,
+				networkIds: parseArgStringList(argv.networkIds),
+				costMultiplier: parseArgFloat(argv.costMultiplier) ?? 1,
+				considerCPULoad: parseArgFloat(argv.considerCPULoad) ?? null,
+				failurePeriodLimit: parseArgInteger(argv.failurePeriodLimit) ?? 0,
+				failurePeriod: parseArgInteger(argv.failurePeriod) ?? 0,
+				executableAliases: parseExecutableAliases(argv.executableAliases),
+				matchFilenamesWithoutExtension: argv.matchFilenamesWithoutExtension,
 			},
 		},
 	}
@@ -659,5 +651,163 @@ export function getProcessArgv(): string[] {
 	// If the first argument is just '--', remove it:
 	if (args[0] === '--') args = args.slice(1)
 
+	// Fix an issue when arguments are escaped and contains spaces:
+
+	// for example: --myArg="this is hard" becomes ['--myArg="this', 'is', 'hard"']
+	for (let i = 0; i < args.length; i++) {
+		const m = args[i].match(/=*(["'])/)
+		if (m) {
+			const quote = m[1] // " or '
+
+			// check if the arg contains only one quote
+			if (countOccurrences(args[i], quote) !== 1) continue
+
+			// check future args
+			let argCombined = args[i]
+
+			for (let j = i + 1; j < args.length; j++) {
+				argCombined += ' ' + args[j]
+				if (args[j].includes(quote)) {
+					// Found the end
+					//
+					// Combine the args in between and remove used args:
+					args[i] = argCombined
+					args.splice(i + 1, j - i)
+					break
+				}
+			}
+		}
+	}
+
 	return args
+}
+
+/**
+ * Parses a string of executable aliases into an object.
+ * The string should be in the format alias1=executable1;alias2=executable2
+ */
+function parseArgStringList<T = never[]>(str: unknown, fallback: any = []): string[] | T {
+	if (typeof str === 'string' && str !== '') {
+		return str.split(';')
+	}
+
+	return fallback
+}
+
+/**
+ * Parses a string of networked-scoped URLs into a URLMap - an object with at least a '*' key for the fallback URL.
+ * The string should be in the format network1@schema:host;network2@schema://host;schema:host.public
+ */
+export function parseNetworkScopedURLs(str: unknown): URLMap | null {
+	if (typeof str === 'string' && str.startsWith('"') && str.endsWith('"')) {
+		// the string is escaped
+		try {
+			str = JSON.parse(str)
+		} catch {
+			// ignore parse errors
+		}
+	}
+
+	const accessURLs: URLMap = {
+		'*': '',
+	}
+
+	let fallBackURL: string | null = null
+
+	if (typeof str !== 'string' || str.length === 0) return null
+
+	str.split(';').forEach((networkIdAndURLPair: string) => {
+		const els = networkIdAndURLPair.split('@')
+		let networkId = els.shift()
+		if (networkId === undefined) return // means that networkIdAndURLPair was an empty string
+
+		let url = els.join('@') // in case the URL contains an '@'
+
+		if (!url) {
+			url = networkId
+			networkId = '*'
+		}
+
+		if (networkId === '*' || !fallBackURL) {
+			fallBackURL = url
+		}
+		accessURLs[networkId] = url
+	})
+
+	if (fallBackURL === null) {
+		// this will never happen, but for type safety:
+		throw new Error(`Error: At least one accessURL must be specified!`)
+	}
+
+	accessURLs['*'] = fallBackURL
+
+	return accessURLs
+}
+
+/**
+ * Parses a string of executable aliases into an object.
+ * The string should be in the format alias1=executable1;alias2=executable2
+ */
+export function parseExecutableAliases(str: unknown): { [alias: string]: string } {
+	if (typeof str === 'string' && str.startsWith('"') && str.endsWith('"')) {
+		// the string is escaped
+		try {
+			str = JSON.parse(str)
+		} catch {
+			// ignore parse errors
+		}
+	}
+
+	if (typeof str === 'string') {
+		const result: { [alias: string]: string } = {}
+
+		const statements = str.split(';')
+
+		for (const statement of statements) {
+			const words = statement.split('=')
+			if (words.length !== 2) continue
+
+			const alias = words[0]
+			const executable = words[1]
+
+			if (alias && executable) {
+				result[alias] = executable
+			}
+		}
+
+		return result
+	}
+
+	return {}
+}
+
+function parseArgInteger(str: unknown): number | undefined {
+	if (!str) return undefined
+
+	const int = typeof str === 'number' ? str : typeof str === 'string' ? parseInt(str, 20) : undefined
+	if (Number.isNaN(int) || !int) return undefined
+
+	return int
+}
+
+function parseArgFloat(str: unknown): number | undefined {
+	if (!str) return undefined
+
+	const int = typeof str === 'number' ? str : typeof str === 'string' ? parseFloat(str) : undefined
+	if (Number.isNaN(int) || !int) return undefined
+
+	return int
+}
+function parseArgBoolean(str: unknown): boolean | undefined {
+	if (typeof str === 'number') {
+		return str !== 0
+	}
+	if (typeof str === 'string') {
+		if (str === 'true') return true
+		if (str === '1') return true
+
+		if (str === 'false') return false
+		if (str === '0') return false
+	}
+	return undefined
 }

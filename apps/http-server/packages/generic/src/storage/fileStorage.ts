@@ -4,7 +4,12 @@ import { promisify } from 'util'
 import mime from 'mime-types'
 import prettyBytes from 'pretty-bytes'
 import { asyncPipe, CTXPost } from '../lib'
-import { betterPathResolve, HTTPServerConfig, LoggerInstance } from '@sofie-package-manager/api'
+import {
+	betterPathResolve,
+	HTTPServerConfig,
+	LoggerInstance,
+	resolveFileWithoutExtension,
+} from '@sofie-package-manager/api'
 import { BadResponse, PackageInfo, ResponseMeta, Storage } from './storage'
 import { Readable } from 'stream'
 
@@ -88,15 +93,39 @@ export class FileStorage extends Storage {
 	private async getFileInfo(paramPath: string): Promise<
 		| {
 				found: false
+				code: number
+				reason: string
 		  }
 		| ({
 				found: true
 		  } & FileInfo)
 	> {
-		const fullPath = path.join(this._basePath, paramPath)
+		let fullPath = path.join(this._basePath, paramPath)
 
 		if (!(await this.exists(fullPath))) {
-			return { found: false }
+			if (!this.config.httpServer.matchFilenamesWithoutExtension) {
+				return { found: false, code: 404, reason: 'Package not found' }
+			}
+
+			const resolution = await resolveFileWithoutExtension(fullPath)
+
+			switch (resolution.result) {
+				case 'found':
+					fullPath = resolution.fullPath
+					break
+				case 'multiple':
+					return {
+						found: false,
+						code: 409,
+						reason: `Multiple files found: ${resolution.matches.join(
+							', '
+						)}. Please specify the exact filename including extension.`,
+					}
+				case 'notFound':
+					return { found: false, code: 404, reason: 'Package not found' }
+				case 'error':
+					return { found: false, code: 500, reason: 'File system error' }
+			}
 		}
 		let mimeType = mime.lookup(fullPath)
 		if (!mimeType) {
@@ -119,7 +148,7 @@ export class FileStorage extends Storage {
 		const fileInfo = await this.getFileInfo(paramPath)
 
 		if (!fileInfo.found) {
-			return { code: 404, reason: 'Package not found' }
+			return { code: fileInfo.code, reason: fileInfo.reason }
 		}
 
 		const meta: ResponseMeta = {
@@ -133,7 +162,7 @@ export class FileStorage extends Storage {
 		const fileInfo = await this.getFileInfo(paramPath)
 
 		if (!fileInfo.found) {
-			return { code: 404, reason: 'Package not found' }
+			return { code: fileInfo.code, reason: fileInfo.reason }
 		}
 		const meta: ResponseMeta = {
 			statusCode: 200,
@@ -182,19 +211,25 @@ export class FileStorage extends Storage {
 		}
 	}
 	async deletePackage(paramPath: string): Promise<{ meta: ResponseMeta; body: any } | BadResponse> {
-		const fullPath = path.join(this._basePath, paramPath)
+		const fileInfo = await this.getFileInfo(paramPath)
 
-		if (!(await this.exists(fullPath))) {
-			return { code: 404, reason: 'Package not found' }
+		if (!fileInfo.found) {
+			return { code: fileInfo.code, reason: fileInfo.reason }
 		}
-
-		await fsUnlink(fullPath)
-
-		const meta: ResponseMeta = {
-			statusCode: 200,
+		try {
+			await fsUnlink(fileInfo.fullPath)
+			const meta: ResponseMeta = {
+				statusCode: 200,
+			}
+			return { meta, body: { message: `Deleted "${fileInfo.fullPath}"` } }
+		} catch (err) {
+			if (`${err}`.includes('ENOENT')) {
+				// File already deleted
+				return { code: 404, reason: 'Package not found' }
+			}
+			// else
+			throw err
 		}
-
-		return { meta, body: { message: `Deleted "${paramPath}"` } }
 	}
 
 	private async exists(fullPath: string) {

@@ -412,10 +412,10 @@ describeForAllPlatforms(
 			const listenToOpen = jest.fn(() => {
 				fs.__setCallbackInterceptor((type, cb) => {
 					if (type === 'open') {
-						// Delay the access
+						// Delay the access by 500ms (less than INNER_ACTION_TIMEOUT of 1000ms)
 						setTimeout(() => {
 							cb()
-						}, 1000)
+						}, 700)
 					} else {
 						return cb()
 					}
@@ -491,13 +491,13 @@ describeForAllPlatforms(
 				return statusCount
 			}
 			{
-				await waitTime(1000) // 1000
+				await waitTime(500)
 				// At this time, no expectations should have moved past the WAITING state yet
 				const statuses = getStatusCount()
 				expect(statuses['waiting']).toBe(100)
 			}
 			{
-				await waitTime(1000) // 2000
+				await waitTime(1000) // total: 1500ms
 				// At this time, some expectations should have moved past the WAITING state
 				const statuses = getStatusCount()
 				expect(statuses['waiting']).toBeGreaterThan(50)
@@ -506,7 +506,7 @@ describeForAllPlatforms(
 				expect(statuses['fulfilled']).toBe(0)
 			}
 			{
-				await waitTime(1000) // 3000
+				await waitTime(2000) // total: 3500ms
 				// By this time, expectationManager should have skipped ahead and processed more states
 
 				const statuses = getStatusCount()

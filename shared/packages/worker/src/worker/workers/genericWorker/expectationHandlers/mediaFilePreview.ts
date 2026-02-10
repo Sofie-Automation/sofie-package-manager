@@ -19,6 +19,7 @@ import {
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
 import {
@@ -188,11 +189,13 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				lookupSource.accessor.type === Accessor.AccessType.HTTP ||
 				lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-				lookupSource.accessor.type === Accessor.AccessType.FTP) &&
+				lookupSource.accessor.type === Accessor.AccessType.FTP ||
+				lookupSource.accessor.type === Accessor.AccessType.S3) &&
 			(lookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				lookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				lookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-				lookupTarget.accessor.type === Accessor.AccessType.FTP)
+				lookupTarget.accessor.type === Accessor.AccessType.FTP ||
+				lookupTarget.accessor.type === Accessor.AccessType.S3)
 		) {
 			// We can read the source and write the preview directly.
 			if (
@@ -200,14 +203,16 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				!isFileShareAccessorHandle(sourceHandle) &&
 				!isHTTPAccessorHandle(sourceHandle) &&
 				!isHTTPProxyAccessorHandle(sourceHandle) &&
-				!isFTPAccessorHandle(sourceHandle)
+				!isFTPAccessorHandle(sourceHandle) &&
+				!isS3AccessorHandle(sourceHandle)
 			)
 				throw new Error(`Source AccessHandler type is wrong`)
 			if (
 				!isLocalFolderAccessorHandle(targetHandle) &&
 				!isFileShareAccessorHandle(targetHandle) &&
 				!isHTTPProxyAccessorHandle(targetHandle) &&
-				!isFTPAccessorHandle(targetHandle)
+				!isFTPAccessorHandle(targetHandle) &&
+				!isS3AccessorHandle(targetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
@@ -246,10 +251,10 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				let inputPath: string
 				let pipeStdin = false
 				if (isLocalFolderAccessorHandle(sourceHandle)) {
-					inputPath = sourceHandle.fullPath
+					inputPath = await sourceHandle.getResolvedFullPath()
 				} else if (isFileShareAccessorHandle(sourceHandle)) {
 					await sourceHandle.prepareFileAccess()
-					inputPath = sourceHandle.fullPath
+					inputPath = await sourceHandle.getResolvedFullPath()
 				} else if (isHTTPAccessorHandle(sourceHandle)) {
 					inputPath = sourceHandle.fullUrl
 				} else if (isHTTPProxyAccessorHandle(sourceHandle)) {
@@ -265,13 +270,15 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 					} else {
 						inputPath = sourceHandle.ftpUrl.url
 					}
+				} else if (isS3AccessorHandle(sourceHandle)) {
+					inputPath = sourceHandle.getFullS3PublicUrl()
 				} else {
 					assertNever(sourceHandle)
 					throw new Error(`Unsupported Source AccessHandler`)
 				}
 
 				// Scan with FFProbe:
-				ffProbeProcess = scanWithFFProbe(sourceHandle)
+				ffProbeProcess = scanWithFFProbe(worker, sourceHandle)
 				const ffProbeScan: FFProbeScanResult = await ffProbeProcess
 				ffProbeProcess = undefined
 				const hasVideoStream =
@@ -293,6 +300,7 @@ export const MediaFilePreview: ExpectationHandlerGenericWorker = {
 				const fileOperation = await targetHandle.prepareForOperation('Generate preview', lookupSource.handle)
 
 				ffMpegProcess = await spawnFFMpeg(
+					worker,
 					args,
 					targetHandle,
 					// actualSourceVersionHash,

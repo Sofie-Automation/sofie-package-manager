@@ -4,6 +4,7 @@ import {
 	ExpectationManagerWorkerAgent,
 	LoggerInstance,
 	PackageContainerExpectation,
+	ProcessConfig,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeDoYouSupportPackageContainer,
 	ReturnTypeGetCostFortExpectation,
@@ -12,13 +13,15 @@ import {
 	ReturnTypeRemoveExpectation,
 	ReturnTypeRunPackageContainerCronJob,
 	stringMaxLength,
-	WorkerAgentConfig,
+	WorkerConfig,
+	ExecutableAliasSource,
 } from '@sofie-package-manager/api'
 import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from './accessorHandlers/genericHandle'
 import { IWorkInProgress } from './lib/workInProgress'
 
 export interface GenericWorkerAgentAPI {
-	config: WorkerAgentConfig
+	config: WorkerConfig['worker']
+	processConfig: ProcessConfig
 	location: WorkerLocation
 	/**
 	 * Acquire a read/write lock to a data point, then write the result of the callback to it.
@@ -35,7 +38,7 @@ export interface GenericWorkerAgentAPI {
 /**
  * A Worker runs static stateless/lambda functions.
  */
-export abstract class BaseWorker {
+export abstract class BaseWorker implements ExecutableAliasSource {
 	/** A space where the AccessorHandlers can store various things, such as persistent connections, etc.. */
 	public accessorCache: { [accessorType: string]: unknown } = {}
 	private _uniqueId = 0
@@ -196,6 +199,10 @@ export abstract class BaseWorker {
 			}, 1000)
 		}
 		return data
+	}
+	/** Looks up executable alias and returns a path to the executable (as defined in --executableAliases CLI) */
+	public getExecutable(executableAlias: string): string | undefined {
+		return this.agentAPI.config.executableAliases[executableAlias]
 	}
 }
 export interface WorkerLocation {

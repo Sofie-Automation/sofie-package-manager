@@ -3,7 +3,6 @@ import {
 	ClientConnectionOptions,
 	LoggerInstance,
 	LogLevel,
-	setLogLevel,
 	Status,
 	StatusCode,
 	Statuses,
@@ -44,7 +43,7 @@ export class WorkforceConnection {
 			this.workforceAPI
 				.registerExpectationManager(
 					this.manager.managerId,
-					this.manager.expectationManagerServer.serverAccessUrl
+					this.manager.expectationManagerServer.serverAccessUrls
 				)
 				.then(() => {
 					this.initWorkForceAPIPromise?.resolve() // To finish the init() function
@@ -59,9 +58,12 @@ export class WorkforceConnection {
 		})
 	}
 	public async init(): Promise<void> {
+		if (this.workForceConnectionOptions.type === 'websocket') {
+			this.logger.info(`Connecting to Workforce at ${this.workForceConnectionOptions.url}`)
+		}
 		await this.workforceAPI.init(this.workForceConnectionOptions, {
 			setLogLevel: async (logLevel: LogLevel): Promise<void> => {
-				setLogLevel(logLevel)
+				this.logger.setLogLevel(logLevel)
 			},
 			_debugKill: async (): Promise<void> => {
 				// This is for testing purposes only

@@ -26,7 +26,7 @@ import {
 	scanWithFFProbe,
 } from './lib/scan'
 import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
-import { ProgressParts } from './progressParts'
+import { ProgressParts } from '../lib/progressParts'
 
 /**
  * Performs a "deep scan" of the source package and saves the result file into the target PackageContainer (a Sofie Core collection)
@@ -205,7 +205,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 			progressSetup(1)
 
 			// Scan with FFProbe:
-			currentProcess = scanWithFFProbe(sourceHandle)
+			currentProcess = scanWithFFProbe(worker, sourceHandle)
 			const ffProbeScan: FFProbeScanResult = await currentProcess
 			const hasVideoStream =
 				ffProbeScan.streams && ffProbeScan.streams.some((stream) => stream.codec_type === 'video')
@@ -216,7 +216,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 			// Scan field order:
 			let resultFieldOrder = FieldOrder.Unknown
 			if (hasVideoStream) {
-				currentProcess = scanFieldOrder(sourceHandle, exp.endRequirement.version)
+				currentProcess = scanFieldOrder(worker, sourceHandle, exp.endRequirement.version)
 				resultFieldOrder = await currentProcess
 				currentProcess = undefined
 			}
@@ -238,6 +238,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 					let ignoreNextCancelError = false
 
 					const scanMoreInfoProcess = scanMoreInfo(
+						worker,
 						sourceHandle,
 						ffProbeScan,
 						exp.endRequirement.version,
@@ -279,6 +280,7 @@ export const PackageDeepScan: ExpectationHandlerGenericWorker = {
 							currentProcess.cancel()
 
 							const scanMoreInfoProcessSecondTry = scanMoreInfo(
+								worker,
 								sourceHandle,
 								ffProbeScan,
 								{

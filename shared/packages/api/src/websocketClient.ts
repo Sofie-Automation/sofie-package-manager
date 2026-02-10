@@ -64,7 +64,7 @@ export class WebsocketClient<ID extends PartyId> extends WebsocketConnection {
 					resolve()
 				})
 				setTimeout(() => {
-					reject('Connection timeout')
+					reject(new Error(`Timeout when opening websocket connection to ${this.url}`))
 				}, 3000) // connection timeout
 			})
 			this.connecting = false

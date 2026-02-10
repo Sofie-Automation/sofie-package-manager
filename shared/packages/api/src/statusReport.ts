@@ -9,13 +9,14 @@ import {
 	WorkerAgentId,
 	WorkInProgressLocalId,
 } from './ids'
+import { URLMap } from './methods'
 import { Cost } from './worker'
 
 export interface WorkforceStatusReport {
 	workerAgents: WorkerStatusReport[]
 	expectationManagers: {
 		id: ExpectationManagerId
-		url?: string
+		urls?: URLMap
 	}[]
 	appContainers: {
 		id: AppContainerId

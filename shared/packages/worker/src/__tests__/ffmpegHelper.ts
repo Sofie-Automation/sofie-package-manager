@@ -1,6 +1,7 @@
 import path from 'path'
 import { LocalFolderAccessorHandle } from '../worker/accessorHandlers/localFolder'
 import { overrideFFMpegExecutables, spawnFFMpeg } from '../worker/workers/genericWorker/expectationHandlers/lib/ffmpeg'
+import { ExecutableAliasSource } from '@sofie-package-manager/api'
 
 export const SamplesDir = path.join(__dirname, '../../../../../tests/samples')
 
@@ -13,6 +14,7 @@ export async function callSpawnFFmpeg(args: string[], targetHandle: LocalFolderA
 	})
 
 	const ffmpegProcess = await spawnFFMpeg(
+		aliasSource,
 		args,
 		targetHandle,
 		async () => resolve(),
@@ -48,4 +50,7 @@ export function runForEachFFMpegRelease(runForFFmpegRelease: () => void) {
 			runForFFmpegRelease()
 		})
 	}
+}
+const aliasSource: ExecutableAliasSource = {
+	getExecutable: () => undefined,
 }

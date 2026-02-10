@@ -207,7 +207,7 @@ yarn test
 yarn start:single-app
 
 # Start the single-app in local-only mode, using packages from expectedPackages.json
-yarn start:single-app -- -- --watchFiles=true --noCore=true --logLevel=debug
+yarn start:single-app -- -- --watchFiles=true --noCore=true --logLevel=debug --executableAliases='ffmpeg=C:\\ffmpeg\\ffmpeg.exe;ffprobe=C:\\ffmpeg\\ffprobe.exe;kairos-converter=C:\\Program Files\\Panasonic\\KairosCreator\\bin\\KairosConverter.exe'
 
 
 

@@ -12,6 +12,7 @@ import {
 	WorkInProgressLocalId,
 	PackageContainerId,
 	MonitorId,
+	URLMap,
 } from '@sofie-package-manager/api'
 
 import { WorkerAgentAPI } from '../workerAgentApi'
@@ -54,7 +55,7 @@ export class InternalManager {
 		public readonly managerId: ExpectationManagerId,
 		serverOptions: ExpectationManagerServerOptions,
 		/** At what url the ExpectationManager can be reached on */
-		serverAccessBaseUrl: string | undefined,
+		serverAccessBaseUrl: URLMap | undefined,
 		workForceConnectionOptions: ClientConnectionOptions,
 		public callbacks: ExpectationManagerCallbacks,
 		options?: ExpectationManagerOptions

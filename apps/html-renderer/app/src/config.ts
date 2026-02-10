@@ -5,6 +5,7 @@ import {
 	processOptions,
 	defineArguments,
 	getProcessArgv,
+	parseExecutableAliases,
 } from '@sofie-package-manager/api'
 
 /*
@@ -58,6 +59,12 @@ const htmlRendererOptions = defineArguments({
 		type: 'boolean',
 		describe: 'When true, will simply trace the version and then close.',
 	},
+	executableAliases: {
+		type: 'string',
+		default: process.env.WORKER_EXECUTABLE_ALIASES || '',
+		describe:
+			'List of aliases for executables the worker can use. Format: "alias1=path to executable1;alias2=executable2". (This is used to alias ffmpeg for the HTML-Renderer.)',
+	},
 })
 
 export interface HTMLRendererOptionsConfig {
@@ -78,6 +85,8 @@ export interface HTMLRendererOptionsConfig {
 	genericWaitStop: number | undefined
 	interactive: boolean | undefined
 	test: boolean | undefined
+	/** List of aliases for executables the worker can use. */
+	executableAliases: { [alias: string]: string }
 }
 export async function getHTMLRendererConfig(): Promise<{
 	process: ProcessConfig
@@ -110,6 +119,7 @@ export async function getHTMLRendererConfig(): Promise<{
 			genericWaitStop: argv.genericWaitStop,
 			interactive: argv.interactive,
 			test: argv.test,
+			executableAliases: parseExecutableAliases(argv.executableAliases),
 		},
 	}
 }

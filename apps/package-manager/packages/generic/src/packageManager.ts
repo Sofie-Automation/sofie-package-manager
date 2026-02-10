@@ -64,6 +64,7 @@ import {
 	objectKeys,
 	objectValues,
 	mapToObject,
+	URLMap,
 } from '@sofie-package-manager/api'
 import deepExtend from 'deep-extend'
 import clone = require('fast-clone')
@@ -90,15 +91,17 @@ export class PackageManagerHandler {
 	settings: PackageManagerSettings = {}
 	callbacksHandler: ExpectationManagerCallbacksHandler
 
-	private dataSnapshot: {
+	public dataSnapshot: {
 		updated: number
 		expectedPackages: ExpectedPackageWrap[]
+		expectedPackageIds: Set<ExpectedPackageId>
 		packageContainers: PackageContainers
 		expectations: { [id: ExpectationId]: Expectation.Any }
 		packageContainerExpectations: { [id: PackageContainerId]: PackageContainerExpectation }
 	} = {
 		updated: 0,
 		expectedPackages: [],
+		expectedPackageIds: new Set(),
 		packageContainers: {},
 		expectations: {},
 		packageContainerExpectations: {},
@@ -111,7 +114,7 @@ export class PackageManagerHandler {
 		logger: LoggerInstance,
 		private managerId: ExpectationManagerId,
 		private serverOptions: ExpectationManagerServerOptions,
-		private serverAccessUrl: string | undefined,
+		private readonly serverAccessUrls: URLMap | undefined,
 		private workForceConnectionOptions: ClientConnectionOptions,
 		concurrency: number | undefined,
 		chaosMonkey: boolean
@@ -123,7 +126,7 @@ export class PackageManagerHandler {
 			this.logger,
 			this.managerId,
 			this.serverOptions,
-			this.serverAccessUrl,
+			this.serverAccessUrls,
 			this.workForceConnectionOptions,
 			this.callbacksHandler,
 			{
@@ -142,7 +145,7 @@ export class PackageManagerHandler {
 
 		this.coreHandler.setPackageManagerHandler(this)
 
-		this.logger.info('PackageManagerHandler init')
+		this.logger.info('PackageManagerHandler init...')
 
 		coreHandler.onConnected(() => {
 			this.setupObservers()
@@ -154,10 +157,20 @@ export class PackageManagerHandler {
 		this.onSettingsChanged()
 		this.triggerUpdatedExpectedPackages()
 
-		await this.callbacksHandler.cleanReportedStatuses()
-		await this.expectationManager.init()
+		try {
+			await this.callbacksHandler.cleanReportedStatuses()
+		} catch (e) {
+			this.logger.error(`Error during cleanReportedStatuses()`)
+			throw e
+		}
+		try {
+			await this.expectationManager.init()
+		} catch (e) {
+			this.logger.error(`Error during expectationManager.init()`)
+			throw e
+		}
 
-		this.logger.info('PackageManagerHandler initialized')
+		this.logger.info('PackageManagerHandler initialized!')
 	}
 	onSettingsChanged(): void {
 		this.settings = {
@@ -351,6 +364,7 @@ export class PackageManagerHandler {
 		// this.logger.debug(JSON.stringify(expectedPackages, null, 2))
 
 		this.dataSnapshot.expectedPackages = expectedPackages
+		this.dataSnapshot.expectedPackageIds = new Set(expectedPackages.map((p) => p.expectedPackage._id))
 		this.dataSnapshot.packageContainers = this.packageContainersCache
 
 		// Step 1: Generate expectations:
@@ -517,6 +531,8 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 		undefined
 	> = new Map()
 	private expectationManagerStatuses: Statuses = {}
+	/** unix timestamp */
+	private lastTimeRemovedInvalidStatuses = 0
 
 	constructor(logger: LoggerInstance, private packageManager: PackageManagerHandler) {
 		this.logger = logger.category('ExpectationManagerCallbacksHandler')
@@ -772,6 +788,14 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 						// Don't send any statuses if not connected:
 						if (!this.packageManager.coreHandler.coreConnected) return
 
+						if (this.lastTimeRemovedInvalidStatuses < Date.now() - 60000) {
+							this.lastTimeRemovedInvalidStatuses = Date.now()
+
+							await this.removeInvalidExpectationStatus()
+							await this.removeInvalidPackageContainerPackageStatus()
+							await this.removeInvalidPackageContainerStatus()
+						}
+
 						this.logger.debug('triggerReportUpdatedStatuses: sending statuses')
 
 						await this.reportUpdateExpectationStatus()
@@ -792,6 +816,19 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 					})
 			}, WAIT_TIME)
 		}
+	}
+	private async removeInvalidExpectationStatus(): Promise<void> {
+		// Go through the previously reported expectations, and check if they are still valid:
+		this.reportedExpectationStatuses.forEach((status, expectationId) => {
+			if (!this.packageManager.dataSnapshot.expectations[expectationId]) {
+				// The reported status is not valid anymore, remove it:
+				this.toReportExpectationStatuses.set(expectationId, {
+					status: null, // Remove
+					ids: status.ids,
+					hash: this.getIncrement(),
+				})
+			}
+		})
 	}
 	private async reportUpdateExpectationStatus(): Promise<void> {
 		await this.reportStatus(
@@ -857,6 +894,22 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 			}
 		)
 	}
+	private async removeInvalidPackageContainerPackageStatus(): Promise<void> {
+		// Go through the previously reported package statuses, and check if they are still valid:
+		this.reportedPackageStatuses.forEach((status, packageOnPackageId) => {
+			if (
+				!this.packageManager.dataSnapshot.expectedPackageIds.has(status.ids.packageId) ||
+				!this.packageManager.dataSnapshot.packageContainers[status.ids.containerId]
+			) {
+				// The reported status is not valid anymore, remove it:
+				this.toReportPackageStatus.set(packageOnPackageId, {
+					status: null, // Remove
+					ids: status.ids,
+					hash: this.getIncrement(),
+				})
+			}
+		})
+	}
 	private async reportUpdatePackageContainerPackageStatus(): Promise<void> {
 		await this.reportStatus(this.toReportPackageStatus, this.reportedPackageStatuses, async (changesToSend) => {
 			// Send the changes to Core:
@@ -879,6 +932,19 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 					}
 				})
 			)
+		})
+	}
+	private async removeInvalidPackageContainerStatus(): Promise<void> {
+		// Go through the previously reported packageContainer statuses, and check if they are still valid:
+		this.reportedPackageContainerStatuses.forEach((status, packageContainerId) => {
+			if (!this.packageManager.dataSnapshot.packageContainers[packageContainerId]) {
+				// The reported status is not valid anymore, remove it:
+				this.toReportPackageContainerStatus.set(packageContainerId, {
+					status: null, // Remove
+					ids: status.ids,
+					hash: this.getIncrement(),
+				})
+			}
 		})
 	}
 	private async reportUpdatePackageContainerStatus(): Promise<void> {

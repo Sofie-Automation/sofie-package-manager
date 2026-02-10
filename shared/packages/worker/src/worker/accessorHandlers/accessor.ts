@@ -9,6 +9,8 @@ import { LocalFolderAccessorHandle } from './localFolder'
 import { QuantelAccessorHandle } from './quantel'
 import { ATEMAccessorHandle } from './atem'
 import { FTPAccessorHandle } from './ftp'
+import { KairosClipAccessorHandle } from './kairosClip'
+import { S3AccessorHandle } from './s3'
 
 export function getAccessorHandle<Metadata>(
 	worker: BaseWorker,
@@ -53,6 +55,10 @@ export function getAccessorStaticHandle(accessor: AccessorOnPackage.Any) {
 		return ATEMAccessorHandle
 	} else if (accessor.type === Accessor.AccessType.FTP) {
 		return FTPAccessorHandle
+	} else if (accessor.type === Accessor.AccessType.KAIROS_CLIP) {
+		return KairosClipAccessorHandle
+	} else if (accessor.type === Accessor.AccessType.S3) {
+		return S3AccessorHandle
 	} else {
 		assertNever(accessor.type) // Assert  so as to not forget to add an if-clause above
 		throw new Error(`Unsupported Accessor type "${accessor.type}"`)
@@ -99,6 +105,17 @@ export function isFTPAccessorHandle<Metadata>(
 ): accessorHandler is FTPAccessorHandle<Metadata> {
 	return accessorHandler.type === FTPAccessorHandle.type
 }
+export function isKairosClipAccessorHandle<Metadata>(
+	accessorHandler: GenericAccessorHandle<Metadata>
+): accessorHandler is KairosClipAccessorHandle<Metadata> {
+	return accessorHandler.type === KairosClipAccessorHandle.type
+}
+
+export function isS3AccessorHandle<Metadata>(
+	accessorHandler: GenericAccessorHandle<Metadata>
+): accessorHandler is S3AccessorHandle<Metadata> {
+	return accessorHandler.type === S3AccessorHandle.type
+}
 
 /** Returns a generic value for how costly it is to use an Accessor type. A higher value means that it is more expensive to access the accessor */
 export function getAccessorCost(accessorType: Accessor.AccessType | undefined): number {
@@ -109,6 +126,7 @@ export function getAccessorCost(accessorType: Accessor.AccessType | undefined): 
 		case Accessor.AccessType.QUANTEL:
 			return 1
 		case Accessor.AccessType.ATEM_MEDIA_STORE:
+		case Accessor.AccessType.KAIROS_CLIP:
 			return 1
 		case Accessor.AccessType.CORE_PACKAGE_INFO:
 			return 2
@@ -118,6 +136,7 @@ export function getAccessorCost(accessorType: Accessor.AccessType | undefined): 
 			return 2
 		case Accessor.AccessType.HTTP_PROXY:
 		case Accessor.AccessType.HTTP:
+		case Accessor.AccessType.S3:
 			return 3
 
 		case undefined:

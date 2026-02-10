@@ -6,7 +6,13 @@ import * as path from 'path'
 const logger = {
 	error: jest.fn((message: string) => console.log('ERROR', message)),
 	warn: jest.fn((message: string) => console.log('WARNING', message)),
-	debug: jest.fn((message: string) => console.log('DEBUG', message)),
+	debug: jest.fn((message: string) => {
+		// suppress noisy log
+		if (message.includes('File is already locked')) return
+		if (message.includes('File was locked by someone else')) return
+		if (message.includes('Unable to parse Lock file content')) return
+		console.log('DEBUG', message)
+	}),
 	silly: jest.fn((message: string) => console.log('SILLY', message)),
 	category: () => logger,
 }

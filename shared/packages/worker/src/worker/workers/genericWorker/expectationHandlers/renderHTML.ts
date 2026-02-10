@@ -39,12 +39,13 @@ import {
 	isHTTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
+	isS3AccessorHandle,
 } from '../../../accessorHandlers/accessor'
 import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder'
 import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle'
 import { ByteCounter } from '../../../lib/streamByteCounter'
 import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch'
-import { ProgressParts, ProgressPart } from './progressParts'
+import { ProgressParts, ProgressPart } from '../lib/progressParts'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer
@@ -192,25 +193,29 @@ export const RenderHTML: ExpectationHandlerGenericWorker = {
 				lookupSource.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				lookupSource.accessor.type === Accessor.AccessType.HTTP ||
 				lookupSource.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-				lookupSource.accessor.type === Accessor.AccessType.FTP) &&
+				lookupSource.accessor.type === Accessor.AccessType.FTP ||
+				lookupSource.accessor.type === Accessor.AccessType.S3) &&
 			(mainLookupTarget.accessor.type === Accessor.AccessType.LOCAL_FOLDER ||
 				mainLookupTarget.accessor.type === Accessor.AccessType.FILE_SHARE ||
 				mainLookupTarget.accessor.type === Accessor.AccessType.HTTP_PROXY ||
-				mainLookupTarget.accessor.type === Accessor.AccessType.FTP)
+				mainLookupTarget.accessor.type === Accessor.AccessType.FTP ||
+				lookupSource.accessor.type === Accessor.AccessType.S3)
 		) {
 			if (
 				!isLocalFolderAccessorHandle(sourceHandle) &&
 				!isFileShareAccessorHandle(sourceHandle) &&
 				!isHTTPAccessorHandle(sourceHandle) &&
 				!isHTTPProxyAccessorHandle(sourceHandle) &&
-				!isFTPAccessorHandle(sourceHandle)
+				!isFTPAccessorHandle(sourceHandle) &&
+				!isS3AccessorHandle(sourceHandle)
 			)
 				throw new Error(`Source AccessHandler type is wrong`)
 			if (
 				!isLocalFolderAccessorHandle(mainTargetHandle) &&
 				!isFileShareAccessorHandle(mainTargetHandle) &&
 				!isHTTPProxyAccessorHandle(mainTargetHandle) &&
-				!isFTPAccessorHandle(mainTargetHandle)
+				!isFTPAccessorHandle(mainTargetHandle) &&
+				!isS3AccessorHandle(mainTargetHandle)
 			)
 				throw new Error(`Target AccessHandler type is wrong`)
 
@@ -226,6 +231,9 @@ export const RenderHTML: ExpectationHandlerGenericWorker = {
 				const o = sourceHandle.ftpUrl
 				url = o.url
 				safeUrl = o.safeUrl
+			} else if (isS3AccessorHandle(sourceHandle)) {
+				url = sourceHandle.getFullS3PublicUrl()
+				safeUrl = url
 			} else {
 				assertNever(sourceHandle)
 				throw new Error(`Unsupported Source AccessHandler`)
@@ -699,6 +707,13 @@ class HTMLRenderer {
 			scale !== undefined && `--zoom=${scale}`,
 			`--outputPath=${escapeFilePath(this.outputPath)}`,
 			`--background=${this.exp.endRequirement.version.renderer?.background ?? 'default'}`,
+			`--executableAliases=${
+				this.worker.agentAPI.config.executableAliases
+					? Object.entries<string>(this.worker.agentAPI.config.executableAliases)
+							.map(([k, v]) => `${k}=${v}`)
+							.join(';')
+					: ''
+			}`,
 			`--interactive=true`,
 		])
 		this.htmlRendererProcess = spawnHtmlRendererExecutable(args, {

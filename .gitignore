@@ -42,3 +42,4 @@ apps/single-app/app/expectedPackages.json_smartbull
 signtool.exe
 apps/single-app/app/tmp/
 apps/single-app/app/tmpRenderHTML/
+apps/html-renderer/app/tmp/

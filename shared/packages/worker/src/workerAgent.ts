@@ -23,7 +23,6 @@ import {
 	Reason,
 	stringifyError,
 	WorkerStatusReport,
-	setLogLevel,
 	AppContainerWorkerAgent,
 	deferGets,
 	promiseTimeout,
@@ -40,6 +39,8 @@ import {
 	Cost,
 	assertNever,
 	KnownReason,
+	URLMap,
+	deepEqual,
 } from '@sofie-package-manager/api'
 
 import { AppContainerAPI } from './appContainerApi'
@@ -70,7 +71,7 @@ export class WorkerAgent {
 	private expectationManagers: Map<
 		ExpectationManagerId,
 		{
-			url: string
+			urls: URLMap
 			api: ExpectationManagerAPI
 		}
 	> = new Map()
@@ -89,8 +90,6 @@ export class WorkerAgent {
 	private initWorkForceAPIPromise?: { resolve: () => void; reject: (reason?: any) => void }
 	private initAppContainerAPIPromise?: { resolve: () => void; reject: (reason?: any) => void }
 	private cpuTracker = new CPUTracker()
-	/** When true, this worker should only accept expectation that are critical for playout */
-	private isOnlyForCriticalExpectations = false
 	private logger: LoggerInstance
 
 	private workerStorageDeferRead = deferGets(async (dataId: DataId) => {
@@ -165,7 +164,6 @@ export class WorkerAgent {
 			})
 		}
 
-		this.isOnlyForCriticalExpectations = this.config.worker.pickUpCriticalExpectationsOnly
 		// Todo: Different types of workers:
 		this._worker = new GenericWorker(
 			this.logger,
@@ -176,6 +174,7 @@ export class WorkerAgent {
 					localNetworkIds: this.config.worker.networkIds,
 				},
 				config: this.config.worker,
+				processConfig: this.config.process,
 				workerStorageRead: async (dataId: DataId) => {
 					// return this.appContainerAPI.workerStorageRead(dataId)
 
@@ -241,6 +240,9 @@ export class WorkerAgent {
 			const pAppContainer = new Promise<void>((resolve, reject) => {
 				this.initAppContainerAPIPromise = { resolve, reject }
 			})
+			if (this.appContainerConnectionOptions.type === 'websocket') {
+				this.logger.info(`Connecting to AppContainer at ${this.appContainerConnectionOptions.url}`)
+			}
 			await this.appContainerAPI.init(this.appContainerConnectionOptions, {
 				setLogLevel: async (logLevel: LogLevel) => this.setLogLevel(logLevel),
 				_debugKill: async () => this._debugKill(),
@@ -261,14 +263,17 @@ export class WorkerAgent {
 		const pWorkForce = new Promise<void>((resolve, reject) => {
 			this.initWorkForceAPIPromise = { resolve, reject }
 		})
+		if (this.workForceConnectionOptions.type === 'websocket') {
+			this.logger.info(`Connecting to Workforce at ${this.workForceConnectionOptions.url}`)
+		}
 		await this.workforceAPI.init(this.workForceConnectionOptions, {
 			setLogLevel: async (logLevel: LogLevel) => this.setLogLevel(logLevel),
 			_debugKill: async () => this._debugKill(),
 			_debugSendKillConnections: async () => this._debugSendKillConnections(),
 			getStatusReport: async () => this.getStatusReport(),
 
-			expectationManagerAvailable: async (id: ExpectationManagerId, url: string) =>
-				this.expectationManagerAvailable(id, url),
+			expectationManagerAvailable: async (id: ExpectationManagerId, urls: URLMap) =>
+				this.expectationManagerAvailable(id, urls),
 			expectationManagerGone: async (id: ExpectationManagerId) => this.expectationManagerGone(id),
 		})
 		// Wait for this.workforceAPI to be ready before continuing:
@@ -330,7 +335,7 @@ export class WorkerAgent {
 	// 	return this._busyMethodCount === 0
 	// }
 	private async doesWorkerSupportExpectation(exp: Expectation.Any): Promise<ReturnTypeDoYouSupportExpectation> {
-		if (this.isOnlyForCriticalExpectations && !exp.workOptions.requiredForPlayout) {
+		if (this.config.worker.pickUpCriticalExpectationsOnly && !exp.workOptions.requiredForPlayout) {
 			return {
 				support: false,
 				knownReason: true,
@@ -341,6 +346,21 @@ export class WorkerAgent {
 			}
 		}
 
+		if (this.config.worker.allowedExpectationTypes) {
+			if (!this.config.worker.allowedExpectationTypes.includes(exp.type)) {
+				return {
+					support: false,
+					reason: {
+						user: 'This worker is not allowed to work on this type of expectation',
+						tech: `Expectation type "${exp.type}" is not in --allowedExpectationTypes: [${JSON.stringify(
+							this.config.worker.allowedExpectationTypes
+						)}] for this worker`,
+					},
+					knownReason: true,
+				}
+			}
+		}
+
 		return this._worker.doYouSupportExpectation(exp)
 	}
 	private async doesWorkerSupportPackageContainer(
@@ -348,19 +368,19 @@ export class WorkerAgent {
 	): Promise<ReturnTypeDoYouSupportExpectation> {
 		return this._worker.doYouSupportPackageContainer(packageContainer)
 	}
-	private async expectationManagerAvailable(managerId: ExpectationManagerId, url: string): Promise<void> {
+	private async expectationManagerAvailable(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
 		const existing = this.expectationManagers.get(managerId)
 		if (existing) {
 			existing.api.terminate()
 		}
 
-		await this.connectToExpectationManager(managerId, url)
+		await this.connectToExpectationManager(managerId, urls)
 	}
 	private async expectationManagerGone(managerId: ExpectationManagerId): Promise<void> {
 		this.expectationManagers.delete(managerId)
 	}
 	public async setLogLevel(logLevel: LogLevel): Promise<void> {
-		setLogLevel(logLevel)
+		this.logger.setLogLevel(logLevel)
 	}
 	async _debugKill(): Promise<void> {
 		this.terminate()
@@ -625,10 +645,10 @@ export class WorkerAgent {
 		return workInProgress
 	}
 
-	private async connectToExpectationManager(managerId: ExpectationManagerId, url: string): Promise<void> {
-		this.logger.info(`Worker: Connecting to Expectation Manager "${managerId}" at url "${url}"`)
+	private async connectToExpectationManager(managerId: ExpectationManagerId, urls: URLMap): Promise<void> {
+		this.logger.info(`Worker: Connecting to Expectation Manager "${managerId}"...`)
 		const expectationManager = {
-			url: url,
+			urls: urls,
 			api: new ExpectationManagerAPI(this.id, this.logger),
 		}
 		expectationManager.api.on('disconnected', () => {
@@ -802,7 +822,7 @@ export class WorkerAgent {
 					return new Promise((_resolve, reject) => {
 						// Simulate a timed out message:
 						setTimeout(() => {
-							reject('Timeout')
+							reject(new Error('Timeout'))
 						}, 200)
 					})
 				try {
@@ -846,6 +866,10 @@ export class WorkerAgent {
 				}
 			}) as any
 		}
+
+		const url = this.findMatchingURL(urls)
+		this.logger.info(`Worker: Connecting to Expectation Manager "${managerId}", selected URL "${url}"...`)
+
 		// Connect to the ExpectationManager:
 		if (url === '__internal') {
 			// This is used for an internal connection:
@@ -858,21 +882,43 @@ export class WorkerAgent {
 			expectationManager.api.hook(managerHookHook)
 		}
 
-		const connectionOptions: ClientConnectionOptions =
-			url === '__internal' ? { type: 'internal' } : { type: 'websocket', url: expectationManager.url }
+		let connectionOptions: ClientConnectionOptions
 
+		if (url === '__internal') {
+			connectionOptions = { type: 'internal' }
+		} else {
+			connectionOptions = {
+				type: 'websocket',
+				url,
+			}
+		}
 		await expectationManager.api.init(connectionOptions, methods)
 	}
 
-	private async updateListOfExpectationManagers(newExpectationManagers: { id: ExpectationManagerId; url: string }[]) {
+	private findMatchingURL(urls: URLMap): string {
+		const networkIds = this.config.worker.networkIds || []
+
+		for (const networkId of networkIds) {
+			const url = urls[networkId]
+			if (url) return url
+		}
+
+		// Fallback to 'default' URL:
+		const defaultUrl = urls['*']
+		return defaultUrl
+	}
+
+	private async updateListOfExpectationManagers(
+		newExpectationManagers: { id: ExpectationManagerId; urls: URLMap }[]
+	) {
 		const ids = new Set<ExpectationManagerId>()
 		for (const newEm of newExpectationManagers) {
 			ids.add(newEm.id)
 
 			const em = this.expectationManagers.get(newEm.id)
-			if (!em || em.url !== newEm.url) {
+			if (!em || !deepEqual(em.urls, newEm.urls)) {
 				// added or changed
-				await this.expectationManagerAvailable(newEm.id, newEm.url)
+				await this.expectationManagerAvailable(newEm.id, newEm.urls)
 			}
 		}
 		// Removed

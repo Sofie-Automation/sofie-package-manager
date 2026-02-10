@@ -34,6 +34,7 @@ import { BaseWorker } from '../worker'
 import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler'
 import { MonitorInProgress } from '../lib/monitorInProgress'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
+import { PassThrough } from 'stream'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -154,7 +155,8 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 	}
 	async checkPackageReadAccess(): Promise<AccessorHandlerCheckPackageReadAccessResult> {
 		try {
-			await fsAccess(this.fullPath, fs.constants.R_OK)
+			const actualFullPath = await this.getResolvedFullPath()
+			await fsAccess(actualFullPath, fs.constants.R_OK)
 			// The file exists and can be read
 		} catch (err) {
 			// File is not readable
@@ -169,10 +171,12 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		}
 		return { success: true }
 	}
+
 	async tryPackageRead(): Promise<AccessorHandlerTryPackageReadResult> {
 		try {
 			// Check if we can open the file for reading:
-			const fd = await fsOpen(this.fullPath, 'r')
+			const actualFullPath = await this.getResolvedFullPath()
+			const fd = await fsOpen(actualFullPath, 'r')
 
 			// If that worked, we seem to have read access.
 			await fsClose(fd)
@@ -220,7 +224,8 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		return { success: true }
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FileOnDisk> {
-		const stat = await fsStat(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
+		const stat = await fsStat(actualFullPath)
 		return this.convertStatToVersion(stat)
 	}
 	async ensurePackageFulfilled(): Promise<void> {
@@ -245,6 +250,10 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		await this.fileHandler.clearPackageRemoval(this.filePath)
 
 		const fullPath = this.workOptions.useTemporaryFilePath ? this.temporaryFilePath : this.fullPath
@@ -254,7 +263,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		// Remove the file if it exists:
 		if (await this.unlinkIfExists(fullPath)) this.logOperation(`Put package stream: Remove file "${fullPath}"`)
 
-		const writeStream = sourceStream.pipe(fs.createWriteStream(fullPath))
+		const writeStream = passThroughStream.pipe(fs.createWriteStream(fullPath))
 
 		const streamWrapper: PutPackageHandler = new PutPackageHandler(() => {
 			writeStream.destroy()

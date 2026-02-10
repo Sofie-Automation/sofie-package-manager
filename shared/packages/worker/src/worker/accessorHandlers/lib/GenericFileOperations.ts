@@ -103,6 +103,7 @@ export class GenericFileOperationsHandler {
 				for (const file of files) {
 					const filePath = path.join(dirPath, file.name)
 					const fullPath = path.join(folderPath, filePath)
+
 					if (file.isDirectory) {
 						await cleanUpDirectory(filePath, true)
 					} else if (file.lastModified && file.lastModified > 0) {

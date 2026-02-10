@@ -72,7 +72,6 @@ export async function testHtmlRenderer(): Promise<string | null> {
 
 		if (htmlRenderExecutable === 'N/A') {
 			if (isRunningInDevelopment()) {
-				// Process runs as a node process, we're probably in development mode.
 				// Use the source code directly instead of the executable:
 				overrideHTMLRendererExecutables(`yarn --cwd ${path.resolve('../../html-renderer/app')} start`)
 			} else {

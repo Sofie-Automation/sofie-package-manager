@@ -79,7 +79,7 @@ export class Connector {
 			this.logger,
 			protectString<ExpectationManagerId>(config.packageManager.deviceId || 'manager0'),
 			packageManagerServerOptions,
-			config.packageManager.accessUrl || undefined,
+			config.packageManager.accessURLs || undefined,
 			workForceConnectionOptions,
 			config.packageManager.concurrency,
 			config.packageManager.chaosMonkey

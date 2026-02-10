@@ -42,6 +42,7 @@ import { MonitorInProgress } from '../lib/monitorInProgress'
 import { MAX_EXEC_BUFFER } from '../lib/lib'
 import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
 import * as path from 'path'
+import { PassThrough } from 'stream'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -259,7 +260,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 
 		try {
 			// Check if we can open the file for reading:
-			const fd = await fsOpen(this.fullPath, 'r')
+			const actualFullPath = await this.getResolvedFullPath()
+			const fd = await fsOpen(actualFullPath, 'r')
 
 			// If that worked, we seem to have read access.
 			await fsClose(fd)
@@ -304,7 +306,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		await this.prepareFileAccess()
 
 		try {
-			await fsAccess(this.fullPath, fs.constants.R_OK)
+			const actualFullPath = await this.getResolvedFullPath()
+			await fsAccess(actualFullPath, fs.constants.R_OK)
 			// The file exists
 		} catch (err) {
 			// File is not readable
@@ -339,7 +342,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 	}
 	async getPackageActualVersion(): Promise<Expectation.Version.FileOnDisk> {
 		await this.prepareFileAccess()
-		const stat = await fsStat(this.fullPath)
+		const actualFullPath = await this.getResolvedFullPath()
+		const stat = await fsStat(actualFullPath)
 		return this.convertStatToVersion(stat)
 	}
 	async ensurePackageFulfilled(): Promise<void> {
@@ -352,8 +356,9 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 
 	async getPackageReadStream(): Promise<{ readStream: NodeJS.ReadableStream; cancel: () => void }> {
 		await this.prepareFileAccess()
+		const actualFullPath = await this.getResolvedFullPath()
 		const readStream = await new Promise<fs.ReadStream>((resolve, reject) => {
-			const rs: fs.ReadStream = fs.createReadStream(this.fullPath)
+			const rs: fs.ReadStream = fs.createReadStream(actualFullPath)
 			rs.once('error', reject)
 			// Wait for the stream to be actually valid before continuing:
 			rs.once('open', () => resolve(rs))
@@ -367,6 +372,10 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		}
 	}
 	async putPackageStream(sourceStream: NodeJS.ReadableStream): Promise<PutPackageHandler> {
+		// Create a PassThrough stream that can receive data while the async preparation-operations are run:
+		const passThroughStream = new PassThrough({ allowHalfOpen: false })
+		sourceStream.pipe(passThroughStream)
+
 		await this.prepareFileAccess()
 		await this.fileHandler.clearPackageRemoval(this.filePath)
 
@@ -377,7 +386,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		// Remove the file if it already exists:
 		if (await this.unlinkIfExists(fullPath)) this.logOperation(`Put package stream: Remove file "${fullPath}"`)
 
-		const writeStream = sourceStream.pipe(fs.createWriteStream(this.fullPath))
+		const writeStream = passThroughStream.pipe(fs.createWriteStream(this.fullPath))
 
 		const streamWrapper: PutPackageHandler = new PutPackageHandler(() => {
 			// can't really abort the write stream

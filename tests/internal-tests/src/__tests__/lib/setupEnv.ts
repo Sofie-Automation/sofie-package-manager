@@ -60,6 +60,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		apiKeyRead: '',
 		apiKeyWrite: '',
 		cleanFileAge: -1,
+		matchFilenamesWithoutExtension: false,
 	},
 	packageManager: {
 		coreHost: '',
@@ -68,7 +69,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		deviceToken: '',
 		disableWatchdog: true,
 		port: null,
-		accessUrl: null,
+		accessURLs: null,
 		workforceURL: null,
 		watchFiles: false,
 		noCore: false,
@@ -81,6 +82,7 @@ export const defaultTestConfig: SingleAppConfig = {
 		resourceId: '',
 		networkIds: [],
 		windowsDriveLetters: ['X', 'Y', 'Z'],
+		allowedExpectationTypes: null,
 		temporaryFolderPath: undefined,
 		sourcePackageStabilityThreshold: 0, // Disabling this to speed up the tests
 		costMultiplier: 1,
@@ -88,6 +90,8 @@ export const defaultTestConfig: SingleAppConfig = {
 		pickUpCriticalExpectationsOnly: false,
 		failurePeriod: 0,
 		failurePeriodLimit: 0,
+		executableAliases: {},
+		matchFilenamesWithoutExtension: false,
 	},
 	quantelHTTPTransformerProxy: {
 		port: 0,
@@ -111,6 +115,10 @@ export const defaultTestConfig: SingleAppConfig = {
 			considerCPULoad: null,
 			failurePeriod: 0,
 			failurePeriodLimit: 0,
+			executableAliases: {},
+			sourcePackageStabilityThreshold: 0,
+			allowedExpectationTypes: null,
+			matchFilenamesWithoutExtension: false,
 		},
 	},
 }

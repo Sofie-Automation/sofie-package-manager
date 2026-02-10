@@ -29,6 +29,7 @@ import {
 	generatePackageLoudness,
 	generateHTMLRender,
 	generatePackageIframes,
+	generatePackageKairosLoadToRam,
 } from './expectations-lib'
 import { getSmartbullExpectedPackages, shouldBeIgnored } from './smartbull'
 import { TEMPORARY_STORAGE_ID } from './lib'
@@ -342,6 +343,23 @@ function getSideEffectOfExpectation(
 				settings
 			)
 			expectations[loudness.id] = loudness
+		}
+	}
+
+	if (
+		expectation0.type === Expectation.Type.FILE_COPY ||
+		expectation0.type === Expectation.Type.FILE_VERIFY ||
+		expectation0.type === Expectation.Type.FILE_COPY_PROXY ||
+		expectation0.type === Expectation.Type.MEDIA_FILE_CONVERT
+	) {
+		if (expectation0.sideEffect?.kairosLoadToRam) {
+			const kairosLoadToRam = generatePackageKairosLoadToRam(
+				packageContainers,
+				expectation0,
+				expectation0.sideEffect.kairosLoadToRam,
+				settings
+			)
+			if (kairosLoadToRam) expectations[kairosLoadToRam.id] = kairosLoadToRam
 		}
 	}
 	return expectations

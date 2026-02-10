@@ -2,8 +2,10 @@ import path from 'path'
 import { copyFile, mkdtemp, readdir } from 'fs/promises'
 import { runForEachFFMpegRelease, SamplesDir } from '../../../__tests__/ffmpegHelper'
 import { rimraf } from 'rimraf'
-import { convertAudio, countFrames, createTGASequence, getStreamIndices } from '../atem'
 import { tmpdir } from 'os'
+import { ATEMAccessorHandle } from '../atem'
+import { PassiveTestWorker } from './lib'
+import { initializeLogger, ProcessConfig, protectString, setupLogger } from '@sofie-package-manager/api'
 
 async function copyToTmpDir(inputFile: string): Promise<{ tmpDir: string; copiedFile: string }> {
 	const tmpDir = await mkdtemp(path.join(tmpdir(), 'package-manager-atem-'))
@@ -13,9 +15,33 @@ async function copyToTmpDir(inputFile: string): Promise<{ tmpDir: string; copied
 	return { tmpDir, copiedFile }
 }
 
+const processConfig: ProcessConfig = {
+	logPath: undefined,
+	logLevel: undefined,
+	unsafeSSL: false,
+	certificates: [],
+}
+initializeLogger({ process: processConfig })
+
 runForEachFFMpegRelease(() => {
 	describe('name with spaces.mov', () => {
 		const clipPath = path.join(SamplesDir, 'name with spaces.mov')
+
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger)
+
+		const accessor = new ATEMAccessorHandle({
+			worker,
+			accessor: {},
+			accessorId: protectString('test-atem-accessor'),
+			content: {
+				onlyContainerAccess: true,
+			},
+			context: {
+				packageContainerId: protectString('test-package-container'),
+			},
+			workOptions: {},
+		})
 
 		let tmpDir: string
 		let copiedFile: string
@@ -34,7 +60,7 @@ runForEachFFMpegRelease(() => {
 		})
 
 		it('createTGASequence', async () => {
-			const result = await createTGASequence(copiedFile)
+			const result = await accessor.createTGASequence(copiedFile)
 			expect(result).toBe('')
 
 			const dirListAfter = await readdir(tmpDir)
@@ -44,7 +70,7 @@ runForEachFFMpegRelease(() => {
 		// TODO: convertFrameToRGBA
 
 		it('convertAudio', async () => {
-			const result = await convertAudio(copiedFile)
+			const result = await accessor.convertAudio(copiedFile)
 			expect(result).toBe('')
 
 			const dirListAfter = await readdir(tmpDir)
@@ -52,15 +78,15 @@ runForEachFFMpegRelease(() => {
 		})
 
 		it('countFrames', async () => {
-			const result = await countFrames(copiedFile)
+			const result = await accessor.countFrames(copiedFile)
 			expect(result).toBe(50)
 		})
 
 		it('getStreamIndicies', async () => {
-			const videoResult = await getStreamIndices(copiedFile, 'video')
+			const videoResult = await accessor.getStreamIndices(copiedFile, 'video')
 			expect(videoResult).toEqual([0])
 
-			const audioResult = await getStreamIndices(copiedFile, 'audio')
+			const audioResult = await accessor.getStreamIndices(copiedFile, 'audio')
 			expect(audioResult).toEqual([1])
 		})
 	})
