@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+* remove invalid reported statuses ([bfffb57](https://github.com/nrkno/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
+
+
+### Features
+
+* Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 

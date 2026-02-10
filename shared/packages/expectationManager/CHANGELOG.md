@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+* issue where the access url to expectationManager did not include port ([85d3e5a](https://github.com/nrkno/sofie-package-manager/commit/85d3e5a4f7b190f5509e748512084c252a986a32))
+* remove invalid reported statuses ([bfffb57](https://github.com/nrkno/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
+
+
+### Features
+
+* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 

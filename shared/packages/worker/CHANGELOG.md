@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* better handling of streams in putPackageStream ([19b5732](https://github.com/nrkno/sofie-package-manager/commit/19b57324758bcf4fc6fd7a7c3fd5b7c0b4ca0c20))
+* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+* ffmpeg 7.0+ ([1c00553](https://github.com/nrkno/sofie-package-manager/commit/1c005532784df5cb3741fce6a26bcd38508c8e2c))
+* handle thrown error when testing executables ([ba38287](https://github.com/nrkno/sofie-package-manager/commit/ba382874d969ee3e26ae1b89d17ee9f491ef67b2))
+* HTTP-Proxy use `JSONWriteFilesNoLockHandler` to better align with previous (working) functionality and still alighn with the other accessorHandlers that uses the GenericFileOperationsHandler ([2622cf6](https://github.com/nrkno/sofie-package-manager/commit/2622cf6d28cdcb6e4c85e2b2be46eedbe48aa902))
+* improve network-scoped URLs parsing ([39a27e3](https://github.com/nrkno/sofie-package-manager/commit/39a27e39c74c47907c18a19434c160184aa9b56b))
+* revert use of delayRemove-json-writer for HTTP-Proxy ([203251d](https://github.com/nrkno/sofie-package-manager/commit/203251d9a2d80a488873b7a59a007aa2847dc0b0))
+* use correct url in thrown error string ([3be1751](https://github.com/nrkno/sofie-package-manager/commit/3be17517e2a41ec3717163bb197dd5fea7a6d2f6))
+
+
+### Features
+
+* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+* Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+* Implement getResolvedFullPath method for LocalFolder and FileShare accessors ([0e0dc26](https://github.com/nrkno/sofie-package-manager/commit/0e0dc266d2f69d4f537392fc4bf8eac78d8b20a0))
+* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+* Support correct file paths in scan.ts ([3b3d0af](https://github.com/nrkno/sofie-package-manager/commit/3b3d0af587d26fb655ca0404094e77a53735724e))
+* Support extensionless filePaths in copy operations ([13ffb11](https://github.com/nrkno/sofie-package-manager/commit/13ffb11df654ea4296d194a306489a42803ac70f))
+* Support extensionless paths in localFolder.ts ([3585a48](https://github.com/nrkno/sofie-package-manager/commit/3585a48cec815cda896ac172ed0c4e605e86b515))
+* Support matchFilenamesWithoutExtension in fileShare ([5ae48de](https://github.com/nrkno/sofie-package-manager/commit/5ae48de3cefb82739ea62a709c954a36f0299d90))
+* **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 

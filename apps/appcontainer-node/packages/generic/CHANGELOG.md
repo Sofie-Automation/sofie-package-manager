@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* minor fixes after code review ([38fdef7](https://github.com/nrkno/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
+
+
+### Features
+
+* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+* Pass parameter correctly ([78b131f](https://github.com/nrkno/sofie-package-manager/commit/78b131f0a44c008ba4a16d038c6c3f6c4f8e7a1d))
+* **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 

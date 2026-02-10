@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Features
+
+* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 

@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+* handle thrown error when testing executables ([ba38287](https://github.com/nrkno/sofie-package-manager/commit/ba382874d969ee3e26ae1b89d17ee9f491ef67b2))
+* improve network-scoped URLs parsing ([39a27e3](https://github.com/nrkno/sofie-package-manager/commit/39a27e39c74c47907c18a19434c160184aa9b56b))
+* issue where allowedExpectationTypes became [''] by default, thus disallowing any jobs on any worker ([0e35c53](https://github.com/nrkno/sofie-package-manager/commit/0e35c538b88ce448282084984c95ef3f54067460))
+* minor fixes after code review ([38fdef7](https://github.com/nrkno/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
+* networks-scoped URLs with authentication part are incorrectly parsed ([9ac4a4d](https://github.com/nrkno/sofie-package-manager/commit/9ac4a4ddc46baaae340e5330da06d94d73131ec7))
+* **worker:** clarify empty allowedExpectationTypes means "all allowed" ([30e4766](https://github.com/nrkno/sofie-package-manager/commit/30e4766065f2b7532e47b4d4703673964860975d))
+
+
+### Features
+
+* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+* Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+* Move extensionless filename detection to utility ([cc33a01](https://github.com/nrkno/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
+* **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
+* **worker:** list out allowed types for allowedExpectationTypes ([ca0ea70](https://github.com/nrkno/sofie-package-manager/commit/ca0ea70afa1d52ddf56e680fe0d9384f62fc5a7e))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 

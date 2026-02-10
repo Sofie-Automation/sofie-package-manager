@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Features
+
+* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 **Note:** Version bump only for package @html-renderer/generic

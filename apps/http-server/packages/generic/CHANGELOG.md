@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* bug fix in HTTP-Proxy, handle unlinking of file that had already been removed ([1dac69d](https://github.com/nrkno/sofie-package-manager/commit/1dac69d42cbe7d82cf87174c9134152d11191d8c))
+
+
+### Features
+
+* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+* Match Extension-less filenames in getFileInfo ([97c48a6](https://github.com/nrkno/sofie-package-manager/commit/97c48a6b79147027e443e7b36d73b176de16aefb))
+* Match Extension-less filenames when deleting ([0c5d82b](https://github.com/nrkno/sofie-package-manager/commit/0c5d82bb86699760bd59bcc0f4a7531004be2b5b))
+* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+* Move extensionless filename detection to utility ([cc33a01](https://github.com/nrkno/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
+
+
+
+
+
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 **Note:** Version bump only for package @http-server/generic
