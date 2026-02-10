@@ -13,8 +13,8 @@ const exec = promisify(cp.exec)
 const require = createRequire(import.meta.url)
 
 /*
-	Due to nexe not taking into account the packages in the mono-repo, we're doing a hack,
-	copying the packages into node_modules, so that nexe will include them.
+	Due to pkg not taking into account the packages in the mono-repo, we're doing a hack,
+	copying the packages into node_modules, so that pkg will include them.
 */
 const basePath = process.cwd()
 const packageJson = require(path.join(basePath, '/package.json'))
@@ -65,6 +65,25 @@ if (!executableName) {
 
 	await Promise.all(ps)
 	ps = []
+
+	{
+		// Fix an issue where some packages aren't compiled properly:
+		// see https://github.com/yao-pkg/pkg/issues/195
+		// D:\git\nrkno\package-manager\node_modules\async-function\package.json
+		// D:\node_modules\async-function\package.json
+		await editJSON('../../../node_modules/async-function/package.json', (json) => {
+			delete json.exports
+			return json
+		})
+		await editJSON('../../../node_modules/generator-function/package.json', (json) => {
+			delete json.exports
+			return json
+		})
+		await editJSON('../../../node_modules/async-generator-function/package.json', (json) => {
+			delete json.exports
+			return json
+		})
+	}
 
 	// Remove things that arent used, to reduce file size:
 	log(`Remove unused files before build...`)
@@ -140,4 +159,14 @@ if (!executableName) {
 function log(...args) {
 	// eslint-disable-next-line no-console
 	console.log(...args)
+}
+async function editJSON(filePath, cb) {
+	const fullFilePath = path.join(`${basePath}`, filePath)
+
+	console.log(`  Editing ${fullFilePath}`)
+
+	const json = JSON.parse(await fs.readFile(fullFilePath, 'utf-8'))
+	const newJSON = cb(json)
+	if (!newJSON) throw new Error('callback must return data')
+	await fs.writeFile(fullFilePath, JSON.stringify(newJSON, null, 2))
 }

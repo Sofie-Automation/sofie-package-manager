@@ -5,7 +5,7 @@ import Koa from 'koa'
 import path from 'path'
 import Router from 'koa-router'
 import cors from '@koa/cors'
-import bodyParser from 'koa-bodyparser'
+import { bodyParser } from '@koa/bodyparser'
 
 import { HTTPServerConfig, LoggerInstance, stringifyError, first } from '@sofie-package-manager/api'
 import { BadResponse, PackageInfo, ResponseMeta, Storage, isBadResponse } from './storage/storage'

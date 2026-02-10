@@ -10,10 +10,10 @@
 		"__test": "jest"
 	},
 	"dependencies": {
+		"@koa/bodyparser": "^6.1.0",
 		"@koa/cors": "^5.0.0",
 		"@sofie-package-manager/api": "1.53.0",
 		"koa": "^2.16.1",
-		"koa-bodyparser": "^4.3.0",
 		"koa-range": "^0.3.0",
 		"koa-router": "^8.0.8",
 		"mime-types": "^2.1.28",
@@ -26,7 +26,6 @@
 	"devDependencies": {
 		"@types/busboy": "^1.5.0",
 		"@types/koa": "^2.13.5",
-		"@types/koa-bodyparser": "^4.3.12",
 		"@types/koa-range": "^0.3.2",
 		"@types/koa-router": "^7.4.0",
 		"@types/koa__cors": "^4.0.0",
