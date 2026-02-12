@@ -63,13 +63,13 @@ export async function evaluateExpectationStateNew({ manager, tracker, trackedExp
 				})
 			}
 		} else {
-			let anyNoAvailableWorkersReasonUser = 'Unknown reason'
+			let anyNoAvailableWorkersReasonUser = ''
 			const allNoAvailableWorkersReasonsTech: string[] = []
-
 			for (const reason of trackedExp.noAvailableWorkersReasons.values()) {
 				if (!anyNoAvailableWorkersReasonUser) anyNoAvailableWorkersReasonUser = reason.user // Just pick the first one
 				allNoAvailableWorkersReasonsTech.push(reason.tech)
 			}
+			if (!anyNoAvailableWorkersReasonUser) anyNoAvailableWorkersReasonUser = 'Unknown reason'
 
 			tracker.trackedExpectationAPI.updateTrackedExpectationStatus(trackedExp, {
 				state: ExpectedPackageStatusAPI.WorkStatusState.NEW,
