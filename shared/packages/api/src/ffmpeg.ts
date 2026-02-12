@@ -47,7 +47,7 @@ export async function testFFProbe(worker: ExecutableAliasSource): Promise<string
 }
 export async function testFFExecutable(ffExecutable: string): Promise<string | null> {
 	try {
-		return new Promise<string | null>((resolve) => {
+		const result = await new Promise<string | null>((resolve) => {
 			const ffMpegProcess = spawn(ffExecutable, ['-version'])
 			let output = ''
 			ffMpegProcess.stderr.on('data', (data) => {
@@ -75,6 +75,7 @@ export async function testFFExecutable(ffExecutable: string): Promise<string | n
 				}
 			})
 		})
+		return result
 	} catch (err) {
 		return `Error when spawning process ${ffExecutable}: ${stringifyError(err)}`
 	}
