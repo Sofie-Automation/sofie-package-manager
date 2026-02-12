@@ -63,13 +63,21 @@ export async function evaluateExpectationStateNew({ manager, tracker, trackedExp
 				})
 			}
 		} else {
+			let anyNoAvailableWorkersReasonUser = 'Unknown reason'
+			const allNoAvailableWorkersReasonsTech: string[] = []
+
+			for (const reason of trackedExp.noAvailableWorkersReasons.values()) {
+				if (!anyNoAvailableWorkersReasonUser) anyNoAvailableWorkersReasonUser = reason.user // Just pick the first one
+				allNoAvailableWorkersReasonsTech.push(reason.tech)
+			}
+
 			tracker.trackedExpectationAPI.updateTrackedExpectationStatus(trackedExp, {
 				state: ExpectedPackageStatusAPI.WorkStatusState.NEW,
 				reason: {
-					user: `Found no workers who supports this Expectation, due to: ${trackedExp.noAvailableWorkersReason.user}`,
-					tech: `Found no workers who supports this Expectation: "${
-						trackedExp.noAvailableWorkersReason.tech
-					}", have asked workers: [${Array.from(trackedExp.queriedWorkers.keys()).join(',')}]`,
+					user: `Found no workers who supports this Expectation, due to: ${anyNoAvailableWorkersReasonUser}`,
+					tech: `Found no workers who supports this Expectation. Reasons why: ${allNoAvailableWorkersReasonsTech.join(
+						', '
+					)}, have asked workers: [${Array.from(trackedExp.queriedWorkers.keys()).join(',')}]`,
 				},
 				// Don't update the package status, since we don't know anything about the package yet:
 				dontUpdatePackage: true,

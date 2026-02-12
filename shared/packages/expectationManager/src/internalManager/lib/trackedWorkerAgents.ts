@@ -60,18 +60,22 @@ export class TrackedWorkerAgents {
 
 						if (support.support) {
 							trackedExp.availableWorkers.add(workerId)
+							trackedExp.noAvailableWorkersReasons.delete(workerId)
 						} else {
 							trackedExp.availableWorkers.delete(workerId)
-							trackedExp.noAvailableWorkersReason = support.reason
+							trackedExp.noAvailableWorkersReasons.set(workerId, {
+								user: support.reason.user,
+								tech: `${workerId}: ${support.reason.tech}`,
+							})
 						}
 					} catch (err) {
 						trackedExp.availableWorkers.delete(workerId)
 
 						if ((err + '').match(/timeout/i)) {
-							trackedExp.noAvailableWorkersReason = {
+							trackedExp.noAvailableWorkersReasons.set(workerId, {
 								user: 'Worker timed out',
-								tech: `Worker "${workerId} timeout"`,
-							}
+								tech: `Worker "${workerId} timeout in doYouSupportExpectation()"`,
+							})
 						} else throw err
 					}
 				}
@@ -94,7 +98,7 @@ export class TrackedWorkerAgents {
 	}> {
 		/** How many requests to send out simultaneously */
 		const BATCH_SIZE = 10
-		/** How many answers we want to have before continuing with picking one */
+		/** If we've gotten this amount of positive answers, we won't be asking more workers */
 		const minWorkerCount = 5
 
 		let countQueried = 0

@@ -30,6 +30,7 @@ export async function evaluateExpectationStateRestarted({
 			})
 		} else {
 			// Something went wrong when trying to remove
+			// Todo: Should we go to NEW here, if it happens multiple times?
 			tracker.trackedExpectationAPI.updateTrackedExpectationStatus(trackedExp, {
 				state: ExpectedPackageStatusAPI.WorkStatusState.RESTARTED,
 				reason: removed.reason,
