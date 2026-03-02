@@ -23,8 +23,8 @@ export interface TrackedExpectation {
 	queriedWorkers: Map<WorkerAgentId, number>
 	/** List of worker ids that supports this Expectation */
 	availableWorkers: Set<WorkerAgentId>
-	/** Contains the latest reason why a worker refused to support an Expectation */
-	noAvailableWorkersReason: Reason
+	/** Contains the reasons why a worker refused to support an Expectation */
+	noAvailableWorkersReasons: Map<WorkerAgentId, Reason>
 	/** Timestamp of the last time the expectation was evaluated. */
 	lastEvaluationTime: number
 	/**
@@ -113,10 +113,7 @@ export function getDefaultTrackedExpectation(
 		state: existingtrackedExp?.state || ExpectedPackageStatusAPI.WorkStatusState.NEW,
 		queriedWorkers: new Map(),
 		availableWorkers: new Set(),
-		noAvailableWorkersReason: {
-			user: 'Unknown reason',
-			tech: 'N/A (init)',
-		},
+		noAvailableWorkersReasons: new Map(),
 		lastEvaluationTime: 0,
 		skipEvaluationCount: 0,
 		waitingForWorkerTime: null,
