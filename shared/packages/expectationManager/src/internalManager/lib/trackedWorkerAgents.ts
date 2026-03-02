@@ -74,12 +74,12 @@ export class TrackedWorkerAgents {
 						if ((err + '').match(/timeout/i)) {
 							trackedExp.noAvailableWorkersReasons.set(workerId, {
 								user: 'Worker timed out',
-								tech: `${workerId}: Timeout in doYouSupportExpectation()"`,
+								tech: `${workerId}: Timeout in doYouSupportExpectation()`,
 							})
 						} else {
 							trackedExp.noAvailableWorkersReasons.set(workerId, {
 								user: 'Error in Worker',
-								tech: `${workerId}: Error thrown: ${err}`,
+								tech: `${workerId}: Error thrown: ${stringifyError(err)}`,
 							})
 						}
 					}
