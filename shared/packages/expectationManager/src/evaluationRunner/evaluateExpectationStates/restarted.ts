@@ -13,6 +13,11 @@ export async function evaluateExpectationStateRestarted({
 }: EvaluateContext): Promise<void> {
 	assertState(trackedExp, ExpectedPackageStatusAPI.WorkStatusState.RESTARTED)
 
+	// Clear this state, so that they will be repopulated in NEW:
+	trackedExp.queriedWorkers.clear()
+	trackedExp.availableWorkers.clear()
+	trackedExp.noAvailableWorkersReasons.clear()
+
 	await manager.workerAgents.assignWorkerToSession(trackedExp)
 	if (trackedExp.session.assignedWorker) {
 		// Start by removing the expectation
