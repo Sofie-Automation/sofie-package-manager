@@ -118,7 +118,7 @@ jobs:
 
       - name: Build and push to GHCR
         if: needs.check-build-steps.outputs.build-and-push-enable == 'true' && needs.check-build-steps.outputs.ghcr-enable == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/${{ matrix.repo}}/app/Dockerfile
@@ -129,7 +129,7 @@ jobs:
 
       - name: Build and push to DockerHub
         if: needs.check-build-steps.outputs.build-and-push-enable == 'true' && needs.check-build-steps.outputs.dockerhub-enable == '1'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/${{ matrix.repo}}/app/Dockerfile
