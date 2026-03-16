@@ -83,6 +83,10 @@ export async function resolveFileWithoutExtension(fullPath: string): Promise<Fil
 			}
 		}
 	} catch (error) {
+		// If the directory itself doesn't exist, the file simply isn't there
+		if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+			return { result: 'notFound' }
+		}
 		return { result: 'error', error }
 	}
 }
