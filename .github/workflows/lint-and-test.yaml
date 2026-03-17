@@ -31,7 +31,7 @@ jobs:
         run: corepack enable
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -75,7 +75,7 @@ jobs:
           cache: 'yarn'
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .yarn/cache
@@ -84,7 +84,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node_version }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache ffmpeg binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: '.ffmpeg'
           key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/ffmpegReleases.json') }}
