@@ -124,7 +124,8 @@ export class FileStorage extends Storage {
 				case 'notFound':
 					return { found: false, code: 404, reason: 'Package not found' }
 				case 'error':
-					return { found: false, code: 500, reason: 'File system error' }
+					this.logger.error(`File system error when resolving "${fullPath}": ${resolution.error}`)
+					return { found: false, code: 500, reason: `File system error: ${resolution.error}` }
 			}
 		}
 		let mimeType = mime.lookup(fullPath)
