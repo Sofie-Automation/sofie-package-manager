@@ -33,7 +33,6 @@
 		"@aws-sdk/lib-storage": "^3.1010.0",
 		"@parcel/watcher": "^2.5.6",
 		"@sofie-package-manager/api": "1.53.0",
-		"abort-controller": "^3.0.0",
 		"atem-connection": "^3.9.0",
 		"basic-ftp": "^5.2.0",
 		"csv-parser": "^3.2.0",
@@ -46,7 +45,7 @@
 		"ssh2-sftp-client": "^12.1.0",
 		"tmp": "~0.2.5",
 		"tv-automation-quantel-gateway-client": "4.0.0",
-		"type-fest": "3.13.1",
+		"type-fest": "^5.4.4",
 		"windows-network-drive": "^4.0.1",
 		"ws": "^8.19.0",
 		"xml-js": "^1.6.11"
