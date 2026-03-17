@@ -15,15 +15,27 @@ import { Expectation } from './expectationApi'
 
 /** Generic CLI-argument-definitions for any process */
 export const processOptions = defineArguments({
-	logPath: { type: 'string', describe: 'Set to write logs to this file' },
-	logLevel: { type: 'string', describe: 'Set default log level. (Might be overwritten by Sofie Core)' },
+	logPath: {
+		type: 'string',
+		default: process.env.LOG_PATH || undefined,
+		describe: 'Set to write logs to this file',
+	},
+	logLevel: {
+		type: 'string',
+		default: process.env.LOG_LEVEL || undefined,
+		describe: 'Set default log level. (Might be overwritten by Sofie Core)',
+	},
 
 	unsafeSSL: {
 		type: 'boolean',
 		default: process.env.UNSAFE_SSL === '1',
 		describe: 'Set to true to allow all SSL certificates (only use this in a safe, local environment)',
 	},
-	certificates: { type: 'string', describe: 'SSL Certificates' },
+	certificates: {
+		type: 'string',
+		default: process.env.CERTIFICATES || undefined,
+		describe: 'SSL Certificates',
+	},
 })
 /** CLI-argument-definitions for the Workforce process */
 const workforceArguments = defineArguments({
@@ -270,7 +282,7 @@ const appContainerArguments = defineArguments({
 	},
 	minCriticalWorkerApps: {
 		type: 'number',
-		default: 1,
+		default: parseInt(process.env.APP_CONTAINER_MIN_CRITICAL_WORKER_APPS || '', 10) || 1,
 		describe: 'Number of Workers reserved for fulfilling playout-critical expectations that will be kept running',
 	},
 
@@ -335,7 +347,7 @@ export function getProcessConfig(argv: {
 	unsafeSSL: boolean
 	certificates: string | undefined
 }): ProcessConfig {
-	const certs: string[] = (argv.certificates || process.env.CERTIFICATES || '').split(';') || []
+	const certs: string[] = (argv.certificates || '').split(';') || []
 	return {
 		logPath: argv.logPath,
 		logLevel: argv.logLevel,
