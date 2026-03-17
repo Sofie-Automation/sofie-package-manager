@@ -13,6 +13,7 @@ export interface ExpectationStateHandlerSession {
 
 	/** The Worker assigned to the Expectation during this evaluation-session */
 	assignedWorker?: WorkerAgentAssignment
+	/** If no Worker was assigned, a Reason why */
 	noAssignedWorkerReason?: Reason
 }
 export interface WorkerAgentAssignment {

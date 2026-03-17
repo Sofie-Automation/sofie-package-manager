@@ -66,7 +66,7 @@ export class ExecutableDependencyHandler {
 
 	async testFFExecutable(executable: string): Promise<string | null> {
 		try {
-			return new Promise<string | null>((resolve) => {
+			const result = await new Promise<string | null>((resolve) => {
 				const execProcess = spawn(executable, ['-v'])
 
 				// Guard against the process not exiting on its own:
@@ -88,6 +88,7 @@ export class ExecutableDependencyHandler {
 					resolve(null)
 				})
 			})
+			return result
 		} catch (err) {
 			return `Error when spawning process ${executable}: ${stringifyError(err)}`
 		}
