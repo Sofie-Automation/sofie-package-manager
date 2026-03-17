@@ -15,7 +15,7 @@
 	},
 	"devDependencies": {
 		"deep-extend": "^0.6.0",
-		"jest": "*",
+		"jest": "^30.3.0",
 		"tv-automation-quantel-gateway-client": "^4.0.0"
 	},
 	"dependencies": {

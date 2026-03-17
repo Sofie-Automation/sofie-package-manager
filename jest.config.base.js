@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
 	roots: ['<rootDir>/src'],
 	projects: ['<rootDir>'],
@@ -7,7 +9,7 @@ module.exports = {
 		'^.+\\.(ts|tsx)$': [
 			'ts-jest',
 			{
-				tsconfig: 'tsconfig.json',
+				tsconfig: path.join(__dirname, 'tsconfig.jest.json'),
 				diagnostics: {
 					ignoreCodes: [
 						151002, // hybrid module kind (Node16/18/Next)
@@ -15,9 +17,11 @@ module.exports = {
 				},
 			},
 		],
+		'^.+\\.js$': ['ts-jest', { tsconfig: path.join(__dirname, 'tsconfig.jest.json') }],
 	},
 	testMatch: ['**/__tests__/**/*.spec.(ts|js)'],
 	testEnvironment: 'node',
+	transformIgnorePatterns: ['node_modules/(?!(p-queue|p-timeout)/)'], // This is not pretty, but required for any esm dependencies
 	coverageThreshold: {
 		global: {
 			branches: 100,
