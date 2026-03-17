@@ -23,7 +23,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node_version }}
-          cache: 'yarn'
 
       - name: Prepare Environment
         run: |
@@ -54,7 +53,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'yarn'
 
       - name: Check release is desired
         id: do-publish
