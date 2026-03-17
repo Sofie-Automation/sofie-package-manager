@@ -29,18 +29,18 @@
 		"@html-renderer/generic": "1.53.0",
 		"@sofie-automation/shared-lib": "1.52.0-nightly-release52-20250110-120624-cb59dd9.0",
 		"@sofie-package-manager/api": "1.53.0",
-		"portfinder": "^1.0.32",
-		"tslib": "^2.1.0",
-		"ws": "^8.17.1",
+		"portfinder": "^1.0.38",
+		"tslib": "^2.8.1",
+		"ws": "^8.19.0",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@types/ws": "^8.5.4",
+		"@types/ws": "^8.18.1",
 		"archiver": "^7.0.1",
 		"electron": "35.7.5",
 		"electron-builder": "^24.13.3",
-		"lerna": "^6.6.1",
-		"rimraf": "^5.0.5"
+		"lerna": "^6.6.2",
+		"rimraf": "^6.1.3"
 	},
 	"build": {
 		"productName": "html-renderer",
