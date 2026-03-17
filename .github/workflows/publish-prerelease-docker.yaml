@@ -99,7 +99,7 @@ jobs:
 
       - name: Set up Docker Buildx
         if: needs.check-build-steps.outputs.build-and-push-enable == 'true'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
         if: needs.check-build-steps.outputs.build-and-push-enable == 'true' && needs.check-build-steps.outputs.dockerhub-enable == '1'
