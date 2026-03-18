@@ -18,6 +18,7 @@ import {
 	WorkerAgentId,
 	mapToObject,
 	URLMap,
+	stringifyError,
 } from '@sofie-package-manager/api'
 import { InternalManager } from './internalManager/internalManager'
 import { ExpectationTrackerConstants } from './lib/constants'
@@ -36,7 +37,7 @@ export class ExpectationManager {
 		serverAccessBaseUrls: URLMap | undefined,
 		workForceConnectionOptions: ClientConnectionOptions,
 		callbacks: ExpectationManagerCallbacks,
-		options?: ExpectationManagerOptions
+		private readonly options?: ExpectationManagerOptions
 	) {
 		this.internalManager = new InternalManager(
 			logger,
@@ -46,7 +47,7 @@ export class ExpectationManager {
 			serverAccessBaseUrls,
 			workForceConnectionOptions,
 			callbacks,
-			options
+			this.options
 		)
 	}
 	terminate(): void {
@@ -117,7 +118,7 @@ export class ExpectationManager {
 
 		this.internalManager.tracker.triggerEvaluationNow()
 	}
-	public getTroubleshootData(): any {
+	public async getTroubleshootData(): Promise<any> {
 		const trackedExpectations = this.internalManager.tracker.getSortedTrackedExpectations().map((trackedExp) => {
 			return {
 				...trackedExp,
@@ -126,10 +127,25 @@ export class ExpectationManager {
 				queriedWorkers: mapToObject(trackedExp.queriedWorkers),
 			}
 		})
+
 		return {
 			trackedExpectations,
-			workers: this.internalManager.workerAgents.list(),
+			workers: await Promise.all(
+				this.internalManager.workerAgents.list().map(async (worker) => {
+					let config = undefined
+					try {
+						config = await worker.workerAgent.api.getConfiguration()
+					} catch (err) {
+						config = `Error getting configuration: ${stringifyError(err)}`
+					}
+					return {
+						...worker,
+						config,
+					}
+				})
+			),
 			waitingExpectations: this.internalManager.tracker.scaler.getWaitingExpectationIds(),
+			config: this.options,
 		}
 	}
 	async getStatusReport(): Promise<any> {

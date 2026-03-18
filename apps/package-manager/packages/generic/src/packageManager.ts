@@ -417,7 +417,7 @@ export class PackageManagerHandler {
 		// This method can be called from core
 		this.expectationManager.restartPackageContainer(containerId)
 	}
-	public getDataSnapshot(): any {
+	public async getDataSnapshot(): Promise<any> {
 		return {
 			...this.dataSnapshot,
 
@@ -426,7 +426,7 @@ export class PackageManagerHandler {
 				reportedPackageStatuses: mapToObject(this.callbacksHandler.reportedPackageStatuses),
 				reportedPackageContainerStatuses: mapToObject(this.callbacksHandler.reportedPackageContainerStatuses),
 			},
-			expectationManager: this.expectationManager.getTroubleshootData(),
+			expectationManager: await this.expectationManager.getTroubleshootData(),
 		}
 	}
 	public async getExpetationManagerStatus(): Promise<any> {

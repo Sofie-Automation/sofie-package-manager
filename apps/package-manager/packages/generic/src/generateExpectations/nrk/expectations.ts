@@ -57,7 +57,7 @@ export function getExpectations(
 	// A blueprint-like plug-in architecture might be a future idea
 
 	/** If set, we should first copy media to a temporary storage and use that for side-effects  */
-	const useTemporaryStorage = packageContainers[TEMPORARY_STORAGE_ID]
+	const useTemporaryStorage = packageContainers[TEMPORARY_STORAGE_ID] as PackageContainer | undefined
 
 	// Sort, so that we handle the high-priority first:
 	expectedPackages.sort((a, b) => {
