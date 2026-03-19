@@ -242,6 +242,7 @@ async function lookupCopySources(
 	exp: Expectation.FileCopyProxy
 ): Promise<LookupPackageContainer<UniversalVersion>> {
 	return lookupAccessorHandles<UniversalVersion>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -261,6 +262,7 @@ async function lookupCopyTargets(
 	exp: Expectation.FileCopyProxy
 ): Promise<LookupPackageContainer<UniversalVersion>> {
 	return lookupAccessorHandles<UniversalVersion>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,

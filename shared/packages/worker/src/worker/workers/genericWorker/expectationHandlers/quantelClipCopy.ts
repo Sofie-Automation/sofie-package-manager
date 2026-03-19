@@ -322,6 +322,7 @@ async function lookupCopySources(
 	exp: Expectation.QuantelClipCopy
 ): Promise<LookupPackageContainer<QuantelMetadata>> {
 	return lookupAccessorHandles<QuantelMetadata>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -340,6 +341,7 @@ async function lookupCopyTargets(
 	exp: Expectation.QuantelClipCopy
 ): Promise<LookupPackageContainer<QuantelMetadata>> {
 	return lookupAccessorHandles<QuantelMetadata>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,

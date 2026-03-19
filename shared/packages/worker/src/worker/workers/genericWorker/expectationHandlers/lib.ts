@@ -151,6 +151,7 @@ export interface LookupChecks {
 }
 /** Go through the Accessors and return the best one that we can use for the expectation */
 export async function lookupAccessorHandles<Metadata>(
+	lookupReason: 'Source' | 'Target' | string,
 	worker: BaseWorker,
 	packageContainers: PackageContainerOnPackage[],
 	combineWithPackageContainers: PackageContainerOnPackage[],
@@ -173,7 +174,7 @@ export async function lookupAccessorHandles<Metadata>(
 		),
 	}))
 
-	return promiseTimeout<LookupPackageContainer<Metadata>>(
+	const result = await promiseTimeout<LookupPackageContainer<Metadata>>(
 		(async () => {
 			/** undefined if all good, error string otherwise */
 			const errorReasons: {
@@ -404,18 +405,24 @@ export async function lookupAccessorHandles<Metadata>(
 					accessor: undefined,
 					ready: false,
 					reason: {
-						user: 'No target found',
-						tech: 'No target found',
+						user: 'No accessor found',
+						tech: 'No accessor found',
 					},
 					knownReason: true,
 				}
 			}
+
+			const allTechReasons = errorReasons.map((e) => e.reason.tech).join(', ') // return all technical reasons
+			const allAccessors = prioritizedAccessors
+				.map((a) => `${a.packageContainer.containerId}-${a.accessorId}`)
+				.join(', ')
+
 			return {
 				accessor: undefined,
 				ready: false,
 				reason: {
 					user: errorReasons[0].reason.user, // Just return first user reason
-					tech: errorReasons.map((e) => e.reason.tech).join(', '), // return all technical reasons
+					tech: `${allTechReasons}, have asked accessors ${allAccessors}`,
 				},
 				knownReason: errorReasons.reduce((prevValue, e) => prevValue && e.knownReason, true), // It is a known reason only if all reasons are known
 			}
@@ -430,6 +437,13 @@ export async function lookupAccessorHandles<Metadata>(
 				checks,
 			})})`
 	)
+
+	if (!result.ready) {
+		// Add reason for failure:
+		result.reason.user = `${lookupReason}: ${result.reason.user}`
+		result.reason.tech = `${lookupReason}: ${result.reason.tech}`
+	}
+	return result
 }
 
 /** Converts a diff to some kind of user-readable string */

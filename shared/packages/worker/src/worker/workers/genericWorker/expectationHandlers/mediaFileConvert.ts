@@ -353,6 +353,7 @@ async function lookupConvertSources(
 	exp: Expectation.MediaFileConvert
 ): Promise<LookupPackageContainer<UniversalVersion>> {
 	return lookupAccessorHandles<UniversalVersion>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -371,6 +372,7 @@ async function lookupConvertTargets(
 	exp: Expectation.MediaFileConvert
 ): Promise<LookupPackageContainer<UniversalVersion>> {
 	return lookupAccessorHandles<UniversalVersion>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,
@@ -794,6 +796,7 @@ class MediaConversionOperation {
 		const sourcePath = await this.getAccessorFullPath(operationPointer.lookup.handle)
 
 		const localLookup = await this.lookupLocalAccessorHandle(
+			'Source',
 			[localPackageContainer.packageContainer],
 			path.basename(sourcePath),
 			operationPointer
@@ -890,6 +893,7 @@ class MediaConversionOperation {
 			else fileName = path.basename(this.exp.endRequirement.content.filePath)
 
 			const localLookup = await this.lookupLocalAccessorHandle(
+				'Intermediate Target',
 				[localPackageContainer.packageContainer],
 				fileName,
 				operationPointer
@@ -1029,6 +1033,7 @@ class MediaConversionOperation {
 	}
 
 	private async lookupLocalAccessorHandle(
+		lookupReason: string,
 		/** The PackageContainer to create an AccessorHandle for */
 		mainPackageContainers: Expectation.SpecificPackageContainerOnPackage.FileSource[],
 		/** File Name (not a full path, just the basename) */
@@ -1039,6 +1044,7 @@ class MediaConversionOperation {
 		// generate a random fileName to avoid collisions
 
 		return lookupAccessorHandles<UniversalVersion>(
+			lookupReason,
 			this.parent.worker,
 			mainPackageContainers,
 			[otherOperationPointer.packageContainer],

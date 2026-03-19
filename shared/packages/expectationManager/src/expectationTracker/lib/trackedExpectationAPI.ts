@@ -57,6 +57,11 @@ export class TrackedExpectationAPI {
 			updatedState = true
 		}
 
+		if (reason && trackedExp.session.assignedWorker) {
+			// Add Worker id to tech reason:
+			reason.tech = `${reason.tech} (Worker: ${trackedExp.session.assignedWorker.id || 'N/A'})`
+		}
+
 		if (reason && !_.isEqual(trackedExp.reason, reason)) {
 			trackedExp.reason = reason
 			updatedReason = true
