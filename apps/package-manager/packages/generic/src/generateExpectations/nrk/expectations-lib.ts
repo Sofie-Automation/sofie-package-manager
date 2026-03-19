@@ -238,6 +238,7 @@ export function generatePackageScan(
 		priority = expectation.priority + 1
 	}
 
+	const useOnlyTargetsAsSources = expectation.type === Expectation.Type.FILE_COPY_PROXY // If previous step is to copy a proxy, we should use only that proxy as source
 	return literal<Expectation.PackageScan>({
 		id: protectString<ExpectationId>(expectation.id + '_scan'),
 		priority: priority,
@@ -253,7 +254,10 @@ export function generatePackageScan(
 		},
 
 		startRequirement: {
-			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+			sources: useOnlyTargetsAsSources
+				? [...expectation.endRequirement.targets]
+				: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -278,7 +282,7 @@ export function generatePackageScan(
 			allowWaitForCPU: false,
 			removeDelay: settings.delayRemovalPackageInfo,
 		},
-		dependsOnFulfilled: [expectation.id],
+		dependsOnFulfilled: useOnlyTargetsAsSources ? [expectation.id] : [],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -286,6 +290,7 @@ export function generatePackageDeepScan(
 	expectation: SomeClipCopyExpectation,
 	settings: PackageManagerSettings
 ): Expectation.PackageDeepScan {
+	const useOnlyTargetsAsSources = expectation.type === Expectation.Type.FILE_COPY_PROXY // If previous step is to copy a proxy, we should use only that proxy as source
 	return literal<Expectation.PackageDeepScan>({
 		id: protectString<ExpectationId>(expectation.id + '_deepscan'),
 		priority: expectation.priority + PriorityAdditions.DEEP_SCAN,
@@ -301,7 +306,9 @@ export function generatePackageDeepScan(
 		},
 
 		startRequirement: {
-			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+			sources: useOnlyTargetsAsSources
+				? [...expectation.endRequirement.targets]
+				: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -332,7 +339,7 @@ export function generatePackageDeepScan(
 			usesCPUCount: 1,
 			removeDelay: settings.delayRemovalPackageInfo,
 		},
-		dependsOnFulfilled: [expectation.id],
+		dependsOnFulfilled: useOnlyTargetsAsSources ? [expectation.id] : [],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -342,6 +349,7 @@ export function generatePackageLoudness(
 	packageSettings: ExpectedPackage.SideEffectLoudnessSettings,
 	settings: PackageManagerSettings
 ): Expectation.PackageLoudnessScan {
+	const useOnlyTargetsAsSources = expectation.type === Expectation.Type.FILE_COPY_PROXY // If previous step is to copy a proxy, we should use only that proxy as source
 	return literal<Expectation.PackageLoudnessScan>({
 		id: protectString<ExpectationId>(expectation.id + '_loudness'),
 		priority: expectation.priority + PriorityAdditions.LOUDNESS_SCAN,
@@ -357,7 +365,9 @@ export function generatePackageLoudness(
 		},
 
 		startRequirement: {
-			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+			sources: useOnlyTargetsAsSources
+				? [...expectation.endRequirement.targets]
+				: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -387,7 +397,7 @@ export function generatePackageLoudness(
 			usesCPUCount: 1,
 			removeDelay: settings.delayRemovalPackageInfo,
 		},
-		dependsOnFulfilled: [expectation.id],
+		dependsOnFulfilled: useOnlyTargetsAsSources ? [expectation.id] : [],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -396,6 +406,7 @@ export function generatePackageIframes(
 	expectation: SomeClipCopyExpectation,
 	settings: PackageManagerSettings
 ): Expectation.PackageIframesScan {
+	const useOnlyTargetsAsSources = expectation.type === Expectation.Type.FILE_COPY_PROXY // If previous step is to copy a proxy, we should use only that proxy as source
 	return {
 		id: protectString<ExpectationId>(expectation.id + '_iframes'),
 		priority: expectation.priority + PriorityAdditions.IFRAMES_SCAN,
@@ -411,7 +422,9 @@ export function generatePackageIframes(
 		},
 
 		startRequirement: {
-			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+			sources: useOnlyTargetsAsSources
+				? [...expectation.endRequirement.targets]
+				: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -437,7 +450,7 @@ export function generatePackageIframes(
 			usesCPUCount: 1,
 			removeDelay: settings.delayRemovalPackageInfo,
 		},
-		dependsOnFulfilled: [expectation.id],
+		dependsOnFulfilled: useOnlyTargetsAsSources ? [expectation.id] : [],
 		triggerByFulfilledIds: [expectation.id],
 	}
 }
@@ -550,6 +563,7 @@ export function generateMediaFileThumbnail(
 	settings: ExpectedPackage.SideEffectThumbnailSettings,
 	packageContainer: PackageContainer
 ): Expectation.MediaFileThumbnail {
+	const useOnlyTargetsAsSources = expectation.type === Expectation.Type.FILE_COPY_PROXY // If previous step is to copy a proxy, we should use only that proxy as source
 	return literal<Expectation.MediaFileThumbnail>({
 		id: protectString<ExpectationId>(expectation.id + '_thumbnail'),
 		priority: expectation.priority + PriorityAdditions.THUMBNAIL,
@@ -565,7 +579,9 @@ export function generateMediaFileThumbnail(
 		},
 
 		startRequirement: {
-			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+			sources: useOnlyTargetsAsSources
+				? [...expectation.endRequirement.targets]
+				: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -594,7 +610,7 @@ export function generateMediaFileThumbnail(
 			removeDelay: 0, // The removal of the thumbnail shouldn't be delayed
 			removePackageOnUnFulfill: true,
 		},
-		dependsOnFulfilled: [expectation.id],
+		dependsOnFulfilled: useOnlyTargetsAsSources ? [expectation.id] : [],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -604,6 +620,7 @@ export function generateMediaFilePreview(
 	settings: ExpectedPackage.SideEffectPreviewSettings,
 	packageContainer: PackageContainer
 ): Expectation.MediaFilePreview {
+	const useOnlyTargetsAsSources = expectation.type === Expectation.Type.FILE_COPY_PROXY // If previous step is to copy a proxy, we should use only that proxy as source
 	return literal<Expectation.MediaFilePreview>({
 		id: protectString<ExpectationId>(expectation.id + '_preview'),
 		priority: expectation.priority + PriorityAdditions.PREVIEW,
@@ -619,7 +636,9 @@ export function generateMediaFilePreview(
 		},
 
 		startRequirement: {
-			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
+			sources: useOnlyTargetsAsSources
+				? [...expectation.endRequirement.targets]
+				: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
@@ -647,7 +666,7 @@ export function generateMediaFilePreview(
 			removeDelay: 0, // The removal of the preview shouldn't be delayed
 			removePackageOnUnFulfill: true,
 		},
-		dependsOnFulfilled: [expectation.id],
+		dependsOnFulfilled: useOnlyTargetsAsSources ? [expectation.id] : [],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -701,7 +720,6 @@ export function generateQuantelClipThumbnail(
 			removeDelay: 0, // The removal of the thumbnail shouldn't be delayed
 			removePackageOnUnFulfill: true,
 		},
-		dependsOnFulfilled: [expectation.id],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -756,7 +774,6 @@ export function generateQuantelClipPreview(
 			removeDelay: 0, // The removal of the preview shouldn't be delayed
 			removePackageOnUnFulfill: true,
 		},
-		dependsOnFulfilled: [expectation.id],
 		triggerByFulfilledIds: [expectation.id],
 	})
 }
@@ -920,7 +937,7 @@ export function generatePackageCopyFileProxy(
 		},
 
 		startRequirement: {
-			sources: expectation.endRequirement.targets,
+			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
 			version: expectation.endRequirement.version,
 		},
