@@ -1,5 +1,6 @@
 import {
 	getAccessorHandle,
+	getAccessorStaticHandle,
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
@@ -190,6 +191,21 @@ export async function lookupAccessorHandles<Metadata>(
 					expectationContent,
 					expectationWorkOptions
 				)
+				const staticHandle = getAccessorStaticHandle(accessor)
+
+				// Check that the accessor is supported by the worker:
+				if (!staticHandle.doYouSupportAccess(worker, accessor)) {
+					errorReasons.push({
+						reason: {
+							user: `Accessor not supported`,
+							tech: `${packageContainer.label}: Accessor "${accessor.label || accessorId}" of type "${
+								accessor.type
+							}" is not supported by the worker`,
+						},
+						knownReason: true,
+					})
+					continue // Maybe next accessor works?
+				}
 
 				// Check that the accessor is valid at the most basic level:
 				const basicResult = handle.checkHandleBasic()
