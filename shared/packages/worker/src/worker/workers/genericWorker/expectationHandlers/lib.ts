@@ -390,14 +390,11 @@ export async function lookupAccessorHandles<Metadata>(
 						continue // Maybe next accessor works?
 					}
 				}
-
-				if (errorReasons.length === 0) {
-					// All good, no need to look further:
-					return {
-						accessor: accessor,
-						handle: handle,
-						ready: true,
-					}
+				// At this point we have found an accessor that can be used!
+				return {
+					accessor: accessor,
+					handle: handle,
+					ready: true,
 				}
 			}
 			if (errorReasons.length === 0) {
