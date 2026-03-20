@@ -136,25 +136,4 @@ jobs:
           push: true
           provenance: false
           labels: ${{ steps.dockerhub-tag.outputs.labels }}
-          tags: '${{ steps.dockerhub-tag.outputs.tags }}'
-
-  trivy-scanning:
-    name: Run Trivy scan for ${{ matrix.repo }}
-    uses: nrkno/github-workflow-docker-build-push/.github/workflows/workflow.yaml@v4.5.0
-    strategy:
-      matrix:
-        repo: [package-manager, workforce, http-server, quantel-http-transformer-proxy]
-    with:
-      runs-on: "['ubuntu-latest']"
-      registry-url: ghcr.io
-      name: sofie-automation/sofie-package-manager
-      # Don't actually push any images, this is just for trivy scanning for now
-      push: false
-      trivy-severity: 'CRITICAL'
-      trivy-summary-enabled: true
-      trivy-sbom-enabled: true
-      dockerfile: apps/${{ matrix.repo }}/app/Dockerfile
-    secrets:
-      registry-username: ${{ github.repository_owner }}
-      registry-password: ${{ secrets.GITHUB_TOKEN }}
-      token: ${{ secrets.GITHUB_TOKEN }}
+          tags: "${{ steps.dockerhub-tag.outputs.tags }}"
