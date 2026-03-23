@@ -72,7 +72,7 @@ jobs:
       - name: Get the docker tag for GHCR
         id: ghcr-tag
         if: needs.check-build-steps.outputs.build-and-push-enable == 'true'
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ghcr.io/${{ github.repository }}-${{ matrix.repo}}
@@ -86,7 +86,7 @@ jobs:
       - name: Get the docker tag for DockerHub
         id: dockerhub-tag
         if: needs.check-build-steps.outputs.build-and-push-enable == 'true'
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             sofietv/package-manager-${{ matrix.repo}}
