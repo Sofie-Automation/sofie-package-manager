@@ -73,6 +73,7 @@ export class WebsocketServer extends HelpfulEventEmitter {
 	}
 	get port(): number {
 		const address = this.wss.address()
+		if (!address) throw new Error(`Internal error: wss.address() is null, can't get port number`)
 		if (typeof address === 'string')
 			throw new Error(`Internal error: to be implemented: wss.address() as string "${address}"`)
 

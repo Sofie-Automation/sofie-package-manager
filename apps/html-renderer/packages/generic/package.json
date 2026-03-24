@@ -29,6 +29,6 @@
         "@sofie-package-manager/api": "1.53.0"
     },
     "devDependencies": {
-        "rimraf": "^5.0.5"
+        "rimraf": "^6.1.3"
     }
 }

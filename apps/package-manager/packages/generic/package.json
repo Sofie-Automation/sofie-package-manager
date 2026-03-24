@@ -15,20 +15,20 @@
         "typescript": "*"
     },
     "dependencies": {
-        "@parcel/watcher": "^2.3.0",
+        "@parcel/watcher": "^2.5.6",
         "@sofie-package-manager/api": "1.53.0",
         "@sofie-package-manager/expectation-manager": "1.53.0",
         "@sofie-package-manager/worker": "1.53.0",
         "data-store": "^4.0.3",
         "deep-extend": "^0.6.0",
         "fast-clone": "^1.5.13",
-        "underscore": "^1.12.0"
+        "underscore": "^1.13.8"
     },
     "devDependencies": {
         "@types/deep-extend": "0.6.2",
-        "@types/underscore": "^1.10.24",
-        "jest": "*",
-        "rimraf": "^5.0.5"
+        "@types/underscore": "^1.13.0",
+        "jest": "^30.3.0",
+        "rimraf": "^6.1.3"
     },
     "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
     "engines": {
