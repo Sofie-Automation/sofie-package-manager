@@ -10,6 +10,7 @@ import {
 	ReturnTypeRemoveExpectation,
 	AdapterServerOptions,
 	PackageContainerExpectation,
+	ReturnTypeGetConfiguration,
 	ReturnTypeDoYouSupportPackageContainer,
 	ReturnTypeRunPackageContainerCronJob,
 	ReturnTypeSetupPackageContainerMonitors,
@@ -34,6 +35,10 @@ export class WorkerAgentAPI
 		super(methods, options)
 	}
 
+	async getConfiguration(): Promise<ReturnTypeGetConfiguration> {
+		// Note: This call is ultimately received in shared/packages/worker/src/workerAgent.ts
+		return this._sendMessage('getConfiguration')
+	}
 	async doYouSupportExpectation(exp: Expectation.Any): Promise<ReturnTypeDoYouSupportExpectation> {
 		// Note: This call is ultimately received in shared/packages/worker/src/workerAgent.ts
 		return this._sendMessage('doYouSupportExpectation', exp)

@@ -8,6 +8,7 @@ import {
 	ReturnTypeDisposePackageContainerMonitors,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeDoYouSupportPackageContainer,
+	ReturnTypeGetConfiguration,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
@@ -101,6 +102,7 @@ export namespace ExpectationManagerWorkerAgent {
 	/** Methods on WorkerAgent, called by ExpectedManager */
 	export interface WorkerAgent extends MethodsInterfaceBase {
 		id: ExpectationManagerId
+		getConfiguration: () => Promise<ReturnTypeGetConfiguration>
 		doYouSupportExpectation: (exp: Expectation.Any) => Promise<ReturnTypeDoYouSupportExpectation>
 		getCostForExpectation: (exp: Expectation.Any) => Promise<ExpectationCost>
 		isExpectationReadyToStartWorkingOn: (

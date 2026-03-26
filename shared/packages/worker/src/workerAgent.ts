@@ -663,6 +663,7 @@ export class WorkerAgent {
 		this.expectationManagers.set(managerId, expectationManager)
 
 		const methods = literal<Omit<ExpectationManagerWorkerAgent.WorkerAgent, 'id'>>({
+			getConfiguration: async () => this.config,
 			doYouSupportExpectation: async (exp: Expectation.Any): Promise<ReturnTypeDoYouSupportExpectation> => {
 				return this.doesWorkerSupportExpectation(exp)
 			},
@@ -847,9 +848,11 @@ export class WorkerAgent {
 							if (!result.success) knownReason = result.knownReason
 						} else if ('ready' in result) {
 							if (!result.ready) knownReason = result.knownReason
-						} else if ('cost' in result) {
-							// do nothing
-						} else if ('wipId' in result) {
+						} else if (
+							'cost' in result || // ExpectationCost
+							'wipId' in result || // WorkInProgressInfo
+							'process' in result // ReturnTypeGetConfiguration
+						) {
 							// do nothing
 						} else {
 							assertNever(result)
