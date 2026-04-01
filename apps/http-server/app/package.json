@@ -11,8 +11,7 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
-        "@http-server/generic": "1.53.0",
-        "rimraf": "^5.0.5"
+        "@http-server/generic": "1.53.0"
     },
     "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
     "engines": {
@@ -27,6 +26,7 @@
         ]
     },
     "devDependencies": {
-        "lerna": "^6.6.1"
+        "lerna": "^9.0.7",
+        "rimraf": "^6.1.3"
     }
 }

@@ -44,7 +44,7 @@ test('checkHandleBasic', () => {
 		})
 	}
 
-	expect(() => getFileShareAccessor({}, {}).checkHandleBasic()).toThrowError('Bad input data')
+	expect(() => getFileShareAccessor({}, {}).checkHandleBasic()).toThrow('Bad input data')
 
 	// missing accessor.folderPath:
 	expect(getFileShareAccessor({}, { filePath: 'amb.amp4' }).checkHandleBasic()).toMatchObject({

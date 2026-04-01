@@ -1,4 +1,3 @@
-import AbortController from 'abort-controller'
 import fetch, { Response, RequestInit } from 'node-fetch'
 import { INNER_ACTION_TIMEOUT } from '@sofie-package-manager/api'
 import { Agent as HTTPAgent } from 'http'

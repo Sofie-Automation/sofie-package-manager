@@ -25,7 +25,7 @@
         ]
     },
     "devDependencies": {
-        "lerna": "^6.6.1",
-        "rimraf": "^5.0.5"
+        "lerna": "^9.0.7",
+        "rimraf": "^6.1.3"
     }
 }

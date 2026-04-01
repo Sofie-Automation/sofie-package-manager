@@ -44,7 +44,7 @@ test('checkHandleBasic', () => {
 		})
 	}
 
-	expect(() => getLocalFolderAccessor({}, {}).checkHandleBasic()).toThrowError('Bad input data')
+	expect(() => getLocalFolderAccessor({}, {}).checkHandleBasic()).toThrow('Bad input data')
 
 	// missing accessor.folderPath:
 	expect(getLocalFolderAccessor({}, { filePath: 'amb.amp4' }).checkHandleBasic()).toMatchObject({

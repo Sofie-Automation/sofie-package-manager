@@ -1,5 +1,5 @@
 import Koa from 'koa'
-import Router from 'koa-router'
+import Router from '@koa/router'
 import cors from '@koa/cors'
 import range from 'koa-range'
 import ratelimit from 'koa-ratelimit'
@@ -69,7 +69,7 @@ export class QuantelHTTPTransformerProxy {
 		})
 
 		// Proxy
-		this.router.get('/(quantel|gv)/(.*)', async (ctx) => {
+		this.router.get(['/quantel{/*rest}', '/gv{/*rest}'], async (ctx) => {
 			try {
 				// this.logger.debug(`Pass-through requests to transformer: ${ctx.path}`)
 				if (!this.transformerURL) {
@@ -120,7 +120,7 @@ export class QuantelHTTPTransformerProxy {
 				}
 			}
 		})
-		this.router.get('/(.*)', async (ctx, next) => {
+		this.router.get('/{/*path}', async (ctx, next) => {
 			const url = `${this.transformerURL}${ctx.path}` + (ctx.querystring ? `?${ctx.querystring}` : '')
 			try {
 				const initReq = await got(url, { responseType: 'buffer' })
