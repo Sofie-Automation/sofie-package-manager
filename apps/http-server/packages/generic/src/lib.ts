@@ -1,8 +1,9 @@
 import type { RouterContext } from '@koa/router'
+import type { DefaultContext, DefaultState } from 'koa'
 import { Readable, Writable } from 'stream'
 
-export type CTX = RouterContext<any, any>
-export type CTXPost = RouterContext<any, any>
+export type CTX = RouterContext<DefaultState, DefaultContext>
+export type CTXPost = RouterContext<DefaultState, DefaultContext>
 
 export async function asyncPipe(readable: Readable, writable: Writable): Promise<void> {
 	return new Promise((resolve) => {

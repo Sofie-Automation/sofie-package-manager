@@ -120,7 +120,7 @@ export class QuantelHTTPTransformerProxy {
 				}
 			}
 		})
-		this.router.get('{/*path}', async (ctx, next) => {
+		this.router.get('/{/*path}', async (ctx, next) => {
 			const url = `${this.transformerURL}${ctx.path}` + (ctx.querystring ? `?${ctx.querystring}` : '')
 			try {
 				const initReq = await got(url, { responseType: 'buffer' })

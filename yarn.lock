@@ -3861,7 +3861,6 @@ __metadata:
   resolution: "@sofie-package-manager/api@workspace:shared/packages/api"
   dependencies:
     "@types/underscore": "npm:^1.13.0"
-    "@types/winston": "npm:^2.4.4"
     "@types/ws": "npm:^8.18.1"
     jest: "npm:^30.3.0"
     kairos-lib: "npm:^1.0.0"
@@ -4553,15 +4552,6 @@ __metadata:
   version: 1.10.10
   resolution: "@types/verror@npm:1.10.10"
   checksum: 10/2865053bded09809edb8bcb899bf8fb82701000434d979d7aa72f9163c1c5b88d1e3bca47e4a4f5eb81d7ec168842c7fffe93dc56c4d4b7afc9d38d92408212d
-  languageName: node
-  linkType: hard
-
-"@types/winston@npm:^2.4.4":
-  version: 2.4.4
-  resolution: "@types/winston@npm:2.4.4"
-  dependencies:
-    winston: "npm:*"
-  checksum: 10/69b2be354ee8f2685cd1ce4f0c22e5a8edbd5f3fb6cf400bf0b07299daf5cdbdfb3e4f602aa318e6b21a108164aa921958cd09324088604a7affb92e99282087
   languageName: node
   linkType: hard
 
@@ -15026,7 +15016,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"winston@npm:*, winston@npm:^3.19.0":
+"winston@npm:^3.19.0":
   version: 3.19.0
   resolution: "winston@npm:3.19.0"
   dependencies:
