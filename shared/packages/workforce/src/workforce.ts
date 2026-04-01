@@ -26,6 +26,7 @@ import {
 	AnyProtectedString,
 	URLMap,
 	deepEqual,
+	Status,
 } from '@sofie-package-manager/api'
 import { AppContainerAPI } from './appContainerApi'
 import { ExpectationManagerAPI } from './expectationManagerApi'
@@ -217,7 +218,8 @@ export class Workforce {
 			}, 500)
 		}
 	}
-	evaluateStatus(): void {
+	/** Computes the current statuses of the Workforce. Used by evaluateStatus() and getStatus(). */
+	private computeStatuses(): Statuses {
 		const statuses: Statuses = {}
 
 		statuses['any-workers'] =
@@ -245,6 +247,22 @@ export class Workforce {
 					  }
 		}
 
+		return statuses
+	}
+	/** Returns an aggregated status suitable for health endpoints. */
+	getStatus(): { statusCode: StatusCode; messages: string[] } {
+		const statuses = this.computeStatuses()
+		let worstCode = StatusCode.GOOD
+		const messages: string[] = []
+		for (const status of Object.values<Status | null>(statuses)) {
+			if (!status) continue
+			if (status.statusCode > worstCode) worstCode = status.statusCode
+			if (status.message) messages.push(status.message)
+		}
+		return { statusCode: worstCode, messages }
+	}
+	evaluateStatus(): void {
+		const statuses = this.computeStatuses()
 		const statusHash = hashObj(statuses)
 
 		// Report our status to each connected expectationManager:

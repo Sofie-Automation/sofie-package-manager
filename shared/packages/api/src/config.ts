@@ -36,6 +36,11 @@ export const processOptions = defineArguments({
 		default: process.env.CERTIFICATES || undefined,
 		describe: 'SSL Certificates',
 	},
+	healthPort: {
+		type: 'number',
+		default: parseInt(process.env.HEALTH_PORT || '', 10) || null,
+		describe: 'The port number to start the health server on (default is disabled)',
+	},
 })
 /** CLI-argument-definitions for the Workforce process */
 const workforceArguments = defineArguments({
@@ -112,11 +117,6 @@ const packageManagerArguments = defineArguments({
 		type: 'boolean',
 		default: process.env.DISABLE_WATCHDOG === '1',
 		describe: 'Set to true to disable the Watchdog (it kills the process if connection to Core is lost)',
-	},
-	healthPort: {
-		type: 'number',
-		default: parseInt(process.env.HEALTH_PORT || '', 10) || null,
-		describe: 'The port number to start the health server on (default is disabled)',
 	},
 
 	port: {
@@ -360,9 +360,19 @@ export function getProcessConfig(argv: {
 		certificates: _.compact(certs),
 	}
 }
+
+export interface HealthConfig {
+	/** The port to expose health/metrics endpoints on. Null means disabled. */
+	port: number | null
+}
+export function getHealthConfig(argv: { healthPort: number | null }): HealthConfig {
+	return { port: argv.healthPort ?? null }
+}
+
 // Configuration for the Workforce Application: ------------------------------
 export interface WorkforceConfig {
 	process: ProcessConfig
+	health: HealthConfig
 	workforce: {
 		port: number | null
 		allowNoAppContainers: boolean
@@ -379,6 +389,7 @@ export async function getWorkforceConfig(): Promise<WorkforceConfig> {
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		workforce: {
 			port: argv.port,
 			allowNoAppContainers: argv.allowNoAppContainers,
@@ -388,6 +399,7 @@ export async function getWorkforceConfig(): Promise<WorkforceConfig> {
 // Configuration for the HTTP server Application: ----------------------------------
 export interface HTTPServerConfig {
 	process: ProcessConfig
+	health: HealthConfig
 	httpServer: {
 		port: number
 
@@ -414,6 +426,7 @@ export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		httpServer: {
 			port: argv.httpServerPort,
 			basePath: argv.basePath,
@@ -427,6 +440,7 @@ export async function getHTTPServerConfig(): Promise<HTTPServerConfig> {
 // Configuration for the Package Manager Application: ------------------------------
 export interface PackageManagerConfig {
 	process: ProcessConfig
+	health: HealthConfig
 	packageManager: {
 		coreHost: string
 		corePort: number
@@ -455,6 +469,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		packageManager: {
 			coreHost: argv.coreHost,
 			corePort: argv.corePort,
@@ -477,6 +492,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 // Configuration for the Worker Application: ------------------------------
 export interface WorkerConfig {
 	process: ProcessConfig
+	health: HealthConfig
 	worker: {
 		workforceURL: string | null
 		appContainerURL: string | null
@@ -498,6 +514,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		worker: {
 			workforceURL: argv.workforceURL,
 			appContainerURL: argv.appContainerURL,
@@ -522,6 +539,7 @@ export async function getWorkerConfig(): Promise<WorkerConfig> {
 // Configuration for the AppContainer Application: ------------------------------
 export interface AppContainerProcessConfig {
 	process: ProcessConfig
+	health: HealthConfig
 	appContainer: AppContainerConfig
 }
 export async function getAppContainerConfig(): Promise<AppContainerProcessConfig> {
@@ -534,6 +552,7 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		appContainer: {
 			workforceURL: argv.workforceURL,
 			port: argv.port,
@@ -603,6 +622,7 @@ export async function getSingleAppConfig(): Promise<SingleAppConfig> {
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		workforce: (await getWorkforceConfig()).workforce,
 		httpServer: (await getHTTPServerConfig()).httpServer,
 		packageManager: (await getPackageManagerConfig()).packageManager,
@@ -619,6 +639,7 @@ export async function getSingleAppConfig(): Promise<SingleAppConfig> {
 // Configuration for the HTTP server Application: ----------------------------------
 export interface QuantelHTTPTransformerProxyConfig {
 	process: ProcessConfig
+	health: HealthConfig
 	quantelHTTPTransformerProxy: {
 		port: number
 
@@ -638,6 +659,7 @@ export async function getQuantelHTTPTransformerProxyConfig(): Promise<QuantelHTT
 
 	return {
 		process: getProcessConfig(argv),
+		health: getHealthConfig(argv),
 		quantelHTTPTransformerProxy: {
 			port: argv.quantelProxyPort,
 			transformerURL: argv.quantelTransformerURL,
