@@ -113,6 +113,11 @@ const packageManagerArguments = defineArguments({
 		default: process.env.DISABLE_WATCHDOG === '1',
 		describe: 'Set to true to disable the Watchdog (it kills the process if connection to Core is lost)',
 	},
+	healthPort: {
+		type: 'number',
+		default: parseInt(process.env.HEALTH_PORT || '', 10) || null,
+		describe: 'The port number to start the health server on (default is disabled)',
+	},
 
 	port: {
 		type: 'number',
@@ -428,6 +433,7 @@ export interface PackageManagerConfig {
 		deviceId: string
 		deviceToken: string
 		disableWatchdog: boolean
+		healthPort: number | null
 
 		port: number | null
 		accessURLs: URLMap | null
@@ -455,6 +461,7 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 			deviceId: argv.deviceId,
 			deviceToken: argv.deviceToken,
 			disableWatchdog: argv.disableWatchdog,
+			healthPort: argv.healthPort,
 
 			port: argv.port,
 			accessURLs: parseNetworkScopedURLs(argv.accessURL),
