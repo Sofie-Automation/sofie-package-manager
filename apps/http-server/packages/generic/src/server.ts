@@ -7,7 +7,7 @@ import Router from '@koa/router'
 import cors from '@koa/cors'
 import { bodyParser } from '@koa/bodyparser'
 
-import { HTTPServerConfig, LoggerInstance, stringifyError, first } from '@sofie-package-manager/api'
+import { HTTPServerConfig, LoggerInstance, stringifyError, first, MetricsGauge } from '@sofie-package-manager/api'
 import { BadResponse, PackageInfo, ResponseMeta, Storage, isBadResponse } from './storage/storage'
 import { FileStorage } from './storage/fileStorage'
 import { CTX, valueOrFirst } from './lib'
@@ -27,6 +27,10 @@ export class PackageProxyServer {
 	private logger: LoggerInstance
 
 	private startupTime = Date.now()
+
+	getMetrics(): { uptimeSeconds: number } {
+		return { uptimeSeconds: (Date.now() - this.startupTime) / 1000 }
+	}
 
 	constructor(logger: LoggerInstance, private config: HTTPServerConfig) {
 		this.logger = logger.category('PackageProxyServer')
@@ -59,6 +63,18 @@ export class PackageProxyServer {
 		await this.storage.init()
 
 		await this._setUpRoutes()
+		this.registerMetrics()
+	}
+	private registerMetrics(): void {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this
+		new MetricsGauge({
+			name: 'package_manager_http_server_uptime_seconds',
+			help: 'Number of seconds the HTTP server has been running',
+			collect() {
+				this.set((Date.now() - self.startupTime) / 1000)
+			},
+		})
 	}
 	private async _setUpRoutes(): Promise<void> {
 		this.router.all('/{/*path}', async (ctx, next) => {

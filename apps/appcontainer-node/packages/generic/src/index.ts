@@ -27,6 +27,8 @@ export async function startProcess(): Promise<void> {
 
 		let initialized = false
 
+		const appContainer = new AppContainer(logger, config)
+
 		new HealthEndpoints(
 			{ port: config.health.port },
 			{
@@ -38,8 +40,6 @@ export async function startProcess(): Promise<void> {
 				isReady: () => initialized,
 			}
 		)
-
-		const appContainer = new AppContainer(logger, config)
 
 		await appContainer.init()
 		initialized = true

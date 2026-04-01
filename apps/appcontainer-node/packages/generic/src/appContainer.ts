@@ -36,6 +36,7 @@ import {
 	LeveledLogMethodLight,
 	isRunningInDevelopment,
 	isRunningInTest,
+	MetricsGauge,
 } from '@sofie-package-manager/api'
 
 import { WorkforceAPI } from './workforceApi'
@@ -177,7 +178,33 @@ export class AppContainer {
 			this.killAllApps()
 		})
 	}
+	getMetrics(): { runningApps: number; appRestartsTotal: number } {
+		let restarts = 0
+		for (const app of this.apps.values()) restarts += app.restarts
+		return { runningApps: this.apps.size, appRestartsTotal: restarts }
+	}
+	private registerMetrics(): void {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this
+		new MetricsGauge({
+			name: 'package_manager_appcontainer_running_apps',
+			help: 'Number of worker app processes currently running in this app container',
+			collect() {
+				this.set(self.apps.size)
+			},
+		})
+		new MetricsGauge({
+			name: 'package_manager_appcontainer_app_restarts_total',
+			help: 'Total number of app process restarts across all apps in this app container',
+			collect() {
+				let restarts = 0
+				for (const app of self.apps.values()) restarts += app.restarts
+				this.set(restarts)
+			},
+		})
+	}
 	async init(): Promise<void> {
+		this.registerMetrics()
 		await this.discoverAvailableApps()
 		// Note: if we later change this.discoverAvailableApps to run on an interval
 		// don't throw here:
