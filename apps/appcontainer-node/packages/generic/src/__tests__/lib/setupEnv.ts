@@ -63,6 +63,9 @@ export async function setupAppContainer(partialAppContainerConfig: Partial<AppCo
 			logPath: undefined,
 			unsafeSSL: false,
 		},
+		health: {
+			port: null,
+		},
 	})
 
 	const logger = setupLogger(config, '', undefined, undefined, undefined, (level) => level === LogLevel.ERROR)
