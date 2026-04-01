@@ -12357,9 +12357,9 @@ __metadata:
   linkType: hard
 
 "path-to-regexp@npm:^8.3.0":
-  version: 8.3.0
-  resolution: "path-to-regexp@npm:8.3.0"
-  checksum: 10/568f148fc64f5fd1ecebf44d531383b28df924214eabf5f2570dce9587a228e36c37882805ff02d71c6209b080ea3ee6a4d2b712b5df09741b67f1f3cf91e55a
+  version: 8.4.1
+  resolution: "path-to-regexp@npm:8.4.1"
+  checksum: 10/5a2ac56dfcd091ac90c2275e830e45e5967d6aae5c87ef7ca8c9b5ce30b7c7e0e38ca78a339b00a6d1d53b13a39538b22a910ae1999417c4334d058a8c57c3e2
   languageName: node
   linkType: hard
 
