@@ -1479,7 +1479,7 @@ __metadata:
   resolution: "@html-renderer/app@workspace:apps/html-renderer/app"
   dependencies:
     "@html-renderer/generic": "npm:1.53.0"
-    "@sofie-automation/shared-lib": "npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
+    "@sofie-automation/shared-lib": "npm:26.3.0-1"
     "@sofie-package-manager/api": "npm:1.53.0"
     "@types/ws": "npm:^8.18.1"
     archiver: "npm:^7.0.1"
@@ -2229,6 +2229,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@koa/router@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "@koa/router@npm:14.0.0"
+  dependencies:
+    debug: "npm:^4.4.1"
+    http-errors: "npm:^2.0.0"
+    koa-compose: "npm:^4.1.0"
+    path-to-regexp: "npm:^8.2.0"
+  checksum: 10/f5f9bedd4c163ad376bcf9626ebb13f35febc44c1f81545ee5efaceb67324e3caf476f9d2a966b4590cac41ab9994b1bcb11f050afbdccd6343f27f31758ff68
+  languageName: node
+  linkType: hard
+
 "@koa/router@npm:^15.4.0":
   version: 15.4.0
   resolution: "@koa/router@npm:15.4.0"
@@ -2267,10 +2279,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mos-connection/model@npm:v4.2.0":
-  version: 4.2.0
-  resolution: "@mos-connection/model@npm:4.2.0"
-  checksum: 10/ee3798f2630254a5d3c71b0d8434e3f726fba2558bca5eeccc909349744991fd60ca0d23b93d5104275d8f29bc226525fe809e56d212dc8589d20ad98eba80ee
+"@mos-connection/model@npm:^5.0.0-alpha.0":
+  version: 5.0.0-alpha.0
+  resolution: "@mos-connection/model@npm:5.0.0-alpha.0"
+  checksum: 10/e66edde4a7f0c20bc468151e5e90b49edd34dc63837a573b30400c3f1e981da2b3d6c504f361a8416eed545477598dc64999543ee5bd33fdcc70786e1330784f
   languageName: node
   linkType: hard
 
@@ -3829,30 +3841,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sofie-automation/server-core-integration@npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0":
-  version: 1.52.0-nightly-release52-20250110-120624-cb59dd9.0
-  resolution: "@sofie-automation/server-core-integration@npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
+"@sofie-automation/server-core-integration@npm:26.3.0-1":
+  version: 26.3.0-1
+  resolution: "@sofie-automation/server-core-integration@npm:26.3.0-1"
   dependencies:
-    "@sofie-automation/shared-lib": "npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
+    "@koa/router": "npm:^14.0.0"
+    "@sofie-automation/shared-lib": "npm:26.3.0-1"
     ejson: "npm:^2.2.3"
-    eventemitter3: "npm:^4.0.7"
     faye-websocket: "npm:^0.11.4"
     got: "npm:^11.8.6"
-    tslib: "npm:^2.6.2"
-    underscore: "npm:^1.13.6"
-  checksum: 10/f955079a0c01a19864b85a69a0e2705d7275f9fba8f5ad067486634aedb359b24c3597ad94df8f87cb0c88923aefb78112268ca8cd75c461bcb97187b8c6c1a2
+    koa: "npm:^3.0.1"
+    tslib: "npm:^2.8.1"
+    underscore: "npm:^1.13.7"
+  checksum: 10/9fb12f7fcb513a84ab44f89ef4bc1b20c9604edac53eda744facf1eb003b0209e98c7f3e1664b6bab0dd0dfefa61489b9a5987d1beb1c14f7ac4760e2ed415d2
   languageName: node
   linkType: hard
 
-"@sofie-automation/shared-lib@npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0":
-  version: 1.52.0-nightly-release52-20250110-120624-cb59dd9.0
-  resolution: "@sofie-automation/shared-lib@npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
+"@sofie-automation/shared-lib@npm:26.3.0-1":
+  version: 26.3.0-1
+  resolution: "@sofie-automation/shared-lib@npm:26.3.0-1"
   dependencies:
-    "@mos-connection/model": "npm:v4.2.0"
-    timeline-state-resolver-types: "npm:9.2.0-nightly-release52-20241219-123204-90290cef1.0"
-    tslib: "npm:^2.6.2"
-    type-fest: "npm:^3.13.1"
-  checksum: 10/4ef50e8f04955bc0dce736f197eb1ff92b32014123d2dc6db4b8db94ac3077869ea727ffc220b6e2f191000a04ba819c9c4925786afe555aa3fdcb4b7a36a15a
+    "@mos-connection/model": "npm:^5.0.0-alpha.0"
+    kairos-lib: "npm:^0.2.3"
+    timeline-state-resolver-types: "npm:10.0.0-nightly-release53-20251217-143607-df590aa96.0"
+    tslib: "npm:^2.8.1"
+    type-fest: "npm:^4.33.0"
+  checksum: 10/54ed9eb17e08dbbf8ac5a64dba3338b5cdec087c6f451924fac42a2f7fafbccf835eef26c717a2bf0137e30a7f39cfa54b96eb731f544bdd63fd1c6f8874bad6
   languageName: node
   linkType: hard
 
@@ -6794,7 +6808,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4, debug@npm:^4.1.0, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.6, debug@npm:^4.4.3":
+"debug@npm:4, debug@npm:^4.1.0, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.6, debug@npm:^4.4.1, debug@npm:^4.4.3":
   version: 4.4.3
   resolution: "debug@npm:4.4.3"
   dependencies:
@@ -10237,6 +10251,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"kairos-lib@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "kairos-lib@npm:0.2.3"
+  dependencies:
+    tslib: "npm:^2.8.1"
+  checksum: 10/d1be6e208896839ea693924b26f185a6b7e7dff9b1f964e4283df2e2d438554f396b4cad7cb696dcd111a2a554c12c9642bf92f7037bd8059e96a118c3a4c2c9
+  languageName: node
+  linkType: hard
+
 "keygrip@npm:~1.1.0":
   version: 1.1.0
   resolution: "keygrip@npm:1.1.0"
@@ -10288,9 +10311,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"koa@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "koa@npm:3.1.2"
+"koa@npm:^3.0.1, koa@npm:^3.1.2":
+  version: 3.2.0
+  resolution: "koa@npm:3.2.0"
   dependencies:
     accepts: "npm:^1.3.8"
     content-disposition: "npm:~1.0.1"
@@ -10310,7 +10333,7 @@ __metadata:
     statuses: "npm:^2.0.1"
     type-is: "npm:^2.0.1"
     vary: "npm:^1.1.2"
-  checksum: 10/0f89a4c69b5d0cc72ff4e971cbaf1e85ae4865c96612c6efab6d21218b25582c064cba202b1c9e678aeb121aee5908d415b45f3098d3e297f4723e49648e5ce7
+  checksum: 10/f8f256c342543a00fb42114a5c28822c96e343a663013b339dd546368069d3eee8d825d80cee51998aa26ba167f93caee70213c57d694061ccafd06d35c8ebaa
   languageName: node
   linkType: hard
 
@@ -12139,8 +12162,8 @@ __metadata:
   resolution: "package-manager-monorepo@workspace:."
   dependencies:
     "@sofie-automation/code-standard-preset": "npm:^2.5.2"
-    "@sofie-automation/server-core-integration": "npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
-    "@sofie-automation/shared-lib": "npm:1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
+    "@sofie-automation/server-core-integration": "npm:26.3.0-1"
+    "@sofie-automation/shared-lib": "npm:26.3.0-1"
     "@types/jest": "npm:^30.0.0"
     "@yao-pkg/pkg": "npm:^6.14.1"
     deep-extend: "npm:^0.6.0"
@@ -12356,7 +12379,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^8.3.0":
+"path-to-regexp@npm:^8.2.0, path-to-regexp@npm:^8.3.0":
   version: 8.4.1
   resolution: "path-to-regexp@npm:8.4.1"
   checksum: 10/5a2ac56dfcd091ac90c2275e830e45e5967d6aae5c87ef7ca8c9b5ce30b7c7e0e38ca78a339b00a6d1d53b13a39538b22a910ae1999417c4334d058a8c57c3e2
@@ -14145,12 +14168,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"timeline-state-resolver-types@npm:9.2.0-nightly-release52-20241219-123204-90290cef1.0":
-  version: 9.2.0-nightly-release52-20241219-123204-90290cef1.0
-  resolution: "timeline-state-resolver-types@npm:9.2.0-nightly-release52-20241219-123204-90290cef1.0"
+"timeline-state-resolver-types@npm:10.0.0-nightly-release53-20251217-143607-df590aa96.0":
+  version: 10.0.0-nightly-release53-20251217-143607-df590aa96.0
+  resolution: "timeline-state-resolver-types@npm:10.0.0-nightly-release53-20251217-143607-df590aa96.0"
   dependencies:
-    tslib: "npm:^2.6.3"
-  checksum: 10/3c0fa5c13b4f2e1dbcb51401cfeb6b51fc143defc629e3b59af4666f451a074f725110c9fe6e2493bd247ae5c1589f3d18379bb5a5003fde429e6fdede4e22b0
+    tslib: "npm:^2.8.1"
+  checksum: 10/6f17030e9f10568757b3ebaae40a54ce5220ce5c2f37d9b5d8a5d286704e4779c80fbfddae500e1952a6efdf6e76b67bc18d0151211c84eb194ae3b52f78c7bf
   languageName: node
   linkType: hard
 
@@ -14367,7 +14390,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.6.3, tslib@npm:^2.8.1":
+"tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
@@ -14502,14 +14525,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^3.1.0, type-fest@npm:^3.13.1":
+"type-fest@npm:^3.1.0":
   version: 3.13.1
   resolution: "type-fest@npm:3.13.1"
   checksum: 10/9a8a2359ada34c9b3affcaf3a8f73ee14c52779e89950db337ce66fb74c3399776c697c99f2532e9b16e10e61cfdba3b1c19daffb93b338b742f0acd0117ce12
   languageName: node
   linkType: hard
 
-"type-fest@npm:^4.41.0":
+"type-fest@npm:^4.33.0, type-fest@npm:^4.41.0":
   version: 4.41.0
   resolution: "type-fest@npm:4.41.0"
   checksum: 10/617ace794ac0893c2986912d28b3065ad1afb484cad59297835a0807dc63286c39e8675d65f7de08fafa339afcb8fe06a36e9a188b9857756ae1e92ee8bda212
@@ -14596,7 +14619,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"underscore@npm:^1.13.6, underscore@npm:^1.13.8":
+"underscore@npm:^1.13.7, underscore@npm:^1.13.8":
   version: 1.13.8
   resolution: "underscore@npm:1.13.8"
   checksum: 10/b50ac5806d059cc180b1bd9adea6f7ed500021f4dc782dfc75d66a90337f6f0506623c1b37863f4a9bf64ffbeb5769b638a54b7f2f5966816189955815953139
