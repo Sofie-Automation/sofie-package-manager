@@ -5,6 +5,8 @@ import {
 	setupLogger,
 	initializeLogger,
 	stringifyError,
+	HealthEndpoints,
+	StatusCode,
 } from '@sofie-package-manager/api'
 
 export { PackageProxyServer }
@@ -20,8 +22,25 @@ export async function startProcess(): Promise<void> {
 	const process = new ProcessHandler(logger)
 	process.init(config.process)
 
+	let initialized = false
+
+	new HealthEndpoints(
+		{ port: config.health.port },
+		{
+			getStatus: () => {
+				if (!initialized) return { statusCode: StatusCode.BAD, messages: ['HTTP server not yet initialized'] }
+				return { statusCode: StatusCode.GOOD, messages: [] }
+			},
+			isReady: () => initialized,
+		}
+	)
+
 	const app = new PackageProxyServer(logger, config)
-	app.init().catch((e) => {
-		logger.error(`Error in PackageProxyServer.init: ${stringifyError(e)}`)
-	})
+	app.init()
+		.then(() => {
+			initialized = true
+		})
+		.catch((e) => {
+			logger.error(`Error in PackageProxyServer.init: ${stringifyError(e)}`)
+		})
 }
