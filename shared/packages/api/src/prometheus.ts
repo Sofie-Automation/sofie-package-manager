@@ -27,3 +27,10 @@ export function setupPrometheusMetrics(): void {
 	// Collect the default nodejs metrics
 	collectDefaultMetrics()
 }
+
+/**
+ * Clear all registered metrics (useful in tests to reset state between test runs)
+ */
+export function clearPrometheusRegistry(): void {
+	register.clear()
+}

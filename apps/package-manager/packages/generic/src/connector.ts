@@ -52,7 +52,7 @@ export class Connector implements IConnector {
 		this.logger = logger.category('Conn')
 		this.coreHandler = new CoreHandler(this.logger, this.config.packageManager)
 
-		new HealthEndpoints(this, this.coreHandler, { port: config.packageManager.healthPort || undefined })
+		new HealthEndpoints(this, this.coreHandler, { port: config.health.port || undefined })
 
 		const packageManagerServerOptions: ExpectationManagerServerOptions =
 			config.packageManager.port !== null

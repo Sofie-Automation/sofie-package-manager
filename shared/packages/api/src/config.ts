@@ -447,7 +447,6 @@ export interface PackageManagerConfig {
 		deviceId: string
 		deviceToken: string
 		disableWatchdog: boolean
-		healthPort: number | null
 
 		port: number | null
 		accessURLs: URLMap | null
@@ -476,7 +475,6 @@ export async function getPackageManagerConfig(): Promise<PackageManagerConfig> {
 			deviceId: argv.deviceId,
 			deviceToken: argv.deviceToken,
 			disableWatchdog: argv.disableWatchdog,
-			healthPort: argv.healthPort,
 
 			port: argv.port,
 			accessURLs: parseNetworkScopedURLs(argv.accessURL),
