@@ -474,7 +474,7 @@ export class CoreHandler {
 	restartPackageContainer(containerId: PackageContainerId): void {
 		return this._packageManagerHandler?.restartPackageContainer(containerId)
 	}
-	troubleshoot(): any {
+	async troubleshoot(): Promise<any> {
 		return this._packageManagerHandler?.getDataSnapshot()
 	}
 	async getExpetationManagerStatus(): Promise<any> {

@@ -2,8 +2,11 @@
  * This file contains API definitions for the Worker methods
  */
 
+import { WorkerConfig } from './config'
 import { MonitorId } from './ids'
 import { Reason } from './methods'
+
+export type ReturnTypeGetConfiguration = WorkerConfig
 
 export type ReturnTypeDoYouSupportExpectation =
 	| {
