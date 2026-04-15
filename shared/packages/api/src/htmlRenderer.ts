@@ -85,12 +85,19 @@ export async function testHtmlRenderer(): Promise<string | null> {
 
 export async function testHtmlRendererExecutable(): Promise<string | null> {
 	return new Promise<string | null>((resolve) => {
+		const signal = AbortSignal.timeout(30000) // 30s timeout, to ensure it doesn't stall indefinitely as this blocks the worker startup
+
 		const executablePath = getHtmlRendererExecutable()
-		const htmlRendererProcess = spawnHtmlRendererExecutable(['--', '--test=true'])
+		const htmlRendererProcess = spawnHtmlRendererExecutable(['--', '--test=true'], { signal })
 		let output = ''
 		htmlRendererProcess.stderr.on('data', (data) => {
 			const str = data.toString()
 			output += str
+
+			if (data.includes('A JavaScript error occurred in the main process')) {
+				// This looks like the app itself has errored, and should be terminated
+				htmlRendererProcess.kill()
+			}
 		})
 		htmlRendererProcess.stdout.on('data', (data) => {
 			const str = data.toString()
