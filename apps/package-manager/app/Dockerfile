@@ -27,6 +27,7 @@ COPY apps/package-manager/packages apps/package-manager/packages
 COPY apps/package-manager/app apps/package-manager/app
 
 # Install
+RUN corepack enable
 RUN yarn install
 
 # Build

@@ -28,6 +28,7 @@ COPY apps/quantel-http-transformer-proxy/packages apps/quantel-http-transformer-
 COPY apps/quantel-http-transformer-proxy/app apps/quantel-http-transformer-proxy/app
 
 # Install
+RUN corepack enable
 RUN yarn install
 
 # Build

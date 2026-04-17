@@ -27,6 +27,7 @@ COPY apps/http-server/packages apps/http-server/packages
 COPY apps/http-server/app apps/http-server/app
 
 # Install
+RUN corepack enable
 RUN yarn install
 
 # Build

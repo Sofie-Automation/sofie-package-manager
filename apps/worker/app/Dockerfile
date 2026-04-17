@@ -27,6 +27,7 @@ COPY apps/worker/packages apps/worker/packages
 COPY apps/worker/app apps/worker/app
 
 # Install
+RUN corepack enable
 RUN yarn install
 
 # Build

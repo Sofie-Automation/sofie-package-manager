@@ -27,6 +27,7 @@ COPY apps/workforce/packages apps/workforce/packages
 COPY apps/workforce/app apps/workforce/app
 
 # Install
+RUN corepack enable
 RUN yarn install
 
 # Build
