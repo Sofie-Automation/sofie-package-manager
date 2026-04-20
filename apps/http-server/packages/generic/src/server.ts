@@ -61,7 +61,7 @@ export class PackageProxyServer {
 		await this._setUpRoutes()
 	}
 	private async _setUpRoutes(): Promise<void> {
-		this.router.all('/{/*path}', async (ctx, next) => {
+		this.router.all('/{*path}', async (ctx, next) => {
 			// Intercept and authenticate:
 
 			const apiKey: string | undefined =
@@ -95,13 +95,13 @@ export class PackageProxyServer {
 		this.router.get('/list', async (ctx) => {
 			await this.handleStorageHTMLList(ctx, async () => this.storage.listPackages())
 		})
-		this.router.get('/package/{/*path}', async (ctx) => {
+		this.router.get('/package/*path', async (ctx) => {
 			await this.handleStorage(ctx, async () => this.storage.getPackage(ctx.params.path))
 		})
-		this.router.head('/package/{/*path}', async (ctx) => {
+		this.router.head('/package/*path', async (ctx) => {
 			await this.handleStorage(ctx, async () => this.storage.headPackage(ctx.params.path))
 		})
-		this.router.post('/package/{/*path}', async (ctx) => {
+		this.router.post('/package/*path', async (ctx) => {
 			this.logger.debug(`POST ${ctx.request.URL}`)
 			const { files, fields } = await parseFormData(ctx.req, {
 				maxFileByteLength: MAX_UPLOAD_FILE_SIZE,
@@ -123,7 +123,7 @@ export class PackageProxyServer {
 				}
 			}
 		})
-		this.router.delete('/package/{/*path}', async (ctx) => {
+		this.router.delete('/package/*path', async (ctx) => {
 			this.logger.debug(`DELETE ${ctx.request.URL}`)
 			await this.handleStorage(ctx, async () => this.storage.deletePackage(ctx.params.path))
 		})
@@ -137,7 +137,7 @@ export class PackageProxyServer {
 				info: this.storage.getInfo(),
 			}
 		})
-		this.router.get('/uploadForm/{/*path}', async (ctx) => {
+		this.router.get('/uploadForm/*path', async (ctx) => {
 			// ctx.response.status = result.code
 			ctx.type = 'text/html'
 			ctx.body = (await fsReadFile(path.resolve('../static/uploadForm.html'), 'utf-8'))
