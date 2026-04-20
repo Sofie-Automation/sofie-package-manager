@@ -69,8 +69,8 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@sofie-automation/server-core-integration": "1.52.0-nightly-release52-20250110-120624-cb59dd9.0",
-    "@sofie-automation/shared-lib": "1.52.0-nightly-release52-20250110-120624-cb59dd9.0"
+    "@sofie-automation/server-core-integration": "26.3.0-1",
+    "@sofie-automation/shared-lib": "26.3.0-1"
   },
   "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
   "lint-staged": {

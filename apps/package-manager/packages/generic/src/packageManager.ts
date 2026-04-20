@@ -12,7 +12,6 @@ import {
 import {
 	PackageManagerActivePlaylist,
 	PackageManagerActiveRundown,
-	PackageManagerExpectedPackageBase,
 	// eslint-disable-next-line node/no-extraneous-import
 } from '@sofie-automation/shared-lib/dist/package-manager/publications'
 import {
@@ -1220,7 +1219,7 @@ export type ConvertExpectedPackage<E extends ExpectedPackageOrg.Base> = Omit<E, 
 }
 
 export interface ExpectedPackageWrap {
-	expectedPackage: ConvertExpectedPackage<PackageManagerExpectedPackageBase>
+	expectedPackage: ConvertExpectedPackage<ExpectedPackageOrg.Any>
 	/** Lower should be done first */
 	priority: number
 	sources: PackageContainerOnPackage[]
