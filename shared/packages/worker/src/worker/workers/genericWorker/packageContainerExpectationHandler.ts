@@ -108,6 +108,7 @@ async function lookupPackageContainer(
 	}
 
 	return (await lookupAccessorHandles(
+		forWhat,
 		worker,
 		packageContainers,
 		[],

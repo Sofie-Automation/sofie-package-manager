@@ -233,6 +233,7 @@ async function lookupTargets(
 	exp: Expectation.FileVerify
 ): Promise<LookupPackageContainer<UniversalVersion>> {
 	return lookupAccessorHandles<UniversalVersion>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,
