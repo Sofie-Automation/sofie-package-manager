@@ -70,6 +70,8 @@ export function fetchWithController(
 ): { response: Promise<Response>; controller: AbortController } {
 	const controller = new AbortController()
 
+	const tmpError = new Error() // Used later in troubleshooting
+
 	return {
 		response: new Promise((resolve, reject) => {
 			const refreshTimeout = () => {
@@ -112,13 +114,29 @@ export function fetchWithController(
 					// We should try again once as it often is a temporary issue:
 
 					doTheFetch().catch((err) => {
-						reject(err)
+						reject(handleError(err, tmpError.stack, url, options?.method))
 					})
 				} else {
-					reject(err)
+					reject(handleError(err, tmpError.stack, url, options?.method))
 				}
 			})
 		}),
 		controller,
+	}
+}
+function handleError(err: unknown, orgStack: string | undefined, url: string, method?: string) {
+	// Improve errors with the url and method info, and make sure the stack trace is preserved:
+	if (err instanceof Error) {
+		err.message = `Error when fetching ${method ?? ''} "${url}": ${err.message}`
+
+		const stackLines: string[] = [
+			...(err.stack?.split('\n').slice(1) ?? []),
+			'Original stack:',
+			...(orgStack?.split('\n') ?? []),
+		]
+		err.stack = `${err.name}: ${err.message}\n${stackLines.join('\n')}`
+		return err
+	} else {
+		return err
 	}
 }
