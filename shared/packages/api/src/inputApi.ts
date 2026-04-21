@@ -201,6 +201,16 @@ export namespace ExpectedPackage {
 		 */
 		needsLocalTarget?: boolean
 
+		/** When set, require keywords to be present in the stdOut output of the executable, in order for the conversion to be considered successful. */
+		requiredStdOut?: string[]
+		/** When set, require keywords to be present in the stdErr output of the executable, in order for the conversion to be considered successful. */
+		requiredStdErr?: string[]
+
+		/** When set, require keywords to NOT be present in the stdOut output of the executable, in order for the conversion to be considered successful. */
+		forbiddenStdOut?: string[]
+		/** When set, require keywords to NOT be present in the stdErr output of the executable, in order for the conversion to be considered successful. */
+		forbiddenStdErr?: string[]
+
 		/**
 		 * Force the output filename from this step.
 		 * This can be useful in multi-step scenarios where you want to specify the inter-step filename.
