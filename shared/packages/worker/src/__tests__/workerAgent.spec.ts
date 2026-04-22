@@ -1,5 +1,5 @@
 import { protectString } from '@sofie-automation/server-core-integration'
-import { ClientConnectionOptions, LoggerInstance, WorkerConfig } from '@sofie-package-manager/api'
+import { ClientConnectionOptions, LoggerInstance, WorkerConfig, clearPrometheusRegistry } from '@sofie-package-manager/api'
 import { WorkforceAPI } from '../workforceApi'
 import { ExpectationManagerAPI } from '../expectationManagerApi'
 
@@ -56,6 +56,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+	clearPrometheusRegistry()
 	mockInit.mockClear()
 	;(WorkforceAPI as any as jest.Mock<WorkforceAPI>).mockClear()
 	;(ExpectationManagerAPI as any as jest.Mock<ExpectationManagerAPI>).mockClear()
@@ -69,7 +70,7 @@ describe('WorkerAgent', () => {
 			worker: {
 				...o.workerConfig.worker,
 				networkIds: ['net2'],
-			}
+			},
 		} satisfies WorkerConfig)
 		await workerAgent.init()
 
@@ -164,6 +165,9 @@ function setup() {
 			windowsDriveLetters: undefined,
 			allowedExpectationTypes: null,
 			matchFilenamesWithoutExtension: false,
+		},
+		health: {
+			port: null,
 		},
 	} satisfies WorkerConfig
 

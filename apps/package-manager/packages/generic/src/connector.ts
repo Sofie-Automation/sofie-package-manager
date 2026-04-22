@@ -14,12 +14,13 @@ import {
 	objectEntries,
 } from '@sofie-package-manager/api'
 import { ExpectationManager, ExpectationManagerServerOptions } from '@sofie-package-manager/expectation-manager'
-import { CoreHandler, CoreConfig } from './coreHandler'
+import { CoreHandler } from './coreHandler'
 import { PackageContainers, PackageManagerHandler } from './packageManager'
 import fs from 'fs'
 import { promisify } from 'util'
 import path from 'path'
 import { PackageManagerSettings } from './generated/options'
+import { HealthEndpoints, IConnector } from '@sofie-automation/server-core-integration'
 
 const fsAccess = promisify(fs.access)
 const fsReadFile = promisify(fs.readFile)
@@ -35,23 +36,14 @@ async function fsExist(fileName: string): Promise<boolean> {
 	}
 }
 
-export interface Config {
-	process: ProcessConfig
-	device: DeviceConfig
-	core: CoreConfig
-	packageManager: PackageManagerConfig
-}
-export interface ProcessConfig {
-	/** Will cause the Node application to blindly accept all certificates. Not recommenced unless in local, controlled networks. */
-	unsafeSSL: boolean
-	/** Paths to certificates to load, for SSL-connections */
-	certificates: string[]
-}
 export interface DeviceConfig {
 	deviceId: string
 	deviceToken: string
 }
-export class Connector {
+export class Connector implements IConnector {
+	public initialized = false
+	public initializedError: string | undefined = undefined
+
 	private packageManagerHandler: PackageManagerHandler
 	private coreHandler: CoreHandler
 
@@ -59,6 +51,8 @@ export class Connector {
 	constructor(logger: LoggerInstance, private config: PackageManagerConfig, private _process: ProcessHandler) {
 		this.logger = logger.category('Conn')
 		this.coreHandler = new CoreHandler(this.logger, this.config.packageManager)
+
+		new HealthEndpoints(this, this.coreHandler, { port: config.health.port || undefined })
 
 		const packageManagerServerOptions: ExpectationManagerServerOptions =
 			config.packageManager.port !== null
@@ -90,7 +84,7 @@ export class Connector {
 		try {
 			if (!this.config.packageManager.noCore) {
 				this.logger.info('Initializing Core...')
-				await this.coreHandler.init(this.config, this._process)
+				await this.coreHandler.init(this.config, this._process.certificates)
 				this.logger.info('Core initialized')
 			} else {
 				this.logger.info('Skipping connecting to Core...')
@@ -108,8 +102,11 @@ export class Connector {
 			}
 
 			this.logger.info('Initialization done')
+			this.initialized = true
 			return
 		} catch (e) {
+			this.initializedError = stringifyError(e)
+
 			this.logger.error(`Error during initialization: ${stringifyError(e)}`)
 
 			if (this.coreHandler) {
