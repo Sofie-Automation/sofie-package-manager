@@ -204,15 +204,17 @@ export function getStandardCost(exp: Expectation.Any, worker: BaseWorker): Retur
  * @returns true if equal
  */
 export function compareResourceIds(
-	resourceId0?: string | number | null,
-	resourceId1?: string | number | null
+	requiredResourceId?: string | number | null,
+	availableResourceId?: string | number | null
 ): boolean {
-	// If one of them are not set, no need to do the comparison:
-	if (resourceId0 === undefined || resourceId0 === null || resourceId0 === '') return true
-	if (resourceId1 === undefined || resourceId1 === null || resourceId1 === '') return true
+	// If the required resourceId is not set, no need to do the comparison:
+	if (requiredResourceId === undefined || requiredResourceId === null || requiredResourceId === '') return true
+
+	requiredResourceId = `${requiredResourceId}`.trim() // stringify
+	if (requiredResourceId === '') return true
 
 	// Do a textual comparison
-	return `${resourceId0}` === `${resourceId1}`
+	return `${requiredResourceId}` === `${availableResourceId}`
 }
 
 export const ACCESSOR_DUMMY_CONTENT = {
