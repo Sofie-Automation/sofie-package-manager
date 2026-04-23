@@ -951,12 +951,31 @@ class MediaConversionOperation {
 
 		try {
 			await new Promise<void>((resolve, reject) => {
+				const recordStdOut: string[] = []
+				const recordStdErr: string[] = []
 				this.spawnedProcess = spawnProcess(
 					executable,
 					args,
 					() => {
 						// On Done
-						resolve()
+						try {
+							if (this.conversion.requiredStdOut?.length) {
+								this.requireStringsInProcessOutput(recordStdOut, this.conversion.requiredStdOut)
+							}
+							if (this.conversion.forbiddenStdOut?.length) {
+								this.requireNoStringsInProcessOutput(recordStdOut, this.conversion.forbiddenStdOut)
+							}
+							if (this.conversion.requiredStdErr?.length) {
+								this.requireStringsInProcessOutput(recordStdErr, this.conversion.requiredStdErr)
+							}
+							if (this.conversion.forbiddenStdErr?.length) {
+								this.requireNoStringsInProcessOutput(recordStdErr, this.conversion.forbiddenStdErr)
+							}
+
+							resolve()
+						} catch (err) {
+							reject(err)
+						}
 					},
 					(err) => {
 						// On Error
@@ -968,6 +987,21 @@ class MediaConversionOperation {
 					}
 					// this.logger.silly
 				)
+
+				// Only collect stdout if needed:
+				if (this.conversion.requiredStdOut?.length || this.conversion.forbiddenStdOut?.length) {
+					this.spawnedProcess.execProcess.stdout.on('data', (data: Buffer) => {
+						const str = data.toString()
+						recordStdOut.push(str)
+					})
+				}
+				// Only collect stderr if needed:
+				if (this.conversion.requiredStdErr?.length || this.conversion.forbiddenStdErr?.length) {
+					this.spawnedProcess.execProcess.stderr.on('data', (data: Buffer) => {
+						const str = data.toString()
+						recordStdErr.push(str)
+					})
+				}
 			})
 		} finally {
 			this.spawnedProcess = undefined
@@ -1055,6 +1089,38 @@ class MediaConversionOperation {
 				writePackageContainer: true,
 			}
 		)
+	}
+
+	private limitToLastFewLines(lines: string[], maxLines: number): string {
+		return lines.slice(-maxLines).join('\n')
+	}
+	private requireStringsInProcessOutput(recordStdOut: string[], requiredStrings: string[] | undefined) {
+		if (!requiredStrings?.length) return
+
+		for (const requiredStr of requiredStrings) {
+			if (!recordStdOut.some((line) => line.includes(requiredStr))) {
+				throw new Error(
+					`Required string "${requiredStr}" not found in stdout. Recorded stdout:\n${this.limitToLastFewLines(
+						recordStdOut,
+						10
+					)}`
+				)
+			}
+		}
+	}
+	private requireNoStringsInProcessOutput(recordStdOut: string[], forbiddenStrings: string[] | undefined) {
+		if (!forbiddenStrings?.length) return
+
+		for (const forbiddenStr of forbiddenStrings) {
+			if (recordStdOut.some((line) => line.includes(forbiddenStr))) {
+				throw new Error(
+					`Forbidden string "${forbiddenStr}" found in stdout. Recorded stdout:\n${this.limitToLastFewLines(
+						recordStdOut,
+						10
+					)}`
+				)
+			}
+		}
 	}
 }
 /**
