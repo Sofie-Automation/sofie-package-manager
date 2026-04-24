@@ -290,6 +290,7 @@ async function lookupLoudnessSources(
 	exp: Expectation.PackageLoudnessScan
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -308,6 +309,7 @@ async function lookupLoudnessTargets(
 	exp: Expectation.PackageLoudnessScan
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,

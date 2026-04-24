@@ -1,5 +1,6 @@
 import {
 	getAccessorHandle,
+	getAccessorStaticHandle,
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
@@ -150,6 +151,7 @@ export interface LookupChecks {
 }
 /** Go through the Accessors and return the best one that we can use for the expectation */
 export async function lookupAccessorHandles<Metadata>(
+	lookupReason: 'Source' | 'Target' | string,
 	worker: BaseWorker,
 	packageContainers: PackageContainerOnPackage[],
 	combineWithPackageContainers: PackageContainerOnPackage[],
@@ -172,23 +174,16 @@ export async function lookupAccessorHandles<Metadata>(
 		),
 	}))
 
-	return promiseTimeout<LookupPackageContainer<Metadata>>(
+	const result = await promiseTimeout<LookupPackageContainer<Metadata>>(
 		(async () => {
 			/** undefined if all good, error string otherwise */
-			let errorReason:
-				| undefined
-				| {
-						reason: Reason
-						knownReason: KnownReason
-				  } = {
-				reason: { user: 'No target found', tech: 'No target found' },
-				knownReason: true,
-			}
+			const errorReasons: {
+				reason: Reason
+				knownReason: KnownReason
+			}[] = []
 
 			// See if the file is available at any of the targets:
 			for (const { packageContainer, accessorId, accessor } of prioritizedAccessors) {
-				errorReason = undefined
-
 				const handle = getAccessorHandle<Metadata>(
 					worker,
 					accessorId,
@@ -197,11 +192,26 @@ export async function lookupAccessorHandles<Metadata>(
 					expectationContent,
 					expectationWorkOptions
 				)
+				const staticHandle = getAccessorStaticHandle(accessor)
+
+				// Check that the accessor is supported by the worker:
+				if (!staticHandle.doYouSupportAccess(worker, accessor)) {
+					errorReasons.push({
+						reason: {
+							user: `Accessor not supported`,
+							tech: `${packageContainer.label}: Accessor "${accessor.label || accessorId}" of type "${
+								accessor.type
+							}" is not supported by the worker`,
+						},
+						knownReason: true,
+					})
+					continue // Maybe next accessor works?
+				}
 
 				// Check that the accessor is valid at the most basic level:
 				const basicResult = handle.checkHandleBasic()
 				if (!basicResult.success) {
-					errorReason = {
+					errorReasons.push({
 						reason: {
 							user: `There is an issue with the Package: ${basicResult.reason.user})`,
 							tech: `${packageContainer.label}: Accessor "${accessor.label || accessorId}": ${
@@ -209,7 +219,7 @@ export async function lookupAccessorHandles<Metadata>(
 							}`,
 						},
 						knownReason: basicResult.knownReason,
-					}
+					})
 
 					continue // Maybe next accessor works?
 				}
@@ -218,7 +228,7 @@ export async function lookupAccessorHandles<Metadata>(
 					// Check that the accessor-handle supports reading:
 					const readResult = handle.checkHandleRead()
 					if (!readResult.success) {
-						errorReason = {
+						errorReasons.push({
 							reason: {
 								user: `There is an issue with the configuration for the PackageContainer "${
 									packageContainer.label
@@ -228,7 +238,7 @@ export async function lookupAccessorHandles<Metadata>(
 								}`,
 							},
 							knownReason: readResult.knownReason,
-						}
+						})
 						continue // Maybe next accessor works?
 					}
 				}
@@ -247,7 +257,7 @@ export async function lookupAccessorHandles<Metadata>(
 					}
 				}
 				if (!foundACompatibleAccessor) {
-					errorReason = {
+					errorReasons.push({
 						reason: {
 							user: `No accessor source/target combination found`,
 							tech: `${packageContainer.label}: Accessor "${
@@ -255,7 +265,7 @@ export async function lookupAccessorHandles<Metadata>(
 							}" is not compatible with any of the accessors for the other PackageContainers`,
 						},
 						knownReason: true,
-					}
+					})
 					continue // Maybe next accessor works?
 				}
 
@@ -273,7 +283,7 @@ export async function lookupAccessorHandles<Metadata>(
 							)}`
 					)
 					if (!readResult.success) {
-						errorReason = {
+						errorReasons.push({
 							reason: {
 								user: `Can't read the Package from PackageContainer "${
 									packageContainer.label
@@ -283,7 +293,7 @@ export async function lookupAccessorHandles<Metadata>(
 								}`,
 							},
 							knownReason: readResult.knownReason,
-						}
+						})
 
 						continue // Maybe next accessor works?
 					}
@@ -305,7 +315,7 @@ export async function lookupAccessorHandles<Metadata>(
 
 					const compareVersionResult = compareActualExpectVersions(actualSourceVersion, checks.packageVersion)
 					if (!compareVersionResult.success) {
-						errorReason = {
+						errorReasons.push({
 							reason: {
 								user: `Won't read from the package, due to: ${compareVersionResult.reason.user}`,
 								tech: `${packageContainer.label}: Accessor "${accessor.label || accessorId}": ${
@@ -313,7 +323,7 @@ export async function lookupAccessorHandles<Metadata>(
 								}`,
 							},
 							knownReason: compareVersionResult.knownReason,
-						}
+						})
 						continue // Maybe next accessor works?
 					}
 				}
@@ -322,7 +332,7 @@ export async function lookupAccessorHandles<Metadata>(
 					// Check that the accessor-handle supports writing:
 					const writeResult = handle.checkHandleWrite()
 					if (!writeResult.success) {
-						errorReason = {
+						errorReasons.push({
 							reason: {
 								user: `There is an issue with the configuration for the PackageContainer "${
 									packageContainer.label
@@ -332,7 +342,7 @@ export async function lookupAccessorHandles<Metadata>(
 								}": ${writeResult.reason.tech}`,
 							},
 							knownReason: writeResult.knownReason,
-						}
+						})
 						continue // Maybe next accessor works?
 					}
 				}
@@ -352,7 +362,7 @@ export async function lookupAccessorHandles<Metadata>(
 					)
 
 					if (!writeAccessResult.success) {
-						errorReason = {
+						errorReasons.push({
 							reason: {
 								user: `Can't write to the PackageContainer "${packageContainer.label}" (on accessor "${
 									accessor.label || accessorId
@@ -362,7 +372,7 @@ export async function lookupAccessorHandles<Metadata>(
 								}`,
 							},
 							knownReason: writeAccessResult.knownReason,
-						}
+						})
 						continue // Maybe next accessor works?
 					}
 				}
@@ -370,31 +380,48 @@ export async function lookupAccessorHandles<Metadata>(
 				if (typeof checks.customCheck === 'function') {
 					const checkResult = checks.customCheck(packageContainer, accessorId, accessor)
 					if (!checkResult.success) {
-						errorReason = {
+						errorReasons.push({
 							reason: {
 								user: checkResult.reason.user,
 								tech: checkResult.reason.tech,
 							},
 							knownReason: checkResult.knownReason,
-						}
+						})
 						continue // Maybe next accessor works?
 					}
 				}
-
-				if (!errorReason) {
-					// All good, no need to look further:
-					return {
-						accessor: accessor,
-						handle: handle,
-						ready: true,
-					}
+				// At this point we have found an accessor that can be used!
+				return {
+					accessor: accessor,
+					handle: handle,
+					ready: true,
 				}
 			}
+			if (errorReasons.length === 0) {
+				return {
+					accessor: undefined,
+					ready: false,
+					reason: {
+						user: 'No accessor found',
+						tech: 'No accessor found',
+					},
+					knownReason: true,
+				}
+			}
+
+			const allTechReasons = errorReasons.map((e) => e.reason.tech).join(', ') // return all technical reasons
+			const allAccessors = prioritizedAccessors
+				.map((a) => `${a.packageContainer.containerId}-${a.accessorId}`)
+				.join(', ')
+
 			return {
 				accessor: undefined,
 				ready: false,
-				reason: errorReason?.reason,
-				knownReason: errorReason?.knownReason,
+				reason: {
+					user: errorReasons[0].reason.user, // Just return first user reason
+					tech: `${allTechReasons}, have asked accessors ${allAccessors}`,
+				},
+				knownReason: errorReasons.reduce((prevValue, e) => prevValue && e.knownReason, true), // It is a known reason only if all reasons are known
 			}
 		})(),
 		INNER_ACTION_TIMEOUT,
@@ -407,6 +434,13 @@ export async function lookupAccessorHandles<Metadata>(
 				checks,
 			})})`
 	)
+
+	if (!result.ready) {
+		// Add reason for failure:
+		result.reason.user = `${lookupReason}: ${result.reason.user}`
+		result.reason.tech = `${lookupReason}: ${result.reason.tech}`
+	}
+	return result
 }
 
 /** Converts a diff to some kind of user-readable string */

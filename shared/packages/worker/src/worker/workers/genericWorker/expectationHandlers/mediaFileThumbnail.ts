@@ -396,6 +396,7 @@ async function lookupThumbnailSources(
 	exp: Expectation.MediaFileThumbnail
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -414,6 +415,7 @@ async function lookupThumbnailTargets(
 	exp: Expectation.MediaFileThumbnail
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,

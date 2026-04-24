@@ -258,6 +258,7 @@ async function lookupScanSources(
 	exp: Expectation.PackageScan
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -276,6 +277,7 @@ async function lookupScanTargets(
 	exp: Expectation.PackageScan
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,
