@@ -90,12 +90,14 @@ export async function testHtmlRendererExecutable(): Promise<string | null> {
 		const executablePath = getHtmlRendererExecutable()
 		const htmlRendererProcess = spawnHtmlRendererExecutable(['--', '--test=true'], { signal })
 		let output = ''
+		let killedForMainProcessError = false
 		htmlRendererProcess.stderr.on('data', (data) => {
 			const str = data.toString()
 			output += str
 
-			if (data.includes('A JavaScript error occurred in the main process')) {
+			if (!killedForMainProcessError && output.includes('A JavaScript error occurred in the main process')) {
 				// This looks like the app itself has errored, and should be terminated
+				killedForMainProcessError = true
 				htmlRendererProcess.kill()
 			}
 		})
