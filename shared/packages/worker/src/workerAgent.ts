@@ -224,10 +224,10 @@ export class WorkerAgent {
 			}
 		)
 	}
-	async init(): Promise<void> {
+	async init(disableMetrics = false): Promise<void> {
 		this.logger.info(`WorkerAgent.init: Initializing...`)
 
-		this.registerMetrics()
+		if (!disableMetrics) this.registerMetrics()
 		await this._worker.init()
 
 		// Connect to AppContainer

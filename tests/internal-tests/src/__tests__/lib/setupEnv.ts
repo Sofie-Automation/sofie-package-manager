@@ -184,7 +184,7 @@ export async function setupExpectationManager(
 		workerAgent.hookToAppContainer(mockAppContainer.getWorkerAgentHook())
 		workerAgent.hookToWorkforce(workforce.getWorkerAgentHook())
 		workerAgent.hookToExpectationManager(expectationManager.managerId, expectationManager.getWorkerAgentHook())
-		await workerAgent.init()
+		await workerAgent.init(true)
 
 		return workerId
 	}
