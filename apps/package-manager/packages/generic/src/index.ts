@@ -1,4 +1,4 @@
-import { Connector, Config } from './connector'
+import { Connector } from './connector'
 import {
 	getPackageManagerConfig,
 	LoggerInstance,
@@ -8,7 +8,8 @@ import {
 	stringifyError,
 } from '@sofie-package-manager/api'
 
-export { Connector, Config }
+export { Connector }
+
 export async function startProcess(
 	startInInternalMode?: boolean
 ): Promise<{ logger: LoggerInstance; connector: Connector }> {
