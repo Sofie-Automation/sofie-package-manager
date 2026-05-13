@@ -8,6 +8,7 @@ import {
 import {
 	ExpectedPackageId as CoreExpectedPackageId,
 	ExpectedPackageWorkStatusId,
+	RundownId,
 } from '@sofie-automation/shared-lib/dist/core/model/Ids'
 import {
 	PackageManagerActivePlaylist,
@@ -1203,6 +1204,13 @@ export function deleteAllUndefinedProperties<T extends { [key: string]: any }>(o
 }
 export type ConvertExpectedPackage<E extends ExpectedPackageOrg.Base> = Omit<E, '_id' | 'sources' | 'sideEffect'> & {
 	_id: ExpectedPackageId
+
+	/**
+	 * The ID of the rundown this package belongs to, if any.
+	 * Note: This aligns with the property in the interfaces from sofie-core
+	 */
+	rundownId?: RundownId
+
 	sources: Array<
 		Omit<E['sources'][0], 'containerId' | 'accessors'> & {
 			containerId: PackageContainerId // Converts string -> PackageContainerId
