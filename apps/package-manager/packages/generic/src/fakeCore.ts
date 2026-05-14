@@ -1,5 +1,5 @@
 /* eslint-disable node/no-extraneous-import */
-import { ExternalPeripheralDeviceAPI } from '@sofie-automation/server-core-integration/dist/lib/methods'
+import { ExternalPeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { ExpectedPackageId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
 import { LoggerInstance } from '@sofie-package-manager/api'
 
