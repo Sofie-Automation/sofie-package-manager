@@ -198,13 +198,15 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		} else throw new Error(`getPackageActualVersion: ${response.reason.user}: ${response.reason.tech}`)
 	}
 	async ensurePackageFulfilled(): Promise<void> {
-		await this.fileHandler.clearPackageRemoval(this.filePath)
+		if ((this.workOptions.removeDelay ?? -1) >= 0) {
+			// Only handle this if there is a removeDelay set, otherwise we can skip it to save time:
+			await this.fileHandler.clearPackageRemoval(this.filePath)
+		}
 	}
 	async removePackage(reason: string): Promise<void> {
 		await this.fileHandler.handleRemovePackage(this.filePath, this.packageName, reason)
 	}
 	async getPackageReadStream(): Promise<PackageReadStream> {
-		// important that this is a 'read', so that it doesn't go into a deadlock with putPackageStream() in case of an upload/download to the same accessorPackageContainer
 		const ftp = await this.prepareFTPClient()
 
 		const response = await ftp.download(this.fullPath)
@@ -267,7 +269,10 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		operationName: string,
 		source: string | GenericAccessorHandle<any>
 	): Promise<PackageOperation> {
-		await this.fileHandler.clearPackageRemoval(this.filePath)
+		if ((this.workOptions.removeDelay ?? -1) >= 0) {
+			// Only handle this if there is a removeDelay set, otherwise we can skip it to save time:
+			await this.fileHandler.clearPackageRemoval(this.filePath)
+		}
 		return this.logWorkOperation(operationName, source, this.packageName)
 	}
 	async finalizePackage(operation: PackageOperation): Promise<void> {
@@ -482,18 +487,20 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 			[accessorType: string]: CachedClients | undefined
 		}
 
-		const cacheKey = JSON.stringify([
-			this.accessorId,
-			ftpOptions.serverType,
-			ftpOptions.host,
-			ftpOptions.port,
-			this.accessor.basePath ?? '/',
-		])
+		const cacheKey = JSON.stringify([this.accessorId, options, this.accessor.basePath ?? '/'])
 
 		let cachedClients = accessorCache[cacheKey]
 		if (cachedClients) {
 			// Check that options matches:
 			if (!isEqual(cachedClients.options, options)) {
+				// It the options don't match, something is wrong with the cacheKey
+
+				this.worker.logger.error(
+					`Something is wrong with the FTP client cacheKey. The options do not match the cacheKey. Deleting cached clients for this key. cacheKey: ${cacheKey}, options: ${JSON.stringify(
+						options
+					)}, cachedOptions: ${JSON.stringify(cachedClients.options)}`
+				)
+
 				for (const c of cachedClients.clients) {
 					await c.client.destroy()
 				}
@@ -532,9 +539,10 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		}
 
 		if (!cachedClient) {
+			this.worker.logger.info(`Creating new FTP client for purpose="${purpose}", ${JSON.stringify(options)}`)
 			// Set up a new FTP client:
 			cachedClient = {
-				client: createFTPClient(ftpOptions.serverType, this.worker.logger, options),
+				client: createFTPClient(options.serverType, this.worker.logger, options),
 				purpose: purpose,
 			}
 			cachedClients.clients.push(cachedClient)
@@ -580,6 +588,11 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 		return ftp.downloadContent(fullPath)
 	}
 	async readFileIfExists(fullPath: string): Promise<Buffer | undefined> {
+		// On FTP, it is a much lighter operation to check if the file exists that reading it,
+		// so we'll do that first:
+		const exists = await this.fileExists(fullPath)
+		if (!exists) return undefined
+
 		try {
 			return await this.readFile(fullPath)
 		} catch (e) {
