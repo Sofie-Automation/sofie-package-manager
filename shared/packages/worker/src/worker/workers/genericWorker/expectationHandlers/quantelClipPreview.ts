@@ -334,6 +334,7 @@ async function lookupPreviewSources(
 	exp: Expectation.QuantelClipPreview
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Source',
 		worker,
 		exp.startRequirement.sources,
 		exp.endRequirement.targets,
@@ -352,6 +353,7 @@ async function lookupPreviewTargets(
 	exp: Expectation.QuantelClipPreview
 ): Promise<LookupPackageContainer<Metadata>> {
 	return lookupAccessorHandles<Metadata>(
+		'Target',
 		worker,
 		exp.endRequirement.targets,
 		exp.startRequirement.sources,
