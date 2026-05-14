@@ -28,6 +28,7 @@ import {
 	AppContainerId,
 	literal,
 	WorkerConfig,
+	clearPrometheusRegistry,
 } from '@sofie-package-manager/api'
 import {
 	ExpectationManager,
@@ -74,6 +75,9 @@ export const defaultTestConfig: SingleAppConfig = {
 		watchFiles: false,
 		noCore: false,
 		chaosMonkey: false,
+	},
+	health: {
+		port: null,
 	},
 	worker: {
 		workerId: protectString<WorkerAgentId>('worker'),
@@ -131,6 +135,9 @@ export async function setupExpectationManager(
 	options: ExpectationManagerOptions,
 	logFilterFunction: (level: string, ...args: any[]) => boolean
 ) {
+	// Clear the global prom-client registry so metrics can be re-registered on each test environment setup
+	clearPrometheusRegistry()
+
 	const logLevel = debugLogging ? LogLevel.DEBUG : LogLevel.WARN
 	const logger = setupLogger(config, '', undefined, undefined, logLevel, logFilterFunction)
 
@@ -177,7 +184,7 @@ export async function setupExpectationManager(
 		workerAgent.hookToAppContainer(mockAppContainer.getWorkerAgentHook())
 		workerAgent.hookToWorkforce(workforce.getWorkerAgentHook())
 		workerAgent.hookToExpectationManager(expectationManager.managerId, expectationManager.getWorkerAgentHook())
-		await workerAgent.init()
+		await workerAgent.init(true)
 
 		return workerId
 	}

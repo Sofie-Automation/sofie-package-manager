@@ -16,6 +16,7 @@ import {
 	PeripheralDevicePubSubCollectionsNames,
 	PeripheralDevicePubSubCollections,
 	CollectionDocCheck,
+	ICoreHandler,
 } from '@sofie-automation/server-core-integration'
 
 import { DeviceConfig } from './connector'
@@ -23,7 +24,6 @@ import { DeviceConfig } from './connector'
 import {
 	LoggerInstance,
 	PackageManagerConfig,
-	ProcessHandler,
 	StatusCode,
 	Statuses,
 	Status,
@@ -52,16 +52,10 @@ try {
 	packageJson = null
 }
 
-export interface CoreConfig {
-	host: string
-	port: number
-	watchdog: boolean
-}
-
 /**
  * Represents a connection between the Gateway and Core
  */
-export class CoreHandler {
+export class CoreHandler implements ICoreHandler {
 	private logger: LoggerInstance
 	public _observers: Array<Observer<any>> = []
 	public deviceSettings: { [key: string]: any } = {}
@@ -79,13 +73,16 @@ export class CoreHandler {
 	private _onConnected?: () => any
 	private _executedFunctions = new Set<PeripheralDeviceCommandId>()
 	private _packageManagerHandler?: PackageManagerHandler
-	private _coreConfig?: CoreConfig
-	private processHandler?: ProcessHandler
 
 	private _statusInitialized = false
+	private _enableWatchdog = false
 	private _statusDestroyed = false
 	private statuses: Statuses = {}
 	private reportedStatusHash = ''
+
+	public get connectedToCore(): boolean {
+		return this.core && this.core.connected
+	}
 
 	constructor(logger: LoggerInstance, deviceOptions: DeviceConfig) {
 		this.logger = logger.category('CoreHandler')
@@ -94,15 +91,9 @@ export class CoreHandler {
 		this.fakeCore = new FakeCore(this.logger)
 	}
 
-	async init(config: PackageManagerConfig, processHandler: ProcessHandler): Promise<void> {
+	async init(config: PackageManagerConfig, certificates: Buffer[]): Promise<void> {
 		this._statusInitialized = false
-		this._coreConfig = {
-			host: config.packageManager.coreHost,
-			port: config.packageManager.corePort,
-			watchdog: config.packageManager.disableWatchdog,
-		}
-
-		this.processHandler = processHandler
+		this._enableWatchdog = !config.packageManager.disableWatchdog
 
 		this.core = new CoreConnection(this.getCoreConnectionOptions())
 
@@ -118,13 +109,9 @@ export class CoreHandler {
 		})
 
 		const ddpConfig: DDPConnectorOptions = {
-			host: this._coreConfig.host,
-			port: this._coreConfig.port,
-		}
-		if (this.processHandler && this.processHandler.certificates.length) {
-			ddpConfig.tlsOpts = {
-				ca: this.processHandler.certificates,
-			}
+			host: config.packageManager.coreHost,
+			port: config.packageManager.corePort,
+			tlsOpts: certificates.length ? { ca: certificates } : undefined,
 		}
 
 		await this.core.init(ddpConfig)
@@ -221,7 +208,7 @@ export class CoreHandler {
 			deviceType: PeripheralDeviceAPI.PeripheralDeviceType.PACKAGE_MANAGER,
 
 			deviceName: 'Package manager',
-			watchDog: this._coreConfig ? this._coreConfig.watchdog : true,
+			watchDog: this._enableWatchdog,
 
 			configManifest: PACKAGE_MANAGER_DEVICE_CONFIG,
 
@@ -422,7 +409,10 @@ export class CoreHandler {
 		this.statuses = statuses
 		await this.updateCoreStatus()
 	}
-	private async updateCoreStatus(): Promise<any> {
+	getCoreStatus(): {
+		statusCode: StatusCode
+		messages: string[]
+	} {
 		let statusCode = SofieStatusCode.GOOD
 		const messages: Array<string> = []
 
@@ -443,15 +433,19 @@ export class CoreHandler {
 				}
 			}
 		}
+		return {
+			statusCode,
+			messages,
+		}
+	}
+	private async updateCoreStatus(): Promise<any> {
+		const statusObj = this.getCoreStatus()
 
-		const statusHash = hashObj({ statusCode, messages })
+		const statusHash = hashObj(statusObj)
 		if (this.reportedStatusHash !== statusHash) {
 			this.reportedStatusHash = statusHash
 
-			await this.core.setStatus({
-				statusCode: statusCode,
-				messages: messages,
-			})
+			await this.core.setStatus(statusObj)
 		}
 	}
 	private _getVersions(): { [packageName: string]: string } {

@@ -41,6 +41,7 @@ import {
 	KnownReason,
 	URLMap,
 	deepEqual,
+	MetricsGauge,
 } from '@sofie-package-manager/api'
 
 import { AppContainerAPI } from './appContainerApi'
@@ -223,9 +224,10 @@ export class WorkerAgent {
 			}
 		)
 	}
-	async init(): Promise<void> {
+	async init(disableMetrics = false): Promise<void> {
 		this.logger.info(`WorkerAgent.init: Initializing...`)
 
+		if (!disableMetrics) this.registerMetrics()
 		await this._worker.init()
 
 		// Connect to AppContainer
@@ -394,6 +396,55 @@ export class WorkerAgent {
 	async _debugSendKillConnections(): Promise<void> {
 		this.workforceAPI.debugCutConnection()
 		this.appContainerAPI.debugCutConnection()
+	}
+	getMetrics(): {
+		activeJobs: number
+		activeMonitors: number
+		jobsStartedTotal: number
+		failurePeriodsTotal: number
+	} {
+		let monitorCount = 0
+		for (const monitors of this.activeMonitors.values()) monitorCount += monitors.size
+		return {
+			activeJobs: this.currentJobs.length,
+			activeMonitors: monitorCount,
+			jobsStartedTotal: this._wipI,
+			failurePeriodsTotal: this.failurePeriodCounter,
+		}
+	}
+	registerMetrics(): void {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this
+		new MetricsGauge({
+			name: 'package_manager_worker_jobs_active',
+			help: 'Number of jobs currently being processed by this worker',
+			collect() {
+				this.set(self.currentJobs.length)
+			},
+		})
+		new MetricsGauge({
+			name: 'package_manager_worker_monitors_active',
+			help: 'Number of package container monitors currently active on this worker',
+			collect() {
+				let count = 0
+				for (const monitors of self.activeMonitors.values()) count += monitors.size
+				this.set(count)
+			},
+		})
+		new MetricsGauge({
+			name: 'package_manager_worker_jobs_started_total',
+			help: 'Total number of jobs started by this worker since process start',
+			collect() {
+				this.set(self._wipI)
+			},
+		})
+		new MetricsGauge({
+			name: 'package_manager_worker_failure_periods_total',
+			help: 'Total number of consecutive failure periods encountered by this worker',
+			collect() {
+				this.set(self.failurePeriodCounter)
+			},
+		})
 	}
 	async getStatusReport(): Promise<WorkerStatusReport> {
 		const activeMonitors: WorkerStatusReport['activeMonitors'] = []

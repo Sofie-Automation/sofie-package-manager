@@ -26,6 +26,8 @@ import {
 	AnyProtectedString,
 	URLMap,
 	deepEqual,
+	Status,
+	MetricsGauge,
 } from '@sofie-package-manager/api'
 import { AppContainerAPI } from './appContainerApi'
 import { ExpectationManagerAPI } from './expectationManagerApi'
@@ -170,6 +172,43 @@ export class Workforce {
 	async init(): Promise<void> {
 		// Nothing to do here at the moment
 		// this.workerHandler.triggerUpdate()
+		this.registerMetrics()
+	}
+	private registerMetrics(): void {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this
+		new MetricsGauge({
+			name: 'package_manager_workforce_worker_agents_connected',
+			help: 'Number of worker agents currently connected to the workforce',
+			collect() {
+				this.set(self.workerAgents.size)
+			},
+		})
+		new MetricsGauge({
+			name: 'package_manager_workforce_expectation_managers_connected',
+			help: 'Number of expectation managers currently connected to the workforce',
+			collect() {
+				this.set(self.expectationManagers.size)
+			},
+		})
+		new MetricsGauge({
+			name: 'package_manager_workforce_app_containers_connected',
+			help: 'Number of app containers currently connected to the workforce',
+			collect() {
+				this.set(self.appContainers.size)
+			},
+		})
+	}
+	getMetrics(): {
+		workerAgentsConnected: number
+		expectationManagersConnected: number
+		appContainersConnected: number
+	} {
+		return {
+			workerAgentsConnected: this.workerAgents.size,
+			expectationManagersConnected: this.expectationManagers.size,
+			appContainersConnected: this.appContainers.size,
+		}
 	}
 	terminate(): void {
 		this.websocketServer?.terminate()
@@ -217,7 +256,8 @@ export class Workforce {
 			}, 500)
 		}
 	}
-	evaluateStatus(): void {
+	/** Computes the current statuses of the Workforce. Used by evaluateStatus() and getStatus(). */
+	private computeStatuses(): Statuses {
 		const statuses: Statuses = {}
 
 		statuses['any-workers'] =
@@ -245,6 +285,22 @@ export class Workforce {
 					  }
 		}
 
+		return statuses
+	}
+	/** Returns an aggregated status suitable for health endpoints. */
+	getStatus(): { statusCode: StatusCode; messages: string[] } {
+		const statuses = this.computeStatuses()
+		let worstCode = StatusCode.GOOD
+		const messages: string[] = []
+		for (const status of Object.values<Status | null>(statuses)) {
+			if (!status) continue
+			if (status.statusCode > worstCode) worstCode = status.statusCode
+			if (status.message) messages.push(status.message)
+		}
+		return { statusCode: worstCode, messages }
+	}
+	evaluateStatus(): void {
+		const statuses = this.computeStatuses()
 		const statusHash = hashObj(statuses)
 
 		// Report our status to each connected expectationManager:

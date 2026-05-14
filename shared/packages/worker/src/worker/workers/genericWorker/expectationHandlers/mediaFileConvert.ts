@@ -975,11 +975,11 @@ class MediaConversionOperation {
 							if (this.conversion.forbiddenStdErr?.length) {
 								this.requireNoStringsInProcessOutput(recordStdErr, this.conversion.forbiddenStdErr)
 							}
+
+							resolve()
 						} catch (err) {
 							reject(err)
 						}
-
-						resolve()
 					},
 					(err) => {
 						// On Error
@@ -1007,14 +1007,6 @@ class MediaConversionOperation {
 					})
 				}
 			})
-
-			// this.spawnedProcess?.execProcess.stdout.on('data', (data) => {
-			// 	const str = data.toString()
-			// 	log?.(`${processName}.stdout: ${str}`)
-
-			// 	lastFewLines.push(str)
-			// 	if (lastFewLines.length > 10) lastFewLines.shift()
-			// })
 		} finally {
 			this.spawnedProcess = undefined
 		}
@@ -1127,7 +1119,6 @@ class MediaConversionOperation {
 
 		for (const forbiddenStr of forbiddenStrings) {
 			if (recordStdOut.some((line) => line.includes(forbiddenStr))) {
-				// Throw a string here, as a thrown string is handled by the caller:
 				throw new Error(
 					`Forbidden string "${forbiddenStr}" found in stdout. Recorded stdout:\n${this.limitToLastFewLines(
 						recordStdOut,
