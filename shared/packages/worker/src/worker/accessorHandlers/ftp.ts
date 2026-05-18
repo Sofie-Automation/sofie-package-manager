@@ -497,8 +497,14 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 
 				this.worker.logger.error(
 					`Something is wrong with the FTP client cacheKey. The options do not match the cacheKey. Deleting cached clients for this key. cacheKey: ${cacheKey}, options: ${JSON.stringify(
-						options
-					)}, cachedOptions: ${JSON.stringify(cachedClients.options)}`
+						{
+							options,
+							password: '***',
+						}
+					)}, cachedOptions: ${JSON.stringify({
+						...cachedClients.options,
+						password: '***',
+					})}`
 				)
 
 				for (const c of cachedClients.clients) {
