@@ -308,6 +308,9 @@ class SafeFTPClient {
 
 	constructor() {
 		this.ftpClient = new FTP.Client()
+
+		this.ftpClient.ftp.verbose = true // TMP!!
+
 		this.queue = new PQueue({ concurrency: 1 })
 	}
 
