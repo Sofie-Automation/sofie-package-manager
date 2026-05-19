@@ -64,7 +64,7 @@ export async function resolveFileWithoutExtension(fullPath: string): Promise<Fil
 
 	try {
 		const files = await fsReaddir(dir)
-		const matches = files.filter((f) => f.startsWith(base + '.'))
+		const matches = files.filter((f) => f.startsWith(base + '.') || f === base)
 
 		if (matches.length === 0) {
 			return { result: 'notFound' }
