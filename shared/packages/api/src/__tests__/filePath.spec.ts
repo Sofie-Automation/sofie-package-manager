@@ -47,6 +47,26 @@ describe('resolveFileWithoutExtension', () => {
 		})
 	})
 
+	test('returns found when filename has no extension', async () => {
+		touch('myclip')
+		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
+		expect(result).toEqual({
+			result: 'found',
+			fullPath: path.join(tmpDir, 'myclip'),
+			extension: '',
+		})
+	})
+
+	test('returns found when path already includes the extension', async () => {
+		touch('myclip.mp4')
+		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip.mp4'))
+		expect(result).toEqual({
+			result: 'found',
+			fullPath: path.join(tmpDir, 'myclip.mp4'),
+			extension: '',
+		})
+	})
+
 	test('returns multiple when more than one file matches', async () => {
 		touch('myclip.mp4')
 		touch('myclip.mov')
@@ -56,6 +76,18 @@ describe('resolveFileWithoutExtension', () => {
 		expect(result.matches).toHaveLength(2)
 		expect(result.matches).toEqual(
 			expect.arrayContaining([path.join(tmpDir, 'myclip.mp4'), path.join(tmpDir, 'myclip.mov')])
+		)
+	})
+
+	test('returns multiple when both extensionless and extension files exist', async () => {
+		touch('myclip')
+		touch('myclip.mp4')
+		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
+		expect(result.result).toBe('multiple')
+		if (result.result !== 'multiple') return
+		expect(result.matches).toHaveLength(2)
+		expect(result.matches).toEqual(
+			expect.arrayContaining([path.join(tmpDir, 'myclip'), path.join(tmpDir, 'myclip.mp4')])
 		)
 	})
 
