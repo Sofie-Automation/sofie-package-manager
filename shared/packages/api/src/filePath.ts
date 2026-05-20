@@ -38,7 +38,8 @@ export type FileResolutionResult =
 /**
  * Attempts to resolve a file path by matching filenames without extensions.
  * If the exact path doesn't exist, searches for files that start with the base name
- * followed by a dot and any extension.
+ * followed by a dot and any extension. Exact basename matches (extensionless file,
+ * or input path that already includes the extension) return `extension: ''`.
  *
  * @param fullPath - The full path to the file to resolve
  * @returns A FileResolutionResult indicating whether the file was found, not found, had multiple matches, or encountered an error
@@ -57,6 +58,18 @@ export type FileResolutionResult =
  * // If both file.mp4 and file.mov exist:
  * const result = await resolveFileWithoutExtension('/path/to/file')
  * // Returns: { result: 'multiple', matches: ['/path/to/file.mp4', '/path/to/file.mov'] }
+ *
+ * @example
+ * // If looking for /path/to/file and file (no extension) exists:
+ * // Returns: { result: 'found', fullPath: '/path/to/file', extension: '' }
+ *
+ * @example
+ * // If looking for /path/to/file.mp4 and file.mp4 exists:
+ * // Returns: { result: 'found', fullPath: '/path/to/file.mp4', extension: '' }
+ *
+ * @example
+ * // If both file and file.mp4 exist:
+ * // Returns: { result: 'multiple', matches: ['/path/to/file', '/path/to/file.mp4'] }
  */
 export async function resolveFileWithoutExtension(fullPath: string): Promise<FileResolutionResult> {
 	const dir = path.dirname(fullPath)
@@ -64,7 +77,7 @@ export async function resolveFileWithoutExtension(fullPath: string): Promise<Fil
 
 	try {
 		const files = await fsReaddir(dir)
-		const matches = files.filter((f) => f.startsWith(base + '.'))
+		const matches = files.filter((f) => f.startsWith(base + '.') || f === base)
 
 		if (matches.length === 0) {
 			return { result: 'notFound' }
