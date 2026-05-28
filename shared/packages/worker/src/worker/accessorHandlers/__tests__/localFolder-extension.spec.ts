@@ -127,6 +127,45 @@ describe('matchFilenamesWithoutExtension for LocalFolder', () => {
 		await expect(accessor.getResolvedFullPath()).rejects.toThrow(/File not found/)
 	})
 
+	test('should retry resolving after notFound (late delivery)', async () => {
+		const logger = setupLogger({ process: processConfig }, '')
+		const worker = new PassiveTestWorker(logger, processConfig, true)
+
+		const folderPath = path.join('test', 'folder')
+		const expectedPath = path.join(folderPath, 'testfile.mp4')
+		const fullPathWithoutExt = path.join(folderPath, 'testfile')
+
+		mockResolveFileWithoutExtension
+			.mockResolvedValueOnce({
+				result: 'notFound',
+			})
+			.mockResolvedValueOnce({
+				result: 'found',
+				fullPath: expectedPath,
+				extension: '.mp4',
+			})
+
+		const accessor = new LocalFolderAccessorHandle<Content>({
+			worker,
+			accessorId: protectString('local0'),
+			accessor: {
+				type: Accessor.AccessType.LOCAL_FOLDER,
+				folderPath: folderPath,
+			} as AccessorOnPackage.LocalFolder,
+			context: { expectationId: 'exp0' },
+			content: { filePath: 'testfile' },
+			workOptions: {},
+		})
+
+		await expect(accessor.getResolvedFullPath()).rejects.toThrow(/File not found/)
+
+		const result = await accessor.getResolvedFullPath()
+		expect(result).toBe(expectedPath)
+		expect(mockResolveFileWithoutExtension).toHaveBeenCalledTimes(2)
+		expect(mockResolveFileWithoutExtension).toHaveBeenNthCalledWith(1, fullPathWithoutExt)
+		expect(mockResolveFileWithoutExtension).toHaveBeenNthCalledWith(2, fullPathWithoutExt)
+	})
+
 	test('should resolve file with compound extension', async () => {
 		const logger = setupLogger({ process: processConfig }, '')
 		const worker = new PassiveTestWorker(logger, processConfig, true)
