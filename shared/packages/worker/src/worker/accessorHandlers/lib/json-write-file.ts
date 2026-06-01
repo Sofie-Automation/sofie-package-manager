@@ -302,7 +302,7 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 			const newValue = cbManipulate(oldValue0?.value)
 			const newValueStr = newValue !== undefined ? JSON.stringify(newValue) : ''
 
-			if (oldValue0?.str === newValueStr) {
+			if (oldValue0?.str === newValueStr || (oldValue0 === undefined && newValue === undefined)) {
 				// do nothing
 				return
 			}
