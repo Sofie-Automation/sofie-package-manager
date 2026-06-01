@@ -435,26 +435,25 @@ function addExpectation(
 }
 /** Returns a priority for an expectation. */
 function getPriority(
-	_activeRundownMap: Map<RundownId, PackageManagerActiveRundown>,
-	_packageWrap: ExpectedPackageWrap,
+	activeRundownMap: Map<RundownId, PackageManagerActiveRundown>,
+	packageWrap: ExpectedPackageWrap,
 	exp: Expectation.Any
 ): number {
 	// Returns the initial priority, based on the expectedPackage
 
-	// HACK: This is wanted, but is causing type errors, so disable temporarily
-	// const activeRundown: PackageManagerActiveRundown | undefined = packageWrap.expectedPackage.rundownId
-	// 	? activeRundownMap.get(packageWrap.expectedPackage.rundownId)
-	// 	: undefined
+	const activeRundown: PackageManagerActiveRundown | undefined = packageWrap.expectedPackage.rundownId
+		? activeRundownMap.get(packageWrap.expectedPackage.rundownId)
+		: undefined
 
-	// if (activeRundown) {
-	// 	// The expected package is in an active rundown.
-	// 	// Earlier rundowns should have higher priority:
-	// 	return exp.priority + activeRundown._rank + PriorityMagnitude.PLAY_NOW
-	// } else {
-	// The expected package is in an inactive rundown.
-	// Make that a low priority:
-	return exp.priority + PriorityMagnitude.OTHER
-	// }
+	if (activeRundown) {
+		// The expected package is in an active rundown.
+		// Earlier rundowns should have higher priority:
+		return exp.priority + activeRundown._rank + PriorityMagnitude.PLAY_NOW
+	} else {
+		// The expected package is in an inactive rundown.
+		// Make that a low priority:
+		return exp.priority + PriorityMagnitude.OTHER
+	}
 }
 type ExpectationCollection = Record<ExpectationId, GenerateExpectation>
 
