@@ -140,7 +140,11 @@ export namespace Expectation {
 		}
 		workOptions: WorkOptions.Base & WorkOptions.RemoveDelay & WorkOptions.UseTemporaryFilePath
 
-		originalExpectation: Expectation.FileCopy | Expectation.FileVerify | Expectation.QuantelClipCopy
+		originalExpectation:
+			| Expectation.FileCopy
+			| Expectation.FileVerify
+			| Expectation.QuantelClipCopy
+			| Expectation.MediaFileConvert
 	}
 	/** Defines a Scan of a Media file. A Scan is to be performed on (one of) the sources and the scan result is to be stored on the target. */
 	export interface PackageScan extends Base {

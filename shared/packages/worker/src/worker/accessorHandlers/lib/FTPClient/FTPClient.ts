@@ -159,8 +159,7 @@ export class FTPClient extends FTPClientBase {
 
 		await this.client.batch(async (ftpClient) => {
 			// Ensure the directory exists:
-			await ftpClient.ensureDir(path.dirname(fullPath))
-			await ftpClient.cd('/') // Revert to root after ensureDir
+			await this.ensureDir(ftpClient, path.dirname(fullPath))
 
 			// Remove the file if it already exists:
 			await ftpClient.remove(fullPath, true)
@@ -181,8 +180,7 @@ export class FTPClient extends FTPClientBase {
 
 		await this.client.batch(async (ftpClient) => {
 			// Ensure the directory exists:
-			await ftpClient.ensureDir(path.dirname(fullPath))
-			await ftpClient.cd('/') // Revert to root after ensureDir
+			await this.ensureDir(ftpClient, path.dirname(fullPath))
 
 			const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content, 'utf-8')
 
@@ -294,6 +292,17 @@ export class FTPClient extends FTPClientBase {
 			return true
 		} else {
 			return false
+		}
+	}
+	private ensureDirDebounce = new Map<string, number>()
+	private async ensureDir(ftpClient: FTP.Client, dirPath: string) {
+		// Don't do this too often, it's unnecessary:
+		const timeSinceLast = Date.now() - (this.ensureDirDebounce.get(dirPath) ?? 0)
+		if (timeSinceLast > 1000 * 3600) {
+			this.ensureDirDebounce.set(dirPath, Date.now())
+			await ftpClient.ensureDir(dirPath)
+
+			await ftpClient.cd('/') // Revert to root after ensureDir
 		}
 	}
 }

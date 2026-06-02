@@ -907,7 +907,11 @@ export function generateHTMLRender(
 }
 
 export function generatePackageCopyFileProxy(
-	expectation: Expectation.FileCopy | Expectation.FileVerify | Expectation.QuantelClipCopy,
+	expectation:
+		| Expectation.FileCopy
+		| Expectation.FileVerify
+		| Expectation.QuantelClipCopy
+		| Expectation.MediaFileConvert,
 	settings: PackageManagerSettings,
 	packageContainerId: PackageContainerId,
 	packageContainer: PackageContainer
@@ -919,18 +923,27 @@ export function generatePackageCopyFileProxy(
 		priority = expectation.priority + 1
 	}
 
-	let filePath: string | undefined
+	let filePath: string | undefined = undefined
+	let version: Expectation.FileCopyProxy['startRequirement']['version'] | undefined = undefined
 
 	if (expectation.type === Expectation.Type.FILE_COPY) {
 		filePath = expectation.endRequirement.content.filePath
+		version = expectation.endRequirement.version
 	} else if (expectation.type === Expectation.Type.FILE_VERIFY) {
 		filePath = expectation.endRequirement.content.filePath
+		version = expectation.endRequirement.version
+	} else if (expectation.type === Expectation.Type.MEDIA_FILE_CONVERT) {
+		filePath = expectation.endRequirement.content.filePath
+		version = {
+			type: Expectation.Version.Type.FILE_ON_DISK,
+		}
 	} else if (expectation.type === Expectation.Type.QUANTEL_CLIP_COPY) {
 		filePath = expectation.endRequirement.content.guid || expectation.endRequirement.content.title
+		version = expectation.endRequirement.version
 	} else {
 		assertNever(expectation)
 	}
-	if (!filePath) return undefined
+	if (!filePath || !version) return undefined
 
 	return literal<Expectation.FileCopyProxy>({
 		id: protectString<ExpectationId>(expectation.id + '_proxy'),
@@ -949,7 +962,7 @@ export function generatePackageCopyFileProxy(
 		startRequirement: {
 			sources: [...expectation.endRequirement.targets, ...expectation.startRequirement.sources],
 			content: expectation.endRequirement.content,
-			version: expectation.endRequirement.version,
+			version: version,
 		},
 		endRequirement: {
 			targets: [

@@ -371,7 +371,7 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 	}
 	/** Full path to the metadata file */
 	private get metadataPath() {
-		return this.fullPath + '_metadata.json'
+		return this.fullPath.replace(/\./g, '_') + '_metadata.json'
 	}
 
 	private get basePath(): string {
