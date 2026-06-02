@@ -145,7 +145,7 @@ function getBasicExpectations(
 
 /** Based on existing expectations, inject more expectations as side-effects */
 function injectSideEffectExpectations(
-	_logger: LoggerInstance,
+	logger: LoggerInstance,
 	packageContainers: PackageContainers,
 	settings: PackageManagerSettings,
 	expectations: ExpectationCollection,
@@ -156,7 +156,7 @@ function injectSideEffectExpectations(
 			// Get side-effects and add them to the expectations:
 			copyExpectationCollection(
 				expectations,
-				getSideEffectOfExpectation(_logger, packageContainers, settings, expectation)
+				getSideEffectOfExpectation(logger, packageContainers, settings, expectation)
 			)
 		}
 	} else {
@@ -166,7 +166,7 @@ function injectSideEffectExpectations(
 			// get those expectations and put them in temporaryStorageExpectations:
 			copyExpectationCollection(
 				temporaryStorageExpectations,
-				getCopyToTemporaryStorage(_logger, useTemporaryStorage, settings, expectation0)
+				getCopyToTemporaryStorage(logger, useTemporaryStorage, settings, expectation0)
 			)
 		}
 
@@ -174,7 +174,7 @@ function injectSideEffectExpectations(
 		for (const [id, expectation] of objectEntries(temporaryStorageExpectations)) {
 			// get side-effects:
 			const resultingExpectations: ExpectationCollection = getSideEffectOfExpectation(
-				_logger,
+				logger,
 				packageContainers,
 				settings,
 				expectation
@@ -352,7 +352,9 @@ function getSideEffectOfExpectation(
 		expectation0.type === Expectation.Type.FILE_COPY_PROXY ||
 		expectation0.type === Expectation.Type.MEDIA_FILE_CONVERT
 	) {
+		logger.warn(`DEBUG TEST a ${JSON.stringify(expectation0.sideEffect?.kairosLoadToRam)}`)
 		if (expectation0.sideEffect?.kairosLoadToRam) {
+			logger.warn(`DEBUG TEST b`)
 			const kairosLoadToRam = generatePackageKairosLoadToRam(
 				logger,
 				packageContainers,

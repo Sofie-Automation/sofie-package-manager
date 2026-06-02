@@ -463,9 +463,9 @@ export function generatePackageKairosLoadToRam(
 	packageSettings: ExpectedPackage.SideEffectKairosLoadToRamSettings,
 	settings: PackageManagerSettings
 ): Expectation.PackageKairosLoadToRam | null {
-	let filePath: string
 	const logger = logger0.category('generatePackageKairosLoadToRam')
 
+	let filePath: string
 	if (expectation.type === Expectation.Type.FILE_COPY) {
 		filePath = expectation.endRequirement.content.filePath
 	} else if (expectation.type === Expectation.Type.FILE_VERIFY) {
