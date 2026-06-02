@@ -217,7 +217,7 @@ function groupExpectations(expectations: ExpectationCollection): GenerateExpecta
 }
 /** Returns side-effects for an expectation */
 function getSideEffectOfExpectation(
-	_logger: LoggerInstance,
+	logger: LoggerInstance,
 	packageContainers: PackageContainers,
 	settings: PackageManagerSettings,
 	expectation0: GenerateExpectation
@@ -354,6 +354,7 @@ function getSideEffectOfExpectation(
 	) {
 		if (expectation0.sideEffect?.kairosLoadToRam) {
 			const kairosLoadToRam = generatePackageKairosLoadToRam(
+				logger,
 				packageContainers,
 				expectation0,
 				expectation0.sideEffect.kairosLoadToRam,

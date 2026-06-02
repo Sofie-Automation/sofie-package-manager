@@ -16,6 +16,7 @@ import {
 	AccessorOnPackage,
 	AccessorId,
 	objectEntries,
+	LoggerInstance,
 } from '@sofie-package-manager/api'
 import {
 	ExpectedPackageWrapHTMLTemplate,
@@ -456,12 +457,14 @@ export function generatePackageIframes(
 }
 /** Defines a package that should be loaded into RAM on a Kairos Vision mixer */
 export function generatePackageKairosLoadToRam(
+	logger0: LoggerInstance,
 	packageContainers: PackageContainers,
 	expectation: SomeClipCopyExpectation | Expectation.MediaFileConvert,
 	packageSettings: ExpectedPackage.SideEffectKairosLoadToRamSettings,
 	settings: PackageManagerSettings
 ): Expectation.PackageKairosLoadToRam | null {
 	let filePath: string
+	const logger = logger0.category('generatePackageKairosLoadToRam')
 
 	if (expectation.type === Expectation.Type.FILE_COPY) {
 		filePath = expectation.endRequirement.content.filePath
@@ -472,6 +475,7 @@ export function generatePackageKairosLoadToRam(
 	} else if (expectation.type === Expectation.Type.MEDIA_FILE_CONVERT) {
 		filePath = expectation.endRequirement.content.filePath
 	} else {
+		logger.warn(`Unsupported expectation type "${expectation.type}"`)
 		return null
 	}
 
@@ -503,10 +507,16 @@ export function generatePackageKairosLoadToRam(
 		}
 	}
 
-	if (!ref) return null
+	if (!ref) {
+		logger.warn(`Unsupported path "${filePath}"`)
+		return null
+	}
 
 	const packageContainer = packageContainers[packageSettings.containerId]
-	if (!packageContainer) return null
+	if (!packageContainer) {
+		logger.warn(`PackageContainer not found: "${packageSettings.containerId}"`)
+		return null
+	}
 
 	const accessors: { [accessorId: AccessorId]: AccessorOnPackage.KairosClip } = {}
 	for (const [accessorId, accessor] of objectEntries(packageContainer.accessors)) {
