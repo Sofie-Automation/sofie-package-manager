@@ -352,7 +352,12 @@ function getSideEffectOfExpectation(
 		expectation0.type === Expectation.Type.FILE_COPY_PROXY ||
 		expectation0.type === Expectation.Type.MEDIA_FILE_CONVERT
 	) {
-		logger.warn(`DEBUG TEST a ${JSON.stringify(expectation0.sideEffect?.kairosLoadToRam)}`)
+		logger.warn(
+			`DEBUG TEST a ${JSON.stringify(expectation0.sideEffect?.kairosLoadToRam)} type: ${expectation0.type}`
+		)
+		if (expectation0.type === Expectation.Type.MEDIA_FILE_CONVERT) {
+			logger.warn(`DEBUG TEST exp ${JSON.stringify(expectation0)}`)
+		}
 		if (expectation0.sideEffect?.kairosLoadToRam) {
 			logger.warn(`DEBUG TEST b`)
 			const kairosLoadToRam = generatePackageKairosLoadToRam(
