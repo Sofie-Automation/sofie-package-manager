@@ -2242,19 +2242,19 @@ __metadata:
   linkType: hard
 
 "@koa/router@npm:^15.0.0, @koa/router@npm:^15.4.0":
-  version: 15.4.0
-  resolution: "@koa/router@npm:15.4.0"
+  version: 15.6.0
+  resolution: "@koa/router@npm:15.6.0"
   dependencies:
     debug: "npm:^4.4.3"
     http-errors: "npm:^2.0.1"
     koa-compose: "npm:^4.1.0"
-    path-to-regexp: "npm:^8.3.0"
+    path-to-regexp: "npm:^8.4.2"
   peerDependencies:
     koa: ^2.0.0 || ^3.0.0
   peerDependenciesMeta:
     koa:
       optional: false
-  checksum: 10/03332e1700ef812a5b89e941b3050b027bc71cfbaee3240f63d3763f93d3a6c740f81f09a19a1c45decaac4b477fecf146773168819e1537a22ade198324c702
+  checksum: 10/bb2d4c858878b64efafa397c62c52cd01012774265c89df69b8985d7b17037a6276ab6c13c892bb448c16c4ebc288af084db6cc7e14998c7d1e976932eb83218
   languageName: node
   linkType: hard
 
@@ -12414,10 +12414,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^8.2.0, path-to-regexp@npm:^8.3.0":
+"path-to-regexp@npm:^8.2.0":
   version: 8.4.1
   resolution: "path-to-regexp@npm:8.4.1"
   checksum: 10/5a2ac56dfcd091ac90c2275e830e45e5967d6aae5c87ef7ca8c9b5ce30b7c7e0e38ca78a339b00a6d1d53b13a39538b22a910ae1999417c4334d058a8c57c3e2
+  languageName: node
+  linkType: hard
+
+"path-to-regexp@npm:^8.4.2":
+  version: 8.4.2
+  resolution: "path-to-regexp@npm:8.4.2"
+  checksum: 10/70fd2cbce0b962cbcf4d312af07818bfce2bae11c09cf3bd86be99c0e30168238a1a7b02b18b452e73f075897df04597d30d63e56da7be41eecfc37998693389
   languageName: node
   linkType: hard
 
