@@ -126,7 +126,7 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 	 * Get the resolved full path to the package.
 	 * If matchFilenamesWithoutExtension is enabled, this will resolve the path to include the file extension.
 	 * For FFmpeg/FFprobe operations, use this instead of fullPath.
-	 * The result is cached to avoid repeated file system lookups.
+	 * When extension matching is enabled, the path is resolved on every call.
 	 */
 	async getResolvedFullPath(): Promise<string> {
 		const fullPath = this.fullPath
