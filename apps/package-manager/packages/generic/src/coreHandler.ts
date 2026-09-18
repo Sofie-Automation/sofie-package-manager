@@ -1,50 +1,49 @@
-/* eslint-disable node/no-extraneous-import */
 import {
-	CoreConnection,
-	CoreOptions,
-	DDPConnectorOptions,
-	Observer,
-	Collection,
-	CoreCredentials,
-	StatusCode as SofieStatusCode,
-	protectString,
-	PeripheralDeviceId,
-	PeripheralDeviceCommand,
-	ExternalPeripheralDeviceAPI,
-	PeripheralDeviceAPI,
-	PeripheralDevicePubSub,
-	PeripheralDevicePubSubCollectionsNames,
-	PeripheralDevicePubSubCollections,
-	CollectionDocCheck,
-	ICoreHandler,
-} from '@sofie-automation/server-core-integration'
-
-import { DeviceConfig } from './connector'
-
-import {
+	AppId,
+	DEFAULT_LOG_LEVEL,
+	ensureValidValue,
+	ExpectationId,
+	hashObj,
 	LoggerInstance,
+	PackageContainerId,
 	PackageManagerConfig,
+	Status,
 	StatusCode,
 	Statuses,
-	Status,
 	stringifyError,
-	hashObj,
-	ensureValidValue,
-	DEFAULT_LOG_LEVEL,
-	ExpectationId,
-	PackageContainerId,
-	AppId,
 } from '@sofie-package-manager/api'
+
+import {
+	Collection,
+	CollectionDocCheck,
+	CoreConnection,
+	CoreCredentials,
+	CoreOptions,
+	DDPConnectorOptions,
+	ExternalPeripheralDeviceAPI,
+	ICoreHandler,
+	Observer,
+	PeripheralDeviceAPI,
+	PeripheralDeviceCommand,
+	PeripheralDeviceId,
+	PeripheralDevicePubSub,
+	PeripheralDevicePubSubCollections,
+	PeripheralDevicePubSubCollectionsNames,
+	protectString,
+	StatusCode as SofieStatusCode,
+} from '@sofie-automation/server-core-integration'
+import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
+import { PeripheralDeviceStatusObject } from '@sofie-automation/shared-lib/dist/peripheralDevice/peripheralDeviceAPI'
+
 import {
 	DEFAULT_DELAY_REMOVAL_PACKAGE,
 	DEFAULT_DELAY_REMOVAL_PACKAGE_INFO,
 	PACKAGE_MANAGER_DEVICE_CONFIG,
-} from './configManifest'
-import { PackageManagerHandler } from './packageManager'
-import { getCredentials } from './credentials'
-import { FakeCore } from './fakeCore'
-import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
-import { PeripheralDeviceStatusObject } from '@sofie-automation/shared-lib/dist/peripheralDevice/peripheralDeviceAPI'
+} from './configManifest.js'
+import { DeviceConfig } from './connector.js'
+import { getCredentials } from './credentials.js'
+import { FakeCore } from './fakeCore.js'
+import { PackageManagerHandler } from './packageManager.js'
 
 let packageJson: any
 try {
@@ -128,8 +127,7 @@ export class CoreHandler implements ICoreHandler {
 			this.logger.warn('Not setup yet, exiting process!')
 			this.logger.warn('To setup, go into Core and add this device to a Studio')
 			this.logger.warn('------------------------------------------------------')
-			process.exit(1) // eslint-disable-line no-process-exit
-			return
+			throw new Error('Device not setup yet, exiting process!')
 		}
 	}
 	setNoCore(): void {
@@ -305,7 +303,7 @@ export class CoreHandler implements ICoreHandler {
 			}
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			// eslint-disable-next-line @typescript-eslint/ban-types
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 			const fcn: Function = this[cmd.functionName]
 			try {
 				if (!fcn) throw Error('Function "' + cmd.functionName + '" not found!')
@@ -390,7 +388,7 @@ export class CoreHandler implements ICoreHandler {
 	killProcess(): void {
 		this.logger.info('KillProcess command received, shutting down in 1000ms!')
 		setTimeout(() => {
-			// eslint-disable-next-line no-process-exit
+			// eslint-disable-next-line n/no-process-exit
 			process.exit(0)
 		}, 1000)
 	}

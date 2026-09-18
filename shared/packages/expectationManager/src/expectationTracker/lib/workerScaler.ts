@@ -1,10 +1,11 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { ExpectationId, LoggerInstance } from '@sofie-package-manager/api'
-import { InternalManager } from '../../internalManager/internalManager'
-import { expLabel, TrackedExpectation } from '../../lib/trackedExpectation'
-import { TrackedPackageContainerExpectation } from '../../lib/trackedPackageContainerExpectation'
-import { ExpectationTracker } from '../expectationTracker'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { InternalManager } from '../../internalManager/internalManager.js'
+import { expLabel, TrackedExpectation } from '../../lib/trackedExpectation.js'
+import { TrackedPackageContainerExpectation } from '../../lib/trackedPackageContainerExpectation.js'
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /** Handles scaling of Workers */
 export class WorkerScaler {
@@ -12,7 +13,11 @@ export class WorkerScaler {
 	private waitingPackageContainers: TrackedPackageContainerExpectation[] = []
 
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private manager: InternalManager, private tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		private manager: InternalManager,
+		private tracker: ExpectationTracker
+	) {
 		this.logger = logger.category('WorkerScaler')
 	}
 

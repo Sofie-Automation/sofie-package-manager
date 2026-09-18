@@ -1,38 +1,39 @@
+import { Readable } from 'node:stream'
+
 import {
-	GenericAccessorHandle,
-	PackageReadInfo,
-	PackageReadStream,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
-	AccessorHandlerRunCronJobResult,
+	Accessor,
+	AccessorOnPackage,
+	assertNever,
+	Expectation,
+	MonitorId,
+	PackageContainerExpectation,
+	Reason,
+} from '@sofie-package-manager/api'
+
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
 	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
 	AccessorHandlerTryPackageReadResult,
+	GenericAccessorHandle,
 	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	PackageContainerExpectation,
-	assertNever,
-	Reason,
-	MonitorId,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { MonitorInProgress } from '../lib/monitorInProgress'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-
-import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
-import { GenericFileHandler } from './lib/GenericFileHandler'
-import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
-import { S3BucketClient, S3Options } from './lib/S3BucketClient'
-import { Readable } from 'node:stream'
+	PackageReadInfo,
+	PackageReadStream,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { GenericFileHandler } from './lib/GenericFileHandler.js'
+import { GenericFileOperationsHandler } from './lib/GenericFileOperations.js'
+import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
+import { S3BucketClient, S3Options } from './lib/S3BucketClient.js'
 
 export interface Content {
 	/** This is set when the class-instance is only going to be used for PackageContainer access.*/

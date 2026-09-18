@@ -1,8 +1,27 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-// eslint-disable-next-line node/no-extraneous-import
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { Expectation } from './expectationApi'
-import { PackageContainerExpectation } from './packageContainerApi'
+
+import { DataId, LockId } from './dataStorage.js'
+import { Expectation } from './expectationApi.js'
+import {
+	AppContainerId,
+	AppId,
+	AppType,
+	ExpectationManagerId,
+	ExpectedPackageId,
+	MonitorId,
+	PackageContainerId,
+	WorkerAgentId,
+	WorkforceId,
+	WorkInProgressLocalId,
+} from './ids.js'
+import { ExpectedPackage, StatusCode } from './inputApi.js'
+import { LogLevel } from './logger.js'
+import { PackageContainerExpectation } from './packageContainerApi.js'
+import { Statuses } from './status.js'
+import { WorkerStatusReport, WorkforceStatusReport } from './statusReport.js'
+import { PartyId } from './websocketConnection.js'
 import {
 	Cost,
 	ReturnTypeDisposePackageContainerMonitors,
@@ -14,25 +33,7 @@ import {
 	ReturnTypeRemoveExpectation,
 	ReturnTypeRunPackageContainerCronJob,
 	ReturnTypeSetupPackageContainerMonitors,
-} from './worker'
-import { WorkerStatusReport, WorkforceStatusReport } from './statusReport'
-import { LogLevel } from './logger'
-import { ExpectedPackage, StatusCode } from './inputApi'
-import { Statuses } from './status'
-import {
-	AppContainerId,
-	AppId,
-	AppType,
-	PackageContainerId,
-	ExpectedPackageId,
-	ExpectationManagerId,
-	MonitorId,
-	WorkerAgentId,
-	WorkforceId,
-	WorkInProgressLocalId,
-} from './ids'
-import { DataId, LockId } from './dataStorage'
-import { PartyId } from './websocketConnection'
+} from './worker.js'
 
 /** Contains textual descriptions for statuses. */
 export type Reason = ExpectedPackageStatusAPI.Reason
@@ -66,7 +67,7 @@ export namespace WorkForceExpectationManager {
 		registerExpectationManager: (managerId: ExpectationManagerId, urls: URLMap) => Promise<void>
 	}
 	/** Methods on ExpectationManager, called by WorkForce */
-	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 	export interface ExpectationManager extends MethodsInterfaceBase {
 		id: WorkforceId
 		setLogLevel: (logLevel: LogLevel) => Promise<void>
@@ -179,7 +180,6 @@ export namespace ExpectationManagerWorkerAgent {
 	) => Promise<any>
 	export type MessageFromWorkerSerialized = (message: MessageFromWorkerPayload.Any) => Promise<ReplyToWorker>
 
-	// eslint-disable-next-line @typescript-eslint/no-namespace
 	export namespace MessageFromWorkerPayload {
 		export type Any = FetchPackageInfoMetadata | UpdatePackageInfo | RemovePackageInfo | ReportFromMonitorPackages
 		export interface Base {
@@ -192,7 +192,7 @@ export namespace ExpectationManagerWorkerAgent {
 			arguments: [
 				//
 				type: string,
-				packageIds: ExpectedPackageId[]
+				packageIds: ExpectedPackageId[],
 			]
 		}
 		export interface UpdatePackageInfo extends Base {
@@ -202,7 +202,7 @@ export namespace ExpectationManagerWorkerAgent {
 				packageId: ExpectedPackageId,
 				expectedContentVersionHash: string,
 				actualContentVersionHash: string,
-				payload: any
+				payload: any,
 			]
 		}
 		export interface RemovePackageInfo extends Base {
@@ -211,7 +211,7 @@ export namespace ExpectationManagerWorkerAgent {
 				//
 				type: string,
 				packageId: ExpectedPackageId,
-				removeDelay: number | undefined
+				removeDelay: number | undefined,
 			]
 		}
 		export interface ReportFromMonitorPackages extends Base {
@@ -220,7 +220,7 @@ export namespace ExpectationManagerWorkerAgent {
 				//
 				containerId: PackageContainerId,
 				monitorId: MonitorId,
-				expectedPackages: ExpectedPackage.Any[]
+				expectedPackages: ExpectedPackage.Any[],
 			]
 		}
 	}

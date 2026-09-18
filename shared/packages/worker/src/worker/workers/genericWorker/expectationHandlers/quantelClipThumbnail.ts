@@ -1,20 +1,19 @@
 import {
 	Accessor,
-	hashObj,
 	Expectation,
+	hashObj,
+	KnownReason,
+	literal,
+	Reason,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	literal,
-	Reason,
-	stringifyError,
 	startTimer,
-	KnownReason,
+	stringifyError,
 } from '@sofie-package-manager/api'
-import { getStandardCost } from '../lib/lib'
-import { BaseWorker } from '../../../worker'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
@@ -22,12 +21,18 @@ import {
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle'
-import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
-import { getSourceHTTPHandle, QuantelClipMetadata } from './lib/quantel'
+} from '../../../accessorHandlers/accessor.js'
+import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker.js'
+import { getStandardCost } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
+import { getSourceHTTPHandle, QuantelClipMetadata } from './lib/quantel.js'
 
 /**
  * Generates a thumbnail image from a source quantel clip, and stores the resulting file into the target PackageContainer
@@ -220,7 +225,13 @@ export const QuantelThumbnail: ExpectationHandlerGenericWorker = {
 						lookupTarget.handle
 							.removePackage('Generate thumbnail cancelled')
 							.then(() => resolve())
-							.catch((err) => reject(err))
+							.catch((err) =>
+								reject(
+									new Error(`Failed to remove package: ${err.message}`, {
+										cause: err,
+									})
+								)
+							)
 					})
 					sourceStream?.cancel()
 					writeStream?.abort()

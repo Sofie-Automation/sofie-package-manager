@@ -1,39 +1,41 @@
+import { PassThrough } from 'node:stream'
+
 import {
-	GenericAccessorHandle,
-	PackageReadInfo,
-	PackageReadStream,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
-	AccessorHandlerRunCronJobResult,
+	Accessor,
+	AccessorOnPackage,
+	assertNever,
+	Expectation,
+	MonitorId,
+	PackageContainerExpectation,
+	Reason,
+	rebaseUrl,
+} from '@sofie-package-manager/api'
+import FormData from 'form-data'
+
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
 	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
 	AccessorHandlerTryPackageReadResult,
+	GenericAccessorHandle,
 	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	PackageContainerExpectation,
-	assertNever,
-	Reason,
-	MonitorId,
-	rebaseUrl,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import FormData from 'form-data'
-import { MonitorInProgress } from '../lib/monitorInProgress'
-import { fetchWithController, fetchWithTimeout } from './lib/fetch'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
-import { JSONWriteFilesBestEffortHandler, JSONWriteFilesNoLockHandler } from './lib/json-write-file'
-import { GenericFileHandler } from './lib/GenericFileHandler'
-import { PassThrough } from 'stream'
+	PackageReadInfo,
+	PackageReadStream,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { fetchWithController, fetchWithTimeout } from './lib/fetch.js'
+import { GenericFileHandler } from './lib/GenericFileHandler.js'
+import { GenericFileOperationsHandler } from './lib/GenericFileOperations.js'
+import { JSONWriteFilesBestEffortHandler, JSONWriteFilesNoLockHandler } from './lib/json-write-file.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 // Feature flag to enable the usage of a lock file when writing the delay-removal json file.
 // This is false due to issues with acquiring file lock for the json file on the http-proxy server.

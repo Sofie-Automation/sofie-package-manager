@@ -6,8 +6,9 @@ import {
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
 } from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { IWorkInProgress } from './workInProgress'
+
+import { BaseWorker } from '../worker.js'
+import { IWorkInProgress } from './workInProgress.js'
 
 export interface ExpectationHandler<TWorker extends BaseWorker> {
 	/**

@@ -1,7 +1,7 @@
-import { promiseTimeout, stringifyError } from './lib'
-import { MethodsInterfaceBase } from './methods'
-import { ACTION_TIMEOUT, MessageBase } from './websocketConnection'
-import { ClientConnection } from './websocketServer'
+import { promiseTimeout, stringifyError } from './lib.js'
+import { MethodsInterfaceBase } from './methods.js'
+import { ACTION_TIMEOUT, MessageBase } from './websocketConnection.js'
+import { ClientConnection } from './websocketServer.js'
 
 /**
  * The AdapterServer's sub-classes are used to expose a type-safe API for AdapterClients to connect to, in order to communicaten between processes (using web-sockets),
@@ -46,7 +46,9 @@ export abstract class AdapterServer<ME extends MethodsInterfaceBase, OTHER exten
 							this.timeoutMessage(timeoutDuration, type, args)
 						)
 					} catch (err) {
-						throw new Error(`Error when executing method "${String(type)}": ${stringifyError(err)}`)
+						throw new Error(`Error when executing method "${String(type)}": ${stringifyError(err)}`, {
+							cause: err,
+						})
 					}
 				} else {
 					throw new Error(`Unknown method "${String(type)}"`)
@@ -63,5 +65,4 @@ export abstract class AdapterServer<ME extends MethodsInterfaceBase, OTHER exten
 }
 /** Options for the AdapterServer */
 export type AdapterServerOptions<OTHER extends MethodsInterfaceBase> =
-	| { type: 'websocket'; clientConnection: ClientConnection }
-	| { type: 'internal'; hookMethods: Omit<OTHER, 'id'> }
+	{ type: 'websocket'; clientConnection: ClientConnection } | { type: 'internal'; hookMethods: Omit<OTHER, 'id'> }

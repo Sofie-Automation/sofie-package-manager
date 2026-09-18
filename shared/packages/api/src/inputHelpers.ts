@@ -1,4 +1,4 @@
-import { ExpectedPackage } from './inputApi'
+import { ExpectedPackage } from './inputApi.js'
 
 type Steps = Required<ExpectedPackage.ExpectedPackageHtmlTemplate['version']>['steps']
 

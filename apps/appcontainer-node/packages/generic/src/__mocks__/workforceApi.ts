@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { AppContainerId, LoggerInstance, WorkForceAppContainer } from '@sofie-package-manager/api'
 import { EventEmitter } from 'events'
 
+import { AppContainerId, LoggerInstance, WorkForceAppContainer } from '@sofie-package-manager/api'
+
 export class WorkforceAPI extends EventEmitter implements WorkForceAppContainer.WorkForce {
-	constructor(public id: AppContainerId, _loger: LoggerInstance) {
+	constructor(
+		public id: AppContainerId,
+		_loger: LoggerInstance
+	) {
 		super()
 	}
 

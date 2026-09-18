@@ -1,19 +1,20 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import {
 	Cost,
 	ExpectationManagerWorkerAgent,
 	LoggerInstance,
+	protectString,
 	Reason,
+	stringifyError,
+	WorkerAgentId,
 	WorkInProgressId,
 	WorkInProgressLocalId,
-	WorkerAgentId,
-	protectString,
-	stringifyError,
 } from '@sofie-package-manager/api'
-import { expLabel, TrackedExpectation } from '../../lib/trackedExpectation'
-import { ExpectationTracker } from '../expectationTracker'
-import { WorkerAgentAPI } from '../../workerAgentApi'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { expLabel, TrackedExpectation } from '../../lib/trackedExpectation.js'
+import { WorkerAgentAPI } from '../../workerAgentApi.js'
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /**
  * This class tracks works-in-progress.
@@ -23,7 +24,10 @@ export class WorkInProgressTracker {
 	private worksInProgress: Map<WorkInProgressId, WorkInProgress> = new Map()
 
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		private tracker: ExpectationTracker
+	) {
 		this.logger = logger.category('WIPTracker')
 	}
 	public getWorksInProgress(): Map<WorkInProgressId, WorkInProgress> {

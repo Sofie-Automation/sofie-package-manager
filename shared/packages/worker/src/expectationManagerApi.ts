@@ -1,13 +1,13 @@
 import {
-	PackageContainerId,
+	AdapterClient,
+	ExpectationManagerWorkerAgent,
+	LoggerInstance,
 	MonitorId,
+	PackageContainerId,
+	Reason,
+	StatusCode,
 	WorkerAgentId,
 	WorkInProgressLocalId,
-	StatusCode,
-	ExpectationManagerWorkerAgent,
-	AdapterClient,
-	LoggerInstance,
-	Reason,
 } from '@sofie-package-manager/api'
 
 /**
@@ -19,7 +19,10 @@ export class ExpectationManagerAPI
 	extends AdapterClient<ExpectationManagerWorkerAgent.WorkerAgent, ExpectationManagerWorkerAgent.ExpectationManager>
 	implements ExpectationManagerWorkerAgent.ExpectationManager
 {
-	constructor(public id: WorkerAgentId, logger: LoggerInstance) {
+	constructor(
+		public id: WorkerAgentId,
+		logger: LoggerInstance
+	) {
 		super(logger.category('ExpMgrAPI'), id, 'workerAgent')
 	}
 

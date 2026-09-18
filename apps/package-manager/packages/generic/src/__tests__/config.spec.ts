@@ -1,10 +1,12 @@
+import { describe, expect, test } from 'vitest'
+
 import { DEFAULT_LOG_LEVEL } from '@sofie-package-manager/api'
 import {
 	PACKAGE_MANAGER_DEVICE_CONFIG,
 	ConfigSchema,
 	DEFAULT_DELAY_REMOVAL_PACKAGE,
 	DEFAULT_DELAY_REMOVAL_PACKAGE_INFO,
-} from '../configManifest'
+} from '../configManifest.js'
 import { JSONBlobParse } from '@sofie-automation/server-core-integration'
 
 describe('Config', () => {

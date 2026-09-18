@@ -1,25 +1,26 @@
-import { WebSocketServer } from 'ws'
-import * as portFinder from 'portfinder'
+import { InteractiveAPI, renderHTML, RenderHTMLOptions } from '@html-renderer/generic'
 import {
-	setupLogger,
-	initializeLogger,
 	assertNever,
-	InteractiveStdOut,
+	initializeLogger,
 	InteractiveMessage,
 	InteractiveReply,
+	InteractiveStdOut,
+	setupLogger,
 } from '@sofie-package-manager/api'
-import { renderHTML, RenderHTMLOptions, InteractiveAPI } from '@html-renderer/generic'
-import { getHTMLRendererConfig } from './config'
+import * as portFinder from 'portfinder'
+import { WebSocketServer } from 'ws'
+
+import { getHTMLRendererConfig } from './config.js'
 
 const PACKAGE_VERSION = '1.50.5'
 
 async function main(): Promise<void> {
 	const config = await getHTMLRendererConfig()
-	// eslint-disable-next-line no-console
+
 	if (config.htmlRenderer.test) {
-		// eslint-disable-next-line no-console
 		console.log(`Version: ${PACKAGE_VERSION}`)
-		// eslint-disable-next-line no-process-exit
+
+		// eslint-disable-next-line n/no-process-exit
 		process.exit(0)
 	}
 
@@ -55,7 +56,6 @@ async function main(): Promise<void> {
 
 			await new Promise<void>((resolve, reject) => {
 				const interactiveLogStdOut = (message: InteractiveStdOut) => {
-					// eslint-disable-next-line no-console
 					console.log(JSON.stringify(message))
 				}
 
@@ -74,6 +74,7 @@ async function main(): Promise<void> {
 					}
 
 					ws.on('message', (data) => {
+						// eslint-disable-next-line @typescript-eslint/no-base-to-string
 						const str = data.toString()
 						try {
 							const message = JSON.parse(str) as InteractiveMessage
@@ -127,7 +128,7 @@ async function main(): Promise<void> {
 							takeScreenshot: {
 								name: 'idle.png',
 							},
-					  }
+						}
 					: {}),
 				...(config.htmlRenderer.recording || config.htmlRenderer['recording-cropped']
 					? {
@@ -136,7 +137,7 @@ async function main(): Promise<void> {
 								full: config.htmlRenderer.recording,
 								cropped: config.htmlRenderer['recording-cropped'],
 							},
-					  }
+						}
 					: {}),
 			},
 			{
@@ -146,7 +147,7 @@ async function main(): Promise<void> {
 							takeScreenshot: {
 								name: 'play.png',
 							},
-					  }
+						}
 					: {}),
 				executeJs: `stop()`,
 			},
@@ -157,7 +158,7 @@ async function main(): Promise<void> {
 							takeScreenshot: {
 								name: 'stop.png',
 							},
-					  }
+						}
 					: {}),
 			},
 		])
@@ -175,7 +176,7 @@ async function main(): Promise<void> {
 							takeScreenshot: {
 								name: 'idle.png',
 							},
-					  }
+						}
 					: {}),
 				...(config.htmlRenderer.recording || config.htmlRenderer['recording-cropped']
 					? {
@@ -184,7 +185,7 @@ async function main(): Promise<void> {
 								full: config.htmlRenderer.recording,
 								cropped: config.htmlRenderer['recording-cropped'],
 							},
-					  }
+						}
 					: {}),
 			},
 			{
@@ -195,7 +196,7 @@ async function main(): Promise<void> {
 							takeScreenshot: {
 								name: 'play.png',
 							},
-					  }
+						}
 					: {}),
 			},
 			{
@@ -206,7 +207,7 @@ async function main(): Promise<void> {
 							takeScreenshot: {
 								name: 'stop.png',
 							},
-					  }
+						}
 					: {}),
 			},
 		])
@@ -238,9 +239,9 @@ async function main(): Promise<void> {
 }
 
 main().catch((e) => {
-	// eslint-disable-next-line no-console
 	console.error(e)
-	// eslint-disable-next-line no-process-exit
+
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(1)
 })
 function compact<T>(array: (T | undefined | null | false)[]): T[] {

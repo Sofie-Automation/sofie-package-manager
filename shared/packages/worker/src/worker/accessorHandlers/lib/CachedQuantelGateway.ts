@@ -1,11 +1,11 @@
 import { ProtectedString, protectString } from '@sofie-package-manager/api'
 import { ClipSearchQuery, QuantelGateway } from 'tv-automation-quantel-gateway-client'
-import {
+import type {
 	ClipDataSummary,
 	ConnectionDetails,
 	ServerInfo,
 	ZoneInfo,
-} from 'tv-automation-quantel-gateway-client/dist/quantelTypes'
+} from 'tv-automation-quantel-gateway-client/dist/quantelTypes.d.ts'
 
 const DEFAULT_CACHE_EXPIRE = 3000
 
@@ -20,14 +20,7 @@ export class CachedQuantelGateway extends QuantelGateway {
 
 	private _connectToISAPromise: Promise<ConnectionDetails> | null = null
 
-	constructor(
-		config?:
-			| {
-					checkStatusInterval?: number | undefined
-					timeout?: number | undefined
-			  }
-			| undefined
-	) {
+	constructor(config?: { checkStatusInterval?: number | undefined; timeout?: number | undefined }) {
 		super(config)
 		this.cacheExpire = config?.timeout ?? DEFAULT_CACHE_EXPIRE
 	}

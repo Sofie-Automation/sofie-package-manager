@@ -1,6 +1,6 @@
-import { GenerateExpectationApi } from '../api'
-import { getExpectations } from './expectations'
-import { getPackageContainerExpectations } from './packageContainerExpectations'
+import { GenerateExpectationApi } from '../api.js'
+import { getExpectations } from './expectations.js'
+import { getPackageContainerExpectations } from './packageContainerExpectations.js'
 
 export const api: GenerateExpectationApi = {
 	getExpectations: getExpectations,

@@ -1,31 +1,32 @@
-import path from 'path'
-import { promisify } from 'util'
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
+
 import {
-	ExpectedPackage,
-	StatusCode,
 	Accessor,
 	AccessorOnPackage,
+	assertNever,
+	betterPathJoin,
 	Expectation,
+	ExpectedPackage,
+	ExpectedPackageId,
 	hashObj,
 	literal,
-	PackageContainerExpectation,
-	assertNever,
-	stringifyError,
-	ExpectedPackageId,
-	protectString,
 	MonitorId,
-	betterPathJoin,
+	PackageContainerExpectation,
+	protectString,
 	removeBasePath,
 	resolveFileWithoutExtension,
+	StatusCode,
+	stringifyError,
 } from '@sofie-package-manager/api'
 
-import { AccessorConstructorProps, GenericAccessorHandle } from '../genericHandle'
-import { MonitorInProgress } from '../../lib/monitorInProgress'
-import { FileEvent, FileWatcher, IFileWatcher } from './FileWatcher'
-import { GenericFileOperationsHandler } from './GenericFileOperations'
-import { GenericFileHandler } from './GenericFileHandler'
-import { JSONWriteFilesLockHandler } from './json-write-file'
+import { MonitorInProgress } from '../../lib/monitorInProgress.js'
+import { AccessorConstructorProps, GenericAccessorHandle } from '../genericHandle.js'
+import { FileEvent, FileWatcher, IFileWatcher } from './FileWatcher.js'
+import { GenericFileHandler } from './GenericFileHandler.js'
+import { GenericFileOperationsHandler } from './GenericFileOperations.js'
+import { JSONWriteFilesLockHandler } from './json-write-file.js'
 
 export const LocalFolderAccessorHandleType = 'localFolder'
 export const FileShareAccessorHandleType = 'fileShare'
@@ -117,7 +118,7 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 			await fsAccess(filePath, fs.constants.R_OK)
 			// The file exists
 			exists = true
-		} catch (err) {
+		} catch {
 			// Ignore errors
 		}
 		return exists
@@ -154,7 +155,9 @@ export abstract class GenericFileAccessorHandle<Metadata> extends GenericAccesso
 				// If the directory itself doesn't exist, the list is empty
 				files = []
 			} else {
-				throw new Error(`Error listing files in "${dir}": ${stringifyError(error, true)}`)
+				throw new Error(`Error listing files in "${dir}": ${stringifyError(error, true)}`, {
+					cause: error,
+				})
 			}
 		}
 		// Resolve the file with any extension

@@ -1,45 +1,44 @@
-import { ExpectedPackageWrap, PackageContainers } from '../../packageManager'
-import { PackageManagerSettings } from '../../generated/options'
 import {
-	ExpectedPackage,
-	PackageContainer,
 	Expectation,
+	ExpectationId,
+	ExpectationManagerId,
+	ExpectedPackage,
 	hashObj,
 	LoggerInstance,
-	ExpectationManagerId,
-	ExpectationId,
 	objectEntries,
-	objectValues,
 	objectSize,
+	objectValues,
+	PackageContainer,
 } from '@sofie-package-manager/api'
-import { GenerateExpectation, PriorityMagnitude } from './types'
 
-import {
-	generateMediaFileCopy,
-	generateMediaFileVerify,
-	generateQuantelCopy,
-	generatePackageScan,
-	generatePackageDeepScan,
-	generateMediaFileThumbnail,
-	generateMediaFilePreview,
-	generateQuantelClipThumbnail,
-	generateQuantelClipPreview,
-	generateJsonDataCopy,
-	generatePackageCopyFileProxy,
-	generatePackageLoudness,
-	generateHTMLRender,
-	generatePackageIframes,
-	generatePackageKairosLoadToRam,
-} from './expectations-lib'
-import { getSmartbullExpectedPackages, shouldBeIgnored } from './smartbull'
-import { TEMPORARY_STORAGE_ID } from './lib'
+import { RundownId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
 import {
 	PackageManagerActivePlaylist,
 	PackageManagerActiveRundown,
-	// eslint-disable-next-line node/no-extraneous-import
 } from '@sofie-automation/shared-lib/dist/package-manager/publications'
-// eslint-disable-next-line node/no-extraneous-import
-import { RundownId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
+
+import { PackageManagerSettings } from '../../generated/options.js'
+import { ExpectedPackageWrap, PackageContainers } from '../../packageManager.js'
+import {
+	generateHTMLRender,
+	generateJsonDataCopy,
+	generateMediaFileCopy,
+	generateMediaFilePreview,
+	generateMediaFileThumbnail,
+	generateMediaFileVerify,
+	generatePackageCopyFileProxy,
+	generatePackageDeepScan,
+	generatePackageIframes,
+	generatePackageKairosLoadToRam,
+	generatePackageLoudness,
+	generatePackageScan,
+	generateQuantelClipPreview,
+	generateQuantelClipThumbnail,
+	generateQuantelCopy,
+} from './expectations-lib.js'
+import { TEMPORARY_STORAGE_ID } from './lib.js'
+import { getSmartbullExpectedPackages, shouldBeIgnored } from './smartbull.js'
+import { GenerateExpectation, PriorityMagnitude } from './types.js'
 
 /** Generate and return the appropriate Expectations based on the provided expectedPackages */
 export function getExpectations(

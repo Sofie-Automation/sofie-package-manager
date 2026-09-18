@@ -1,18 +1,19 @@
 import {
+	AccessorId,
 	AccessorOnPackage,
 	Expectation,
-	PackageContainerExpectation,
-	Reason,
 	HelpfulEventEmitter,
-	AccessorId,
-	MonitorId,
-	promiseTimeout,
 	INNER_ACTION_TIMEOUT,
 	KnownReason,
+	MonitorId,
+	PackageContainerExpectation,
+	promiseTimeout,
+	Reason,
 	stringMaxLength,
 } from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { MonitorInProgress } from '../lib/monitorInProgress'
+
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
 
 /**
  * The AccessorHandle provides a common API to manipulate Packages across multiple types of Accessors
@@ -56,6 +57,7 @@ export abstract class GenericAccessorHandle<Metadata> {
 		]
 
 		for (const methodName of methodsToWrap) {
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			const originalMethod = this[methodName] as (...args: any[]) => Promise<unknown>
 
 			;(this as any)[methodName] = async function (...args: any[]) {

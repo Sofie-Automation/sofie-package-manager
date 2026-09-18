@@ -1,34 +1,34 @@
 import {
-	StatusCode,
 	ClientConnectionOptions,
+	ExpectationManagerId,
 	ExpectationManagerWorkerAgent,
 	Hook,
 	LoggerInstance,
+	MonitorId,
+	PackageContainerId,
 	Reason,
 	removeUndefinedProperties,
+	StatusCode,
 	stringifyError,
-	ExpectationManagerId,
+	URLMap,
 	WorkerAgentId,
 	WorkInProgressLocalId,
-	PackageContainerId,
-	MonitorId,
-	URLMap,
 } from '@sofie-package-manager/api'
 
-import { WorkerAgentAPI } from '../workerAgentApi'
-import { getDefaultConstants } from '../lib/constants'
-import { ExpectationTracker } from '../expectationTracker/expectationTracker'
-import { TrackedWorkerAgents } from './lib/trackedWorkerAgents'
-import { ManagerStatusWatchdog } from './lib/managerStatusWatchdog'
 import {
 	ExpectationManagerCallbacks,
 	ExpectationManagerOptions,
 	ExpectationManagerServerOptions,
-} from '../expectationManager'
-import { ManagerStatusReporter } from './lib/managerStatusReporter'
-import { WorkforceConnection } from './lib/workforceConnection'
-import { ExpectationManagerServer } from './lib/expectationManagerServer'
-import { StatusReportCache } from './lib/statusReportCache'
+} from '../expectationManager.js'
+import { ExpectationTracker } from '../expectationTracker/expectationTracker.js'
+import { getDefaultConstants } from '../lib/constants.js'
+import { WorkerAgentAPI } from '../workerAgentApi.js'
+import { ExpectationManagerServer } from './lib/expectationManagerServer.js'
+import { ManagerStatusReporter } from './lib/managerStatusReporter.js'
+import { ManagerStatusWatchdog } from './lib/managerStatusWatchdog.js'
+import { StatusReportCache } from './lib/statusReportCache.js'
+import { TrackedWorkerAgents } from './lib/trackedWorkerAgents.js'
+import { WorkforceConnection } from './lib/workforceConnection.js'
 
 /**
  * ExpectationManagerInternal contains methods that are used internally in this library.

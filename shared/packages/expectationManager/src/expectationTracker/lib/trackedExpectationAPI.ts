@@ -1,17 +1,20 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { LoggerInstance, Reason, ReturnTypeIsExpectationReadyToStartWorkingOn } from '@sofie-package-manager/api'
 import _ from 'underscore'
 
-import { TrackedExpectation, expLabel } from '../../lib/trackedExpectation'
-import { WorkerAgentAPI } from '../../workerAgentApi'
-import { ExpectationTracker } from '../expectationTracker'
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { expLabel, TrackedExpectation } from '../../lib/trackedExpectation.js'
+import { WorkerAgentAPI } from '../../workerAgentApi.js'
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /** Various methods related to TrackedExpectation */
 export class TrackedExpectationAPI {
 	private logger: LoggerInstance
 
-	constructor(logger: LoggerInstance, private tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		private tracker: ExpectationTracker
+	) {
 		this.logger = logger.category('TrackedExpectationAPI')
 	}
 

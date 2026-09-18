@@ -1,15 +1,16 @@
 import {
 	getAppContainerConfig,
+	HealthEndpoints,
+	initializeLogger,
 	ProcessHandler,
 	setupLogger,
-	stringifyError,
-	initializeLogger,
-	HealthEndpoints,
 	StatusCode,
+	stringifyError,
 } from '@sofie-package-manager/api'
-import { AppContainer } from './appContainer'
 
-export { AppContainer } from './appContainer'
+import { AppContainer } from './appContainer.js'
+
+export { AppContainer } from './appContainer.js'
 
 export async function startProcess(): Promise<void> {
 	const config = await getAppContainerConfig()

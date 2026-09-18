@@ -1,7 +1,8 @@
 import WebSocket from 'ws'
-import { stringifyError } from './lib'
-import { LoggerInstance } from './logger'
-import { PartyId, MessageBase, MessageIdentifyClient, PING_TIME, WebsocketConnection } from './websocketConnection'
+
+import { stringifyError } from './lib.js'
+import { LoggerInstance } from './logger.js'
+import { MessageBase, MessageIdentifyClient, PartyId, PING_TIME, WebsocketConnection } from './websocketConnection.js'
 
 /** A Class which handles a connection to a Websocket server */
 export class WebsocketClient<ID extends PartyId> extends WebsocketConnection {

@@ -1,38 +1,37 @@
 import * as path from 'path'
-import { ExpectedPackageWrap, PackageContainers } from '../../packageManager'
-import { PackageManagerSettings } from '../../generated/options'
+
 import {
 	Accessor,
-	ExpectedPackage,
-	PackageContainer,
+	AccessorId,
+	AccessorOnPackage,
+	assertNever,
 	Expectation,
+	ExpectationId,
+	ExpectationManagerId,
+	ExpectedPackage,
 	hashObj,
 	literal,
-	assertNever,
-	ExpectationManagerId,
+	objectEntries,
+	PackageContainer,
 	PackageContainerId,
 	protectString,
-	ExpectationId,
-	AccessorOnPackage,
-	AccessorId,
-	objectEntries,
 } from '@sofie-package-manager/api'
+// eslint-disable-next-line n/no-extraneous-import
+import { MediaRamRecRef, MediaStillRef, protocolEncodeStr, refMediaRamRec, refMediaStill, refToPath } from 'kairos-lib'
+
+import { PackageManagerSettings } from '../../generated/options.js'
+import { ExpectedPackageWrap, PackageContainers } from '../../packageManager.js'
+import { CORE_COLLECTION_ACCESSOR_ID } from './lib.js'
 import {
 	ExpectedPackageWrapHTMLTemplate,
 	ExpectedPackageWrapJSONData,
 	ExpectedPackageWrapMediaFile,
 	ExpectedPackageWrapQuantel,
 	PriorityAdditions,
-} from './types'
-import { CORE_COLLECTION_ACCESSOR_ID } from './lib'
-// eslint-disable-next-line node/no-missing-import
-import { MediaRamRecRef, MediaStillRef, protocolEncodeStr, refMediaRamRec, refMediaStill, refToPath } from 'kairos-lib'
+} from './types.js'
 
 type SomeClipCopyExpectation =
-	| Expectation.FileCopy
-	| Expectation.FileCopyProxy
-	| Expectation.FileVerify
-	| Expectation.QuantelClipCopy
+	Expectation.FileCopy | Expectation.FileCopyProxy | Expectation.FileVerify | Expectation.QuantelClipCopy
 
 type SomeClipFileOnDiskCopyExpectation = Expectation.FileCopy | Expectation.FileCopyProxy | Expectation.FileVerify
 

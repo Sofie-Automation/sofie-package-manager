@@ -1,9 +1,18 @@
-jest.mock('child_process')
-jest.mock('../workforceApi.ts')
-jest.mock('../workerAgentApi.ts')
+import { describe, expect, vi, afterEach, beforeAll, it } from 'vitest'
 
-//@ts-ignore mock
-import { mockClearAllProcesses } from 'child_process'
+vi.mock('child_process', async () => {
+	const mock = await import('../__mocks__/child_process.ts')
+	return mock
+})
+vi.mock('../workforceApi.ts', async () => {
+	const mock = await import('../__mocks__/workforceApi.ts')
+	return mock
+})
+vi.mock('../workerAgentApi.ts', async () => {
+	const mock = await import('../__mocks__/workerAgentApi.ts')
+	return mock
+})
+
 import {
 	getWorkerCount,
 	getWorkerId,
@@ -11,15 +20,15 @@ import {
 	resetMocks,
 	setupAppContainer,
 	setupWorkers,
-} from './lib/setupEnv'
-import { WorkforceAPI } from '../workforceApi'
-import { getFileCopyExpectation, getPackageContainerExpectation } from './lib/containers'
+} from './lib/setupEnv.js'
+import { WorkforceAPI } from '../workforceApi.js'
+import { getFileCopyExpectation, getPackageContainerExpectation } from './lib/containers.js'
 import { sleep } from '@sofie-automation/server-core-integration'
-import { WorkerAgentAPI } from '../workerAgentApi'
+import { WorkerAgentAPI } from '../workerAgentApi.js'
 
-jest.setTimeout(10000)
-
-describe('Auto-scaling', () => {
+describe('Auto-scaling', {
+	timeout: 10_000
+}, () => {
 	beforeAll(async () => {
 		await prepareTestEnviromnent(false)
 	})

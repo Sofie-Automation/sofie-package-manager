@@ -10,8 +10,9 @@ import {
 	unprotectString,
 	WORKFORCE_ID,
 } from '@sofie-package-manager/api'
-import { WorkforceAPI } from '../../workforceApi'
-import { InternalManager } from '../internalManager'
+
+import { WorkforceAPI } from '../../workforceApi.js'
+import { InternalManager } from '../internalManager.js'
 
 /**  */
 export class WorkforceConnection {
@@ -68,7 +69,7 @@ export class WorkforceConnection {
 			_debugKill: async (): Promise<void> => {
 				// This is for testing purposes only
 				setTimeout(() => {
-					// eslint-disable-next-line no-process-exit
+					// eslint-disable-next-line n/no-process-exit
 					process.exit(42)
 				}, 1)
 			},

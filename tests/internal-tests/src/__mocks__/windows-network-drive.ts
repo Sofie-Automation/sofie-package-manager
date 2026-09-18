@@ -1,7 +1,5 @@
 import type * as WND from 'windows-network-drive'
 
-/* eslint-disable no-console */
-
 const DEBUG_LOG = false
 
 const mountedDrives: { [driveLetter: string]: WND.DriveInfo } = {}
@@ -32,11 +30,11 @@ export interface WNDMockType {
 	list: typeof list
 }
 
-const wnd: WNDMockType = jest.createMockFromModule('windows-network-drive')
+const wnd: WNDMockType = {
+	__mountedDrives: mountedDrives,
+	unmount,
+	mount,
+	list,
+}
 
-wnd.__mountedDrives = mountedDrives
-wnd.unmount = unmount
-wnd.mount = mount
-wnd.list = list
-
-module.exports = wnd
+export default wnd

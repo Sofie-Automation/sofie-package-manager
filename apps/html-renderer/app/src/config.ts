@@ -1,12 +1,12 @@
-import yargs = require('yargs/yargs')
 import {
-	ProcessConfig,
-	getProcessConfig,
-	processOptions,
 	defineArguments,
 	getProcessArgv,
+	getProcessConfig,
 	parseExecutableAliases,
+	ProcessConfig,
+	processOptions,
 } from '@sofie-package-manager/api'
+import yargs from 'yargs/yargs'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager

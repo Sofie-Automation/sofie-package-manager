@@ -1,16 +1,17 @@
-import { assertNever, Accessor, AccessorOnPackage, AccessorId } from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { CorePackageInfoAccessorHandle } from './corePackageInfo'
-import { FileShareAccessorHandle } from './fileShare'
-import { AccessorConstructorProps, AccessorContext, GenericAccessorHandle } from './genericHandle'
-import { HTTPAccessorHandle } from './http'
-import { HTTPProxyAccessorHandle } from './httpProxy'
-import { LocalFolderAccessorHandle } from './localFolder'
-import { QuantelAccessorHandle } from './quantel'
-import { ATEMAccessorHandle } from './atem'
-import { FTPAccessorHandle } from './ftp'
-import { KairosClipAccessorHandle } from './kairosClip'
-import { S3AccessorHandle } from './s3'
+import { Accessor, AccessorId, AccessorOnPackage, assertNever } from '@sofie-package-manager/api'
+
+import { BaseWorker } from '../worker.js'
+import { ATEMAccessorHandle } from './atem.js'
+import { CorePackageInfoAccessorHandle } from './corePackageInfo.js'
+import { FileShareAccessorHandle } from './fileShare.js'
+import { FTPAccessorHandle } from './ftp.js'
+import { AccessorConstructorProps, AccessorContext, GenericAccessorHandle } from './genericHandle.js'
+import { HTTPAccessorHandle } from './http.js'
+import { HTTPProxyAccessorHandle } from './httpProxy.js'
+import { KairosClipAccessorHandle } from './kairosClip.js'
+import { LocalFolderAccessorHandle } from './localFolder.js'
+import { QuantelAccessorHandle } from './quantel.js'
+import { S3AccessorHandle } from './s3.js'
 
 export function getAccessorHandle<Metadata>(
 	worker: BaseWorker,
@@ -25,7 +26,7 @@ export function getAccessorHandle<Metadata>(
 	const constructorOptions: AccessorConstructorProps<AccessorOnPackage.Any> = {
 		worker: worker,
 		accessorId: accessorId,
-		accessor: accessor as any,
+		accessor: accessor,
 		context: accessorContext,
 		content: content as any,
 		workOptions: workOptions as any,

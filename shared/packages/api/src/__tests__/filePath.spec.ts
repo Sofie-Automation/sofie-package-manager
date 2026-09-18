@@ -1,10 +1,12 @@
-import fs from 'fs'
-import os from 'os'
-import path from 'path'
-import { escapeFilePath, resolveFileWithoutExtension } from '../filePath'
+import { describe, expect, afterEach, it, beforeEach } from 'vitest'
+
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { escapeFilePath, resolveFileWithoutExtension } from '../filePath.js'
 
 describe('filePath', () => {
-	test('checkPath', () => {
+	it('checkPath', () => {
 		expect(escapeFilePath('test/path')).toBe(process.platform === 'win32' ? '"test/path"' : 'test/path')
 		expect(escapeFilePath('C:\\test\\path')).toBe(
 			process.platform === 'win32' ? '"C:\\test\\path"' : 'C:\\test\\path'
@@ -27,7 +29,7 @@ describe('resolveFileWithoutExtension', () => {
 		fs.writeFileSync(path.join(tmpDir, filename), '')
 	}
 
-	test('returns found with correct fullPath and extension for a single match', async () => {
+	it('returns found with correct fullPath and extension for a single match', async () => {
 		touch('myclip.mp4')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
 		expect(result).toEqual({
@@ -37,7 +39,7 @@ describe('resolveFileWithoutExtension', () => {
 		})
 	})
 
-	test('returns found with compound extension (e.g. .tar.gz)', async () => {
+	it('returns found with compound extension (e.g. .tar.gz)', async () => {
 		touch('archive.tar.gz')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'archive'))
 		expect(result).toEqual({
@@ -47,7 +49,7 @@ describe('resolveFileWithoutExtension', () => {
 		})
 	})
 
-	test('returns found when filename has no extension', async () => {
+	it('returns found when filename has no extension', async () => {
 		touch('myclip')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
 		expect(result).toEqual({
@@ -57,7 +59,7 @@ describe('resolveFileWithoutExtension', () => {
 		})
 	})
 
-	test('returns found when path already includes the extension', async () => {
+	it('returns found when path already includes the extension', async () => {
 		touch('myclip.mp4')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip.mp4'))
 		expect(result).toEqual({
@@ -67,7 +69,7 @@ describe('resolveFileWithoutExtension', () => {
 		})
 	})
 
-	test('returns multiple when more than one file matches', async () => {
+	it('returns multiple when more than one file matches', async () => {
 		touch('myclip.mp4')
 		touch('myclip.mov')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
@@ -79,7 +81,7 @@ describe('resolveFileWithoutExtension', () => {
 		)
 	})
 
-	test('returns multiple when both extensionless and extension files exist', async () => {
+	it('returns multiple when both extensionless and extension files exist', async () => {
 		touch('myclip')
 		touch('myclip.mp4')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
@@ -91,18 +93,18 @@ describe('resolveFileWithoutExtension', () => {
 		)
 	})
 
-	test('returns notFound when no files match', async () => {
+	it('returns notFound when no files match', async () => {
 		touch('other.mp4')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))
 		expect(result).toEqual({ result: 'notFound' })
 	})
 
-	test('returns notFound (not error) when the directory does not exist', async () => {
+	it('returns notFound (not error) when the directory does not exist', async () => {
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'nonexistent-subdir', 'myclip'))
 		expect(result).toEqual({ result: 'notFound' })
 	})
 
-	test('does not match filenames that share the base name but have no dot separator', async () => {
+	it('does not match filenames that share the base name but have no dot separator', async () => {
 		// "myclipExtra" should not match a search for "myclip"
 		touch('myclipExtra.mp4')
 		const result = await resolveFileWithoutExtension(path.join(tmpDir, 'myclip'))

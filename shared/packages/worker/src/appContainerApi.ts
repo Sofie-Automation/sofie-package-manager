@@ -1,10 +1,10 @@
 import {
 	AdapterClient,
-	LoggerInstance,
 	AppContainerWorkerAgent,
-	WorkerAgentId,
 	DataId,
 	LockId,
+	LoggerInstance,
+	WorkerAgentId,
 } from '@sofie-package-manager/api'
 
 /**
@@ -16,7 +16,10 @@ export class AppContainerAPI
 	extends AdapterClient<AppContainerWorkerAgent.WorkerAgent, AppContainerWorkerAgent.AppContainer>
 	implements AppContainerWorkerAgent.AppContainer
 {
-	constructor(public id: WorkerAgentId, logger: LoggerInstance) {
+	constructor(
+		public id: WorkerAgentId,
+		logger: LoggerInstance
+	) {
 		super(logger.category('AppContainerAPI'), id, 'workerAgent')
 	}
 	// Note: These calls are ultimately received at apps/appcontainer-node/packages/generic/src/appContainer.ts

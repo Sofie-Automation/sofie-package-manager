@@ -1,18 +1,17 @@
-import { BaseWorker } from '../../../worker'
-import { getStandardCost } from '../lib/lib'
 import {
 	Accessor,
-	hashObj,
+	assertNever,
 	Expectation,
+	hashObj,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	assertNever,
-	stringifyError,
 	startTimer,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
@@ -20,19 +19,21 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
+} from '../../../accessorHandlers/accessor.js'
+import { PackageReadStream } from '../../../accessorHandlers/genericHandle.js'
+import { CancelablePromise } from '../../../lib/cancelablePromise.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker.js'
+import { getStandardCost } from '../lib/lib.js'
 import {
 	checkWorkerHasAccessToPackageContainersOnPackage,
 	lookupAccessorHandles,
 	LookupPackageContainer,
 	previewFFMpegArguments,
-} from './lib'
-import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg'
-import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
-import { scanWithFFProbe, FFProbeScanResult } from './lib/scan'
-import { CancelablePromise } from '../../../lib/cancelablePromise'
-import { PackageReadStream } from '../../../accessorHandlers/genericHandle'
+} from './lib.js'
+import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg.js'
+import { FFProbeScanResult, scanWithFFProbe } from './lib/scan.js'
 
 /**
  * Generates a low-res preview video of a source video file, and stores the resulting file into the target PackageContainer

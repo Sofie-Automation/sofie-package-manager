@@ -1,8 +1,9 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { stringifyError } from '@sofie-package-manager/api'
-import { TrackedExpectation } from '../../lib/trackedExpectation'
-import { assertState, EvaluateContext } from '../lib'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { TrackedExpectation } from '../../lib/trackedExpectation.js'
+import { assertState, EvaluateContext } from '../lib.js'
 
 /**
  * Evaluate a TrackedExpectation which is in the WAITING state.

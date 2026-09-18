@@ -1,13 +1,14 @@
-import { PackageContainers } from '../../packageManager'
 import {
-	PackageContainerExpectation,
 	ExpectationManagerId,
-	PackageContainerId,
 	objectEntries,
+	PackageContainerExpectation,
+	PackageContainerId,
 } from '@sofie-package-manager/api'
-import { SMARTBULL_STORAGE_ID, SOURCE_MONITOR_STORAGE_ID, TEMPORARY_STORAGE_ID } from './lib'
-// eslint-disable-next-line node/no-extraneous-import
+
 import { PackageManagerActivePlaylist } from '@sofie-automation/shared-lib/dist/package-manager/publications'
+
+import { PackageContainers } from '../../packageManager.js'
+import { SMARTBULL_STORAGE_ID, SOURCE_MONITOR_STORAGE_ID, TEMPORARY_STORAGE_ID } from './lib.js'
 
 // Max age for untracked files
 const MAX_FILE_AGE = 30 * 24 * 3600 // 30 days

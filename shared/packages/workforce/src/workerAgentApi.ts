@@ -1,12 +1,12 @@
 import {
-	WorkForceWorkerAgent,
 	AdapterServer,
 	AdapterServerOptions,
-	LogLevel,
-	WorkerStatusReport,
 	ExpectationManagerId,
-	WorkforceId,
+	LogLevel,
 	URLMap,
+	WorkerStatusReport,
+	WorkforceId,
+	WorkForceWorkerAgent,
 } from '@sofie-package-manager/api'
 
 /**

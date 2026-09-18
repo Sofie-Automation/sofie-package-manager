@@ -1,27 +1,37 @@
-import { execFile, ChildProcess, spawn } from 'child_process'
-import csvParser from 'csv-parser'
+import { ChildProcess, execFile, spawn } from 'child_process'
+
 import {
-	Expectation,
-	assertNever,
 	Accessor,
 	AccessorOnPackage,
-	LoggerInstance,
+	assertNever,
 	escapeFilePath,
-	stringifyError,
 	ExecutableAliasSource,
+	Expectation,
+	LoggerInstance,
+	stringifyError,
 } from '@sofie-package-manager/api'
+import csvParser from 'csv-parser'
+
 import {
-	isQuantelClipAccessorHandle,
-	isLocalFolderAccessorHandle,
 	isFileShareAccessorHandle,
-	isHTTPProxyAccessorHandle,
-	isHTTPAccessorHandle,
 	isFTPAccessorHandle,
+	isHTTPAccessorHandle,
+	isHTTPProxyAccessorHandle,
+	isLocalFolderAccessorHandle,
+	isQuantelClipAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../../accessorHandlers/accessor'
-import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
-import { QuantelAccessorHandle } from '../../../../accessorHandlers/quantel'
-import { CancelablePromise } from '../../../../lib/cancelablePromise'
+} from '../../../../accessorHandlers/accessor.js'
+import { FileShareAccessorHandle } from '../../../../accessorHandlers/fileShare.js'
+import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp.js'
+import { GenericAccessorHandle, PackageReadStream } from '../../../../accessorHandlers/genericHandle.js'
+import { HTTPAccessorHandle } from '../../../../accessorHandlers/http.js'
+import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy.js'
+import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder.js'
+import { QuantelAccessorHandle } from '../../../../accessorHandlers/quantel.js'
+import { S3AccessorHandle } from '../../../../accessorHandlers/s3.js'
+import { CancelablePromise } from '../../../../lib/cancelablePromise.js'
+import { MAX_EXEC_BUFFER } from '../../../../lib/lib.js'
+import { BaseWorker } from '../../../../worker.js'
 import {
 	CompressionType,
 	FieldOrder,
@@ -29,17 +39,9 @@ import {
 	LoudnessScanResult,
 	LoudnessScanResultForStream,
 	ScanAnomaly,
-} from './coreApi'
-import { generateFFProbeFromClipData } from './quantelFormats'
-import { FileShareAccessorHandle } from '../../../../accessorHandlers/fileShare'
-import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy'
-import { HTTPAccessorHandle } from '../../../../accessorHandlers/http'
-import { MAX_EXEC_BUFFER } from '../../../../lib/lib'
-import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg'
-import { GenericAccessorHandle, PackageReadStream } from '../../../../accessorHandlers/genericHandle'
-import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
-import { BaseWorker } from '../../../../worker'
-import { S3AccessorHandle } from '../../../../accessorHandlers/s3'
+} from './coreApi.js'
+import { getFFMpegExecutable, getFFProbeExecutable } from './ffmpeg.js'
+import { generateFFProbeFromClipData } from './quantelFormats.js'
 
 export interface FFProbeScanResultStream {
 	index: number
@@ -355,7 +357,7 @@ export function scanMoreInfo(
 			try {
 				ffMpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 				ffMpegProcess?.kill()
-			} catch (e) {
+			} catch {
 				// This is probably OK, errors likely means that the process is already dead
 			}
 		}
@@ -736,7 +738,7 @@ export function scanIframes(
 			try {
 				ffMpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 				ffMpegProcess?.kill()
-			} catch (e) {
+			} catch {
 				// This is probably OK, errors likely means that the process is already dead
 			}
 		}

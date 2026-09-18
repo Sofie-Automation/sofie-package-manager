@@ -1,7 +1,8 @@
-import { ExpectedPackageWrap } from '../../packageManager'
 import { ExpectedPackage, LoggerInstance } from '@sofie-package-manager/api'
-import { ExpectedPackageWrapMediaFile, PriorityMagnitude } from './types'
-import { SMARTBULL_STORAGE_ID } from './lib'
+
+import { ExpectedPackageWrap } from '../../packageManager.js'
+import { SMARTBULL_STORAGE_ID } from './lib.js'
+import { ExpectedPackageWrapMediaFile, PriorityMagnitude } from './types.js'
 
 export function shouldBeIgnored(packageWrap: ExpectedPackageWrap): boolean {
 	// Ignore the original smartbull package:

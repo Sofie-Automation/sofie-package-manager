@@ -1,9 +1,11 @@
-import { BrowserWindow } from 'electron'
-import * as path from 'path'
-import * as fs from 'fs'
 import { spawn } from 'child_process'
-import { InteractiveAPI, RenderHTMLOptions } from './renderHTML'
+import * as fs from 'fs'
+import * as path from 'path'
+
 import { escapeFilePath, getFFMpegExecutable, LoggerInstance } from '@sofie-package-manager/api'
+import { BrowserWindow } from 'electron'
+
+import { InteractiveAPI, RenderHTMLOptions } from './renderHTML.js'
 
 export class BrowserRenderer implements InteractiveAPI {
 	private logger: LoggerInstance
@@ -26,7 +28,10 @@ export class BrowserRenderer implements InteractiveAPI {
 
 	private onStoppedListeners: (() => void)[] = []
 
-	constructor(logger: LoggerInstance, private options: RenderHTMLOptions) {
+	constructor(
+		logger: LoggerInstance,
+		private options: RenderHTMLOptions
+	) {
 		this.logger = logger.category('BrowserRenderer')
 
 		this.width = options.width || 1920
@@ -393,7 +398,6 @@ export class BrowserRenderer implements InteractiveAPI {
 			})
 			child.on('close', (code) => {
 				if (code !== 0) {
-					// eslint-disable-next-line no-console
 					logger.error(logTrace)
 					reject(new Error(`ffmpeg process exited with code ${code}, args: ${args.join(' ')}`))
 				} else resolve()

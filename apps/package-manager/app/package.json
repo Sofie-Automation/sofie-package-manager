@@ -1,12 +1,13 @@
 {
     "name": "@package-manager/app",
     "version": "1.53.0",
+    "type": "module",
     "private": true,
     "scripts": {
         "build": "yarn rimraf dist && yarn build:main",
         "build:main": "tsc -p tsconfig.json",
         "build-win32": "node ../../../scripts/build-win32.mjs package-manager.exe && node ../../../scripts/copy-natives.js win32-x64",
-        "__test": "jest",
+        "__test": "vitest run",
         "start": "node dist/index.js"
     },
     "peerDependencies": {
@@ -17,7 +18,7 @@
     "dependencies": {
         "@package-manager/generic": "1.53.0"
     },
-    "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+    "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {
         "node": ">=24"
     },
@@ -30,7 +31,7 @@
         ]
     },
     "devDependencies": {
-        "lerna": "^9.0.7",
+        "lerna": "^10.0.1",
         "rimraf": "^6.1.3"
     }
 }

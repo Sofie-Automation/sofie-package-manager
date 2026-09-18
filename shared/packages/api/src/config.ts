@@ -1,13 +1,14 @@
-import { Options } from 'yargs'
-import yargs = require('yargs/yargs')
 import _ from 'underscore'
-import { WorkerAgentConfig } from './worker'
-import { AppContainerConfig } from './appContainer'
-import { protectString } from './ProtectedString'
-import { AppContainerId, WorkerAgentId } from './ids'
-import { countOccurrences } from './lib'
-import { URLMap } from './methods'
-import { Expectation } from './expectationApi'
+import { Options } from 'yargs'
+import yargs from 'yargs/yargs'
+
+import { AppContainerConfig } from './appContainer.js'
+import { Expectation } from './expectationApi.js'
+import { AppContainerId, WorkerAgentId } from './ids.js'
+import { countOccurrences } from './lib.js'
+import { URLMap } from './methods.js'
+import { protectString } from './ProtectedString.js'
+import { WorkerAgentConfig } from './worker.js'
 
 /*
  * This file contains various CLI argument definitions, used by the various processes that together constitutes the Package Manager
@@ -581,7 +582,8 @@ export async function getAppContainerConfig(): Promise<AppContainerProcessConfig
 
 // Configuration for the Single-app Application: ------------------------------
 export interface SingleAppConfig
-	extends WorkforceConfig,
+	extends
+		WorkforceConfig,
 		HTTPServerConfig,
 		PackageManagerConfig,
 		WorkerConfig,

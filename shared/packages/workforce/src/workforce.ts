@@ -1,38 +1,39 @@
 import {
+	AnyProtectedString,
+	AppContainerId,
+	AppId,
+	AppType,
+	assertNever,
 	ClientConnection,
-	WebsocketServer,
-	WorkForceExpectationManager,
-	WorkForceWorkerAgent,
+	deepEqual,
+	Expectation,
+	ExpectationManagerId,
+	hashObj,
 	Hook,
 	LoggerInstance,
-	WorkforceConfig,
-	assertNever,
-	WorkForceAppContainer,
-	WorkforceStatusReport,
 	LogLevel,
-	Expectation,
-	PackageContainerExpectation,
-	stringifyError,
-	hashObj,
-	Statuses,
-	StatusCode,
 	mapEntries,
-	ExpectationManagerId,
-	AppContainerId,
+	MetricsGauge,
+	PackageContainerExpectation,
+	Status,
+	StatusCode,
+	Statuses,
+	stringifyError,
+	URLMap,
+	WebsocketServer,
 	WorkerAgentId,
 	WORKFORCE_ID,
-	AppType,
-	AppId,
-	AnyProtectedString,
-	URLMap,
-	deepEqual,
-	Status,
-	MetricsGauge,
+	WorkForceAppContainer,
+	WorkforceConfig,
+	WorkForceExpectationManager,
+	WorkforceStatusReport,
+	WorkForceWorkerAgent,
 } from '@sofie-package-manager/api'
-import { AppContainerAPI } from './appContainerApi'
-import { ExpectationManagerAPI } from './expectationManagerApi'
-import { WorkerAgentAPI } from './workerAgentApi'
-import { WorkerHandler } from './workerHandler'
+
+import { AppContainerAPI } from './appContainerApi.js'
+import { ExpectationManagerAPI } from './expectationManagerApi.js'
+import { WorkerAgentAPI } from './workerAgentApi.js'
+import { WorkerHandler } from './workerHandler.js'
 
 /**
  * The Workforce class tracks the status of which ExpectationManagers and WorkerAgents are online,
@@ -266,11 +267,11 @@ export class Workforce {
 						// This is perfectly normal in some scenarios, so we don't report this as an error
 						statusCode: StatusCode.GOOD,
 						message: 'No workers connected to workforce',
-				  }
+					}
 				: {
 						statusCode: StatusCode.GOOD,
 						message: '',
-				  }
+					}
 
 		if (!this.config.workforce.allowNoAppContainers) {
 			statuses['any-appContainers'] =
@@ -278,11 +279,11 @@ export class Workforce {
 					? {
 							statusCode: StatusCode.BAD,
 							message: 'No appContainers connected to workforce',
-					  }
+						}
 					: {
 							statusCode: StatusCode.GOOD,
 							message: '',
-					  }
+						}
 		}
 
 		return statuses
@@ -381,7 +382,7 @@ export class Workforce {
 	private _debugKill(): void {
 		// This is for testing purposes only
 		setTimeout(() => {
-			// eslint-disable-next-line no-process-exit
+			// eslint-disable-next-line n/no-process-exit
 			process.exit(42)
 		}, 1)
 	}

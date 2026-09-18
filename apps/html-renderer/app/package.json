@@ -1,6 +1,7 @@
 {
 	"name": "@html-renderer/app",
 	"version": "1.53.0",
+	"type": "module",
 	"description": "HTML-renderer",
 	"private": true,
 	"main": "dist/index.js",
@@ -8,12 +9,12 @@
 		"build": "yarn rimraf dist && yarn build:main",
 		"build:main": "tsc -p tsconfig.json",
 		"build-win32": "yarn prepare-build-win32 && electron-builder && yarn post-build-win32",
-		"prepare-build-win32": "node scripts/prepare_build.js",
-		"post-build-win32": "node scripts/post_build.js",
-		"__test": "jest",
+		"prepare-build-win32": "node scripts/prepare_build.mjs",
+		"post-build-win32": "node scripts/post_build.mjs",
+		"__test": "vitest run",
 		"start": "electron dist/index.js"
 	},
-	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+	"prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
 	"engines": {
 		"node": ">=24"
 	},
@@ -39,7 +40,7 @@
 		"archiver": "^7.0.1",
 		"electron": "35.7.5",
 		"electron-builder": "^24.13.3",
-		"lerna": "^9.0.7",
+		"lerna": "^10.0.1",
 		"rimraf": "^6.1.3"
 	},
 	"build": {

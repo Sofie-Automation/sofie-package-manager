@@ -1,3 +1,5 @@
+import { test, expect } from 'vitest'
+
 import {
 	AccessorOnPackage,
 	protectString,
@@ -7,8 +9,8 @@ import {
 	Expectation,
 	Accessor,
 } from '@sofie-package-manager/api'
-import { Content, FileShareAccessorHandle } from '../fileShare'
-import { PassiveTestWorker } from './lib'
+import { Content, FileShareAccessorHandle } from '../fileShare.js'
+import { PassiveTestWorker } from './lib.js'
 
 const processConfig: ProcessConfig = {
 	logPath: undefined,
@@ -45,6 +47,10 @@ test('checkHandleBasic', () => {
 	}
 
 	expect(() => getFileShareAccessor({}, {}).checkHandleBasic()).toThrow('Bad input data')
+
+	if (process.platform !== 'win32') {
+		return
+	}
 
 	// missing accessor.folderPath:
 	expect(getFileShareAccessor({}, { filePath: 'amb.amp4' }).checkHandleBasic()).toMatchObject({

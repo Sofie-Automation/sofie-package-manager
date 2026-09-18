@@ -1,10 +1,10 @@
-import Koa from 'koa'
-import Router from '@koa/router'
 import cors from '@koa/cors'
+import Router from '@koa/router'
+import { LoggerInstance, QuantelHTTPTransformerProxyConfig, stringifyError } from '@sofie-package-manager/api'
+import got from 'got'
+import Koa from 'koa'
 import range from 'koa-range'
 import ratelimit from 'koa-ratelimit'
-import got from 'got'
-import { QuantelHTTPTransformerProxyConfig, LoggerInstance, stringifyError } from '@sofie-package-manager/api'
 import { parseStringPromise as xmlParser } from 'xml2js'
 
 export class QuantelHTTPTransformerProxy {
@@ -14,7 +14,10 @@ export class QuantelHTTPTransformerProxy {
 	private smoothStream = false
 
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private config: QuantelHTTPTransformerProxyConfig) {
+	constructor(
+		logger: LoggerInstance,
+		private config: QuantelHTTPTransformerProxyConfig
+	) {
 		this.logger = logger.category('QuantelHTTPTransformerProxy')
 		if (this.config.quantelHTTPTransformerProxy.transformerURL) {
 			this.transformerURL = this.config.quantelHTTPTransformerProxy.transformerURL
@@ -80,7 +83,7 @@ export class QuantelHTTPTransformerProxy {
 				}
 				if (ctx.path.endsWith('init.mp4')) {
 					const initReq = await got(`${this.transformerURL}${ctx.path}`, { responseType: 'buffer' })
-					const initBuf = initReq.body
+					const initBuf = Buffer.from(initReq.body)
 					const stsc = initBuf.indexOf('stsc')
 					initBuf.writeUInt32BE(0, stsc + 8)
 					const stco = initBuf.indexOf('stco')

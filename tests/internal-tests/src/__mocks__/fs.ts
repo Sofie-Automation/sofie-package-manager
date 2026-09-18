@@ -1,21 +1,24 @@
 // eslint-disable-next-line node/no-unpublished-import
+import { EventEmitter } from 'node:events' // Note: this is a mocked module
+
+import { Readable, Writable } from 'node:stream'
+import { promisify } from 'node:util'
+
+import { vi } from 'vitest'
 import wndMock0 from 'windows-network-drive' // Note: this is a mocked module
-import { EventEmitter } from 'events' // Note: this is a mocked module
-import { Readable, Writable } from 'stream'
-import { promisify } from 'util'
+
 // import * as Path from 'path'
 
-import type { WNDMockType } from './windows-network-drive'
+import type { WNDMockType } from './windows-network-drive.js'
 
 const wndMock = wndMock0 as any as WNDMockType
 
 const DEBUG_LOG = false
 function debugLog(...args: any[]): void {
-	// eslint-disable-next-line no-console
 	if (DEBUG_LOG) console.log(...args)
 }
 
-const fs: any = jest.createMockFromModule('fs')
+const fs: any = vi.importMock('fs')
 
 type MockAny = MockDirectory | MockFile
 interface MockBase {
@@ -373,6 +376,19 @@ export function unlink(path: string, callback: (error: any, result?: any) => voi
 }
 fs.unlink = unlink
 
+export function rmdir(path: string, callback: (error: any, result?: any) => void): void {
+	path = fixPath(path)
+	debugLog('fs.rmdir', path)
+	fsMockEmitter.emit('rmdir', path)
+	try {
+		deleteMock(path)
+		return callback(undefined, null)
+	} catch (err) {
+		callback(err)
+	}
+}
+fs.rmdir = rmdir
+
 export function mkdir(path: string, callback: (error: any, result?: any) => void): void
 export function mkdir(path: string, opts: { recursive?: boolean }, callback: (error: any, result?: any) => void): void
 export function mkdir(
@@ -482,7 +498,7 @@ export function writeFile(path: string, data: Buffer | string, callback: (error:
 	}
 }
 fs.writeFile = writeFile
-function readFile(path: string, ...args: any[]): void {
+export function readFile(path: string, ...args: any[]): void {
 	path = fixPath(path)
 
 	let callback: (error: any, result?: any) => void
@@ -590,20 +606,19 @@ export function utimes(
 }
 fs.utimes = utimes
 
-export function createReadStream(path: string, _options?: BufferEncoding | undefined): FSReadStream {
+export function createReadStream(path: string, _options?: BufferEncoding): FSReadStream {
 	return new FSReadStream(path)
 }
 
 fs.createReadStream = createReadStream
 
-export function createWriteStream(path: string, _options?: BufferEncoding | undefined): FSWriteStream {
+export function createWriteStream(path: string, _options?: BufferEncoding): FSWriteStream {
 	return new FSWriteStream(path)
 }
 fs.createWriteStream = createWriteStream
 
 const DEBUG_STREAMS = false
 function debugStreamsLog(...args: any[]): void {
-	// eslint-disable-next-line no-console
 	if (DEBUG_STREAMS) console.log(...args)
 }
 class FSReadStream extends Readable {
@@ -627,7 +642,7 @@ class FSReadStream extends Readable {
 		}
 		this.readI++
 	}
-	pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean | undefined } | undefined): T {
+	pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean | undefined }): T {
 		debugStreamsLog('READ pipe')
 		return super.pipe(destination, options)
 	}
@@ -680,10 +695,11 @@ interface FileAccess {
 	accessWrite: boolean
 }
 
-fs.promises = {
+export const promises = {
 	stat: promisify(stat),
 	access: promisify(access),
 	unlink: promisify(unlink),
+	rmdir: promisify(rmdir),
 	mkdir: promisify(mkdir),
 	readdir: promisify(readdir),
 	lstat: promisify(lstat),
@@ -695,4 +711,6 @@ fs.promises = {
 	utimes: promisify(utimes),
 }
 
-module.exports = fs
+fs.promises = promises
+
+export default fs

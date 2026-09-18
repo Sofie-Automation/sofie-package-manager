@@ -1,16 +1,20 @@
+import { LoggerInstance, Reason, stringifyError, valueOfCost, WorkerAgentId } from '@sofie-package-manager/api'
 import { PromisePool } from '@supercharge/promise-pool'
-import { LoggerInstance, Reason, WorkerAgentId, valueOfCost, stringifyError } from '@sofie-package-manager/api'
-import { ExpectationStateHandlerSession, WorkerAgentAssignment } from '../../lib/types'
-import { WorkerAgentAPI } from '../../workerAgentApi'
-import { ExpectationTracker } from '../../expectationTracker/expectationTracker'
-import { TrackedExpectation } from '../../lib/trackedExpectation'
+
+import { ExpectationTracker } from '../../expectationTracker/expectationTracker.js'
+import { TrackedExpectation } from '../../lib/trackedExpectation.js'
+import { ExpectationStateHandlerSession, WorkerAgentAssignment } from '../../lib/types.js'
+import { WorkerAgentAPI } from '../../workerAgentApi.js'
 
 /** Storage for WorkerAgents */
 export class TrackedWorkerAgents {
 	private workerAgents: Map<WorkerAgentId, TrackedWorkerAgent> = new Map()
 
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		private tracker: ExpectationTracker
+	) {
 		this.logger = logger.category('TrackedWorkerAgents')
 	}
 
@@ -177,7 +181,7 @@ export class TrackedWorkerAgents {
 					`queriedWorkers: ${trackedExp.queriedWorkers.size}, ` +
 					`countQueried: ${countQueried}, ` +
 					`countInfinite: ${countInfinite} ` +
-					`(Worker costs: ${workerCosts.map((c) => `${c.id}: ${c.cost}`).join(', ')}`,
+					`(Worker costs: ${workerCosts.map((c) => `${c.id}: ${JSON.stringify(c.cost)}`).join(', ')}`,
 			}
 		}
 

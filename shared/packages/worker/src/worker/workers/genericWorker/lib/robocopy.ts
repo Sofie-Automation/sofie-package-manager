@@ -1,7 +1,8 @@
 import * as cp from 'child_process'
 import * as fs from 'fs'
 import * as path from 'path'
-import { CancelablePromise } from '../../../lib/cancelablePromise'
+
+import { CancelablePromise } from '../../../lib/cancelablePromise.js'
 
 export function roboCopyFile(src: string, dst: string, progress?: (progress: number) => void): CancelablePromise<void> {
 	if (process.platform !== 'win32') {

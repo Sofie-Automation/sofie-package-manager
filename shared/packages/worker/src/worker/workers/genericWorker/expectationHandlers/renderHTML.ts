@@ -1,38 +1,33 @@
 import { ChildProcessWithoutNullStreams } from 'child_process'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import WebSocket from 'ws'
-import { BaseWorker } from '../../../worker'
-import { UniversalVersion, getStandardCost, makeUniversalVersion } from '../lib/lib'
+
 import {
 	Accessor,
+	AccessorId,
+	assertNever,
+	escapeFilePath,
 	Expectation,
+	hash,
+	hashObj,
+	htmlTemplateGetFileNamesFromSteps,
+	htmlTemplateGetSteps,
+	InteractiveMessage,
+	InteractiveReply,
+	InteractiveStdOut,
+	literal,
+	protectString,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	stringifyError,
-	AccessorId,
-	startTimer,
-	hashObj,
 	spawnHtmlRendererExecutable,
-	assertNever,
-	hash,
-	protectString,
-	InteractiveStdOut,
-	InteractiveReply,
-	InteractiveMessage,
-	literal,
-	htmlTemplateGetSteps,
-	htmlTemplateGetFileNamesFromSteps,
-	escapeFilePath,
+	startTimer,
+	stringifyError,
 } from '@sofie-package-manager/api'
+import WebSocket from 'ws'
 
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file'
-import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
@@ -40,12 +35,22 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder'
-import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle'
-import { ByteCounter } from '../../../lib/streamByteCounter'
-import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch'
-import { ProgressParts, ProgressPart } from '../lib/progressParts'
+} from '../../../accessorHandlers/accessor.js'
+import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle.js'
+import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch.js'
+import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder.js'
+import { ByteCounter } from '../../../lib/streamByteCounter.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker.js'
+import { getStandardCost, makeUniversalVersion, UniversalVersion } from '../lib/lib.js'
+import { ProgressPart, ProgressParts } from '../lib/progressParts.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
+import { isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file.js'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer
@@ -407,7 +412,10 @@ class HTMLRenderHandler {
 	private executeSteps: { step: Steps[number]; duration: number }[]
 	private outputFileNames: string[]
 
-	constructor(public readonly exp: Expectation.RenderHTML, public readonly worker: BaseWorker) {
+	constructor(
+		public readonly exp: Expectation.RenderHTML,
+		public readonly worker: BaseWorker
+	) {
 		this.steps = getSteps(exp)
 		const f = getFileNames(this.steps)
 		if (!f.mainFileName)
@@ -611,8 +619,12 @@ class HTMLRenderHandler {
 				if (!this.sourceStream) throw new Error(`sourceStream missing`)
 				if (!this.writeStream) throw new Error(`writeStream missing`)
 
-				this.sourceStream.readStream.on('error', (err) => reject(err))
-				this.writeStream.once('error', (err) => reject(err))
+				this.sourceStream.readStream.on('error', (err) =>
+					reject(new Error(`Source stream error: ${err.message}`, { cause: err }))
+				)
+				this.writeStream.once('error', (err) =>
+					reject(new Error(`Write stream error: ${err.message}`, { cause: err }))
+				)
 				this.writeStream.once('close', () => resolve())
 			})
 			this.writeStream.removeAllListeners()
@@ -673,7 +685,7 @@ class HTMLRenderer {
 		// ensure this function doesn't throw, since it is called from various error event handlers
 		try {
 			this.htmlRendererProcess?.kill()
-		} catch (e) {
+		} catch {
 			// This is probably OK, errors likely means that the process is already dead
 		}
 		this.htmlRendererProcess = undefined
@@ -773,7 +785,9 @@ class HTMLRenderer {
 						this.setupWebSocketConnection(message.port).catch((e) => this.onError(e))
 					} else {
 						this.onError(
-							new Error(`Unexpected reply from HTMLRenderer: ${message} (not waiting for 'listening')`)
+							new Error(
+								`Unexpected reply from HTMLRenderer: ${JSON.stringify(message)} (not waiting for 'listening')`
+							)
 						)
 						this.cancel()
 					}
@@ -797,6 +811,7 @@ class HTMLRenderer {
 		})
 		ws.on('message', (data) => {
 			try {
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
 				const str = data.toString()
 
 				this.worker.logger.debug(`HTMLRenderer: Received reply: ${str}`)

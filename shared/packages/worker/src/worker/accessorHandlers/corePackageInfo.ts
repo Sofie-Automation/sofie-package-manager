@@ -1,4 +1,14 @@
 import {
+	Accessor,
+	AccessorOnPackage,
+	Expectation,
+	ExpectedPackageId,
+	hashObj,
+	protectString,
+	Reason,
+} from '@sofie-package-manager/api'
+
+import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
 	AccessorHandlerCheckHandleCompatibilityResult,
@@ -13,16 +23,7 @@ import {
 	PackageReadInfo,
 	PutPackageHandler,
 	SetupPackageContainerMonitorsResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	hashObj,
-	Expectation,
-	Reason,
-	protectString,
-	ExpectedPackageId,
-} from '@sofie-package-manager/api'
+} from './genericHandle.js'
 
 /**
  * Accessor handle for accessing data store in Sofie Core.

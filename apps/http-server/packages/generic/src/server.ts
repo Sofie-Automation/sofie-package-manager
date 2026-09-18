@@ -1,19 +1,18 @@
+import fs from 'fs'
+import path from 'path'
 import { promisify } from 'util'
 
-import fs from 'fs'
-import Koa from 'koa'
-import path from 'path'
-import Router from '@koa/router'
-import cors from '@koa/cors'
 import { bodyParser } from '@koa/bodyparser'
-
-import { HTTPServerConfig, LoggerInstance, stringifyError, first, MetricsGauge } from '@sofie-package-manager/api'
-import { BadResponse, PackageInfo, ResponseMeta, Storage, isBadResponse } from './storage/storage'
-import { FileStorage } from './storage/fileStorage'
-import { CTX, valueOrFirst } from './lib'
+import cors from '@koa/cors'
+import Router from '@koa/router'
+import { first, HTTPServerConfig, LoggerInstance, MetricsGauge, stringifyError } from '@sofie-package-manager/api'
+import Koa from 'koa'
 import { parseFormData } from 'pechkin'
-// eslint-disable-next-line node/no-unpublished-import
-import { PACKAGE_JSON_VERSION } from './packageVersion'
+
+import { CTX, valueOrFirst } from './lib.js'
+import { PACKAGE_JSON_VERSION } from './packageVersion.js'
+import { FileStorage } from './storage/fileStorage.js'
+import { BadResponse, isBadResponse, PackageInfo, ResponseMeta, Storage } from './storage/storage.js'
 
 const fsReadFile = promisify(fs.readFile)
 
@@ -32,7 +31,10 @@ export class PackageProxyServer {
 		return { uptimeSeconds: (Date.now() - this.startupTime) / 1000 }
 	}
 
-	constructor(logger: LoggerInstance, private config: HTTPServerConfig) {
+	constructor(
+		logger: LoggerInstance,
+		private config: HTTPServerConfig
+	) {
 		this.logger = logger.category('PackageProxyServer')
 		this.app.on('error', (err) => {
 			const errString = stringifyError(err)

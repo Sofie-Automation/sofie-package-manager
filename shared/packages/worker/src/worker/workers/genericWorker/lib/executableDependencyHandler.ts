@@ -1,6 +1,8 @@
 import { spawn } from 'child_process'
+
 import { ExecutableAliasSource, LoggerInstance, stringifyError, testHtmlRenderer } from '@sofie-package-manager/api'
-import { testFFMpeg, testFFProbe } from '../expectationHandlers/lib/ffmpeg'
+
+import { testFFMpeg, testFFProbe } from '../expectationHandlers/lib/ffmpeg.js'
 
 export class ExecutableDependencyHandler {
 	/** Contains the result of testing the FFMpeg executable. null = all is well, otherwise contains error message */
@@ -19,7 +21,10 @@ export class ExecutableDependencyHandler {
 		}
 	> = new Map()
 
-	constructor(private logger: LoggerInstance, private worker: ExecutableAliasSource) {}
+	constructor(
+		private logger: LoggerInstance,
+		private worker: ExecutableAliasSource
+	) {}
 
 	/**
 	 * Returns null if all is well, otherwise an error message

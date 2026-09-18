@@ -1,11 +1,14 @@
+import { describe, expect, vi, beforeAll, beforeEach, it } from 'vitest'
+import type { Mock, MockedObject } from '@vitest/spy'
+
 import { protectString } from '@sofie-automation/server-core-integration'
 import { ClientConnectionOptions, LoggerInstance, WorkerConfig, clearPrometheusRegistry } from '@sofie-package-manager/api'
-import { WorkforceAPI } from '../workforceApi'
-import { ExpectationManagerAPI } from '../expectationManagerApi'
+import { WorkforceAPI } from '../workforceApi.js'
+import { ExpectationManagerAPI } from '../expectationManagerApi.js'
 
-jest.mock('../workforceApi.ts', () => {
+vi.mock('../workforceApi.ts', () => {
 	return {
-		WorkforceAPI: jest.fn().mockImplementation(function () {
+		WorkforceAPI: vi.fn().mockImplementation(function () {
 			let onConnected: (() => void) | null = null
 			return {
 				on: function (event: string, cb: (...args: any[]) => void) {
@@ -32,13 +35,13 @@ jest.mock('../workforceApi.ts', () => {
 	}
 })
 
-const mockInit = jest.fn(function (_connectionOptions: ClientConnectionOptions, _clientMethods: any) {
+const mockInit = vi.fn(function (_connectionOptions: ClientConnectionOptions, _clientMethods: any) {
 	return Promise.resolve()
 })
 
-jest.mock('../expectationManagerApi.ts', () => {
+vi.mock('../expectationManagerApi.ts', () => {
 	return {
-		ExpectationManagerAPI: jest.fn().mockImplementation(function () {
+		ExpectationManagerAPI: vi.fn().mockImplementation(function () {
 			return {
 				on: function (_event: string, _cb: (...args: any[]) => void) {
 					// do nothing
@@ -49,17 +52,17 @@ jest.mock('../expectationManagerApi.ts', () => {
 	}
 })
 
-import { WorkerAgent } from '../workerAgent'
+import { WorkerAgent } from '../workerAgent.js'
 
 beforeAll(() => {
-	jest.useFakeTimers()
+	vi.useFakeTimers()
 })
 
 beforeEach(() => {
 	clearPrometheusRegistry()
 	mockInit.mockClear()
-	;(WorkforceAPI as any as jest.Mock<WorkforceAPI>).mockClear()
-	;(ExpectationManagerAPI as any as jest.Mock<ExpectationManagerAPI>).mockClear()
+	;(WorkforceAPI as any as MockedObject<WorkforceAPI>).mockClear()
+	;(ExpectationManagerAPI as any as vi.Mock<ExpectationManagerAPI>).mockClear()
 })
 
 describe('WorkerAgent', () => {
@@ -75,7 +78,7 @@ describe('WorkerAgent', () => {
 		await workerAgent.init()
 
 		expect(WorkforceAPI).toHaveBeenCalledTimes(1)
-		expect((WorkforceAPI as any as jest.Mock<WorkforceAPI>).mock.calls[0][0]).toBe(o.workerConfig.worker.workerId)
+		expect((WorkforceAPI as any as MockedObject<WorkforceAPI>).mock.calls[0][0]).toBe(o.workerConfig.worker.workerId)
 
 		expect(mockInit).toHaveBeenCalledTimes(1)
 		expect(mockInit.mock.calls[0][0]).toMatchObject({
@@ -95,7 +98,7 @@ describe('WorkerAgent', () => {
 		await workerAgent.init()
 
 		expect(WorkforceAPI).toHaveBeenCalledTimes(1)
-		expect((WorkforceAPI as any as jest.Mock<WorkforceAPI>).mock.calls[0][0]).toBe(o.workerConfig.worker.workerId)
+		expect((WorkforceAPI as any as vi.Mock<WorkforceAPI>).mock.calls[0][0]).toBe(o.workerConfig.worker.workerId)
 
 		expect(mockInit).toHaveBeenCalledTimes(1)
 		expect(mockInit.mock.calls[0][0]).toMatchObject({
@@ -115,7 +118,7 @@ describe('WorkerAgent', () => {
 		await workerAgent.init()
 
 		expect(WorkforceAPI).toHaveBeenCalledTimes(1)
-		expect((WorkforceAPI as any as jest.Mock<WorkforceAPI>).mock.calls[0][0]).toBe(o.workerConfig.worker.workerId)
+		expect((WorkforceAPI as any as vi.Mock<WorkforceAPI>).mock.calls[0][0]).toBe(o.workerConfig.worker.workerId)
 
 		expect(mockInit).toHaveBeenCalledTimes(1)
 		expect(mockInit.mock.calls[0][0]).toMatchObject({
@@ -127,17 +130,17 @@ describe('WorkerAgent', () => {
 
 function setup() {
 	const logger = {
-		error: jest.fn((...args) => console.log(...args)),
-		warn: jest.fn((...args) => console.log(...args)),
-		help: jest.fn((...args) => console.log(...args)),
-		data: jest.fn((...args) => console.log(...args)),
-		info: jest.fn((...args) => console.log(...args)),
-		debug: jest.fn((...args) => console.log(...args)),
-		prompt: jest.fn((...args) => console.log(...args)),
-		http: jest.fn((...args) => console.log(...args)),
-		verbose: jest.fn((...args) => console.log(...args)),
-		input: jest.fn((...args) => console.log(...args)),
-		silly: jest.fn((...args) => console.log(...args)),
+		error: vi.fn((...args) => console.log(...args)),
+		warn: vi.fn((...args) => console.log(...args)),
+		help: vi.fn((...args) => console.log(...args)),
+		data: vi.fn((...args) => console.log(...args)),
+		info: vi.fn((...args) => console.log(...args)),
+		debug: vi.fn((...args) => console.log(...args)),
+		prompt: vi.fn((...args) => console.log(...args)),
+		http: vi.fn((...args) => console.log(...args)),
+		verbose: vi.fn((...args) => console.log(...args)),
+		input: vi.fn((...args) => console.log(...args)),
+		silly: vi.fn((...args) => console.log(...args)),
 	} as any as LoggerInstance
 	logger.category = () => logger
 

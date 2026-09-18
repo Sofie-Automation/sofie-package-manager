@@ -1,5 +1,6 @@
 import { ExpectationId, LoggerInstance } from '@sofie-package-manager/api'
-import { ExpectationTracker } from '../expectationTracker'
+
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /** Keeps track of which Expectations are waiting for the fulfillment of other Expectations */
 export class ListeningExpectationsStorage {
@@ -11,7 +12,10 @@ export class ListeningExpectationsStorage {
 	private _listeningExpectations: Map<ExpectationId, ExpectationId[]> = new Map()
 
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		private tracker: ExpectationTracker
+	) {
 		this.logger = logger.category('ListeningExpectations')
 	}
 

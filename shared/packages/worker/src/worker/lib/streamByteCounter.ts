@@ -1,4 +1,4 @@
-import { Transform, TransformCallback } from 'stream'
+import { Transform, TransformCallback } from 'node:stream'
 
 /** Stream transformer that pipes the data and counts the bytes */
 export class ByteCounter extends Transform {

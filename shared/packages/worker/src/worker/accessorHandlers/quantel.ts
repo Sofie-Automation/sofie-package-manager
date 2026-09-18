@@ -1,36 +1,43 @@
 import { Socket } from 'node:net'
-import { CachedQuantelGateway } from './lib/CachedQuantelGateway'
+
 import {
+	Accessor,
+	AccessorOnPackage,
+	Expectation,
+	INNER_ACTION_TIMEOUT,
+	KnownReason,
+	literal,
+	Reason,
+	rebaseUrl,
+} from '@sofie-package-manager/api'
+import type {
+	ClipData,
+	ClipDataSummary,
+	ServerInfo,
+	ZoneInfo,
+} from 'tv-automation-quantel-gateway-client/dist/quantelTypes.d.ts'
+
+import { BaseWorker } from '../worker.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
+	AccessorHandlerCheckHandleReadResult,
+	AccessorHandlerCheckHandleWriteResult,
+	AccessorHandlerCheckPackageContainerWriteAccessResult,
+	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
+	AccessorHandlerTryPackageReadResult,
 	GenericAccessorHandle,
+	PackageOperation,
 	PackageReadInfo,
 	PackageReadInfoBaseType,
 	PackageReadInfoQuantelClip,
 	PutPackageHandler,
 	SetupPackageContainerMonitorsResult,
-	AccessorHandlerTryPackageReadResult,
-	AccessorHandlerCheckPackageReadAccessResult,
-	AccessorHandlerCheckPackageContainerWriteAccessResult,
-	AccessorHandlerCheckHandleReadResult,
-	AccessorHandlerCheckHandleWriteResult,
-	AccessorHandlerRunCronJobResult,
-	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	literal,
-	Reason,
-	INNER_ACTION_TIMEOUT,
-	rebaseUrl,
-	KnownReason,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { ClipData, ClipDataSummary, ServerInfo, ZoneInfo } from 'tv-automation-quantel-gateway-client/dist/quantelTypes'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
+} from './genericHandle.js'
+import { CachedQuantelGateway } from './lib/CachedQuantelGateway.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 /** The minimum amount of frames where a clip is playable */
 const RESERVED_CLIP_MINIMUM_FRAMES = 10
@@ -504,7 +511,7 @@ export class QuantelAccessorHandle<Metadata> extends GenericAccessorHandle<Metad
 		if (!this.accessor.ISAUrls) throw new Error('accessor.ISAUrls is not set')
 		if (!this.accessor.ISAUrls.length) throw new Error('accessor.ISAUrls array is empty')
 
-		const id = `${this.accessor.quantelGatewayUrl}`
+		const id = `${this.accessor.quantelGatewayUrl}__server_${this.accessor.serverId ?? 'none'}`
 
 		// A little hack to fix a case where ISAUrls is a string, even though it shouldn't...
 		let ISAUrls: string[] = this.accessor.ISAUrls

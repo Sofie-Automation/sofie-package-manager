@@ -1,26 +1,27 @@
-import { BaseWorker } from '../../../worker'
-import { getStandardCost, makeUniversalVersion, UniversalVersion } from '../lib/lib'
+import path from 'node:path'
+
 import {
 	Accessor,
-	hashObj,
+	AccessorId,
+	AccessorOnPackage,
+	escapeFilePath,
 	Expectation,
+	ExpectedPackage,
+	hashObj,
+	LoggerInstance,
+	PackageContainerExpectation,
+	PackageContainerId,
+	PackageContainerOnPackage,
+	protectString,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	stringifyError,
-	PackageContainerId,
-	protectString,
-	AccessorId,
-	PackageContainerOnPackage,
-	AccessorOnPackage,
-	escapeFilePath,
-	PackageContainerExpectation,
-	LoggerInstance,
 	startTimer,
-	ExpectedPackage,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
@@ -28,16 +29,20 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
-import { GenericAccessorHandle } from '../../../accessorHandlers/genericHandle'
-import { doFileCopyExpectation, isFileFulfilled } from './lib/file'
-import { ProgressPart, ProgressParts } from '../lib/progressParts'
-
-import path from 'path'
-import { SpawnedProcess, spawnProcess } from './lib/spawnProcess'
+} from '../../../accessorHandlers/accessor.js'
+import { GenericAccessorHandle } from '../../../accessorHandlers/genericHandle.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker.js'
+import { getStandardCost, makeUniversalVersion, UniversalVersion } from '../lib/lib.js'
+import { ProgressPart, ProgressParts } from '../lib/progressParts.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
+import { doFileCopyExpectation, isFileFulfilled } from './lib/file.js'
+import { SpawnedProcess, spawnProcess } from './lib/spawnProcess.js'
 
 /**
  * Generates a low-res preview video of a source video file, and stores the resulting file into the target PackageContainer
@@ -667,8 +672,8 @@ class MediaConversionOperation {
 					handle.source === 'stdout'
 						? preCheckResult.stdout
 						: handle.source === 'stderr'
-						? preCheckResult.stderr
-						: ''
+							? preCheckResult.stderr
+							: ''
 
 				this.logger.silly(handle.source + ' sourceStr ' + sourceStr)
 
@@ -755,7 +760,8 @@ class MediaConversionOperation {
 					executable,
 					args,
 					() => resolve({ stdout, stderr }), // On Done
-					(err) => reject(err), // On Error
+					(err) =>
+						reject(new Error(`PreCheck process error: ${err?.message || String(err)}`, { cause: err })), // On Error
 					noop // on Progress
 					// ,this.logger.silly
 				)
@@ -978,12 +984,14 @@ class MediaConversionOperation {
 
 							resolve()
 						} catch (err) {
-							reject(err)
+							reject(
+								new Error(`Conversion process output processing error: ${String(err)}`, { cause: err })
+							)
 						}
 					},
 					(err) => {
 						// On Error
-						reject(err)
+						reject(new Error(`Conversion process error: ${String(err)}`, { cause: err }))
 					},
 					(progress: number) => {
 						// On Progress

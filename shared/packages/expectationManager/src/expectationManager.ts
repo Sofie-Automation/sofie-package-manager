@@ -1,27 +1,28 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import {
+	AppId,
 	ClientConnectionOptions,
 	Expectation,
+	ExpectationId,
+	ExpectationManagerId,
 	ExpectationManagerWorkerAgent,
+	ExpectedPackageId,
+	Hook,
 	LoggerInstance,
+	mapToObject,
 	PackageContainerExpectation,
+	PackageContainerId,
 	Reason,
 	Statuses,
-	Hook,
-	WorkForceExpectationManager,
-	ExpectationManagerId,
-	PackageContainerId,
-	ExpectationId,
-	ExpectedPackageId,
-	AppId,
-	WorkerAgentId,
-	mapToObject,
-	URLMap,
 	stringifyError,
+	URLMap,
+	WorkerAgentId,
+	WorkForceExpectationManager,
 } from '@sofie-package-manager/api'
-import { InternalManager } from './internalManager/internalManager'
-import { ExpectationTrackerConstants } from './lib/constants'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { InternalManager } from './internalManager/internalManager.js'
+import { ExpectationTrackerConstants } from './lib/constants.js'
 
 /**
  * The Expectation Manager is responsible for tracking the state of the Expectations,
@@ -132,7 +133,7 @@ export class ExpectationManager {
 			trackedExpectations,
 			workers: await Promise.all(
 				this.internalManager.workerAgents.list().map(async (worker) => {
-					let config = undefined
+					let config
 					try {
 						config = await worker.workerAgent.api.getConfiguration()
 					} catch (err) {

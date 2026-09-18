@@ -1,9 +1,11 @@
-import { StatusCode as SofieStatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
-import { PackageContainerId, ExpectedPackageId, AccessorId } from './ids'
-/* eslint-disable node/no-missing-import */
 import type { MediaRamRecRef, MediaStillRef } from 'kairos-lib'
 
-// import { assertTrue, EnumExtends, assertEnumValuesExtends } from './lib'
+import { StatusCode as SofieStatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
+import { ExpectedPackage as ExpectedPackageOrg } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { AccessorId, ExpectedPackageId, PackageContainerId } from './ids.js'
+
+// import { assertTrue, EnumExtends, assertEnumValuesExtends } from './lib.js'
 /* eslint-disable @typescript-eslint/no-namespace */
 
 /*
@@ -27,24 +29,12 @@ export const StatusCode = SofieStatusCode
  *   will fetch from a MAM and copy to the media-folder of CasparCG.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ExpectedPackage {
 	export type Any =
-		| ExpectedPackageMediaFile
-		| ExpectedPackageQuantelClip
-		| ExpectedPackageJSONData
-		| ExpectedPackageHtmlTemplate
+		ExpectedPackageMediaFile | ExpectedPackageQuantelClip | ExpectedPackageJSONData | ExpectedPackageHtmlTemplate
 
-	export enum PackageType {
-		MEDIA_FILE = 'media_file',
-		QUANTEL_CLIP = 'quantel_clip',
-		JSON_DATA = 'json_data',
-		HTML_TEMPLATE = 'html_template',
-
-		// TALLY_LABEL = 'tally_label'
-
-		// VIZ_GFX = 'viz_gfx'
-	}
+	export type PackageType = ExpectedPackageOrg.PackageType
+	export const PackageType = ExpectedPackageOrg.PackageType
 
 	/** Generic (used in extends) */
 	export interface Base {
@@ -151,7 +141,7 @@ export namespace ExpectedPackage {
 	}
 
 	export interface ExpectedPackageMediaFile extends Base {
-		type: PackageType.MEDIA_FILE
+		type: ExpectedPackageOrg.PackageType.MEDIA_FILE
 		content: {
 			/** Local file path on the package container */
 			filePath: string
@@ -263,7 +253,7 @@ export namespace ExpectedPackage {
 		}[]
 	}
 	export interface ExpectedPackageQuantelClip extends Base {
-		type: PackageType.QUANTEL_CLIP
+		type: ExpectedPackageOrg.PackageType.QUANTEL_CLIP
 		content:
 			| {
 					guid: string
@@ -286,7 +276,7 @@ export namespace ExpectedPackage {
 	}
 
 	export interface ExpectedPackageJSONData extends Base {
-		type: PackageType.JSON_DATA
+		type: ExpectedPackageOrg.PackageType.JSON_DATA
 		content: {
 			/** Local path on the package container */
 			path: string
@@ -304,7 +294,7 @@ export namespace ExpectedPackage {
 		}[]
 	}
 	export interface ExpectedPackageHtmlTemplate extends Base {
-		type: PackageType.HTML_TEMPLATE
+		type: ExpectedPackageOrg.PackageType.HTML_TEMPLATE
 		content: {
 			/** path to the HTML template */
 			path: string
@@ -408,7 +398,7 @@ export interface PackageContainer {
 /** Defines different ways of accessing a PackageContainer.
  * For example, a local folder on a computer might be accessed through a LocalFolder and a FileShare
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace Accessor {
 	export type Any =
 		| LocalFolder
@@ -618,7 +608,7 @@ export namespace Accessor {
  * AccessorOnPackage contains interfaces for Accessor definitions that are put ON the Package.
  * The info is then (optionally) combined with the Accessor data
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace AccessorOnPackage {
 	export type Any =
 		| LocalFolder
@@ -652,7 +642,8 @@ export namespace AccessorOnPackage {
 		guid?: string
 		title?: string
 	}
-	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
+	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	export interface CorePackageCollection extends Partial<Accessor.CorePackageCollection> {
 		// empty
 	}

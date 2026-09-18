@@ -1,5 +1,5 @@
 import { protectString, LoggerInstance, ProcessConfig } from '@sofie-package-manager/api'
-import { BaseWorker } from '../../worker'
+import { BaseWorker } from '../../worker.js'
 
 const defaultProcessConfig: ProcessConfig = {
 	logPath: undefined,

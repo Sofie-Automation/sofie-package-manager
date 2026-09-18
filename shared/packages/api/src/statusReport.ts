@@ -1,16 +1,16 @@
 import {
 	AppContainerId,
 	AppType,
-	PackageContainerId,
 	ExpectationId,
 	ExpectationManagerId,
 	MonitorId,
-	WorkInProgressId,
+	PackageContainerId,
 	WorkerAgentId,
+	WorkInProgressId,
 	WorkInProgressLocalId,
-} from './ids'
-import { URLMap } from './methods'
-import { Cost } from './worker'
+} from './ids.js'
+import { URLMap } from './methods.js'
+import { Cost } from './worker.js'
 
 export interface WorkforceStatusReport {
 	workerAgents: WorkerStatusReport[]

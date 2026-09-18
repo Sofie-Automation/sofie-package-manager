@@ -1,11 +1,11 @@
 import {
 	getWorkerConfig,
+	HealthEndpoints,
+	initializeLogger,
 	ProcessHandler,
 	setupLogger,
-	initializeLogger,
-	stringifyError,
-	HealthEndpoints,
 	StatusCode,
+	stringifyError,
 } from '@sofie-package-manager/api'
 import { WorkerAgent } from '@sofie-package-manager/worker'
 

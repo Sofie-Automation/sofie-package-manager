@@ -9,10 +9,10 @@ import {
 	WebsocketServer,
 	WorkerAgentId,
 } from '@sofie-package-manager/api'
-import { ExpectationManagerServerOptions } from '../../expectationManager'
-import { WorkerAgentAPI } from '../../workerAgentApi'
 
-import { InternalManager } from '../internalManager'
+import { ExpectationManagerServerOptions } from '../../expectationManager.js'
+import { WorkerAgentAPI } from '../../workerAgentApi.js'
+import { InternalManager } from '../internalManager.js'
 
 /**  */
 export class ExpectationManagerServer {

@@ -1,15 +1,13 @@
-import fs from 'fs'
 import EventEmitter from 'events'
-import { promisify } from 'util'
+import fs from 'fs'
 import path from 'path'
-
-/* eslint-disable no-console */
+import { promisify } from 'util'
 
 const fsCopyFile = promisify(fs.copyFile)
 const fsMkdir = promisify(fs.mkdir)
 const fsStat = promisify(fs.stat)
 
-const child_process: any = jest.createMockFromModule('child_process')
+const child_process: any = {}
 
 const mappedDriveLetters: {
 	[driveLetter: string]: string // path
@@ -27,11 +25,11 @@ async function pExec(commandString: string, _options: any): Promise<{ stdout: st
 		throw new Error(`Mock child_process.exec: command not implemented: "${commandString}"`)
 	}
 }
-function exec(
+const exec = (
 	commandString: string,
 	options?: any,
 	cb?: (error: any | null, result: { stdout: string; stderr: string } | null) => void
-): void {
+): void => {
 	if (typeof options === 'function' && cb === undefined) {
 		cb = options
 		options = {}
@@ -41,7 +39,7 @@ function exec(
 		.catch((err) => cb?.(err, null))
 }
 child_process.exec = exec
-function spawn(command: string, args: string[] = []) {
+const spawn = (command: string, args: string[] = []) => {
 	const spawned = new SpawnedProcess()
 	if (command === 'robocopy') {
 		setImmediate(() => {
@@ -69,12 +67,20 @@ function spawn(command: string, args: string[] = []) {
 		})
 	} else if (command === 'taskkill') {
 		// mock killing a task?
+	} else if (command.includes('yarn')) {
+		setImmediate(() => {
+			spawned.stdout.emit('data', Buffer.from('Version: 1.0.0\n'))
+			spawned.emit('exit', 0)
+			spawned.emit('close', 0)
+		})
 	} else {
 		throw new Error(`Mock child_process.spawn: command not implemented: "${command}"`)
 	}
 	return spawned
 }
 child_process.spawn = spawn
+
+export { exec, spawn }
 
 class SpawnedProcess extends EventEmitter {
 	public stdout = new EventEmitter()
@@ -278,4 +284,4 @@ async function netUse(commandString: string): Promise<{ stdout: string; stderr: 
 	}
 }
 
-module.exports = child_process
+export default child_process

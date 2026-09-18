@@ -1,24 +1,4 @@
-import {
-	GenericAccessorHandle,
-	PackageReadInfo,
-	PackageReadStream,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
-	AccessorHandlerCheckHandleReadResult,
-	AccessorHandlerCheckHandleWriteResult,
-	AccessorHandlerCheckPackageContainerWriteAccessResult,
-	AccessorHandlerCheckPackageReadAccessResult,
-	AccessorHandlerTryPackageReadResult,
-	AccessorHandlerRunCronJobResult,
-	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import { Expectation, Accessor, AccessorOnPackage } from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { UniversalVersion } from '../workers/genericWorker/lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
+import { Accessor, AccessorOnPackage, Expectation } from '@sofie-package-manager/api'
 import {
 	assertNever,
 	KairosConnection,
@@ -27,8 +7,28 @@ import {
 	MediaStatus,
 	MediaStillRef,
 	refToPath,
-	// eslint-disable-next-line node/no-missing-import
 } from 'kairos-connection'
+
+import { BaseWorker } from '../worker.js'
+import { UniversalVersion } from '../workers/genericWorker/lib/lib.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
+	AccessorHandlerCheckHandleReadResult,
+	AccessorHandlerCheckHandleWriteResult,
+	AccessorHandlerCheckPackageContainerWriteAccessResult,
+	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
+	AccessorHandlerTryPackageReadResult,
+	GenericAccessorHandle,
+	PackageOperation,
+	PackageReadInfo,
+	PackageReadStream,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 export interface Content {
 	/** This is set when the class-instance is only going to be used for PackageContainer access.*/
@@ -153,7 +153,7 @@ export class KairosClipAccessorHandle<Metadata> extends GenericAccessorHandle<Me
 		const ref = this.ref
 
 		// Check that the clip exists:
-		let media: MediaObject | undefined = undefined
+		let media: MediaObject | undefined
 		if (ref.realm === 'media-ramrec') {
 			media = await kairos.getMediaRamRec(ref)
 		} else if (ref.realm === 'media-still') {

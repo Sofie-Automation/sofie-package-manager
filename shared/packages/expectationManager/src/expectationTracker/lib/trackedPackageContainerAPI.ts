@@ -1,8 +1,9 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { deepEqual, MonitorId, Reason, StatusCode, unprotectString } from '@sofie-package-manager/api'
-import { TrackedPackageContainerExpectation } from '../../lib/trackedPackageContainerExpectation'
-import { ExpectationTracker } from '../expectationTracker'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { TrackedPackageContainerExpectation } from '../../lib/trackedPackageContainerExpectation.js'
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /** Various methods related to TrackedPackageContainer */
 export class TrackedPackageContainerAPI {

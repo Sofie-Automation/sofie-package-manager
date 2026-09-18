@@ -1,16 +1,16 @@
+import Configstore from 'configstore'
+
 import { CoreCredentials, PeripheralDeviceId, protectString } from '@sofie-automation/server-core-integration'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const DataStore = require('data-store')
-
 /**
- * @deprecated This is a copy of the old method provided by server-core-integration.
- * 'data-store' is not maintained, so should be replaced with something better soon
+ * @deprecated This is a modified copy of the old method provided by server-core-integration.
+ * This used to use data-store, but data-store was replaced with configstore for ESM compatibility.
+ * The question if this should be kept is open.
  */
 export function getCredentials(name: string): CoreCredentials {
-	const store = new DataStore(name)
+	const store = new Configstore(name)
 
-	let credentials: CoreCredentials = store.get('CoreCredentials')
+	let credentials: CoreCredentials | undefined = store.get('CoreCredentials')
 	if (!credentials) {
 		credentials = {
 			deviceId: protectString<PeripheralDeviceId>(randomString()),

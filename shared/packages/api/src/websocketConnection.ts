@@ -1,10 +1,10 @@
 import WebSocket from 'ws'
-import { HelpfulEventEmitter } from './HelpfulEventEmitter'
-import { isRunningInTest, stringifyError } from './lib'
 
-import { AppContainerId, ExpectationManagerId, WorkerAgentId, WorkforceId } from './ids'
-import { MethodsInterfaceBase } from './methods'
-import { ProtectedString } from './ProtectedString'
+import { HelpfulEventEmitter } from './HelpfulEventEmitter.js'
+import { AppContainerId, ExpectationManagerId, WorkerAgentId, WorkforceId } from './ids.js'
+import { isRunningInTest, stringifyError } from './lib.js'
+import { MethodsInterfaceBase } from './methods.js'
+import { ProtectedString } from './ProtectedString.js'
 
 export const PING_TIME = 10 * 1000
 /**

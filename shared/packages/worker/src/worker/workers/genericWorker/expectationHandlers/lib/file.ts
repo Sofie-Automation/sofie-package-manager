@@ -1,15 +1,15 @@
-import { BaseWorker } from '../../../../worker'
-import { roboCopyFile } from '../../lib/robocopy'
-import { UniversalVersion, compareUniversalVersions, makeUniversalVersion, compareResourceIds } from '../../lib/lib'
 import {
 	Accessor,
-	hashObj,
-	waitTime,
 	Expectation,
+	hashObj,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	startTimer,
+	stringifyError,
+	waitTime,
 } from '@sofie-package-manager/api'
+import { diff } from 'datum-diff'
+
 import {
 	isATEMAccessorHandle,
 	isFileShareAccessorHandle,
@@ -19,14 +19,16 @@ import {
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../../accessorHandlers/accessor'
-import { ByteCounter } from '../../../../lib/streamByteCounter'
-import { WorkInProgress } from '../../../../lib/workInProgress'
-import { LookupPackageContainer, userReadableDiff } from '../lib'
-import { CancelablePromise } from '../../../../lib/cancelablePromise'
-import { PackageReadStream, PutPackageHandler } from '../../../../accessorHandlers/genericHandle'
-import { diff } from 'deep-diff'
-import { quantelFileFlowCopy } from '../../lib/quantelFileflow'
+} from '../../../../accessorHandlers/accessor.js'
+import { PackageReadStream, PutPackageHandler } from '../../../../accessorHandlers/genericHandle.js'
+import { CancelablePromise } from '../../../../lib/cancelablePromise.js'
+import { ByteCounter } from '../../../../lib/streamByteCounter.js'
+import { WorkInProgress } from '../../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../../worker.js'
+import { compareResourceIds, compareUniversalVersions, makeUniversalVersion, UniversalVersion } from '../../lib/lib.js'
+import { quantelFileFlowCopy } from '../../lib/quantelFileflow.js'
+import { roboCopyFile } from '../../lib/robocopy.js'
+import { LookupPackageContainer, userReadableDiff } from '../lib.js'
 
 export async function isFileReadyToStartWorkingOn(
 	worker: BaseWorker,
@@ -294,7 +296,13 @@ export async function doFileCopyExpectation(
 					targetHandle
 						.removePackage('Copy file, using streams, cancelled')
 						.then(() => resolve())
-						.catch((err) => reject(err))
+						.catch((err) =>
+							reject(
+								new Error(`Failed to remove package: ${stringifyError(err)}`, {
+									cause: err,
+								})
+							)
+						)
 				})
 				sourceStream?.cancel()
 				writeStream?.abort()

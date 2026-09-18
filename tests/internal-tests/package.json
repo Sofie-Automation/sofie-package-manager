@@ -1,12 +1,13 @@
 {
 	"name": "@tests/internal-tests",
 	"version": "1.53.0",
+	"type": "module",
 	"description": "Internal tests",
 	"private": true,
 	"scripts": {
 		"__build": "run -T rimraf dist && yarn build:main",
 		"build:main": "tsc -p tsconfig.json",
-		"test": "jest --runInBand --forceExit"
+		"test": "vitest run --fileParallelism=false"
 	},
 	"peerDependencies": {
 		"@sofie-automation/server-core-integration": "*",
@@ -15,8 +16,8 @@
 	},
 	"devDependencies": {
 		"deep-extend": "^0.6.0",
-		"jest": "^30.3.0",
-		"tv-automation-quantel-gateway-client": "^4.0.0"
+		"tv-automation-quantel-gateway-client": "^4.0.0",
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
 		"@http-server/generic": "1.53.0",
@@ -28,7 +29,7 @@
 		"underscore": "^1.13.8",
 		"windows-network-drive": "^4.0.1"
 	},
-	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+	"prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
 	"engines": {
 		"node": ">=24"
 	},

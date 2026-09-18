@@ -1,24 +1,29 @@
-import { BaseWorker } from '../../../worker'
-import { UniversalVersion, getStandardCost } from '../lib/lib'
 import {
 	Accessor,
+	AccessorId,
 	AccessorOnPackage,
-	PackageContainerOnPackage,
 	Expectation,
+	KnownReason,
+	PackageContainerOnPackage,
+	Reason,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	Reason,
 	stringifyError,
-	AccessorId,
-	KnownReason,
 } from '@sofie-package-manager/api'
-import { IWorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { doFileCopyExpectation, isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file'
-import { ExpectationHandlerGenericWorker } from '../genericWorker'
+
+import { IWorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker } from '../genericWorker.js'
+import { getStandardCost, UniversalVersion } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
+import { doFileCopyExpectation, isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file.js'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer

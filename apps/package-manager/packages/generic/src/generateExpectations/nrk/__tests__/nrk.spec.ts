@@ -1,3 +1,5 @@
+import { describe, expect, vi, test } from 'vitest'
+
 import {
 	Accessor,
 	AccessorId,
@@ -15,11 +17,11 @@ import {
 import {
 	PackageManagerActivePlaylist,
 	PackageManagerActiveRundown,
-	// eslint-disable-next-line node/no-extraneous-import
+
 } from '@sofie-automation/shared-lib/dist/package-manager/publications'
 import * as NRK from '..'
-import { ExpectedPackageWrap, PackageContainers, wrapExpectedPackage } from '../../../packageManager'
-import { PackageManagerSettings } from '../../../generated/options'
+import { ExpectedPackageWrap, PackageContainers, wrapExpectedPackage } from '../../../packageManager.js'
+import { PackageManagerSettings } from '../../../generated/options.js'
 import * as Core from '@sofie-automation/server-core-integration'
 
 describe('Generate expectations - NRK', () => {
@@ -194,17 +196,17 @@ describe('Generate expectations - NRK', () => {
 })
 function setup() {
 	const logger = {
-		error: jest.fn((...args) => console.log(...args)),
-		warn: jest.fn((...args) => console.log(...args)),
-		help: jest.fn((...args) => console.log(...args)),
-		data: jest.fn((...args) => console.log(...args)),
-		info: jest.fn((...args) => console.log(...args)),
-		debug: jest.fn((...args) => console.log(...args)),
-		prompt: jest.fn((...args) => console.log(...args)),
-		http: jest.fn((...args) => console.log(...args)),
-		verbose: jest.fn((...args) => console.log(...args)),
-		input: jest.fn((...args) => console.log(...args)),
-		silly: jest.fn((...args) => console.log(...args)),
+		error: vi.fn((...args) => console.log(...args)),
+		warn: vi.fn((...args) => console.log(...args)),
+		help: vi.fn((...args) => console.log(...args)),
+		data: vi.fn((...args) => console.log(...args)),
+		info: vi.fn((...args) => console.log(...args)),
+		debug: vi.fn((...args) => console.log(...args)),
+		prompt: vi.fn((...args) => console.log(...args)),
+		http: vi.fn((...args) => console.log(...args)),
+		verbose: vi.fn((...args) => console.log(...args)),
+		input: vi.fn((...args) => console.log(...args)),
+		silly: vi.fn((...args) => console.log(...args)),
 	} as any as LoggerInstance
 	const managerId = 'mockManager'
 	// const packageContainers: PackageContainers,

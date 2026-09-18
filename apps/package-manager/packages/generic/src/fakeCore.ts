@@ -1,7 +1,7 @@
-/* eslint-disable node/no-extraneous-import */
+import { LoggerInstance } from '@sofie-package-manager/api'
+
 import { ExternalPeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { ExpectedPackageId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
-import { LoggerInstance } from '@sofie-package-manager/api'
 
 /** A fake version of some of the Core APIs, used in troubleshooting */
 export class FakeCore {

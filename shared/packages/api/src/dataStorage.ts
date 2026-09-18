@@ -1,5 +1,5 @@
-import { ProtectedString, protectString } from './ProtectedString'
-import { LoggerInstance } from './logger'
+import { LoggerInstance } from './logger.js'
+import { ProtectedString, protectString } from './ProtectedString.js'
 
 /**
  * The DataStore is a simple key-value store, with support for access locks
@@ -36,7 +36,10 @@ export class DataStore {
 
 	private terminated = false
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private _timeoutTime = 1000) {
+	constructor(
+		logger: LoggerInstance,
+		private _timeoutTime = 1000
+	) {
 		this.logger = logger.category('DataStore')
 	}
 	terminate(): void {

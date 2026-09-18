@@ -1,7 +1,9 @@
+import { describe, expect, vi, it } from 'vitest'
+
 import { tmpdir } from 'os'
 import path from 'path'
 import { stat as fsStat, unlink as fsUnlink } from 'fs/promises'
-import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
+import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder.js'
 import {
 	FFProbeScanResult,
 	scanFieldOrder,
@@ -9,27 +11,19 @@ import {
 	scanMoreInfo,
 	ScanMoreInfoResult,
 	scanWithFFProbe,
-} from '../lib/scan'
-import { mock } from 'jest-mock-extended'
+} from '../lib/scan.js'
 import { ExecutableAliasSource, Expectation, literal, LoggerInstance } from '@sofie-package-manager/api'
-import { LoudnessScanResult } from '../lib/coreApi'
-import { previewFFMpegArguments, thumbnailFFMpegArguments } from '../lib'
-import { callSpawnFFmpeg, runForEachFFMpegRelease, SamplesDir } from '../../../../../__tests__/ffmpegHelper'
+import { LoudnessScanResult } from '../lib/coreApi.js'
+import { previewFFMpegArguments, thumbnailFFMpegArguments } from '../lib.js'
+import { callSpawnFFmpeg, runForEachFFMpegRelease, SamplesDir } from '../../../../../__tests__/ffmpegHelper.js'
 
 function createLocalFolderAccessorHandleMock(fullPath: string): LocalFolderAccessorHandle<any> {
-	return mock<LocalFolderAccessorHandle<any>>(
-		{
-			type: LocalFolderAccessorHandle.type,
-			fullPath: fullPath,
-			filePath: path.basename(fullPath),
-			getResolvedFullPath: async () => fullPath,
-		},
-		{
-			fallbackMockImplementation: () => {
-				throw new Error('Not mocked')
-			},
-		}
-	)
+	return {
+		type: LocalFolderAccessorHandle.type,
+		fullPath: fullPath,
+		filePath: path.basename(fullPath),
+		getResolvedFullPath: async () => fullPath,
+	} as any
 }
 
 runForEachFFMpegRelease(() => {
@@ -89,7 +83,7 @@ runForEachFFMpegRelease(() => {
 			}
 
 			const fakeFFProbeScanResult = null as any as FFProbeScanResult // This is not used
-			const onProgress = jest.fn()
+			const onProgress = vi.fn()
 
 			const loudness = await scanLoudness(
 				aliasSource,
@@ -122,7 +116,7 @@ runForEachFFMpegRelease(() => {
 		})
 
 		it('scan more', async () => {
-			const onProgress = jest.fn()
+			const onProgress = vi.fn()
 
 			const targetVersion: Expectation.PackageDeepScan['endRequirement']['version'] = {
 				scenes: true,
@@ -130,7 +124,19 @@ runForEachFFMpegRelease(() => {
 				blackDetection: true,
 			}
 
-			const logger = mock<LoggerInstance>()
+			const logger = {
+				error: vi.fn((...args) => console.log(...args)),
+				warn: vi.fn((...args) => console.log(...args)),
+				help: vi.fn((...args) => console.log(...args)),
+				data: vi.fn((...args) => console.log(...args)),
+				info: vi.fn((...args) => console.log(...args)),
+				debug: vi.fn((...args) => console.log(...args)),
+				prompt: vi.fn((...args) => console.log(...args)),
+				http: vi.fn((...args) => console.log(...args)),
+				verbose: vi.fn((...args) => console.log(...args)),
+				input: vi.fn((...args) => console.log(...args)),
+				silly: vi.fn((...args) => console.log(...args)),
+			} as any as LoggerInstance
 
 			const probeResult = await scanWithFFProbe(aliasSource, fileHandleMock)
 			const scanInfo = await scanMoreInfo(

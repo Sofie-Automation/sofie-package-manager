@@ -1,33 +1,34 @@
 import {
-	GenericAccessorHandle,
-	PackageReadInfo,
-	PackageReadStream,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
-	AccessorHandlerRunCronJobResult,
+	Accessor,
+	AccessorOnPackage,
+	assertNever,
+	Expectation,
+	MonitorId,
+	PackageContainerExpectation,
+	rebaseUrl,
+} from '@sofie-package-manager/api'
+
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
 	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
 	AccessorHandlerTryPackageReadResult,
+	GenericAccessorHandle,
 	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	PackageContainerExpectation,
-	assertNever,
-	MonitorId,
-	rebaseUrl,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { fetchWithController } from './lib/fetch'
-import { MonitorInProgress } from '../lib/monitorInProgress'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
+	PackageReadInfo,
+	PackageReadStream,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { fetchWithController } from './lib/fetch.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 /**
  * Accessor handle for accessing files at an HTTP endpoint

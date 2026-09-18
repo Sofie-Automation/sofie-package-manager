@@ -1,8 +1,9 @@
-import fetch, { Response, RequestInit } from 'node-fetch'
+import { Agent as HTTPAgent } from 'node:http'
+import { Agent as HTTPSAgent } from 'node:https'
+import { URL } from 'node:url'
+
 import { INNER_ACTION_TIMEOUT } from '@sofie-package-manager/api'
-import { Agent as HTTPAgent } from 'http'
-import { Agent as HTTPSAgent } from 'https'
-import { URL } from 'url'
+import fetch, { RequestInit, Response } from 'node-fetch'
 
 const MAX_FREE_SOCKETS = 5
 const MAX_SOCKETS_PER_HOST = 5
@@ -95,7 +96,7 @@ export function fetchWithController(
 				})
 			}
 
-			const headers = options?.headers ?? ({} as Record<string, string>)
+			const headers = options?.headers ?? {}
 			headers['Connection'] = 'keep-alive'
 			headers['Keep-Alive'] = `timeout=${Math.ceil(HTTP_KEEP_ALIVE / 1000)}`
 
@@ -124,7 +125,7 @@ export function fetchWithController(
 		controller,
 	}
 }
-function handleError(err: unknown, orgStack: string | undefined, url: string, method?: string) {
+function handleError(err: unknown, orgStack: string | undefined, url: string, method?: string): Error {
 	// Improve errors with the url and method info, and make sure the stack trace is preserved:
 	if (err instanceof Error) {
 		err.message = `Error when fetching ${method ?? ''} "${url}": ${err.message}`
@@ -137,6 +138,8 @@ function handleError(err: unknown, orgStack: string | undefined, url: string, me
 		err.stack = `${err.name}: ${err.message}\n${stackLines.join('\n')}`
 		return err
 	} else {
-		return err
+		return new Error(`Error when fetching ${method ?? ''} "${url}": ${String(err)}`, {
+			cause: err,
+		})
 	}
 }

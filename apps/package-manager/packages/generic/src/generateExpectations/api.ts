@@ -1,5 +1,3 @@
-import { ExpectedPackageWrap, PackageContainers } from '../packageManager'
-import { PackageManagerSettings } from '../generated/options'
 import {
 	Expectation,
 	ExpectationId,
@@ -8,11 +6,14 @@ import {
 	PackageContainerExpectation,
 	PackageContainerId,
 } from '@sofie-package-manager/api'
+
 import {
 	PackageManagerActivePlaylist,
 	PackageManagerActiveRundown,
-	// eslint-disable-next-line node/no-extraneous-import
 } from '@sofie-automation/shared-lib/dist/package-manager/publications'
+
+import { PackageManagerSettings } from '../generated/options.js'
+import { ExpectedPackageWrap, PackageContainers } from '../packageManager.js'
 
 export interface GenerateExpectationApi {
 	getExpectations: (

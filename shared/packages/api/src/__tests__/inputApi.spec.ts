@@ -1,4 +1,5 @@
-import { Accessor } from '../inputApi'
+import { describe, expect, test } from 'vitest'
+import { Accessor } from '../inputApi.js'
 
 describe('inputApi', () => {
 	test('checkAssertions', () => {

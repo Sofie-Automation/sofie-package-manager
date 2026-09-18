@@ -1,5 +1,5 @@
-import { PackageContainerId, ExpectationManagerId } from './ids'
-import { PackageContainer } from './inputApi'
+import { ExpectationManagerId, PackageContainerId } from './ids.js'
+import { PackageContainer } from './inputApi.js'
 
 /*
  * This file contains definitions for Package Container Expectations, an internal data structure upon which the Package Manager operates.

@@ -1,4 +1,8 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
 import {
+	assertNever,
 	Expectation,
 	ExpectationManagerWorkerAgent,
 	LoggerInstance,
@@ -10,34 +14,31 @@ import {
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
 	ReturnTypeRunPackageContainerCronJob,
-	assertNever,
 	stringifyError,
 } from '@sofie-package-manager/api'
-import { BaseWorker, GenericWorkerAgentAPI } from '../../worker'
-import fs from 'fs'
-import { FileCopy } from './expectationHandlers/fileCopy'
-import { FileCopyProxy } from './expectationHandlers/fileCopyProxy'
-import { PackageScan } from './expectationHandlers/packageScan'
-import { PackageDeepScan } from './expectationHandlers/packageDeepScan'
-import { PackageLoudnessScan } from './expectationHandlers/packageLoudnessScan'
-import { MediaFileThumbnail } from './expectationHandlers/mediaFileThumbnail'
-import { ExpectationHandler } from '../../lib/expectationHandler'
-import { IWorkInProgress } from '../../lib/workInProgress'
-import { MediaFilePreview } from './expectationHandlers/mediaFilePreview'
-import { QuantelClipCopy } from './expectationHandlers/quantelClipCopy'
-import * as PackageContainerExpHandler from './packageContainerExpectationHandler'
-import { QuantelClipPreview } from './expectationHandlers/quantelClipPreview'
-import { QuantelThumbnail } from './expectationHandlers/quantelClipThumbnail'
 
-import { JsonDataCopy } from './expectationHandlers/jsonDataCopy'
-import { SetupPackageContainerMonitorsResult } from '../../accessorHandlers/genericHandle'
-import { FileVerify } from './expectationHandlers/fileVerify'
-import { RenderHTML } from './expectationHandlers/renderHTML'
-import { PackageIframesScan } from './expectationHandlers/packageIframesScan'
-import { ExecutableDependencyHandler } from './lib/executableDependencyHandler'
-import { MediaFileConvert } from './expectationHandlers/mediaFileConvert'
-import path from 'path'
-import { KairosLoadToRam } from './expectationHandlers/kairosLoadToRam'
+import { SetupPackageContainerMonitorsResult } from '../../accessorHandlers/genericHandle.js'
+import { ExpectationHandler } from '../../lib/expectationHandler.js'
+import { IWorkInProgress } from '../../lib/workInProgress.js'
+import { BaseWorker, GenericWorkerAgentAPI } from '../../worker.js'
+import { FileCopy } from './expectationHandlers/fileCopy.js'
+import { FileCopyProxy } from './expectationHandlers/fileCopyProxy.js'
+import { FileVerify } from './expectationHandlers/fileVerify.js'
+import { JsonDataCopy } from './expectationHandlers/jsonDataCopy.js'
+import { KairosLoadToRam } from './expectationHandlers/kairosLoadToRam.js'
+import { MediaFileConvert } from './expectationHandlers/mediaFileConvert.js'
+import { MediaFilePreview } from './expectationHandlers/mediaFilePreview.js'
+import { MediaFileThumbnail } from './expectationHandlers/mediaFileThumbnail.js'
+import { PackageDeepScan } from './expectationHandlers/packageDeepScan.js'
+import { PackageIframesScan } from './expectationHandlers/packageIframesScan.js'
+import { PackageLoudnessScan } from './expectationHandlers/packageLoudnessScan.js'
+import { PackageScan } from './expectationHandlers/packageScan.js'
+import { QuantelClipCopy } from './expectationHandlers/quantelClipCopy.js'
+import { QuantelClipPreview } from './expectationHandlers/quantelClipPreview.js'
+import { QuantelThumbnail } from './expectationHandlers/quantelClipThumbnail.js'
+import { RenderHTML } from './expectationHandlers/renderHTML.js'
+import { ExecutableDependencyHandler } from './lib/executableDependencyHandler.js'
+import * as PackageContainerExpHandler from './packageContainerExpectationHandler.js'
 
 export type ExpectationHandlerGenericWorker = ExpectationHandler<GenericWorker>
 
@@ -65,11 +66,14 @@ export class GenericWorker extends BaseWorker {
 	}
 	async init(): Promise<void> {
 		await this.executables.checkExecutables()
-		this.monitorExecutables = setInterval(() => {
-			this.executables.checkExecutables().catch((err) => {
-				this.logger.error(`Error in checkExecutables: ${stringifyError(err)}`)
-			})
-		}, 1000 * 60 * 5) // Check every 5 minutes
+		this.monitorExecutables = setInterval(
+			() => {
+				this.executables.checkExecutables().catch((err) => {
+					this.logger.error(`Error in checkExecutables: ${stringifyError(err)}`)
+				})
+			},
+			1000 * 60 * 5
+		) // Check every 5 minutes
 		this.logger.debug(`Worker initialized`)
 	}
 	terminate(): void {

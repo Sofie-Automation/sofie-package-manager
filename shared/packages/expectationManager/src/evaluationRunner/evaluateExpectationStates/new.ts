@@ -1,6 +1,6 @@
-// eslint-disable-next-line node/no-extraneous-import
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { assertState, EvaluateContext } from '../lib'
+
+import { assertState, EvaluateContext } from '../lib.js'
 
 /**
  * Evaluate a TrackedExpectation which is in the NEW state.
@@ -15,9 +15,8 @@ export async function evaluateExpectationStateNew({ manager, tracker, trackedExp
 	// Reset properties:
 	trackedExp.status = {}
 
-	const { hasQueriedAnyone, workerCount } = await manager.workerAgents.updateAvailableWorkersForExpectation(
-		trackedExp
-	)
+	const { hasQueriedAnyone, workerCount } =
+		await manager.workerAgents.updateAvailableWorkersForExpectation(trackedExp)
 
 	const availableWorkersCount = trackedExp.availableWorkers.size
 	if (availableWorkersCount > 0) {

@@ -1,14 +1,25 @@
-jest.mock('child_process')
-jest.mock('../workforceApi.ts')
-jest.mock('../workerAgentApi.ts')
+import { describe, expect, vi, afterEach, beforeAll, it } from 'vitest'
 
-import { getWorkerCount, prepareTestEnviromnent, resetMocks, setupAppContainer, setupWorkers } from './lib/setupEnv'
+vi.mock('child_process', async () => {
+	const mock = await import('../__mocks__/child_process.ts')
+	return mock
+})
+vi.mock('../workforceApi.ts', async () => {
+	const mock = await import('../__mocks__/workforceApi.ts')
+	return mock
+})
+vi.mock('../workerAgentApi.ts', async () => {
+	const mock = await import('../__mocks__/workerAgentApi.ts')
+	return mock
+})
+
+import { getWorkerCount, prepareTestEnviromnent, resetMocks, setupAppContainer, setupWorkers } from './lib/setupEnv.js'
 import { sleep } from '@sofie-automation/server-core-integration'
-import { WorkerAgentAPI } from '../workerAgentApi'
+import { WorkerAgentAPI } from '../workerAgentApi.js'
 
-jest.setTimeout(10000)
-
-describe('Critical worker Apps', () => {
+describe('Critical worker Apps', {
+	timeout: 10_000
+}, () => {
 	beforeAll(async () => {
 		await prepareTestEnviromnent(false)
 	})

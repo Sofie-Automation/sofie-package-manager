@@ -1,6 +1,8 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import { ffmpegInterpretProgress } from './ffmpeg'
+
 import { stringifyError } from '@sofie-package-manager/api'
+
+import { ffmpegInterpretProgress } from './ffmpeg.js'
 
 export interface SpawnedProcess {
 	execProcess: ChildProcessWithoutNullStreams
@@ -41,7 +43,7 @@ export function spawnProcess(
 			}
 
 			execProcess?.kill()
-		} catch (e) {
+		} catch {
 			// This is probably OK, errors likely means that the process is already dead
 		}
 		execProcess = undefined

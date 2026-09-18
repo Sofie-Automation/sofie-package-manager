@@ -1,58 +1,58 @@
 import {
-	StatusCode,
+	APPCONTAINER_PING_TIME,
+	AppContainerWorkerAgent,
+	assertNever,
 	ClientConnectionOptions,
+	Cost,
+	DataId,
+	deepEqual,
+	deferGets,
 	Expectation,
+	ExpectationManagerId,
 	ExpectationManagerWorkerAgent,
+	Hook,
+	INNER_ACTION_TIMEOUT,
+	isProtectedString,
+	KnownReason,
+	literal,
+	LoggerInstance,
+	LogLevel,
+	MetricsGauge,
+	MonitorId,
+	MonitorProperties,
+	objectEntries,
+	PackageContainerExpectation,
+	PackageContainerId,
+	promiseTimeout,
+	protectString,
+	Reason,
+	ReturnTypeDisposePackageContainerMonitors,
 	ReturnTypeDoYouSupportExpectation,
+	ReturnTypeDoYouSupportPackageContainer,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	WorkForceWorkerAgent,
-	Hook,
-	LoggerInstance,
-	WorkerConfig,
-	literal,
-	PackageContainerExpectation,
-	ReturnTypeDoYouSupportPackageContainer,
 	ReturnTypeRunPackageContainerCronJob,
 	ReturnTypeSetupPackageContainerMonitors,
-	ReturnTypeDisposePackageContainerMonitors,
-	LogLevel,
-	APPCONTAINER_PING_TIME,
-	MonitorProperties,
-	Reason,
+	StatusCode,
 	stringifyError,
-	WorkerStatusReport,
-	AppContainerWorkerAgent,
-	deferGets,
-	promiseTimeout,
-	INNER_ACTION_TIMEOUT,
-	protectString,
-	ExpectationManagerId,
-	MonitorId,
-	PackageContainerId,
-	WorkerAgentId,
-	DataId,
-	isProtectedString,
-	WorkInProgressLocalId,
-	objectEntries,
-	Cost,
-	assertNever,
-	KnownReason,
 	URLMap,
-	deepEqual,
-	MetricsGauge,
+	WorkerAgentId,
+	WorkerConfig,
+	WorkerStatusReport,
+	WorkForceWorkerAgent,
+	WorkInProgressLocalId,
 } from '@sofie-package-manager/api'
 
-import { AppContainerAPI } from './appContainerApi'
-import { CPUTracker } from './cpuTracker'
-import { ExpectationManagerAPI } from './expectationManagerApi'
-import { MonitorInProgress } from './worker/lib/monitorInProgress'
-import { IWorkInProgress } from './worker/lib/workInProgress'
-import { BaseWorker } from './worker/worker'
-import { GenericWorker } from './worker/workers/genericWorker/genericWorker'
-import { WorkforceAPI } from './workforceApi'
-import { DummyAppContainerAPI, NoClientConnectionOptions } from './dummyAppContainerApi'
+import { AppContainerAPI } from './appContainerApi.js'
+import { CPUTracker } from './cpuTracker.js'
+import { DummyAppContainerAPI, NoClientConnectionOptions } from './dummyAppContainerApi.js'
+import { ExpectationManagerAPI } from './expectationManagerApi.js'
+import { MonitorInProgress } from './worker/lib/monitorInProgress.js'
+import { IWorkInProgress } from './worker/lib/workInProgress.js'
+import { BaseWorker } from './worker/worker.js'
+import { GenericWorker } from './worker/workers/genericWorker/genericWorker.js'
+import { WorkforceAPI } from './workforceApi.js'
 
 /** The WorkerAgent is a front for a Worker (@see GenericWorker).
  * It is intended to be the main class in its worker-process, and handles things like communication with the WorkForce or the Expectation-Manager
@@ -97,7 +97,10 @@ export class WorkerAgent {
 		return this.appContainerAPI.workerStorageRead(dataId)
 	})
 
-	constructor(logger: LoggerInstance, private config: WorkerConfig) {
+	constructor(
+		logger: LoggerInstance,
+		private config: WorkerConfig
+	) {
 		this.logger = logger.category('WorkerAgent')
 		this.id = config.worker.workerId
 
@@ -105,22 +108,22 @@ export class WorkerAgent {
 			? {
 					type: 'websocket',
 					url: this.config.worker.workforceURL,
-			  }
+				}
 			: {
 					type: 'internal',
-			  }
+				}
 		this.appContainerConnectionOptions = !this.config.worker.appContainerURL
 			? {
 					type: 'none',
-			  }
+				}
 			: this.config.worker.appContainerURL === 'internal'
-			? {
-					type: 'internal',
-			  }
-			: {
-					type: 'websocket',
-					url: this.config.worker.appContainerURL,
-			  }
+				? {
+						type: 'internal',
+					}
+				: {
+						type: 'websocket',
+						url: this.config.worker.appContainerURL,
+					}
 
 		this.workforceAPI = new WorkforceAPI(this.id, this.logger)
 		this.workforceAPI.on('disconnected', () => {
@@ -388,7 +391,7 @@ export class WorkerAgent {
 		this.terminate()
 		// This is for testing purposes only
 		setTimeout(() => {
-			// eslint-disable-next-line no-process-exit
+			// eslint-disable-next-line n/no-process-exit
 			process.exit(42)
 		}, 1)
 	}
@@ -567,7 +570,9 @@ export class WorkerAgent {
 							setTimeout(
 								() =>
 									reject(
-										`Timeout when cancelling job "${currentJob.workInProgress?.properties.workLabel}" (${currentJob.wipId})`
+										new Error(
+											`Timeout when cancelling job "${currentJob.workInProgress?.properties.workLabel}" (${currentJob.wipId})`
+										)
 									),
 								1000
 							)
@@ -1045,7 +1050,8 @@ export class WorkerAgent {
 		} else {
 			// Huh, we're not connected to the appContainer.
 			// Well, we want to spin down anyway, so we'll do it:
-			// eslint-disable-next-line no-process-exit
+
+			// eslint-disable-next-line n/no-process-exit
 			process.exit(54)
 		}
 	}

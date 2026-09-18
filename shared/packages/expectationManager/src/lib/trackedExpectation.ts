@@ -1,8 +1,9 @@
-// eslint-disable-next-line node/no-extraneous-import
+import { Expectation, ExpectationId, Reason, stringMaxLength, WorkerAgentId } from '@sofie-package-manager/api'
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { Expectation, ExpectationId, Reason, WorkerAgentId, stringMaxLength } from '@sofie-package-manager/api'
-import { ExpectationStateHandlerSession } from '../lib/types'
-import { ExpectationTrackerConstants } from './constants'
+
+import { ExpectationStateHandlerSession } from '../lib/types.js'
+import { ExpectationTrackerConstants } from './constants.js'
 
 /** Persistant data structure used to track the progress of an Expectation */
 export interface TrackedExpectation {

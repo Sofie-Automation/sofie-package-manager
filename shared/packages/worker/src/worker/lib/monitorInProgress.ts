@@ -1,4 +1,4 @@
-import { StatusCode, MonitorProperties, Reason, stringifyError, HelpfulEventEmitter } from '@sofie-package-manager/api'
+import { HelpfulEventEmitter, MonitorProperties, Reason, StatusCode, stringifyError } from '@sofie-package-manager/api'
 
 export interface MonitorInProgressEvents {
 	status: (status: StatusCode, reason: Reason) => void
@@ -14,7 +14,10 @@ export declare interface IMonitorInProgress {
 export class MonitorInProgress extends HelpfulEventEmitter implements IMonitorInProgress {
 	private statuses: Map<string, { status: StatusCode; reason: Reason }> = new Map()
 	private lastReportedStatus: { status: StatusCode; reason: Reason } | undefined = undefined
-	constructor(public properties: MonitorProperties, private _onStop: () => Promise<void>) {
+	constructor(
+		public properties: MonitorProperties,
+		private _onStop: () => Promise<void>
+	) {
 		super()
 	}
 	async stop(): Promise<void> {

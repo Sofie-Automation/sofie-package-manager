@@ -1,10 +1,10 @@
 import {
 	ExpectationManagerWorkerAgent,
-	Reason,
-	stringifyError,
+	HelpfulEventEmitter,
 	INNER_ACTION_TIMEOUT,
 	promiseTimeout,
-	HelpfulEventEmitter,
+	Reason,
+	stringifyError,
 } from '@sofie-package-manager/api'
 
 export interface WorkInProgressEvents {

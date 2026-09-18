@@ -1,4 +1,4 @@
-import { ClipData } from 'tv-automation-quantel-gateway-client/dist/quantelTypes'
+import type { ClipData } from 'tv-automation-quantel-gateway-client/dist/quantelTypes.d.ts'
 
 /*
 	These functions come from the media-manager originally
@@ -16,15 +16,14 @@ export function generateFFProbeFromClipData(clipData: ClipData): any {
 		.map((x) => +x)
 		.sort((a, b) => a - b) // sort alphabetically
 		.reverse()[0]
-	let audioFormat: number
-	if (clipData.AudioFormats === '') {
-		// Streams can be published without audio
-		audioFormat = -1
+	// Streams can be published without audio
+	let audioFormat: number = -1
+	if (clipData.AudioFormats !== '') {
+		audioFormat = clipData.AudioFormats.split(' ')
+			.map((x) => +x)
+			.sort((a, b) => a - b) // sort alphabetically
+			.reverse()[0]
 	}
-	audioFormat = clipData.AudioFormats.split(' ')
-		.map((x) => +x)
-		.sort((a, b) => a - b) // sort alphabetically
-		.reverse()[0]
 
 	return {
 		name: clipData.Title,
@@ -156,7 +155,7 @@ function makeAudioStreams(clipData: ClipData, audioFormat: number): any[] {
 
 function makeFormat(clipData: ClipData, videoFormat: number, audioFormat: number): any {
 	// FFprobe guesses bitrate and size based on first 100 frames ... this guesses at the guess
-	let bitrate = 0
+	let bitrate
 	switch (videoFormat) {
 		case 91:
 			bitrate = 62600000

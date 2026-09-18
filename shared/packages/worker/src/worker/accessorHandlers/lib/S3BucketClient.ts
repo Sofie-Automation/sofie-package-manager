@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream'
+
 import {
 	CopyObjectCommand,
 	DeleteObjectCommand,
@@ -7,11 +9,10 @@ import {
 	ListObjectsV2CommandOutput,
 	S3Client,
 } from '@aws-sdk/client-s3'
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { Readable } from 'node:stream'
 import { Upload } from '@aws-sdk/lib-storage'
-
 import { stringifyError } from '@sofie-package-manager/api'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 
 export type ListFilesResultItem = {
 	name: string
@@ -74,7 +75,10 @@ export class S3BucketClient {
 			await upload.done()
 		} catch (err) {
 			throw new Error(
-				`Failed to write '${fullPath}' to bucket '${this.options.bucketId}': ${stringifyError(err)}`
+				`Failed to write '${fullPath}' to bucket '${this.options.bucketId}': ${stringifyError(err)}`,
+				{
+					cause: err,
+				}
 			)
 		}
 	}
@@ -109,11 +113,11 @@ export class S3BucketClient {
 					? {
 							tech: "Object doesn't exist",
 							user: 'The requested file does not exist in the S3 storage bucket',
-					  }
+						}
 					: {
 							tech: `S3 Error: ${reason} err: ${stringifyError(err)}`,
 							user: 'An unknown error occurred when trying to access the S3 storage bucket',
-					  },
+						},
 			}
 		}
 	}
@@ -130,7 +134,10 @@ export class S3BucketClient {
 			return result.$metadata.httpStatusCode === 204
 		} catch (err) {
 			throw new Error(
-				`Failed to remove '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(err)}`
+				`Failed to remove '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(err)}`,
+				{
+					cause: err,
+				}
 			)
 		}
 	}
@@ -162,7 +169,10 @@ export class S3BucketClient {
 				throw new Error(
 					`Failed to list files in '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(
 						err
-					)}`
+					)}`,
+					{
+						cause: err,
+					}
 				)
 			}
 		} while (continuationToken)
@@ -264,7 +274,9 @@ export class S3BucketClient {
 
 			return response.Body.transformToWebStream()
 		} catch (err) {
-			throw new Error(`Failed to read '${fullPath}' from bucket: ${stringifyError(err)}`)
+			throw new Error(`Failed to read '${fullPath}' from bucket: ${stringifyError(err)}`, {
+				cause: err,
+			})
 		}
 	}
 
@@ -280,7 +292,10 @@ export class S3BucketClient {
 			return result.DeleteMarker === true || result.VersionId !== undefined
 		} catch (err) {
 			throw new Error(
-				`Failed to unlink '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(err)}`
+				`Failed to unlink '${fullPath}' from bucket '${this.options.bucketId}': ${stringifyError(err)}`,
+				{
+					cause: err,
+				}
 			)
 		}
 	}

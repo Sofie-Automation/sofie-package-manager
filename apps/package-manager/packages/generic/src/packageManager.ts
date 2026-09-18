@@ -1,78 +1,77 @@
-import _ from 'underscore'
-import { CoreHandler } from './coreHandler'
-// eslint-disable-next-line node/no-extraneous-import
 import {
-	ExpectedPackageStatusAPI,
-	ExpectedPackage as ExpectedPackageOrg,
-} from '@sofie-automation/shared-lib/dist/package-manager/package'
+	Accessor,
+	AccessorId,
+	AccessorOnPackage,
+	AnyProtectedString,
+	AppId,
+	ClientConnectionOptions,
+	convProtectedString,
+	deepEqual,
+	Expectation,
+	ExpectationId,
+	ExpectationManagerId,
+	ExpectationManagerWorkerAgent,
+	ExpectedPackage,
+	ExpectedPackageId,
+	literal,
+	LoggerInstance,
+	mapToObject,
+	MonitorId,
+	objectEntries,
+	objectKeys,
+	objectSize,
+	objectValues,
+	PackageContainer,
+	PackageContainerExpectation,
+	PackageContainerId,
+	PackageContainerOnPackage,
+	PackageManagerConfig,
+	ProtectedString,
+	protectString,
+	Reason,
+	startTimer,
+	Status,
+	StatusCode,
+	Statuses,
+	stringifyError,
+	unprotectString,
+	URLMap,
+} from '@sofie-package-manager/api'
+import {
+	ExpectationManager,
+	ExpectationManagerCallbacks,
+	ExpectationManagerServerOptions,
+} from '@sofie-package-manager/expectation-manager'
+import deepExtend from 'deep-extend'
+import rfdc from 'rfdc'
+import _ from 'underscore'
+
+import {
+	Observer,
+	PeripheralDeviceId,
+	PeripheralDevicePubSubCollectionsNames,
+} from '@sofie-automation/server-core-integration'
 import {
 	ExpectedPackageId as CoreExpectedPackageId,
 	ExpectedPackageWorkStatusId,
 	RundownId,
 } from '@sofie-automation/shared-lib/dist/core/model/Ids'
 import {
+	ExpectedPackage as ExpectedPackageOrg,
+	ExpectedPackageStatusAPI,
+} from '@sofie-automation/shared-lib/dist/package-manager/package'
+import {
 	PackageManagerActivePlaylist,
 	PackageManagerActiveRundown,
-	// eslint-disable-next-line node/no-extraneous-import
 } from '@sofie-automation/shared-lib/dist/package-manager/publications'
-import {
-	Observer,
-	PeripheralDeviceId,
-	PeripheralDevicePubSubCollectionsNames,
-} from '@sofie-automation/server-core-integration'
-// eslint-disable-next-line node/no-extraneous-import
 import { UpdateExpectedPackageWorkStatusesChanges } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
-// eslint-disable-next-line node/no-extraneous-import
-import {
-	ExpectationManager,
-	ExpectationManagerCallbacks,
-	ExpectationManagerServerOptions,
-} from '@sofie-package-manager/expectation-manager'
-import {
-	ExpectedPackage,
-	PackageContainer,
-	PackageContainerOnPackage,
-	StatusCode,
-	ClientConnectionOptions,
-	Expectation,
-	ExpectationManagerWorkerAgent,
-	PackageManagerConfig,
-	LoggerInstance,
-	PackageContainerExpectation,
-	literal,
-	Reason,
-	deepEqual,
-	stringifyError,
-	Accessor,
-	AccessorOnPackage,
-	Statuses,
-	Status,
-	ExpectationManagerId,
-	PackageContainerId,
-	ExpectedPackageId,
-	ExpectationId,
-	MonitorId,
-	AppId,
-	AccessorId,
-	AnyProtectedString,
-	objectEntries,
-	objectSize,
-	ProtectedString,
-	protectString,
-	unprotectString,
-	convProtectedString,
-	objectKeys,
-	objectValues,
-	mapToObject,
-	URLMap,
-} from '@sofie-package-manager/api'
-import deepExtend from 'deep-extend'
-import clone = require('fast-clone')
-import { GenerateExpectationApi } from './generateExpectations/api'
-import { PackageManagerSettings } from './generated/options'
 
-import * as NRK from './generateExpectations/nrk'
-import { startTimer } from '@sofie-package-manager/api'
+import { CoreHandler } from './coreHandler.js'
+import { PackageManagerSettings } from './generated/options.js'
+import { GenerateExpectationApi } from './generateExpectations/api.js'
+import * as NRK from './generateExpectations/nrk/index.js'
+
+const clone = rfdc()
 
 export class PackageManagerHandler {
 	public coreHandler!: CoreHandler
@@ -535,7 +534,10 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 	/** unix timestamp */
 	private lastTimeRemovedInvalidStatuses = 0
 
-	constructor(logger: LoggerInstance, private packageManager: PackageManagerHandler) {
+	constructor(
+		logger: LoggerInstance,
+		private packageManager: PackageManagerHandler
+	) {
 		this.logger = logger.category('ExpectationManagerCallbacksHandler')
 	}
 
@@ -1110,7 +1112,7 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 				? {
 						statusCode: container.status?.status,
 						message: container.status?.statusReason.user,
-				  }
+					}
 				: null
 		}
 
@@ -1189,7 +1191,7 @@ export function wrapExpectedPackage(
 				} else if (packageAccessor) {
 					combinedSource.accessors[accessorId] = clone<AccessorOnPackage.Any>(packageAccessor)
 				} else if (sourceAccessor) {
-					combinedSource.accessors[accessorId] = clone<Accessor.Any>(sourceAccessor) as AccessorOnPackage.Any
+					combinedSource.accessors[accessorId] = clone<Accessor.Any>(sourceAccessor)
 				}
 			}
 			combinedSources.push(combinedSource)
@@ -1217,7 +1219,7 @@ export function wrapExpectedPackage(
 	if (combinedSources.length) {
 		if (combinedTargets.length) {
 			return {
-				expectedPackage: expectedPackage as any,
+				expectedPackage: expectedPackage,
 				priority: 999, // Default: lowest priority
 				sources: combinedSources,
 				targets: combinedTargets,
