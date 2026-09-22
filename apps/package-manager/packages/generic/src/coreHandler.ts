@@ -44,6 +44,7 @@ import { PackageManagerHandler } from './packageManager'
 import { getCredentials } from './credentials'
 import { FakeCore } from './fakeCore'
 import { PeripheralDeviceCommandId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
+import { PeripheralDeviceStatusObject } from '@sofie-automation/shared-lib/dist/peripheralDevice/peripheralDeviceAPI.js'
 
 let packageJson: any
 try {
@@ -409,10 +410,7 @@ export class CoreHandler implements ICoreHandler {
 		this.statuses = statuses
 		await this.updateCoreStatus()
 	}
-	getCoreStatus(): {
-		statusCode: StatusCode
-		messages: string[]
-	} {
+	getCoreStatus(): PeripheralDeviceStatusObject {
 		let statusCode = SofieStatusCode.GOOD
 		const messages: Array<string> = []
 
@@ -435,7 +433,7 @@ export class CoreHandler implements ICoreHandler {
 		}
 		return {
 			statusCode,
-			messages,
+			statusDetails: messages.map((message) => ({ message })),
 		}
 	}
 	private async updateCoreStatus(): Promise<any> {
