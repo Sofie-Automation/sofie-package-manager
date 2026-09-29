@@ -1,7 +1,6 @@
 import cors from '@koa/cors'
 import Router from '@koa/router'
 import { LoggerInstance, QuantelHTTPTransformerProxyConfig, stringifyError } from '@sofie-package-manager/api'
-import got from 'got'
 import Koa from 'koa'
 import range from 'koa-range'
 import ratelimit from 'koa-ratelimit'
@@ -65,6 +64,17 @@ export class QuantelHTTPTransformerProxy {
 		)
 	}
 
+	private async fetch(path: string): Promise<Response> {
+		if (!this.transformerURL) {
+			throw new Error('Transformer URL not set. Cannot talk to HTTP transformer.')
+		}
+		const res = await fetch(`${this.transformerURL}${path}`)
+		if (!res.ok) {
+			throw new Error(`Request to fetch from transformer failed: ${res.status} ${res.statusText}`, { cause: res })
+		}
+		return res
+	}
+
 	async init(): Promise<void> {
 		this.router.get('/hello', async (ctx, next) => {
 			ctx.body = { msg: 'Hello World', params: ctx.params }
@@ -82,37 +92,39 @@ export class QuantelHTTPTransformerProxy {
 					return
 				}
 				if (ctx.path.endsWith('init.mp4')) {
-					const initReq = await got(`${this.transformerURL}${ctx.path}`, { responseType: 'buffer' })
-					const initBuf = Buffer.from(initReq.body)
+					const initReq = await this.fetch(`${ctx.path}`)
+					const initBuf = Buffer.from(await initReq.arrayBuffer())
 					const stsc = initBuf.indexOf('stsc')
 					initBuf.writeUInt32BE(0, stsc + 8)
 					const stco = initBuf.indexOf('stco')
 					initBuf.writeUInt32BE(0, stco + 8)
-					ctx.type = initReq.headers['content-type'] || 'video/mpeg-4'
+					ctx.type = initReq.headers.get('content-type') || 'video/mpeg-4'
 					ctx.body = initBuf
 					return
 				}
 				if (this.smoothStream && ctx.path.endsWith('stream.mpd')) {
-					const smoothFestRes = await got(`${this.transformerURL}${ctx.path.slice(0, -4)}.xml`)
+					const smoothFestRes = await this.fetch(`${ctx.path.slice(0, -4)}.xml`)
 					ctx.type = 'application/xml'
-					ctx.body = await manifestTransform(smoothFestRes.body)
+					ctx.body = await manifestTransform(await smoothFestRes.text())
 					return
 				} else {
 					// TODO - ideally this would stream - but that would hang on longer payloads
-					const initReq = await got(`${this.transformerURL}${ctx.path}`, { responseType: 'buffer' })
-					ctx.type = initReq.headers['content-type'] || 'application/octet-stream'
+					const initReq = await this.fetch(`${ctx.path}`)
+					ctx.type = initReq.headers.get('content-type') || 'application/octet-stream'
 					ctx.body = initReq.body
 
 					// await next() // todo: should we do this?
 				}
 			} catch (err: any) {
-				if (err.response) {
+				if (err instanceof Error && err.cause instanceof Response) {
 					// Pass through response:
-					ctx.status = err.response.statusCode
-					ctx.body = err.response.body?.toString() || ''
-					if (err.response.headers) {
-						for (const header of Object.keys(err.response.headers)) {
-							ctx.set(header, err.response.headers[header])
+					ctx.status = err.cause.status
+					ctx.body = err.cause.body
+					if (err.cause.headers) {
+						for (const header of Object.keys(err.cause.headers)) {
+							const value = err.cause.headers.get(header)
+							if (value === null) continue
+							ctx.set(header, value)
 						}
 					}
 				} else {
@@ -124,27 +136,29 @@ export class QuantelHTTPTransformerProxy {
 			}
 		})
 		this.router.get('/{/*path}', async (ctx, next) => {
-			const url = `${this.transformerURL}${ctx.path}` + (ctx.querystring ? `?${ctx.querystring}` : '')
+			const relativeUrl = `${ctx.path}` + (ctx.querystring ? `?${ctx.querystring}` : '')
 			try {
-				const initReq = await got(url, { responseType: 'buffer' })
-				ctx.type = initReq.headers['content-type'] || 'application/octet-stream'
+				const initReq = await this.fetch(relativeUrl)
+				ctx.type = initReq.headers.get('content-type') || 'application/octet-stream'
 				ctx.body = initReq.body
 
 				await next()
 			} catch (err: any) {
-				if (err.response) {
+				if (err instanceof Error && err.cause instanceof Response) {
 					// Pass through response:
-					ctx.status = err.response.statusCode
-					ctx.body = err.response.body?.toString() || ''
-					if (err.response.headers) {
-						for (const header of Object.keys(err.response.headers)) {
-							ctx.set(header, err.response.headers[header])
+					ctx.status = err.cause.status
+					ctx.body = err.cause.body
+					if (err.cause.headers) {
+						for (const header of Object.keys(err.cause.headers)) {
+							const value = err.cause.headers.get(header)
+							if (value === null) continue
+							ctx.set(header, value)
 						}
 					}
 				} else {
 					ctx.status = 502
 					ctx.body = 'Bad Gateway'
-					this.logger.error(`Error when requesting URL "${url}"`)
+					this.logger.error(`Error when requesting URL "${relativeUrl}"`)
 					this.logger.error(JSON.stringify(err))
 					return
 				}

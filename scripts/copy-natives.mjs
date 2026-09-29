@@ -1,8 +1,8 @@
-/* eslint-disable node/no-unpublished-require */
-const find = require('find')
-const os = require('os')
-const path = require('path')
-const fs = require('fs-extra')
+import os from 'os'
+import path from 'path'
+
+import find from 'find'
+import fs from 'fs-extra'
 
 const arch = os.arch()
 const platform = os.platform()
@@ -44,6 +44,5 @@ function isFileForPlatform(filename) {
 }
 
 function log(...args) {
-	// eslint-disable-next-line no-console
 	console.log(...args)
 }

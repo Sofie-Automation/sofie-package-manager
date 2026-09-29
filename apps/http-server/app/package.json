@@ -1,13 +1,14 @@
 {
     "name": "@http-server/app",
     "version": "1.53.0",
+    "bin": "./dist/index.js",
     "type": "module",
     "description": "Upload to and serve proxies of packages",
     "private": true,
     "scripts": {
         "build": "yarn rimraf dist && yarn build:main",
         "build:main": "tsc -p tsconfig.json",
-        "build-win32": "node ../../../scripts/build-win32.mjs http-server.exe && node ../../../scripts/copy-natives.js win32-x64",
+        "build-win32": "node ../../../scripts/build-win32.mjs http-server.exe && node ../../../scripts/copy-natives.mjs win32-x64",
         "__test": "vitest run",
         "start": "node dist/index.js"
     },

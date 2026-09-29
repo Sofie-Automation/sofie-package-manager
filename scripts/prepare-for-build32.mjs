@@ -1,20 +1,13 @@
-/* eslint-disable node/no-unpublished-require */
-import { promisify } from 'util'
 import cp from 'child_process'
-import path from 'path'
-import os from 'os'
 import fs from 'fs/promises'
-import pkgFetch from '@yao-pkg/pkg-fetch'
+import os from 'os'
+import path from 'path'
+import { promisify } from 'util'
 
+// eslint-disable-next-line n/no-extraneous-import
+import pkgFetch from '@yao-pkg/pkg-fetch'
 import fse from 'fs-extra'
 
-// const promisify = require('util').promisify
-// const cp = require('child_process')
-// const path = require('path')
-// const os = require('os')
-// eslint-disable-next-line node/no-extraneous-require
-// const pkgFetch = require('@yao-pkg/pkg-fetch')
-// const nexe = require('nexe')
 const exec = promisify(cp.exec)
 const fseCopy = promisify(fse.copy)
 
@@ -34,7 +27,6 @@ const packageJson = await fs.readFile(path.join(basePath, '/package.json'), 'utf
 // }
 
 function log(...args) {
-	// eslint-disable-next-line no-console
 	console.log(...args)
 }
 
@@ -71,7 +63,7 @@ function log(...args) {
 	}
 
 	await Promise.all(ps)
-	ps = []
+	ps.length = 0
 }
 
 // Hack to make pkg include the native dependency @parcel/watcher:
