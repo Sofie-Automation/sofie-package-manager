@@ -1445,7 +1445,7 @@ __metadata:
   resolution: "@html-renderer/app@workspace:apps/html-renderer/app"
   dependencies:
     "@html-renderer/generic": "npm:1.53.0"
-    "@sofie-automation/shared-lib": "npm:@nrk/sofie-shared-lib@26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0"
+    "@sofie-automation/shared-lib": "npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0"
     "@sofie-package-manager/api": "npm:1.53.0"
     "@types/ws": "npm:^8.18.1"
     archiver: "npm:^7.0.1"
@@ -3728,33 +3728,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sofie-automation/server-core-integration@npm:@nrk/sofie-server-core-integration@26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0":
-  version: 26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0
-  resolution: "@nrk/sofie-server-core-integration@npm:26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0"
+"@sofie-automation/server-core-integration@npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0":
+  version: 26.3.0-nightly-main-20261005-101207-3ec1d8e.0
+  resolution: "@sofie-automation/server-core-integration@npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0"
   dependencies:
     "@koa/router": "npm:^15.7.0"
     "@kubernetes/client-node": "npm:^0.22.3"
-    "@sofie-automation/shared-lib": "npm:@nrk/sofie-shared-lib@26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0"
+    "@sofie-automation/shared-lib": "npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0"
     ejson: "npm:^2.2.3"
     koa: "npm:^3.2.1"
     prom-client: "npm:^15.1.3"
     tslib: "npm:^2.8.1"
     underscore: "npm:^1.13.8"
     ws: "npm:^8.21.1"
-  checksum: 10/9c242fac4aa1233dfd0291e7b09121de46f70c9145521c81f8d6386c087ac20e9bc407f3e6e0c8ffc6fa9432492a03b52bda7cd1d0a7c101a4326e8f1e64b0ec
+  checksum: 10/9d56e970c98438b264c6963be8748b8b92a6cf6ee208265b70bba31472ed8530fbc4573debcf9f851b7c764195e44ac011d464037021ea9663fc66dfada8075f
   languageName: node
   linkType: hard
 
-"@sofie-automation/shared-lib@npm:@nrk/sofie-shared-lib@26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0":
-  version: 26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0
-  resolution: "@nrk/sofie-shared-lib@npm:26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0"
+"@sofie-automation/shared-lib@npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0":
+  version: 26.3.0-nightly-main-20261005-101207-3ec1d8e.0
+  resolution: "@sofie-automation/shared-lib@npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0"
   dependencies:
     "@mos-connection/model": "npm:^5.0.0-alpha.0"
     kairos-lib: "npm:^1.0.0"
     timeline-state-resolver-types: "npm:10.0.0-nightly-main-20260714-110908-7c702dedf.0"
     tslib: "npm:^2.8.1"
     type-fest: "npm:^4.41.0"
-  checksum: 10/de177109186149b5f28e0107aacb02dea3a97b683b048fbb633c148e65cce74b0d044f463507226388030b60f9913d9f2544b733decf1dcb0a5c356735783a0a
+  checksum: 10/e1666748e3909bdcdf422df5d5d50eff93cfe6af756cb0fdcf8f1fe048e01a9504a14bd996eb06f83f2d7ed18cd5c5052fed0bb913b46a9039705ecb9e94d97c
   languageName: node
   linkType: hard
 
@@ -4728,9 +4728,9 @@ __metadata:
   linkType: soft
 
 "@xmldom/xmldom@npm:^0.8.8":
-  version: 0.8.13
-  resolution: "@xmldom/xmldom@npm:0.8.13"
-  checksum: 10/f8f3d56fa91d5026885c0c5c00b07eae47647bda0d742ecbf8e51e06bb287ab30222977b20529ee15c364031606225ebca58907a8ecc76a3add6b3f10e6ddfc6
+  version: 0.8.15
+  resolution: "@xmldom/xmldom@npm:0.8.15"
+  checksum: 10/521d8e5a9798a47dddb28237d112e47637d638e4f3d60ce1eefa1f397d2439af5a00f781c956b5affc251ef8a1bbc1f8325161d32f7b27c89aacf5ff84f14cf7
   languageName: node
   linkType: hard
 
@@ -8616,9 +8616,9 @@ __metadata:
   linkType: hard
 
 "ip-address@npm:^10.0.1":
-  version: 10.4.0
-  resolution: "ip-address@npm:10.4.0"
-  checksum: 10/8a286dd112a88c372b10c706caca14dcf5ed029a11c3911062ad8937ca0f951aa513ecacf82e15ffcf6343749ae6c079dd9741282fc94033a06ff1b7bd6ce69a
+  version: 10.7.2
+  resolution: "ip-address@npm:10.7.2"
+  checksum: 10/3a051cb5234cff142bb527e8b40bf0f9dd895b0334161b1ffe0256700a50a49f4d3b94ef72a809f086b2bd6489d4f7a4a52025b03db9c2e9e83a5f9e4d4bdb60
   languageName: node
   linkType: hard
 
@@ -10908,8 +10908,8 @@ __metadata:
   resolution: "package-manager-monorepo@workspace:."
   dependencies:
     "@sofie-automation/code-standard-preset": "npm:4.0.3"
-    "@sofie-automation/server-core-integration": "npm:@nrk/sofie-server-core-integration@26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0"
-    "@sofie-automation/shared-lib": "npm:@nrk/sofie-shared-lib@26.3.0-nightly-feat-pm-limited-removeAll-20260910-104009-158585b.0"
+    "@sofie-automation/server-core-integration": "npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0"
+    "@sofie-automation/shared-lib": "npm:26.3.0-nightly-main-20261005-101207-3ec1d8e.0"
     "@yao-pkg/pkg": "npm:^6.22.0"
     deep-extend: "npm:^0.6.0"
     eslint: "npm:^10.0.0"
@@ -11207,12 +11207,12 @@ __metadata:
   linkType: hard
 
 "postcss-selector-parser@npm:^7.0.0":
-  version: 7.1.1
-  resolution: "postcss-selector-parser@npm:7.1.1"
+  version: 7.1.5
+  resolution: "postcss-selector-parser@npm:7.1.5"
   dependencies:
     cssesc: "npm:^3.0.0"
     util-deprecate: "npm:^1.0.2"
-  checksum: 10/bb3c6455b20af26a556e3021e21101d8470252644e673c1612f7348ff8dd41b11321329f0694cf299b5b94863f823480b72d3e2f4bd3a89dc43e2d8c0dbad341
+  checksum: 10/ae66bbcb5d370a3f4b4660e23a208352a885c651f1b420f7b998faaa1034832b870066f49e295f73ee3da6a6c6312c56fea1b2039969f8d803438fa48232b307
   languageName: node
   linkType: hard
 
