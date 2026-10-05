@@ -1,17 +1,23 @@
-// Mock resolveFileWithoutExtension before importing modules
-const mockResolveFileWithoutExtension = jest.fn()
-const mockFsReaddir = jest.fn()
+import { describe, test, expect, beforeAll, afterEach, vi } from 'vitest'
 
-jest.mock('fs', () => {
-	const actual = jest.requireActual('fs')
-	return {
+// Mock resolveFileWithoutExtension before importing modules
+const mockResolveFileWithoutExtension = vi.hoisted(() => vi.fn())
+const mockFsReaddir = vi.hoisted(() => vi.fn())
+
+vi.mock('node:fs', async (importOriginal) => {
+	const actual = await importOriginal() as typeof import('node:fs')
+	const mockedFs = {
 		...actual,
 		readdir: mockFsReaddir,
 	}
+	return {
+		...mockedFs,
+		default: mockedFs,
+	}
 })
 
-jest.mock('@sofie-package-manager/api', () => {
-	const actual = jest.requireActual('@sofie-package-manager/api')
+vi.mock('@sofie-package-manager/api', async (importOriginal) => {
+	const actual = await importOriginal() as typeof import('@sofie-package-manager/api')
 	return {
 		...actual,
 		resolveFileWithoutExtension: mockResolveFileWithoutExtension,
@@ -26,8 +32,8 @@ import {
 	ProcessConfig,
 	Accessor,
 } from '@sofie-package-manager/api'
-import { Content, FileShareAccessorHandle } from '../fileShare'
-import { PassiveTestWorker } from './lib'
+import { Content, FileShareAccessorHandle } from '../fileShare.js'
+import { PassiveTestWorker } from './lib.js'
 import path from 'node:path'
 
 describe('matchFilenamesWithoutExtension for FileShare', () => {
@@ -76,7 +82,7 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 		const expectedPath = path.join(folderPath, 'testfile.mp4')
 		const fullPathWithoutExt = path.join(folderPath, 'testfile')
 		const filesInDir = ['testfile.mp4', 'other.mov']
-		mockFsReaddir.mockImplementation((_: string, cb: (err: Error | null, files?: string[]) => void) => {
+		mockFsReaddir.mockImplementationOnce((_: string, cb: (err: Error | null, files?: string[]) => void) => {
 			cb(null, filesInDir)
 		})
 
@@ -99,7 +105,7 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = getFolderPath()
-		mockFsReaddir.mockImplementation((_: string, cb: (err: Error | null, files?: string[]) => void) => {
+		mockFsReaddir.mockImplementationOnce((_: string, cb: (err: Error | null, files?: string[]) => void) => {
 			cb(null, ['testfile.mp4', 'testfile.mov', 'testfile.avi'])
 		})
 
@@ -123,7 +129,7 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 		const worker = new PassiveTestWorker(logger, processConfig, true)
 
 		const folderPath = getFolderPath()
-		mockFsReaddir.mockImplementation((_: string, cb: (err: Error | null, files?: string[]) => void) => {
+		mockFsReaddir.mockImplementationOnce((_: string, cb: (err: Error | null, files?: string[]) => void) => {
 			cb(null, ['unrelated.mov'])
 		})
 
@@ -161,7 +167,7 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 		const fullPathWithoutExt = path.join(folderPath, 'testfile')
 		const enoent = new Error('ENOENT: no such file or directory') as NodeJS.ErrnoException
 		enoent.code = 'ENOENT'
-		mockFsReaddir.mockImplementation((_: string, cb: (err: Error | null, files?: string[]) => void) => {
+		mockFsReaddir.mockImplementationOnce((_: string, cb: (err: Error | null, files?: string[]) => void) => {
 			cb(enoent)
 		})
 		mockResolveFileWithoutExtension.mockResolvedValue({
@@ -181,7 +187,7 @@ describe('matchFilenamesWithoutExtension for FileShare', () => {
 		const folderPath = getFolderPath()
 		const eacces = new Error('EACCES: permission denied') as NodeJS.ErrnoException
 		eacces.code = 'EACCES'
-		mockFsReaddir.mockImplementation((_: string, cb: (err: Error | null, files?: string[]) => void) => {
+		mockFsReaddir.mockImplementationOnce((_: string, cb: (err: Error | null, files?: string[]) => void) => {
 			cb(eacces)
 		})
 

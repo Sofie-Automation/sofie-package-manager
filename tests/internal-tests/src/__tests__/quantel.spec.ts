@@ -1,4 +1,5 @@
-// eslint-disable-next-line node/no-extraneous-import
+import { describe, beforeEach, afterEach, expect, test, vi } from 'vitest'
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import * as QGatewayClientOrg from 'tv-automation-quantel-gateway-client'
 import {
@@ -12,12 +13,18 @@ import {
 	waitTime,
 } from '@sofie-package-manager/api'
 import type * as QGatewayClientType from '../__mocks__/tv-automation-quantel-gateway-client'
-import { prepareTestEnvironment, TestEnvironment } from './lib/setupEnv'
-import { describeForAllPlatforms, waitUntil } from './lib/lib'
-import { getQuantelSource, getQuantelTarget } from './lib/containers'
-jest.mock('child_process')
-jest.mock('tv-automation-quantel-gateway-client')
-jest.mock('@parcel/watcher')
+import { prepareTestEnvironment, TestEnvironment } from './lib/setupEnv.js'
+import { describeForAllPlatforms, waitUntil } from './lib/lib.js'
+import { getQuantelSource, getQuantelTarget } from './lib/containers.js'
+vi.mock('child_process', async () => {
+	const mod = await import('../__mocks__/child_process')
+	return { ...mod, default: mod.default }
+})
+vi.mock('tv-automation-quantel-gateway-client', async () => {
+	const mod = await import('../__mocks__/tv-automation-quantel-gateway-client')
+	return { ...mod, default: mod.default }
+})
+vi.mock('@parcel/watcher', async () => ({ default: {} }))
 
 const QGatewayClient = QGatewayClientOrg as any as typeof QGatewayClientType
 
@@ -25,15 +32,12 @@ let env: TestEnvironment
 describeForAllPlatforms(
 	'Quantel',
 	() => {
-		beforeAll(async () => {
+		beforeEach(async () => {
 			env = await prepareTestEnvironment(false) // set to true to enable debug-logging
-		})
-		afterAll(() => {
-			env.terminate()
-		})
-		beforeEach(() => {
-			env.reset()
 			QGatewayClient.resetMock()
+		})
+		afterEach(() => {
+			env.terminate()
 		})
 	},
 	() => {
@@ -316,7 +320,7 @@ describeForAllPlatforms(
 				expect(env.containerStatuses[TARGET1].packages[PACKAGE0].packageStatus?.status).toEqual(
 					ExpectedPackageStatusAPI.PackageContainerPackageStatusStatus.READY
 				)
-			}, 500 + env.WAIT_JOB_TIME)
+			}, env.WAIT_JOB_TIME_SAFE + env.WAIT_SCAN_TIME)
 
 			expect(env.expectationStatuses[EXP_copy0].statusInfo.status).toEqual('fulfilled')
 		})

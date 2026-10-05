@@ -1,5 +1,6 @@
 import {
 	DataId,
+	ExecutableAliasSource,
 	Expectation,
 	ExpectationManagerWorkerAgent,
 	LoggerInstance,
@@ -14,10 +15,10 @@ import {
 	ReturnTypeRunPackageContainerCronJob,
 	stringMaxLength,
 	WorkerConfig,
-	ExecutableAliasSource,
 } from '@sofie-package-manager/api'
-import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from './accessorHandlers/genericHandle'
-import { IWorkInProgress } from './lib/workInProgress'
+
+import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from './accessorHandlers/genericHandle.js'
+import { IWorkInProgress } from './lib/workInProgress.js'
 
 export interface GenericWorkerAgentAPI {
 	config: WorkerConfig['worker']

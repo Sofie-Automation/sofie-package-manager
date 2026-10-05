@@ -1,6 +1,6 @@
-// eslint-disable-next-line node/no-extraneous-import
+import { PackageContainerExpectation, PackageContainerId, WorkerAgentId } from '@sofie-package-manager/api'
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { PackageContainerId, PackageContainerExpectation, WorkerAgentId } from '@sofie-package-manager/api'
 
 export interface TrackedPackageContainerExpectation {
 	/** Unique ID of the tracked packageContainer */

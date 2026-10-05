@@ -20,7 +20,7 @@ try {
 	}
 }
 
-// Remove artifacts created by prepare-for-build32.js...
+// Remove artifacts created by prepare-for-build32.mjs...
 
 console.log(`Looking up copied files to remove...`)
 

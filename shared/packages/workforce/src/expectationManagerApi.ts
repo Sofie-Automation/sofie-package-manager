@@ -1,9 +1,9 @@
 import {
-	WorkForceExpectationManager,
 	AdapterServer,
 	AdapterServerOptions,
 	LogLevel,
 	Statuses,
+	WorkForceExpectationManager,
 	WorkforceId,
 } from '@sofie-package-manager/api'
 

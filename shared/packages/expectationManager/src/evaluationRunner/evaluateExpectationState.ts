@@ -1,19 +1,20 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { assertNever, stringifyError } from '@sofie-package-manager/api'
-import { EvaluationRunner } from './evaluationRunner'
-import { InternalManager } from '../internalManager/internalManager'
-import { ExpectationTracker } from '../expectationTracker/expectationTracker'
-import { EvaluateContext } from './lib'
-import { evaluateExpectationStateAborted } from './evaluateExpectationStates/aborted'
-import { evaluateExpectationStateFulfilled } from './evaluateExpectationStates/fulfilled'
-import { evaluateExpectationStateNew } from './evaluateExpectationStates/new'
-import { evaluateExpectationStateReady } from './evaluateExpectationStates/ready'
-import { evaluateExpectationStateRemoved } from './evaluateExpectationStates/removed'
-import { evaluateExpectationStateRestarted } from './evaluateExpectationStates/restarted'
-import { evaluateExpectationStateWaiting } from './evaluateExpectationStates/waiting'
-import { evaluateExpectationStateWorking } from './evaluateExpectationStates/working'
-import { TrackedExpectation, expLabel } from '../lib/trackedExpectation'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { ExpectationTracker } from '../expectationTracker/expectationTracker.js'
+import { InternalManager } from '../internalManager/internalManager.js'
+import { expLabel, TrackedExpectation } from '../lib/trackedExpectation.js'
+import { evaluateExpectationStateAborted } from './evaluateExpectationStates/aborted.js'
+import { evaluateExpectationStateFulfilled } from './evaluateExpectationStates/fulfilled.js'
+import { evaluateExpectationStateNew } from './evaluateExpectationStates/new.js'
+import { evaluateExpectationStateReady } from './evaluateExpectationStates/ready.js'
+import { evaluateExpectationStateRemoved } from './evaluateExpectationStates/removed.js'
+import { evaluateExpectationStateRestarted } from './evaluateExpectationStates/restarted.js'
+import { evaluateExpectationStateWaiting } from './evaluateExpectationStates/waiting.js'
+import { evaluateExpectationStateWorking } from './evaluateExpectationStates/working.js'
+import { EvaluationRunner } from './evaluationRunner.js'
+import { EvaluateContext } from './lib.js'
 
 /** Evaluate the state of an Expectation */
 export async function evaluateExpectationState(

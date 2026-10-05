@@ -1,7 +1,8 @@
 import { AccessorOnPackage } from '@sofie-package-manager/api'
-import { AccessorHandlerCheckHandleReadResult, AccessorHandlerCheckHandleWriteResult } from '../genericHandle'
-import { BaseWorker } from '../../worker'
-import { compareResourceIds } from '../../workers/genericWorker/lib/lib'
+
+import { BaseWorker } from '../../worker.js'
+import { compareResourceIds } from '../../workers/genericWorker/lib/lib.js'
+import { AccessorHandlerCheckHandleReadResult, AccessorHandlerCheckHandleWriteResult } from '../genericHandle.js'
 
 export function defaultDoYouSupportAccess(worker: BaseWorker, accessor: AccessorOnPackage.Any): boolean {
 	if ('resourceId' in accessor) {

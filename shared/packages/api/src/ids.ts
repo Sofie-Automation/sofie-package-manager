@@ -1,4 +1,4 @@
-import { ProtectedString, protectString } from './ProtectedString'
+import { ProtectedString, protectString } from './ProtectedString.js'
 
 // From Core
 export type ExpectedPackageId = ProtectedString<'ExpectedPackageId', string>

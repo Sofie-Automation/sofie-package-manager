@@ -1,5 +1,5 @@
-import { AppContainerId, AppId } from './ids'
-import { WorkerAgentConfig } from './worker'
+import { AppContainerId, AppId } from './ids.js'
+import { WorkerAgentConfig } from './worker.js'
 
 /** The AppContainer is a host application responsible for spawning other applications */
 

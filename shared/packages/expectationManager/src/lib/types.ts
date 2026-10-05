@@ -1,5 +1,6 @@
 import { ExpectationManagerWorkerAgent, Reason, WorkerAgentId } from '@sofie-package-manager/api'
-import { WorkerAgentAPI } from '../workerAgentApi'
+
+import { WorkerAgentAPI } from '../workerAgentApi.js'
 
 /** Contains some data which is persisted during an evaluation-session */
 export interface ExpectationStateHandlerSession {

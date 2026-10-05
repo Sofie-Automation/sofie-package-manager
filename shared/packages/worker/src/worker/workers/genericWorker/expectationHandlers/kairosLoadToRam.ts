@@ -1,5 +1,3 @@
-import { BaseWorker } from '../../../worker'
-import { UniversalVersion, getStandardCost } from '../lib/lib'
 import {
 	Accessor,
 	Expectation,
@@ -10,12 +8,18 @@ import {
 	ReturnTypeRemoveExpectation,
 	stringifyError,
 } from '@sofie-package-manager/api'
-import { isKairosClipAccessorHandle } from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { ExpectationHandlerGenericWorker } from '../genericWorker'
-// eslint-disable-next-line node/no-missing-import
 import { assertNever, MediaObject, MediaStatus } from 'kairos-connection'
+
+import { isKairosClipAccessorHandle } from '../../../accessorHandlers/accessor.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker } from '../genericWorker.js'
+import { getStandardCost, UniversalVersion } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
 
 /**
  * Loads a ramrec/still into RAM on a Kairos.

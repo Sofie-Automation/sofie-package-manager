@@ -1,4 +1,19 @@
 import {
+	AccessorId,
+	AccessorOnPackage,
+	assertNever,
+	escapeFilePath,
+	Expectation,
+	INNER_ACTION_TIMEOUT,
+	KnownReason,
+	PackageContainerOnPackage,
+	promiseTimeout,
+	Reason,
+	ReturnTypeDoYouSupportExpectation,
+} from '@sofie-package-manager/api'
+import { Diff } from 'datum-diff'
+
+import {
 	getAccessorHandle,
 	getAccessorStaticHandle,
 	isFileShareAccessorHandle,
@@ -6,34 +21,20 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { prioritizeAccessors } from '../../../lib/lib'
-import { AccessorContext, GenericAccessorHandle } from '../../../accessorHandlers/genericHandle'
-import { BaseWorker } from '../../../worker'
+} from '../../../accessorHandlers/accessor.js'
+import { FileShareAccessorHandle } from '../../../accessorHandlers/fileShare.js'
+import { FTPAccessorHandle } from '../../../accessorHandlers/ftp.js'
+import { AccessorContext, GenericAccessorHandle } from '../../../accessorHandlers/genericHandle.js'
+import { HTTPProxyAccessorHandle } from '../../../accessorHandlers/httpProxy.js'
+import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder.js'
+import { S3AccessorHandle } from '../../../accessorHandlers/s3.js'
+import { prioritizeAccessors } from '../../../lib/lib.js'
+import { BaseWorker } from '../../../worker.js'
 import {
 	ACCESSOR_DUMMY_CONTENT,
 	compareActualExpectVersions,
 	findBestPackageContainerWithAccessToPackage,
-} from '../lib/lib'
-import { Diff } from 'deep-diff'
-import {
-	AccessorOnPackage,
-	PackageContainerOnPackage,
-	Expectation,
-	Reason,
-	ReturnTypeDoYouSupportExpectation,
-	assertNever,
-	AccessorId,
-	promiseTimeout,
-	INNER_ACTION_TIMEOUT,
-	escapeFilePath,
-	KnownReason,
-} from '@sofie-package-manager/api'
-import { LocalFolderAccessorHandle } from '../../../accessorHandlers/localFolder'
-import { FileShareAccessorHandle } from '../../../accessorHandlers/fileShare'
-import { HTTPProxyAccessorHandle } from '../../../accessorHandlers/httpProxy'
-import { FTPAccessorHandle } from '../../../accessorHandlers/ftp'
-import { S3AccessorHandle } from '../../../accessorHandlers/s3'
+} from '../lib/lib.js'
 
 /** Check that a worker has access to the packageContainers through its accessors */
 export function checkWorkerHasAccessToPackageContainersOnPackage(
@@ -444,7 +445,7 @@ export async function lookupAccessorHandles<Metadata>(
 }
 
 /** Converts a diff to some kind of user-readable string */
-export function userReadableDiff<T>(diffs: Diff<T, T>[]): string {
+export function userReadableDiff<T>(diffs: Readonly<Diff<T, T>[]>): string {
 	const strings: string[] = []
 	for (const diff of diffs) {
 		if (diff.kind === 'A') {
@@ -548,11 +549,11 @@ export function thumbnailFFMpegArguments(
 			? [
 					`-vf`,
 					`${!seekTimeCode ? 'thumbnail,' : ''}scale=${metadata.version.width}:${metadata.version.height}`, // Creates a thumbnail of the video.
-			  ]
+				]
 			: [
 					'-filter_complex',
 					'showwavespic=s=640x240:split_channels=1:colors=white', // Creates an image of the audio waveform.
-			  ]),
+				]),
 
 		'-threads',
 		'1',

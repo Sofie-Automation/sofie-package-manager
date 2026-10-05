@@ -1,3 +1,19 @@
+import { expect, vi } from 'vitest'
+
+vi.mock('@sofie-package-manager/api', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@sofie-package-manager/api')>()
+	const mock = await import('../../__mocks__/@sofie-package-manager/api.ts')
+	return {
+		...actual,
+		...mock,
+	}
+})
+
+vi.mock('child_process', async () => {
+	const mock = await import('../../__mocks__/child_process.ts')
+	return mock
+})
+
 import {
 	AppContainerConfig,
 	AppContainerProcessConfig,
@@ -9,12 +25,13 @@ import {
 	setupLogger,
 	WebsocketServer,
 	WorkerAgentId,
+	clearPrometheusRegistry,
 } from '@sofie-package-manager/api'
 // @ts-ignore mock
 import { mockOnNewProcess, mockListAllProcesses, mockClearAllProcesses } from 'child_process'
-import { AppContainer } from '../../appContainer'
+import { AppContainer } from '../../appContainer.js'
 import deepExtend from 'deep-extend'
-import { WorkerAgentAPI } from '../../workerAgentApi'
+import { WorkerAgentAPI } from '../../workerAgentApi.js'
 
 export async function prepareTestEnviromnent(debugLogging: boolean): Promise<void> {
 	const config: { process: ProcessConfig } = {
@@ -96,6 +113,8 @@ export function getWorkerId(index: number): WorkerAgentId | undefined {
 }
 
 export async function resetMocks(): Promise<void> {
+	clearPrometheusRegistry()
+
 	mockClearAllProcesses()
 	//@ts-ignore mock
 	WorkerAgentAPI.mockReset()

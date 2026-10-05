@@ -1,13 +1,14 @@
-import { QuantelHTTPTransformerProxy } from './server'
 import {
 	getQuantelHTTPTransformerProxyConfig,
-	ProcessHandler,
-	initializeLogger,
-	stringifyError,
-	setupLogger,
 	HealthEndpoints,
+	initializeLogger,
+	ProcessHandler,
+	setupLogger,
 	StatusCode,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
+import { QuantelHTTPTransformerProxy } from './server.js'
 
 export { QuantelHTTPTransformerProxy }
 export async function startProcess(): Promise<void> {

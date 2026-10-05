@@ -1,13 +1,14 @@
 {
     "name": "@workforce/generic",
     "version": "1.53.0",
+    "type": "module",
     "private": true,
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "yarn rimraf dist && yarn build:main",
         "build:main": "tsc -p tsconfig.json",
-        "__test": "jest"
+        "__test": "vitest run"
     },
     "dependencies": {
         "@sofie-package-manager/api": "1.53.0",
@@ -16,7 +17,7 @@
     "devDependencies": {
         "rimraf": "^6.1.3"
     },
-    "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+    "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {
         "node": ">=24"
     },

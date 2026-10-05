@@ -1,7 +1,8 @@
 import { LoggerInstance, stringifyError } from '@sofie-package-manager/api'
-import { EvaluationRunner } from '../../evaluationRunner/evaluationRunner'
-import { InternalManager } from '../../internalManager/internalManager'
-import { ExpectationTracker } from '../expectationTracker'
+
+import { EvaluationRunner } from '../../evaluationRunner/evaluationRunner.js'
+import { InternalManager } from '../../internalManager/internalManager.js'
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /**
  * The EvaluateRunner goes through one pass of evaluation of expectations.
@@ -17,7 +18,11 @@ export class EvaluationScheduler {
 	private terminated = false
 	private logger: LoggerInstance
 
-	constructor(logger: LoggerInstance, private manager: InternalManager, private tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		private manager: InternalManager,
+		private tracker: ExpectationTracker
+	) {
 		this.logger = logger.category('Scheduler')
 	}
 

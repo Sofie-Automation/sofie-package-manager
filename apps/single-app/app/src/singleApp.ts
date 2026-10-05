@@ -1,9 +1,9 @@
-import * as HTTPServer from '@http-server/generic'
-import * as QuantelHTTPTransformerProxy from '@quantel-http-transformer-proxy/generic'
-import * as PackageManager from '@package-manager/generic'
-import * as Workforce from '@sofie-package-manager/workforce'
 import * as AppConatainerNode from '@appcontainer-node/generic'
-import { getSingleAppConfig, ProcessHandler, setupLogger, initializeLogger } from '@sofie-package-manager/api'
+import * as HTTPServer from '@http-server/generic'
+import * as PackageManager from '@package-manager/generic'
+import * as QuantelHTTPTransformerProxy from '@quantel-http-transformer-proxy/generic'
+import { getSingleAppConfig, initializeLogger, ProcessHandler, setupLogger } from '@sofie-package-manager/api'
+import * as Workforce from '@sofie-package-manager/workforce'
 
 export async function startSingleApp(): Promise<void> {
 	const config = await getSingleAppConfig()
@@ -31,7 +31,7 @@ export async function startSingleApp(): Promise<void> {
 		logger.info('Core:          ' + config.packageManager.coreHost + ':' + config.packageManager.corePort)
 	}
 	logger.info('------------------------------------------------------------------')
-	// eslint-disable-next-line no-console
+
 	console.log(JSON.stringify(config, undefined, 2))
 	logger.info('------------------------------------------------------------------')
 

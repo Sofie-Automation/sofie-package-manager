@@ -1,7 +1,8 @@
 import _ from 'underscore'
 import * as Winston from 'winston'
-import { ProcessConfig } from './config'
-import { isRunningInDevelopment, isRunningInTest, literal, stringifyError } from './lib'
+
+import { ProcessConfig } from './config.js'
+import { isRunningInDevelopment, isRunningInTest, literal, stringifyError } from './lib.js'
 
 const { combine, label, json, timestamp, printf } = Winston.format
 
@@ -141,7 +142,7 @@ export function setupLogger(
 			const customFormat = printf((o) => {
 				let str = `[${o.level}]`
 				const meta = _.omit(o, 'level', 'message', 'timestamp')
-				if (meta.label) {
+				if (typeof meta.label == 'string') {
 					str += ` [${meta.label}]`
 					delete meta.label
 				}

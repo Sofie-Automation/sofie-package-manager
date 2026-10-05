@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
-import { stringifyError } from './lib'
+
+import { stringifyError } from './lib.js'
 
 export interface ExecutableAliasSource {
 	getExecutable: (executableAlias: string) => string | undefined

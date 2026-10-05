@@ -1,4 +1,4 @@
-import { register, collectDefaultMetrics } from 'prom-client'
+import { collectDefaultMetrics, register } from 'prom-client'
 
 // Re-export types, to ensure the correct 'instance' of 'prom-client' is used
 export {

@@ -1,21 +1,25 @@
 {
     "name": "@sofie-package-manager/expectation-manager",
     "version": "1.53.0",
+    "type": "module",
     "main": "dist/index.js",
+    "exports": {
+        ".": "./dist/index.js"
+    },
     "types": "dist/index.d.ts",
     "license": "MIT",
     "scripts": {
         "build": "yarn rimraf dist && yarn build:main",
         "build:main": "tsc -p tsconfig.json",
-        "test": "jest"
+        "test": "vitest run"
     },
     "engines": {
         "node": ">=24"
     },
     "devDependencies": {
-        "jest": "^30.3.0",
         "rimraf": "^6.1.3",
-        "type-fest": "^5.4.4"
+        "type-fest": "^5.4.4",
+        "vitest": "^4.1.11"
     },
     "dependencies": {
         "@sofie-package-manager/api": "1.53.0",
@@ -23,7 +27,7 @@
         "@supercharge/promise-pool": "^3.3.0",
         "underscore": "^1.13.8"
     },
-    "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+    "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "lint-staged": {
         "*.{js,css,json,md,scss}": [
             "prettier"

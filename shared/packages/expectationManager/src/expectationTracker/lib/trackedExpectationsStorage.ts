@@ -1,6 +1,7 @@
 import { ExpectationId } from '@sofie-package-manager/api'
-import { sortTrackedExpectations, TrackedExpectation } from '../../lib/trackedExpectation'
-import { ExpectationTracker } from '../expectationTracker'
+
+import { sortTrackedExpectations, TrackedExpectation } from '../../lib/trackedExpectation.js'
+import { ExpectationTracker } from '../expectationTracker.js'
 
 /** Storage for Expectations */
 export class TrackedExpectationsStorage {

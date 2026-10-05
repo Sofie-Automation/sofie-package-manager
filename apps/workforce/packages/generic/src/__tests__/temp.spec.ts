@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest'
+
 describe('Temp', () => {
 	// This is just a placeholder, to be replaced with real tests later on
 	test('basic math', () => {

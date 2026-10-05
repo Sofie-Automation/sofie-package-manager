@@ -1,30 +1,34 @@
-import WebSocket from 'ws'
-import { stringifyError } from './lib'
+import WebSocket, { WebSocketServer as WebSocketServerClass } from 'ws'
 
+import { HelpfulEventEmitter } from './HelpfulEventEmitter.js'
+import { stringifyError } from './lib.js'
+import { LoggerInstance } from './logger.js'
+import { protectString } from './ProtectedString.js'
 import {
-	PartyId,
+	isMessageIdentifyClient,
 	MessageBase,
 	MessageIdentifyClient,
+	PartyId,
 	PING_TIME,
 	WebsocketConnection,
-	isMessageIdentifyClient,
-} from './websocketConnection'
-import { HelpfulEventEmitter } from './HelpfulEventEmitter'
-import { LoggerInstance } from './logger'
-import { protectString } from './ProtectedString'
+} from './websocketConnection.js'
 
 export type OnMessageHandler = (message: MessageBase) => Promise<any>
 
 export class WebsocketServer extends HelpfulEventEmitter {
-	private wss: WebSocket.Server
+	private wss: WebSocketServerClass
 	private clients: ClientConnection[] = []
 
 	private logger: LoggerInstance
-	constructor(port: number, logger: LoggerInstance, private onConnection: (client: ClientConnection) => void) {
+	constructor(
+		port: number,
+		logger: LoggerInstance,
+		private onConnection: (client: ClientConnection) => void
+	) {
 		super()
 		this.logger = logger.category('WebsocketServer')
 
-		this.wss = new WebSocket.Server({ port: port })
+		this.wss = new WebSocketServerClass({ port: port })
 
 		this.wss.on('listening', () => {
 			this.logger.info(`Listening on port ${port}`)

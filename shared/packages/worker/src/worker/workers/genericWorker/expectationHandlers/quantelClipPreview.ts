@@ -1,17 +1,16 @@
-import { BaseWorker } from '../../../worker'
-import { getStandardCost } from '../lib/lib'
 import {
 	Accessor,
-	hashObj,
 	Expectation,
+	hashObj,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	stringifyError,
 	startTimer,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
@@ -19,17 +18,19 @@ import {
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
+} from '../../../accessorHandlers/accessor.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker.js'
+import { getStandardCost } from '../lib/lib.js'
 import {
 	checkWorkerHasAccessToPackageContainersOnPackage,
 	lookupAccessorHandles,
 	LookupPackageContainer,
 	previewFFMpegArguments,
-} from './lib'
-import { getSourceHTTPHandle } from './lib/quantel'
-import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg'
-import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
+} from './lib.js'
+import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg.js'
+import { getSourceHTTPHandle } from './lib/quantel.js'
 
 export const QuantelClipPreview: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, worker: GenericWorker): ReturnTypeDoYouSupportExpectation {

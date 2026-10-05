@@ -1,15 +1,15 @@
 import {
-	WorkForceAppContainer,
 	AdapterServer,
 	AdapterServerOptions,
-	LogLevel,
+	AppId,
+	AppType,
+	Cost,
 	Expectation,
+	LogLevel,
 	PackageContainerExpectation,
 	Reason,
+	WorkForceAppContainer,
 	WorkforceId,
-	AppType,
-	AppId,
-	Cost,
 } from '@sofie-package-manager/api'
 
 /**

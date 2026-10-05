@@ -14,11 +14,10 @@ export async function writeSnapshot(_dir: FilePath, _snapshot: FilePath, _opts?:
 }
 
 type FilePath = string
-type GlobPattern = string
 type BackendType = 'fs-events' | 'watchman' | 'inotify' | 'windows' | 'brute-force'
 type EventType = 'create' | 'update' | 'delete'
 interface Options {
-	ignore?: (FilePath | GlobPattern)[]
+	ignore?: FilePath[]
 	backend?: BackendType
 }
 type SubscribeCallback = (err: Error | null, events: Event[]) => unknown

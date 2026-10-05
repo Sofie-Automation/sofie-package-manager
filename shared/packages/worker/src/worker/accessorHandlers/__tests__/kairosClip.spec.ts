@@ -1,3 +1,5 @@
+import { test, expect } from 'vitest'
+
 import {
 	AccessorOnPackage,
 	protectString,
@@ -6,8 +8,8 @@ import {
 	ProcessConfig,
 	Accessor,
 } from '@sofie-package-manager/api'
-import { Content, KairosClipAccessorHandle } from '../kairosClip'
-import { PassiveTestWorker } from './lib'
+import { Content, KairosClipAccessorHandle } from '../kairosClip.js'
+import { PassiveTestWorker } from './lib.js'
 import { refMediaRamRec, refMediaStill } from 'kairos-connection'
 
 const processConfig: ProcessConfig = {

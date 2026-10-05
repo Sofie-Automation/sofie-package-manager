@@ -1,5 +1,6 @@
-import { ExpectedPackageWrap } from '../../packageManager'
-import { ExpectedPackage, Expectation, PackageContainerId } from '@sofie-package-manager/api'
+import { Expectation, ExpectedPackage, PackageContainerId } from '@sofie-package-manager/api'
+
+import { ExpectedPackageWrap } from '../../packageManager.js'
 
 export type GenerateExpectation = Expectation.Any & {
 	sideEffect?: ExpectedPackage.Base['sideEffect']

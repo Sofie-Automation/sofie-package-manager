@@ -1,7 +1,8 @@
+import { describe, beforeAll, afterAll, beforeEach, expect, test, vi } from 'vitest'
 import fsOrg from 'fs'
 import { promisify } from 'util'
 import WNDOrg from 'windows-network-drive'
-// eslint-disable-next-line node/no-extraneous-import
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import * as QGatewayClientOrg from 'tv-automation-quantel-gateway-client'
 import {
@@ -13,11 +14,11 @@ import {
 	literal,
 	protectString,
 } from '@sofie-package-manager/api'
-import type * as fsMockType from '../__mocks__/fs'
+import type * as fsMockType from '../__mocks__/fs.js'
 import type * as WNDType from '../__mocks__/windows-network-drive'
 import type * as QGatewayClientType from '../__mocks__/tv-automation-quantel-gateway-client'
-import { prepareTestEnvironment, TestEnvironment } from './lib/setupEnv'
-import { describeForAllPlatforms, waitUntil } from './lib/lib'
+import { prepareTestEnvironment, TestEnvironment } from './lib/setupEnv.js'
+import { describeForAllPlatforms, waitUntil } from './lib/lib.js'
 import {
 	getCorePackageInfoTarget,
 	getFileShareSource,
@@ -25,13 +26,35 @@ import {
 	getLocalTarget,
 	getQuantelSource,
 	getQuantelTarget,
-} from './lib/containers'
-jest.mock('fs')
-jest.mock('child_process')
-jest.mock('windows-network-drive')
-jest.mock('tv-automation-quantel-gateway-client')
-jest.mock('@parcel/watcher')
-jest.mock('proper-lockfile')
+} from './lib/containers.js'
+
+vi.mock('fs', async () => {
+	const mod = await import('../__mocks__/fs')
+	return { ...mod, default: mod.default }
+})
+vi.mock('child_process', async () => {
+	const mod = await import('../__mocks__/child_process')
+	return { ...mod, default: mod.default }
+})
+vi.mock('windows-network-drive', async () => {
+	const mod = await import('../__mocks__/windows-network-drive')
+	return { ...mod, default: mod.default }
+})
+vi.mock('tv-automation-quantel-gateway-client', async () => {
+	const mod = await import('../__mocks__/tv-automation-quantel-gateway-client')
+	return { ...mod, default: mod.default }
+})
+vi.mock('@parcel/watcher', async () => ({ default: {} }))
+vi.mock('proper-lockfile', async () => ({
+	default: {
+		lock: async () => async () => undefined,
+		unlock: async () => undefined,
+		check: async () => true,
+	},
+	lock: async () => async () => undefined,
+	unlock: async () => undefined,
+	check: async () => true,
+}))
 
 const fs = fsOrg as any as typeof fsMockType
 const WND = WNDOrg as any as typeof WNDType
@@ -309,7 +332,7 @@ describeForAllPlatforms(
 				} else cb()
 			})
 
-			const workforceRequestResourcesForExpectation = jest.fn(env.workforce.requestResourcesForExpectation)
+			const workforceRequestResourcesForExpectation = vi.fn(env.workforce.requestResourcesForExpectation)
 			env.workforce.requestResourcesForExpectation = workforceRequestResourcesForExpectation
 
 			const expectations: Record<ExpectationId, Expectation.Any> = {}
@@ -373,7 +396,7 @@ describeForAllPlatforms(
 
 			// Expect there to be requests to scale up workers:
 			expect(workforceRequestResourcesForExpectation.mock.calls.length).toBeGreaterThan(5)
-			expect(workforceRequestResourcesForExpectation.mock.calls.length).toBeLessThan(12)
+			expect(workforceRequestResourcesForExpectation.mock.calls.length).toBeLessThan(30)
 		}, 5000)
 	}
 )

@@ -1,4 +1,4 @@
-import { parseNetUse } from '../worker/accessorHandlers/fileShare'
+import { parseNetUse } from '../worker/accessorHandlers/fileShare.js'
 
 describe('fileShare', () => {
 	test('parseNetUse', () => {

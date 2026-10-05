@@ -1,11 +1,11 @@
 import {
-	PackageContainerId,
+	AnyProtectedString,
+	ensureArray,
 	Expectation,
 	ExpectationId,
-	PackageContainerExpectation,
-	ensureArray,
-	AnyProtectedString,
 	objectKeys,
+	PackageContainerExpectation,
+	PackageContainerId,
 } from '@sofie-package-manager/api'
 import _ from 'underscore'
 

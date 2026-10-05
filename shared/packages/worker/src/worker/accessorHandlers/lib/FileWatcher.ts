@@ -1,7 +1,8 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
+
 import ParcelWatcher from '@parcel/watcher'
-import { HelpfulEventEmitter, assertNever, stringifyError } from '@sofie-package-manager/api'
+import { assertNever, HelpfulEventEmitter, stringifyError } from '@sofie-package-manager/api'
 
 export interface FileWatcherEvents {
 	/** Emitted whenever there is an error */
@@ -31,7 +32,10 @@ export class FileWatcher extends HelpfulEventEmitter implements IFileWatcher {
 	private delayEmitNewFileTimeoutMap = new Map<string, NodeJS.Timeout>()
 	private watcher: ParcelWatcher.AsyncSubscription | undefined = undefined
 
-	constructor(private folderPath: string, private options: Options) {
+	constructor(
+		private folderPath: string,
+		private options: Options
+	) {
 		super()
 		this.addHelpfulEventCheck('fileEvent')
 	}

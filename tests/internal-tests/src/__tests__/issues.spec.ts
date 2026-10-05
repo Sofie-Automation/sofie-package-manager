@@ -1,6 +1,7 @@
+import { describe, beforeAll, afterAll, beforeEach, afterEach, expect, test, vi } from 'vitest'
 import fsOrg from 'fs'
 import { promisify } from 'util'
-// eslint-disable-next-line node/no-extraneous-import
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import {
 	Expectation,
@@ -12,18 +13,39 @@ import {
 	protectString,
 	INNER_ACTION_TIMEOUT,
 } from '@sofie-package-manager/api'
-import type * as fsMockType from '../__mocks__/fs'
-import { prepareTestEnvironment, TestEnvironment } from './lib/setupEnv'
-import { waitUntil, waitTime, describeForAllPlatforms } from './lib/lib'
-import { getLocalSource, getLocalTarget } from './lib/containers'
+import type * as fsMockType from '../__mocks__/fs.js'
+import { prepareTestEnvironment, TestEnvironment } from './lib/setupEnv.js'
+import { waitUntil, waitTime, describeForAllPlatforms } from './lib/lib.js'
+import { getLocalSource, getLocalTarget } from './lib/containers.js'
 import { WorkerAgent } from '@sofie-package-manager/worker'
 
-jest.mock('fs')
-jest.mock('child_process')
-jest.mock('windows-network-drive')
-jest.mock('tv-automation-quantel-gateway-client')
-jest.mock('@parcel/watcher')
-jest.mock('proper-lockfile')
+vi.mock('fs', async () => {
+	const mod = await import('../__mocks__/fs')
+	return { ...mod, default: mod.default }
+})
+vi.mock('child_process', async () => {
+	const mod = await import('../__mocks__/child_process')
+	return { ...mod, default: mod.default }
+})
+vi.mock('windows-network-drive', async () => {
+	const mod = await import('../__mocks__/windows-network-drive')
+	return { ...mod, default: mod.default }
+})
+vi.mock('tv-automation-quantel-gateway-client', async () => {
+	const mod = await import('../__mocks__/tv-automation-quantel-gateway-client')
+	return { ...mod, default: mod.default }
+})
+vi.mock('@parcel/watcher', async () => ({ default: {} }))
+vi.mock('proper-lockfile', async () => ({
+	default: {
+		lock: async () => async () => undefined,
+		unlock: async () => undefined,
+		check: async () => true,
+	},
+	lock: async () => async () => undefined,
+	unlock: async () => undefined,
+	check: async () => true,
+}))
 
 const fs = fsOrg as any as typeof fsMockType
 
@@ -44,8 +66,7 @@ const fsExists = async (filePath: string) => {
 // const fsStat = promisify(fs.stat)
 
 // this test can be a bit slower in CI sometimes
-jest.setTimeout(30000)
-
+	vi.setConfig({ testTimeout: 30000 })
 const MANAGER0 = protectString<ExpectationManagerId>('manager0')
 const EXP_copy0 = protectString<ExpectationId>('copy0')
 const PACKAGE0 = protectString<ExpectedPackageId>('package0')
@@ -64,7 +85,7 @@ describeForAllPlatforms(
 			expect(fs.lstat).toBeTruthy()
 			expect(fs.__mockReset).toBeTruthy()
 
-			jest.setTimeout(env.WAIT_JOB_TIME_SAFE * 10 + env.WAIT_SCAN_TIME * 2)
+			vi.setConfig({ testTimeout: env.WAIT_JOB_TIME_SAFE * 10 + env.WAIT_SCAN_TIME * 2 })
 		})
 		afterAll(() => {
 			env.terminate()
@@ -282,7 +303,7 @@ describeForAllPlatforms(
 			fs.__mockSetFile('/sources/source0/file0Source.mp4', 1234)
 			fs.__mockSetDirectory('/targets/target0')
 			let killedWorker: WorkerAgent | undefined
-			const listenToCopyFile = jest.fn(() => {
+			const listenToCopyFile = vi.fn(() => {
 				// While the copy is underway, kill off the worker:
 				// This simulates that the worker crashes, without telling anyone.
 				killedWorker = env.workerAgents[0]
@@ -344,7 +365,7 @@ describeForAllPlatforms(
 			fs.__mockSetDirectory('/targets/target0')
 			let hasIntercepted = 0
 			let deferredCallbacks: Function[] = []
-			const listenToCopyFile = jest.fn(() => {
+			const listenToCopyFile = vi.fn(() => {
 				fs.__setCallbackInterceptor((type, cb) => {
 					if (type === 'copyFile') {
 						hasIntercepted++
@@ -409,7 +430,7 @@ describeForAllPlatforms(
 		test('Access times out, queue should continue', async () => {
 			expect(env.workerAgents).toHaveLength(1)
 
-			const listenToOpen = jest.fn(() => {
+			const listenToOpen = vi.fn(() => {
 				fs.__setCallbackInterceptor((type, cb) => {
 					if (type === 'open') {
 						// Delay the access by 500ms (less than INNER_ACTION_TIMEOUT of 1000ms)
@@ -529,7 +550,7 @@ describeForAllPlatforms(
 			fs.__mockSetDirectory('/targets/target0')
 			fs.__mockSetFile('/sources/source0/file0Source.mp4', 1234)
 
-			const listenToOpen = jest.fn(() => {
+			const listenToOpen = vi.fn(() => {
 				fs.__setCallbackInterceptor((type, cb) => {
 					if (type === 'open') {
 						// throw upon open:
@@ -541,7 +562,7 @@ describeForAllPlatforms(
 			})
 			fs.__emitter().on('open', listenToOpen)
 
-			const failurePeriodSpinDown = jest.fn()
+			const failurePeriodSpinDown = vi.fn()
 
 			env.setLogFilterFunction((level, ...args) => {
 				const str = args.join(',')

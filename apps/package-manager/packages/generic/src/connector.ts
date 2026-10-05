@@ -1,26 +1,29 @@
+import fs from 'fs'
+import path from 'path'
+import { promisify } from 'util'
+
 import {
+	Accessor,
+	AccessorId,
 	ClientConnectionOptions,
+	ExpectationManagerId,
+	ExpectedPackage,
+	ExpectedPackageId,
 	LoggerInstance,
+	objectEntries,
+	PackageContainerId,
 	PackageManagerConfig,
 	ProcessHandler,
-	stringifyError,
-	ExpectedPackage,
-	Accessor,
 	protectString,
-	ExpectationManagerId,
-	ExpectedPackageId,
-	PackageContainerId,
-	AccessorId,
-	objectEntries,
+	stringifyError,
 } from '@sofie-package-manager/api'
 import { ExpectationManager, ExpectationManagerServerOptions } from '@sofie-package-manager/expectation-manager'
-import { CoreHandler } from './coreHandler'
-import { PackageContainers, PackageManagerHandler } from './packageManager'
-import fs from 'fs'
-import { promisify } from 'util'
-import path from 'path'
-import { PackageManagerSettings } from './generated/options'
+
 import { HealthEndpoints, IConnector } from '@sofie-automation/server-core-integration'
+
+import { CoreHandler } from './coreHandler.js'
+import { PackageManagerSettings } from './generated/options.js'
+import { PackageContainers, PackageManagerHandler } from './packageManager.js'
 
 const fsAccess = promisify(fs.access)
 const fsReadFile = promisify(fs.readFile)
@@ -48,7 +51,11 @@ export class Connector implements IConnector {
 	private coreHandler: CoreHandler
 
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private config: PackageManagerConfig, private _process: ProcessHandler) {
+	constructor(
+		logger: LoggerInstance,
+		private config: PackageManagerConfig,
+		private _process: ProcessHandler
+	) {
 		this.logger = logger.category('Conn')
 		this.coreHandler = new CoreHandler(this.logger, this.config.packageManager)
 
@@ -59,14 +66,14 @@ export class Connector implements IConnector {
 				? {
 						type: 'websocket',
 						port: config.packageManager.port,
-				  }
+					}
 				: { type: 'internal' }
 
 		const workForceConnectionOptions: ClientConnectionOptions = config.packageManager.workforceURL
 			? {
 					type: 'websocket',
 					url: config.packageManager.workforceURL,
-			  }
+				}
 			: { type: 'internal' }
 
 		this.packageManagerHandler = new PackageManagerHandler(
@@ -115,7 +122,7 @@ export class Connector implements IConnector {
 
 			this.logger.info('Shutting down in 10 seconds!')
 			setTimeout(() => {
-				// eslint-disable-next-line no-process-exit
+				// eslint-disable-next-line n/no-process-exit
 				process.exit(0)
 			}, 10 * 1000)
 			return

@@ -1,12 +1,13 @@
-import { Connector } from './connector'
 import {
 	getPackageManagerConfig,
+	initializeLogger,
 	LoggerInstance,
 	ProcessHandler,
 	setupLogger,
-	initializeLogger,
 	stringifyError,
 } from '@sofie-package-manager/api'
+
+import { Connector } from './connector.js'
 
 export { Connector }
 

@@ -1,5 +1,6 @@
-import { Readable } from 'stream'
-import { CTXPost } from '../lib'
+import { Readable } from 'node:stream'
+
+import { CTXPost } from '../lib.js'
 
 export abstract class Storage {
 	abstract init(): Promise<void>

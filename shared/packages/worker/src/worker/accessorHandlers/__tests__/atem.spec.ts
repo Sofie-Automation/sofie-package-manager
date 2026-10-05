@@ -1,10 +1,12 @@
-import path from 'path'
-import { copyFile, mkdtemp, readdir } from 'fs/promises'
-import { runForEachFFMpegRelease, SamplesDir } from '../../../__tests__/ffmpegHelper'
+import { describe, expect, afterEach, beforeEach, it } from 'vitest'
+
+import path from 'node:path'
+import { copyFile, mkdtemp, readdir } from 'node:fs/promises'
+import { runForEachFFMpegRelease, SamplesDir } from '../../../__tests__/ffmpegHelper.js'
 import { rimraf } from 'rimraf'
-import { tmpdir } from 'os'
-import { ATEMAccessorHandle } from '../atem'
-import { PassiveTestWorker } from './lib'
+import { tmpdir } from 'node:os'
+import { ATEMAccessorHandle } from '../atem.js'
+import { PassiveTestWorker } from './lib.js'
 import { initializeLogger, ProcessConfig, protectString, setupLogger } from '@sofie-package-manager/api'
 
 async function copyToTmpDir(inputFile: string): Promise<{ tmpDir: string; copiedFile: string }> {

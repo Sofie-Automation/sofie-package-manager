@@ -1,3 +1,5 @@
+import { describe, beforeAll, afterAll } from 'vitest'
+
 import { startTimer } from '@sofie-package-manager/api'
 
 export function waitTime(ms: number): Promise<void> {

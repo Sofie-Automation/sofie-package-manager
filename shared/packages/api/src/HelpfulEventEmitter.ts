@@ -1,6 +1,6 @@
-import EventEmitter from 'events'
-import { isRunningInTest } from './lib'
-/* eslint-disable no-console */
+import EventEmitter from 'node:events'
+
+import { isRunningInTest } from './lib.js'
 
 /** An EventEmitter which does a check that you've remembered to listen to the 'error' event */
 export class HelpfulEventEmitter extends EventEmitter {

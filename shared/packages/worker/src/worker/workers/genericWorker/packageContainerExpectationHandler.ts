@@ -1,20 +1,20 @@
 import {
 	Accessor,
+	assertNever,
+	KnownReason,
 	PackageContainer,
-	PackageContainerOnPackage,
 	PackageContainerExpectation,
+	PackageContainerId,
+	PackageContainerOnPackage,
+	Reason,
 	ReturnTypeDoYouSupportPackageContainer,
 	ReturnTypeRunPackageContainerCronJob,
-	Reason,
-	assertNever,
-	PackageContainerId,
-	KnownReason,
 } from '@sofie-package-manager/api'
 
-import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from '../../accessorHandlers/genericHandle'
-import { BaseWorker } from '../../worker'
-import { lookupAccessorHandles, LookupChecks } from './expectationHandlers/lib'
-import { ACCESSOR_DUMMY_CONTENT, findBestAccessorOnPackageContainer } from './lib/lib'
+import { GenericAccessorHandle, SetupPackageContainerMonitorsResult } from '../../accessorHandlers/genericHandle.js'
+import { BaseWorker } from '../../worker.js'
+import { lookupAccessorHandles, LookupChecks } from './expectationHandlers/lib.js'
+import { ACCESSOR_DUMMY_CONTENT, findBestAccessorOnPackageContainer } from './lib/lib.js'
 
 export async function doYouSupportPackageContainer(
 	packageContainer: PackageContainerExpectation,
@@ -89,7 +89,7 @@ async function lookupPackageContainer(
 		{
 			containerId: packageContainer.id,
 			label: packageContainer.label,
-			accessors: packageContainer.accessors as PackageContainerOnPackage['accessors'],
+			accessors: packageContainer.accessors,
 		},
 	]
 

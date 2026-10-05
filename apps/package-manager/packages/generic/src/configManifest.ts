@@ -1,6 +1,6 @@
 import { DeviceConfigManifest, JSONBlobStringify, JSONSchema } from '@sofie-automation/server-core-integration'
 
-import ConfigSchemaJSON = require('./$schemas/options.json')
+import ConfigSchemaJSON from './$schemas/options.json' with { type: 'json' }
 
 export const PACKAGE_MANAGER_DEVICE_CONFIG: DeviceConfigManifest = {
 	deviceConfigSchema: JSONBlobStringify<JSONSchema>(ConfigSchemaJSON as any),

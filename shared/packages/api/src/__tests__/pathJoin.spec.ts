@@ -1,4 +1,6 @@
-import { rebaseUrl } from '../pathJoin'
+import { test, expect } from 'vitest'
+
+import { rebaseUrl } from '../pathJoin.js'
 test('rebaseUrl', () => {
 	expect(rebaseUrl('https://a', 'b')).toBe('https://a/b')
 	expect(rebaseUrl('https://a/', 'b')).toBe('https://a/b')

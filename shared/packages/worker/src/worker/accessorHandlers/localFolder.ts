@@ -1,40 +1,42 @@
-import path from 'path'
-import { promisify } from 'util'
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
+import { PassThrough } from 'node:stream'
+import { promisify } from 'node:util'
+
 import {
-	PackageReadInfo,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
-	AccessorHandlerRunCronJobResult,
+	Accessor,
+	AccessorOnPackage,
+	assertNever,
+	betterPathIsAbsolute,
+	betterPathResolve,
+	Expectation,
+	MonitorId,
+	PackageContainerExpectation,
+	protectString,
+	Reason,
+	stringifyError,
+} from '@sofie-package-manager/api'
+
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
 	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
 	AccessorHandlerTryPackageReadResult,
 	GenericAccessorHandle,
 	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	PackageContainerExpectation,
-	assertNever,
-	Reason,
-	stringifyError,
-	MonitorId,
-	protectString,
-	betterPathResolve,
-	betterPathIsAbsolute,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler'
-import { MonitorInProgress } from '../lib/monitorInProgress'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-import { PassThrough } from 'stream'
+	PackageReadInfo,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { GenericFileAccessorHandle, LocalFolderAccessorHandleType } from './lib/FileHandler.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -310,7 +312,7 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 				encoding: 'utf-8',
 			})
 			return JSON.parse(text)
-		} catch (err) {
+		} catch {
 			// File doesn't exist
 			return undefined
 		}
@@ -361,9 +363,8 @@ export class LocalFolderAccessorHandle<Metadata> extends GenericFileAccessorHand
 		for (const monitorIdStr of monitorIds) {
 			if (monitorIdStr === 'packages') {
 				// setup file monitor:
-				resultingMonitors[protectString<MonitorId>(monitorIdStr)] = await this.setupPackagesMonitor(
-					packageContainerExp
-				)
+				resultingMonitors[protectString<MonitorId>(monitorIdStr)] =
+					await this.setupPackagesMonitor(packageContainerExp)
 			} else {
 				// Assert that cronjob is of type "never", to ensure that all types of monitors are handled:
 				assertNever(monitorIdStr)

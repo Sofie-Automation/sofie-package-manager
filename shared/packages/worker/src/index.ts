@@ -1,2 +1,2 @@
-export * from './workerAgent'
-export * from './worker/lib/workInProgress'
+export * from './workerAgent.js'
+export * from './worker/lib/workInProgress.js'

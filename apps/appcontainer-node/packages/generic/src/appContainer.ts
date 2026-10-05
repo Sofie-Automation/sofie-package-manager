@@ -1,47 +1,49 @@
 import * as cp from 'child_process'
-import * as path from 'path'
 import * as fs from 'fs'
-import _ from 'underscore'
+import * as path from 'path'
+
 import {
-	LoggerInstance,
-	AppContainerProcessConfig,
-	ClientConnectionOptions,
-	LogLevel,
-	WebsocketServer,
-	ClientConnection,
-	AppContainerWorkerAgent,
-	assertNever,
-	Expectation,
-	waitTime,
 	APPCONTAINER_PING_TIME,
-	PackageContainerExpectation,
-	Reason,
-	stringifyError,
-	isNodeRunningInDebugMode,
-	INNER_ACTION_TIMEOUT,
-	DataStore,
-	literal,
-	WorkForceAppContainer,
-	mapEntries,
-	findValue,
 	AppContainerId,
-	AppType,
+	AppContainerProcessConfig,
+	AppContainerWorkerAgent,
 	AppId,
-	WorkerAgentId,
-	unprotectString,
-	DataId,
-	LockId,
-	protectString,
+	AppType,
+	assertNever,
+	ClientConnection,
+	ClientConnectionOptions,
 	Cost,
-	LeveledLogMethodLight,
+	DataId,
+	DataStore,
+	Expectation,
+	findValue,
+	INNER_ACTION_TIMEOUT,
+	isNodeRunningInDebugMode,
 	isRunningInDevelopment,
 	isRunningInTest,
+	LeveledLogMethodLight,
+	literal,
+	LockId,
+	LoggerInstance,
+	LogLevel,
+	mapEntries,
 	MetricsGauge,
+	PackageContainerExpectation,
+	protectString,
+	Reason,
+	stringifyError,
+	unprotectString,
+	waitTime,
+	WebsocketServer,
+	WorkerAgentId,
+	WorkForceAppContainer,
 } from '@sofie-package-manager/api'
+import _ from 'underscore'
 
-import { WorkforceAPI } from './workforceApi'
-import { WorkerAgentAPI } from './workerAgentApi'
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { WorkerAgentAPI } from './workerAgentApi.js'
+import { WorkforceAPI } from './workforceApi.js'
 
 /** Mimimum time between app restarts */
 const RESTART_COOLDOWN = 60 * 1000 // ms
@@ -73,7 +75,10 @@ export class AppContainer {
 
 	private logger: LoggerInstance
 
-	constructor(logger: LoggerInstance, private config: AppContainerProcessConfig) {
+	constructor(
+		logger: LoggerInstance,
+		private config: AppContainerProcessConfig
+	) {
 		this.logger = logger.category('AppContainer')
 		this.id = config.appContainer.appContainerId
 
@@ -168,10 +173,10 @@ export class AppContainer {
 			? {
 					type: 'websocket',
 					url: this.config.appContainer.workforceURL,
-			  }
+				}
 			: {
 					type: 'internal',
-			  }
+				}
 
 		process.on('exit', (code) => {
 			this.logger.info(`Closing with exitCode ${code}`)
@@ -429,7 +434,7 @@ export class AppContainer {
 	async _debugKill(): Promise<void> {
 		// This is for testing purposes only
 		setTimeout(() => {
-			// eslint-disable-next-line no-process-exit
+			// eslint-disable-next-line n/no-process-exit
 			process.exit(42)
 		}, 1)
 	}

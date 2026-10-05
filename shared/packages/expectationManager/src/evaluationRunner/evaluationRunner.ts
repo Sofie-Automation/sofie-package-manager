@@ -1,5 +1,3 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import {
 	diff,
 	ExpectationId,
@@ -8,17 +6,20 @@ import {
 	objectEntries,
 	objectSize,
 	Reason,
+	startTimer,
 	StatusCode,
 	stringifyError,
-	startTimer,
 } from '@sofie-package-manager/api'
 import { PromisePool } from '@supercharge/promise-pool'
 import _ from 'underscore'
-import { evaluateExpectationState } from './evaluateExpectationState'
-import { InternalManager } from '../internalManager/internalManager'
-import { ExpectationTracker } from '../expectationTracker/expectationTracker'
-import { expLabel, getDefaultTrackedExpectation, TrackedExpectation } from '../lib/trackedExpectation'
-import { TrackedPackageContainerExpectation } from '../lib/trackedPackageContainerExpectation'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { ExpectationTracker } from '../expectationTracker/expectationTracker.js'
+import { InternalManager } from '../internalManager/internalManager.js'
+import { expLabel, getDefaultTrackedExpectation, TrackedExpectation } from '../lib/trackedExpectation.js'
+import { TrackedPackageContainerExpectation } from '../lib/trackedPackageContainerExpectation.js'
+import { evaluateExpectationState } from './evaluateExpectationState.js'
 
 /**
  * The EvaluationRunner goes through one pass of evaluation of expectations.
@@ -32,7 +33,11 @@ export class EvaluationRunner {
 	public logger: LoggerInstance
 	private instanceId: number
 
-	constructor(logger: LoggerInstance, public manager: InternalManager, public tracker: ExpectationTracker) {
+	constructor(
+		logger: LoggerInstance,
+		public manager: InternalManager,
+		public tracker: ExpectationTracker
+	) {
 		this.instanceId = EvaluationRunner.instanceId++
 		this.logger = logger.category(`Runner_${this.instanceId}`)
 	}

@@ -1,13 +1,13 @@
 import {
 	AdapterClient,
-	LoggerInstance,
 	AppContainerWorkerAgent,
-	WorkerAgentId,
-	DataId,
-	LockId,
-	protectString,
 	ClientConnectionOptions,
+	DataId,
 	Hook,
+	LockId,
+	LoggerInstance,
+	protectString,
+	WorkerAgentId,
 } from '@sofie-package-manager/api'
 
 /**
@@ -21,7 +21,10 @@ export class DummyAppContainerAPI
 {
 	private workerStorage: Map<DataId, any> = new Map()
 
-	constructor(public id: WorkerAgentId, logger: LoggerInstance) {
+	constructor(
+		public id: WorkerAgentId,
+		logger: LoggerInstance
+	) {
 		super(logger, id, 'N/A')
 		this.on('error', () => {
 			// an empty error handler to avoid HelpfulEventEmitter complaining

@@ -1,7 +1,15 @@
-import path from 'path'
-import { LocalFolderAccessorHandle } from '../worker/accessorHandlers/localFolder'
-import { overrideFFMpegExecutables, spawnFFMpeg } from '../worker/workers/genericWorker/expectationHandlers/lib/ffmpeg'
+import { describe, expect, test, beforeEach, afterAll } from 'vitest'
+
+import path from 'node:path'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
+import { LocalFolderAccessorHandle } from '../worker/accessorHandlers/localFolder.js'
+import { overrideFFMpegExecutables, spawnFFMpeg } from '../worker/workers/genericWorker/expectationHandlers/lib/ffmpeg.js'
 import { ExecutableAliasSource } from '@sofie-package-manager/api'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
 
 export const SamplesDir = path.join(__dirname, '../../../../../tests/samples')
 

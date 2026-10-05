@@ -1,8 +1,11 @@
-import { app, ipcMain } from 'electron'
 import * as fs from 'fs'
+
 import { LoggerInstance, testFFMpeg } from '@sofie-package-manager/api'
+import { app, ipcMain } from 'electron'
+
 import { sleep } from '@sofie-automation/shared-lib/dist/lib/lib'
-import { BrowserRenderer } from './BrowserRenderer'
+
+import { BrowserRenderer } from './BrowserRenderer.js'
 
 export interface RenderHTMLOptions {
 	logger: LoggerInstance
@@ -57,7 +60,7 @@ export async function renderHTML(options: RenderHTMLOptions): Promise<{
 
 		const logger = options.logger.category('RenderHTML')
 		ipcMain.on('console', function (sender, type, args) {
-			logger.debug(`Electron: ${sender}, ${type}, ${args}`)
+			logger.debug(`Electron: ${JSON.stringify(sender)}, ${type}, ${args}`)
 		})
 
 		const renderer = new BrowserRenderer(logger, options)
@@ -132,7 +135,6 @@ export async function renderHTML(options: RenderHTMLOptions): Promise<{
 			exitCode,
 		}
 	} catch (e) {
-		// eslint-disable-next-line no-console
 		console.error(e)
 		return {
 			app: app,

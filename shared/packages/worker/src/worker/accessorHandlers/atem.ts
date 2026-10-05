@@ -1,41 +1,44 @@
+import { execFile } from 'child_process'
+import * as crypto from 'node:crypto'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import { promisify } from 'node:util'
+
 import {
-	GenericAccessorHandle,
-	PackageReadInfo,
-	PackageReadStream,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
+	Accessor,
+	AccessorOnPackage,
+	escapeFilePath,
+	Expectation,
+	getFFMpegExecutable,
+	getFFProbeExecutable,
+	stringifyError,
+} from '@sofie-package-manager/api'
+import { Atem, AtemConnectionStatus, Util as AtemUtil } from 'atem-connection'
+import tmp from 'tmp'
+import type { ClipBank } from 'atem-connection/dist/state/media.d.ts'
+
+import { MAX_EXEC_BUFFER } from '../lib/lib.js'
+import { BaseWorker } from '../worker.js'
+import { UniversalVersion } from '../workers/genericWorker/lib/lib.js'
+import { ProgressParts } from '../workers/genericWorker/lib/progressParts.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
 	AccessorHandlerCheckPackageReadAccessResult,
-	AccessorHandlerTryPackageReadResult,
 	AccessorHandlerRunCronJobResult,
+	AccessorHandlerTryPackageReadResult,
+	GenericAccessorHandle,
 	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Expectation,
-	Accessor,
-	AccessorOnPackage,
-	escapeFilePath,
-	getFFProbeExecutable,
-	getFFMpegExecutable,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { Atem, AtemConnectionStatus, Util as AtemUtil } from 'atem-connection'
-import { ClipBank } from 'atem-connection/dist/state/media'
-import * as crypto from 'crypto'
-import { execFile } from 'child_process'
-import tmp from 'tmp'
-import * as fs from 'fs'
-import * as path from 'path'
-import { promisify } from 'util'
-import { UniversalVersion } from '../workers/genericWorker/lib/lib'
-import { MAX_EXEC_BUFFER } from '../lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-import { ProgressParts } from '../workers/genericWorker/lib/progressParts'
+	PackageReadInfo,
+	PackageReadStream,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 const fsReadFile = promisify(fs.readFile)
 
@@ -534,7 +537,11 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 				},
 				(error, stdout) => {
 					if (error) {
-						reject(error)
+						reject(
+							new Error('FFProbe executable error: ' + stringifyError(error), {
+								cause: error,
+							})
+						)
 					} else {
 						resolve(stdout)
 					}
@@ -555,7 +562,11 @@ export class ATEMAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata
 				},
 				(error, stdout) => {
 					if (error) {
-						reject(error)
+						reject(
+							new Error('FFMpeg executable error: ' + stringifyError(error), {
+								cause: error,
+							})
+						)
 					} else {
 						resolve(stdout)
 					}
@@ -653,7 +664,7 @@ async function stream2Disk(sourceStream: NodeJS.ReadableStream, outputFile: stri
 			}
 			handled = true
 			writeStream.end()
-			reject(error)
+			reject(new Error('Stream error: ' + stringifyError(error), { cause: error }))
 		})
 		writeStream.on('error', (error) => {
 			if (handled) {
@@ -661,7 +672,7 @@ async function stream2Disk(sourceStream: NodeJS.ReadableStream, outputFile: stri
 			}
 			handled = true
 			writeStream.end()
-			reject(error)
+			reject(new Error('Write stream error: ' + stringifyError(error), { cause: error }))
 		})
 		writeStream.on('finish', () => {
 			if (handled) {

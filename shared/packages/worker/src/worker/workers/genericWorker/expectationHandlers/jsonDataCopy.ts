@@ -1,17 +1,16 @@
-import { BaseWorker } from '../../../worker'
-import { UniversalVersion, compareUniversalVersions, makeUniversalVersion, getStandardCost } from '../lib/lib'
 import {
 	Accessor,
-	hashObj,
 	Expectation,
+	hashObj,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	stringifyError,
 	startTimer,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
 import {
 	isCorePackageInfoAccessorHandle,
 	isFileShareAccessorHandle,
@@ -20,12 +19,18 @@ import {
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle'
-import { PackageInfoType } from './lib/coreApi'
-import { ExpectationHandlerGenericWorker } from '../genericWorker'
+} from '../../../accessorHandlers/accessor.js'
+import { PackageReadStream, PutPackageHandler } from '../../../accessorHandlers/genericHandle.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker } from '../genericWorker.js'
+import { compareUniversalVersions, getStandardCost, makeUniversalVersion, UniversalVersion } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
+import { PackageInfoType } from './lib/coreApi.js'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer
@@ -238,11 +243,13 @@ export const JsonDataCopy: ExpectationHandlerGenericWorker = {
 
 								const jsonString = Buffer.concat(readChunks).toString('utf8')
 
-								let jsonData: any = undefined
+								let jsonData: any
 								try {
 									jsonData = JSON.parse(jsonString)
 								} catch (err) {
-									throw new Error(`Error parsing JSON: ${err}`)
+									throw new Error(`Error parsing JSON: ${err}`, {
+										cause: err,
+									})
 								}
 								const saveOperation = await targetHandle.prepareForOperation(
 									'Copy JSON.Data',
@@ -306,7 +313,9 @@ export const JsonDataCopy: ExpectationHandlerGenericWorker = {
 							targetHandle
 								.removePackage('work cancelled')
 								.then(() => resolve())
-								.catch((err) => reject(err))
+								.catch((err) =>
+									reject(new Error(`Failed to remove package: ${err.message}`, { cause: err }))
+								)
 						})
 						sourceStream?.cancel()
 						writeStream?.abort()

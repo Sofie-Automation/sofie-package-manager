@@ -1,7 +1,8 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { assertNever, ExpectationManagerStatusReport } from '@sofie-package-manager/api'
-import { InternalManager } from '../internalManager'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { InternalManager } from '../internalManager.js'
 
 /**  */
 export class StatusReportCache {

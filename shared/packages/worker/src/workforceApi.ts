@@ -3,8 +3,8 @@ import {
 	ExpectationManagerId,
 	LoggerInstance,
 	URLMap,
-	WorkForceWorkerAgent,
 	WorkerAgentId,
+	WorkForceWorkerAgent,
 } from '@sofie-package-manager/api'
 
 /**
@@ -16,7 +16,10 @@ export class WorkforceAPI
 	extends AdapterClient<WorkForceWorkerAgent.WorkerAgent, WorkForceWorkerAgent.WorkForce>
 	implements WorkForceWorkerAgent.WorkForce
 {
-	constructor(public id: WorkerAgentId, logger: LoggerInstance) {
+	constructor(
+		public id: WorkerAgentId,
+		logger: LoggerInstance
+	) {
 		super(logger.category('WorkforceAPI'), id, 'workerAgent')
 	}
 	async getExpectationManagerList(): Promise<{ id: ExpectationManagerId; urls: URLMap }[]> {

@@ -1,9 +1,9 @@
-import { HelpfulEventEmitter } from './HelpfulEventEmitter'
-import { promiseTimeout, stringifyError } from './lib'
-import { LoggerInstance } from './logger'
-import { WebsocketClient } from './websocketClient'
-import { Hook, MessageBase, MessageIdentifyClient, ACTION_TIMEOUT } from './websocketConnection'
-import { MethodsInterfaceBase } from './methods'
+import { HelpfulEventEmitter } from './HelpfulEventEmitter.js'
+import { promiseTimeout, stringifyError } from './lib.js'
+import { LoggerInstance } from './logger.js'
+import { MethodsInterfaceBase } from './methods.js'
+import { WebsocketClient } from './websocketClient.js'
+import { ACTION_TIMEOUT, Hook, MessageBase, MessageIdentifyClient } from './websocketConnection.js'
 
 /**
  * The AdapterClient's sub-classes are used to connect to an AdapterServer in order to provide type-safe communication between processes (using web-sockets),
@@ -12,7 +12,7 @@ import { MethodsInterfaceBase } from './methods'
  */
 export abstract class AdapterClient<
 	ME extends MethodsInterfaceBase,
-	OTHER extends MethodsInterfaceBase
+	OTHER extends MethodsInterfaceBase,
 > extends HelpfulEventEmitter {
 	/** Used for internal connections */
 	private serverHook?: Hook<OTHER, ME>
@@ -97,7 +97,9 @@ export abstract class AdapterClient<
 							this.timeoutMessage(timeoutDuration, type, args)
 						)
 					} catch (err) {
-						throw new Error(`Error when executing method "${String(type)}": ${stringifyError(err)}`)
+						throw new Error(`Error when executing method "${String(type)}": ${stringifyError(err)}`, {
+							cause: err,
+						})
 					}
 				} else {
 					throw new Error(`Unknown method "${String(type)}"`)

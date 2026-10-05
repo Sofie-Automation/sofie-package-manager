@@ -1,17 +1,19 @@
 import fs from 'fs'
+import { Readable } from 'node:stream'
 import path from 'path'
 import { promisify } from 'util'
-import mime from 'mime-types'
-import prettyBytes from 'pretty-bytes'
-import { asyncPipe, CTXPost } from '../lib'
+
 import {
 	betterPathResolve,
 	HTTPServerConfig,
 	LoggerInstance,
 	resolveFileWithoutExtension,
 } from '@sofie-package-manager/api'
-import { BadResponse, PackageInfo, ResponseMeta, Storage } from './storage'
-import { Readable } from 'stream'
+import mime from 'mime-types'
+import prettyBytes from 'pretty-bytes'
+
+import { asyncPipe, CTXPost } from '../lib.js'
+import { BadResponse, PackageInfo, ResponseMeta, Storage } from './storage.js'
 
 // Note: Explicit types here, due to that for some strange reason, promisify wont pass through the correct typings.
 const fsStat = promisify(fs.stat)
@@ -34,7 +36,10 @@ type FileInfo = {
 export class FileStorage extends Storage {
 	private _basePath: string
 	private logger: LoggerInstance
-	constructor(logger: LoggerInstance, private config: HTTPServerConfig) {
+	constructor(
+		logger: LoggerInstance,
+		private config: HTTPServerConfig
+	) {
 		super()
 		this._basePath = betterPathResolve(this.config.httpServer.basePath)
 		this.logger = logger.category('FileStorage')

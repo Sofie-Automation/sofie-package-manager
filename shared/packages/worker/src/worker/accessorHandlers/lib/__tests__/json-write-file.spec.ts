@@ -1,23 +1,25 @@
-import { GenericFileHandler } from '../GenericFileHandler'
-import { JSONWriteHandler, JSONWriteFilesLockHandler, JSONWriteFilesBestEffortHandler } from '../json-write-file'
-import { promises as fs } from 'fs'
-import * as path from 'path'
+import { describe, expect, beforeEach, afterEach, test, vi } from 'vitest'
 
-const logger = {
-	error: jest.fn((message: string) => console.log('ERROR', message)),
-	warn: jest.fn((message: string) => console.log('WARNING', message)),
-	debug: jest.fn((message: string) => {
+import { GenericFileHandler } from '../GenericFileHandler.js'
+import { JSONWriteHandler, JSONWriteFilesLockHandler, JSONWriteFilesBestEffortHandler } from '../json-write-file.js'
+import { promises as fs } from 'node:fs'
+import * as path from 'node:path'
+
+const logger = vi.hoisted(() => ({
+	error: vi.fn((message: string) => console.log('ERROR', message)),
+	warn: vi.fn((message: string) => console.log('WARNING', message)),
+	debug: vi.fn((message: string) => {
 		// suppress noisy log
 		if (message.includes('File is already locked')) return
 		if (message.includes('File was locked by someone else')) return
 		if (message.includes('Unable to parse Lock file content')) return
 		console.log('DEBUG', message)
 	}),
-	silly: jest.fn((message: string) => console.log('SILLY', message)),
+	silly: vi.fn((message: string) => console.log('SILLY', message)),
 	category: () => logger,
-}
+}))
 
-const fileHandler: GenericFileHandler = {
+const fileHandler: GenericFileHandler = vi.hoisted(() => ({
 	logOperation: (_message: string) => {},
 	getFullPath: (filePath: string) => `${filePath}`,
 	unlinkIfExists: async (_fullPath: string) => {
@@ -59,7 +61,7 @@ const fileHandler: GenericFileHandler = {
 		throw new Error('removeDirIfExists Not implemented')
 	},
 	rename: async (from: string, to: string) => fs.rename(from, to),
-}
+}))
 
 describe('JSONWriteFilesLockHandler', () => {
 	const FILE_NAME = path.resolve('file_a.json')
@@ -80,7 +82,7 @@ describe('JSONWriteFilesLockHandler', () => {
 	const writeHandler = new JSONWriteFilesLockHandler(fileHandler, logger as any)
 
 	test('updateJSONFile: single write', async () => {
-		const cbManipulate = jest.fn(() => {
+		const cbManipulate = vi.fn(() => {
 			return {
 				a: 1,
 			}
@@ -99,7 +101,7 @@ describe('JSONWriteFilesLockHandler', () => {
 	})
 
 	test('updateJSONFile: 2 writes', async () => {
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('a')
 			return o
@@ -118,7 +120,7 @@ describe('JSONWriteFilesLockHandler', () => {
 		expect(logger.warn).toHaveBeenCalledTimes(0)
 	})
 	test('updateJSONFile: 15 writes', async () => {
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('b')
 			return o
@@ -158,7 +160,7 @@ describe('JSONWriteFilesLockHandler', () => {
 	})
 
 	test('updateJSONFileBatch: single write', async () => {
-		const cbManipulate = jest.fn(() => {
+		const cbManipulate = vi.fn(() => {
 			return {
 				b: 1,
 			}
@@ -179,7 +181,7 @@ describe('JSONWriteFilesLockHandler', () => {
 		const v = await readIfExists(FILE_NAME)
 		expect(v).toBe(undefined)
 
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('a')
 			return o
@@ -200,7 +202,7 @@ describe('JSONWriteFilesLockHandler', () => {
 		expect(logger.warn).toHaveBeenCalledTimes(0)
 	})
 	test('updateJSONFileBatch: 20 writes', async () => {
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('a')
 			return o
@@ -242,7 +244,7 @@ describe('JSONWriteFilesBestEffortHandler', () => {
 	const writeHandler = new JSONWriteFilesBestEffortHandler(fileHandler, logger as any)
 
 	test('updateJSONFile: single write', async () => {
-		const cbManipulate = jest.fn(() => {
+		const cbManipulate = vi.fn(() => {
 			return {
 				a: 1,
 			}
@@ -261,7 +263,7 @@ describe('JSONWriteFilesBestEffortHandler', () => {
 	})
 
 	test('updateJSONFile: 2 writes', async () => {
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('a')
 			return o
@@ -280,7 +282,7 @@ describe('JSONWriteFilesBestEffortHandler', () => {
 		expect(logger.warn).toHaveBeenCalledTimes(0)
 	})
 	test('updateJSONFile: 15 writes', async () => {
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('b')
 			return o
@@ -321,7 +323,7 @@ describe('JSONWriteFilesBestEffortHandler', () => {
 	})
 
 	test('updateJSONFileBatch: single write', async () => {
-		const cbManipulate = jest.fn(() => {
+		const cbManipulate = vi.fn(() => {
 			return {
 				b: 1,
 			}
@@ -342,7 +344,7 @@ describe('JSONWriteFilesBestEffortHandler', () => {
 		const v = await readIfExists(FILE_NAME)
 		expect(v).toBe(undefined)
 
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('a')
 			return o
@@ -363,7 +365,7 @@ describe('JSONWriteFilesBestEffortHandler', () => {
 		expect(logger.warn).toHaveBeenCalledTimes(0)
 	})
 	test('updateJSONFileBatch: 20 writes', async () => {
-		const cbManipulate = jest.fn((o) => {
+		const cbManipulate = vi.fn((o) => {
 			o = o || []
 			o.push('a')
 			return o

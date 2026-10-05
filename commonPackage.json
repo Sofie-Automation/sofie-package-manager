@@ -3,7 +3,7 @@
 	"engines": {
 		"node": ">=24"
 	},
-	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+	"prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
 	"lint-staged": {
 		"*.{js,css,json,md,scss}": [
 			"prettier"

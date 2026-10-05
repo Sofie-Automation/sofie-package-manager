@@ -1,12 +1,12 @@
 import {
-	AppContainerWorkerAgent,
 	AdapterServer,
 	AdapterServerOptions,
-	LogLevel,
-	Expectation,
-	ReturnTypeDoYouSupportExpectation,
-	PackageContainerExpectation,
 	AppContainerId,
+	AppContainerWorkerAgent,
+	Expectation,
+	LogLevel,
+	PackageContainerExpectation,
+	ReturnTypeDoYouSupportExpectation,
 } from '@sofie-package-manager/api'
 
 /**

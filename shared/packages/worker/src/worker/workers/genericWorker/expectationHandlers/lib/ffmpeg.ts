@@ -1,31 +1,33 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import path from 'path'
 import { mkdir as fsMkDir } from 'fs/promises'
+import path from 'path'
+
+import {
+	assertNever,
+	escapeFilePath,
+	ExecutableAliasSource,
+	FFMpegProcess,
+	getFFMpegExecutable,
+	getFFProbeExecutable,
+	overrideFFMpegExecutables,
+	stringifyError,
+	testFFMpeg,
+	testFFProbe,
+} from '@sofie-package-manager/api'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../../accessorHandlers/accessor'
-import { FileShareAccessorHandle } from '../../../../accessorHandlers/fileShare'
-import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy'
-import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder'
-import {
-	assertNever,
-	escapeFilePath,
-	stringifyError,
-	FFMpegProcess,
-	getFFMpegExecutable,
-	testFFMpeg,
-	testFFProbe,
-	overrideFFMpegExecutables,
-	getFFProbeExecutable,
-	ExecutableAliasSource,
-} from '@sofie-package-manager/api'
-import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp'
-import { BaseWorker } from '../../../../worker'
-import { S3AccessorHandle } from '../../../../accessorHandlers/s3'
+} from '../../../../accessorHandlers/accessor.js'
+import { FileShareAccessorHandle } from '../../../../accessorHandlers/fileShare.js'
+import { FTPAccessorHandle } from '../../../../accessorHandlers/ftp.js'
+import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy.js'
+import { LocalFolderAccessorHandle } from '../../../../accessorHandlers/localFolder.js'
+import { S3AccessorHandle } from '../../../../accessorHandlers/s3.js'
+import { BaseWorker } from '../../../../worker.js'
 
 export { FFMpegProcess, testFFMpeg, testFFProbe, overrideFFMpegExecutables, getFFProbeExecutable, getFFMpegExecutable }
 
@@ -150,7 +152,7 @@ function spawnFFMpegProcess<Metadata>(props: {
 		try {
 			ffMpegProcess?.stdin?.write('q') // send "q" to quit, because .kill() doesn't quite do it.
 			ffMpegProcess?.kill()
-		} catch (e) {
+		} catch {
 			// This is probably OK, errors likely means that the process is already dead
 		}
 		ffMpegProcess = undefined

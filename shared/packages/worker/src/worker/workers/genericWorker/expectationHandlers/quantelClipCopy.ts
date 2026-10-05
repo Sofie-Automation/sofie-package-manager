@@ -1,21 +1,26 @@
-import { BaseWorker } from '../../../worker'
-import { compareUniversalVersions, getStandardCost, makeUniversalVersion } from '../lib/lib'
 import {
 	Accessor,
-	hashObj,
 	Expectation,
+	hashObj,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	stringifyError,
 	startTimer,
+	stringifyError,
 } from '@sofie-package-manager/api'
-import { isQuantelClipAccessorHandle } from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { ExpectationHandlerGenericWorker } from '../genericWorker'
+
+import { isQuantelClipAccessorHandle } from '../../../accessorHandlers/accessor.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker } from '../genericWorker.js'
+import { compareUniversalVersions, getStandardCost, makeUniversalVersion } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
 
 export const QuantelClipCopy: ExpectationHandlerGenericWorker = {
 	doYouSupportExpectation(exp: Expectation.Any, genericWorker: BaseWorker): ReturnTypeDoYouSupportExpectation {
@@ -185,7 +190,13 @@ export const QuantelClipCopy: ExpectationHandlerGenericWorker = {
 						targetHandle
 							.removePackage('work cancelled')
 							.then(() => resolve())
-							.catch((err) => reject(err))
+							.catch((err) =>
+								reject(
+									new Error(`Error removing package after cancellation: ${String(err)}`, {
+										cause: err,
+									})
+								)
+							)
 					})
 					sourceReadInfo.cancel()
 					putPackageHandler.abort()
@@ -355,7 +366,4 @@ async function lookupCopyTargets(
 	)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface QuantelMetadata {
-	// nothing?
-}
+type QuantelMetadata = unknown

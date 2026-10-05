@@ -1,11 +1,11 @@
-import { Workforce } from '@sofie-package-manager/workforce'
 import {
 	getWorkforceConfig,
-	setupLogger,
-	initializeLogger,
-	stringifyError,
 	HealthEndpoints,
+	initializeLogger,
+	setupLogger,
+	stringifyError,
 } from '@sofie-package-manager/api'
+import { Workforce } from '@sofie-package-manager/workforce'
 
 export async function startProcess(): Promise<void> {
 	const config = await getWorkforceConfig()

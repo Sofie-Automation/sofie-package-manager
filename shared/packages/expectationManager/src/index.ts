@@ -1,1 +1,1 @@
-export * from './expectationManager'
+export * from './expectationManager.js'

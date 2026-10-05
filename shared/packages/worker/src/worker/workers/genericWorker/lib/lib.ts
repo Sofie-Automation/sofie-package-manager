@@ -1,17 +1,18 @@
-import { getAccessorCost, getAccessorStaticHandle } from '../../../accessorHandlers/accessor'
-import { BaseWorker } from '../../../worker'
 import {
-	AccessorOnPackage,
-	PackageContainer,
-	PackageContainerOnPackage,
-	Expectation,
-	ReturnTypeGetCostFortExpectation,
-	PackageContainerId,
 	AccessorId,
+	AccessorOnPackage,
 	Cost,
+	Expectation,
+	PackageContainer,
+	PackageContainerId,
+	PackageContainerOnPackage,
+	ReturnTypeGetCostFortExpectation,
 } from '@sofie-package-manager/api'
-import { prioritizeAccessors } from '../../../lib/lib'
-import { AccessorHandlerResultGeneric } from '../../../accessorHandlers/genericHandle'
+
+import { getAccessorCost, getAccessorStaticHandle } from '../../../accessorHandlers/accessor.js'
+import { AccessorHandlerResultGeneric } from '../../../accessorHandlers/genericHandle.js'
+import { prioritizeAccessors } from '../../../lib/lib.js'
+import { BaseWorker } from '../../../worker.js'
 
 export function compareActualExpectVersions(
 	actualVersion: Expectation.Version.Any,
@@ -88,14 +89,14 @@ export function makeUniversalVersion(
 				version.type === Expectation.Version.Type.FILE_ON_DISK
 					? version.fileSize
 					: version.type === Expectation.Version.Type.FTP_FILE
-					? version.fileSize
-					: version.type === Expectation.Version.Type.HTTP_FILE
-					? version.contentLength
-					: version.type === Expectation.Version.Type.JSON_DATA
-					? version.size
-					: version.type === Expectation.Version.Type.S3_RESOURCE
-					? version.fileSize
-					: undefined,
+						? version.fileSize
+						: version.type === Expectation.Version.Type.HTTP_FILE
+							? version.contentLength
+							: version.type === Expectation.Version.Type.JSON_DATA
+								? version.size
+								: version.type === Expectation.Version.Type.S3_RESOURCE
+									? version.fileSize
+									: undefined,
 		},
 
 		modified: {
@@ -104,12 +105,12 @@ export function makeUniversalVersion(
 				version.type === Expectation.Version.Type.FILE_ON_DISK
 					? version.modifiedDate
 					: version.type === Expectation.Version.Type.FTP_FILE
-					? version.modifiedDate
-					: version.type === Expectation.Version.Type.S3_RESOURCE
-					? version.modifiedDate
-					: version.type === Expectation.Version.Type.HTTP_FILE
-					? version.modified
-					: undefined,
+						? version.modifiedDate
+						: version.type === Expectation.Version.Type.S3_RESOURCE
+							? version.modifiedDate
+							: version.type === Expectation.Version.Type.HTTP_FILE
+								? version.modified
+								: undefined,
 		},
 		etags: {
 			name: 'http-etags',
@@ -163,7 +164,7 @@ export function findBestAccessorOnPackageContainer(
 		{
 			containerId: containerId,
 			label: packageContainer.label,
-			accessors: packageContainer.accessors as any,
+			accessors: packageContainer.accessors,
 		},
 	]
 	for (const { accessorId, accessor } of prioritizeAccessors(packageContainers)) {

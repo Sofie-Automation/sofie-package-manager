@@ -1,41 +1,42 @@
+import * as path from 'node:path'
+import { PassThrough } from 'node:stream'
+
 import {
-	GenericAccessorHandle,
-	PackageReadInfo,
-	PackageReadStream,
-	PutPackageHandler,
-	SetupPackageContainerMonitorsResult,
-	AccessorHandlerRunCronJobResult,
+	Accessor,
+	AccessorOnPackage,
+	assertNever,
+	Expectation,
+	MonitorId,
+	PackageContainerExpectation,
+	Reason,
+} from '@sofie-package-manager/api'
+import * as FTP from 'basic-ftp'
+
+import { isEqual } from '../lib/lib.js'
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
+import {
+	AccessorConstructorProps,
+	AccessorHandlerCheckHandleBasicResult,
+	AccessorHandlerCheckHandleCompatibilityResult,
 	AccessorHandlerCheckHandleReadResult,
 	AccessorHandlerCheckHandleWriteResult,
 	AccessorHandlerCheckPackageContainerWriteAccessResult,
 	AccessorHandlerCheckPackageReadAccessResult,
+	AccessorHandlerRunCronJobResult,
 	AccessorHandlerTryPackageReadResult,
+	GenericAccessorHandle,
 	PackageOperation,
-	AccessorHandlerCheckHandleBasicResult,
-	AccessorConstructorProps,
-	AccessorHandlerCheckHandleCompatibilityResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	PackageContainerExpectation,
-	assertNever,
-	Reason,
-	MonitorId,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import * as path from 'path'
-import * as FTP from 'basic-ftp'
-import { MonitorInProgress } from '../lib/monitorInProgress'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-
-import { isEqual } from '../lib/lib'
-import { GenericFileOperationsHandler } from './lib/GenericFileOperations'
-import { GenericFileHandler } from './lib/GenericFileHandler'
-import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file'
-import { createFTPClient, FTPClientBase, FTPOptions } from './lib/FTPClient/index'
-import { PassThrough } from 'stream'
+	PackageReadInfo,
+	PackageReadStream,
+	PutPackageHandler,
+	SetupPackageContainerMonitorsResult,
+} from './genericHandle.js'
+import { createFTPClient, FTPClientBase, FTPOptions } from './lib/FTPClient/index.js'
+import { GenericFileHandler } from './lib/GenericFileHandler.js'
+import { GenericFileOperationsHandler } from './lib/GenericFileOperations.js'
+import { JSONWriteFilesBestEffortHandler } from './lib/json-write-file.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 export interface Content {
 	/** This is set when the class-instance is only going to be used for PackageContainer access.*/
@@ -405,8 +406,8 @@ export class FTPAccessorHandle<Metadata> extends GenericAccessorHandle<Metadata>
 			(this.accessor.serverType === 'ftp' || this.accessor.serverType === 'ftps'
 				? 21
 				: this.accessor.serverType === 'sftp'
-				? 22
-				: 990) // default port for FTP (and FTP + AUTH TLS) is 21, SFTP is 22, FTPS (implicit FTP over TLS/SSL) is 990
+					? 22
+					: 990) // default port for FTP (and FTP + AUTH TLS) is 21, SFTP is 22, FTPS (implicit FTP over TLS/SSL) is 990
 		const username = this.accessor.username
 		const password = this.accessor.password
 

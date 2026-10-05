@@ -1,19 +1,23 @@
 import {
-	Expectation,
-	LoggerInstance,
-	PackageContainerExpectation,
 	AppContainerId,
 	AppType,
 	Cost,
+	Expectation,
+	LoggerInstance,
+	PackageContainerExpectation,
 	valueOfCost,
 } from '@sofie-package-manager/api'
-import { Workforce } from './workforce'
+
+import { Workforce } from './workforce.js'
 
 /** The WorkerHandler is in charge of spinning up/down Workers */
 export class WorkerHandler {
 	private logger: LoggerInstance
 
-	constructor(logger: LoggerInstance, private workForce: Workforce) {
+	constructor(
+		logger: LoggerInstance,
+		private workForce: Workforce
+	) {
 		this.logger = logger.category('WorkerHandler')
 	}
 	public terminate(): void {

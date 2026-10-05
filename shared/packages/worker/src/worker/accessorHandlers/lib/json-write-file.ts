@@ -1,7 +1,8 @@
 // import { promises as fs } from 'fs'
-import * as LockFile from 'proper-lockfile'
-import { GenericFileHandler } from './GenericFileHandler'
 import { LoggerInstance } from '@sofie-package-manager/api'
+import * as LockFile from 'proper-lockfile'
+
+import { GenericFileHandler } from './GenericFileHandler.js'
 
 export abstract class JSONWriteHandler {
 	/** How long to wait a before trying again, in case of a failed write lock. Defaults to 100 ms. */
@@ -16,7 +17,10 @@ export abstract class JSONWriteHandler {
 
 	protected logger: LoggerInstance
 
-	constructor(protected fileHandler: GenericFileHandler, logger: LoggerInstance) {
+	constructor(
+		protected fileHandler: GenericFileHandler,
+		logger: LoggerInstance
+	) {
 		this.logger = logger.category('JSONWriteHandler')
 	}
 
@@ -174,7 +178,7 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 			lockCompromisedError = undefined
 
 			// Get file lock
-			let releaseLock: (() => Promise<void>) | undefined = undefined
+			let releaseLock: (() => Promise<void>) | undefined
 			try {
 				releaseLock = await LockFile.lock(filePath, {
 					onCompromised: (err) => {
@@ -233,7 +237,7 @@ export class JSONWriteFilesLockHandler extends JSONWriteHandler {
 						try {
 							// Rename file:
 							await this.rename(writeFilePathFirst, filePath)
-						} catch (e) {
+						} catch {
 							// If renaming fails, try writing directly to the file instead:
 							await this.fileHandler.writeFile(filePath, fileData)
 							await this.fileHandler.unlinkIfExists(writeFilePathFirst)
@@ -405,7 +409,7 @@ export class JSONWriteFilesBestEffortHandler extends JSONWriteHandler {
 					try {
 						// Rename file:
 						await this.rename(writeFilePathFirst, filePath)
-					} catch (e) {
+					} catch {
 						// Renaming failed.
 						// (rename might not be supported on all file systems, such as some ftp servers)
 						// Instead, try writing directly to the file instead:
@@ -466,7 +470,7 @@ export class JSONWriteFilesNoLockHandler extends JSONWriteHandler {
 					try {
 						// Rename file:
 						await this.rename(writeFilePathFirst, filePath)
-					} catch (e) {
+					} catch {
 						// Renaming failed.
 						// (rename might not be supported on all file systems, such as some ftp servers)
 						// Instead, try writing directly to the file instead:

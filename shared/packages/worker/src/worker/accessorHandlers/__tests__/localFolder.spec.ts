@@ -1,3 +1,5 @@
+import { test, expect } from 'vitest'
+
 import {
 	AccessorOnPackage,
 	protectString,
@@ -7,8 +9,8 @@ import {
 	Expectation,
 	Accessor,
 } from '@sofie-package-manager/api'
-import { Content, LocalFolderAccessorHandle } from '../localFolder'
-import { PassiveTestWorker } from './lib'
+import { Content, LocalFolderAccessorHandle } from '../localFolder.js'
+import { PassiveTestWorker } from './lib.js'
 
 const processConfig: ProcessConfig = {
 	logPath: undefined,

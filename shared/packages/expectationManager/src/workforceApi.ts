@@ -1,14 +1,14 @@
 import {
-	WorkForceExpectationManager,
 	AdapterClient,
+	AppId,
+	Expectation,
+	ExpectationManagerId,
 	LoggerInstance,
 	LogLevel,
-	WorkforceStatusReport,
-	Expectation,
 	PackageContainerExpectation,
-	ExpectationManagerId,
-	AppId,
 	URLMap,
+	WorkForceExpectationManager,
+	WorkforceStatusReport,
 } from '@sofie-package-manager/api'
 
 /**
@@ -20,7 +20,10 @@ export class WorkforceAPI
 	extends AdapterClient<WorkForceExpectationManager.ExpectationManager, WorkForceExpectationManager.WorkForce>
 	implements WorkForceExpectationManager.WorkForce
 {
-	constructor(public id: ExpectationManagerId, logger: LoggerInstance) {
+	constructor(
+		public id: ExpectationManagerId,
+		logger: LoggerInstance
+	) {
 		super(logger.category('WorkforceAPI'), id, 'expectationManager')
 	}
 

@@ -1,9 +1,9 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import * as InputApi from './inputApi'
-import { AccessorId, ExpectationId, ExpectationManagerId, ExpectedPackageId } from './ids'
-// eslint-disable-next-line node/no-missing-import
 import { MediaRamRecRef, MediaStillRef } from 'kairos-lib'
+
+import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { AccessorId, ExpectationId, ExpectationManagerId, ExpectedPackageId } from './ids.js'
+import * as InputApi from './inputApi.js'
 
 /*
  * This file contains definitions for Expectations, the internal data structure upon which the Package Manager operates.
@@ -401,9 +401,7 @@ export namespace Expectation {
 		}
 		endRequirement: {
 			targets: SpecificPackageContainerOnPackage.FileTarget[]
-			content: {
-				// empty
-			}
+			content: Record<string, never>
 			version: {
 				renderer?: InputApi.ExpectedPackage.HTMLRendererOptions
 

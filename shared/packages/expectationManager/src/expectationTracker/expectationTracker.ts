@@ -1,26 +1,27 @@
 import {
 	HelpfulEventEmitter,
 	LoggerInstance,
+	MonitorId,
+	PackageContainerId,
 	Reason,
 	StatusCode,
-	PackageContainerId,
-	MonitorId,
 } from '@sofie-package-manager/api'
-import { EvaluationScheduler } from './lib/evaluationScheduler'
-import { ExpectationManagerCallbacks } from '../expectationManager'
-import { ListeningExpectationsStorage } from './lib/listeningExpectationsStorage'
-import { TrackedExpectationsStorage } from './lib/trackedExpectationsStorage'
-import { TrackedPackageContainersStorage } from './lib/trackedPackageContainersStorage'
-import { ExpectationTrackerConstants } from '../lib/constants'
-import { WorkInProgressTracker } from './lib/workInProgressTracker'
-import { TrackedReceivedUpdates } from './lib/trackedReceivedUpdates'
-import { InternalManager } from '../internalManager/internalManager'
-import { TrackedExpectation } from '../lib/trackedExpectation'
-import { TrackedPackageContainerExpectation } from '../lib/trackedPackageContainerExpectation'
-import { WorkerScaler } from './lib/workerScaler'
-import { TrackedExpectationAPI } from './lib/trackedExpectationAPI'
-import { TrackedPackageContainerAPI } from './lib/trackedPackageContainerAPI'
-import { TrackedPackageContainerPackageAPI } from './lib/trackedPackageContainerPackageAPI'
+
+import { ExpectationManagerCallbacks } from '../expectationManager.js'
+import { InternalManager } from '../internalManager/internalManager.js'
+import { ExpectationTrackerConstants } from '../lib/constants.js'
+import { TrackedExpectation } from '../lib/trackedExpectation.js'
+import { TrackedPackageContainerExpectation } from '../lib/trackedPackageContainerExpectation.js'
+import { EvaluationScheduler } from './lib/evaluationScheduler.js'
+import { ListeningExpectationsStorage } from './lib/listeningExpectationsStorage.js'
+import { TrackedExpectationAPI } from './lib/trackedExpectationAPI.js'
+import { TrackedExpectationsStorage } from './lib/trackedExpectationsStorage.js'
+import { TrackedPackageContainerAPI } from './lib/trackedPackageContainerAPI.js'
+import { TrackedPackageContainerPackageAPI } from './lib/trackedPackageContainerPackageAPI.js'
+import { TrackedPackageContainersStorage } from './lib/trackedPackageContainersStorage.js'
+import { TrackedReceivedUpdates } from './lib/trackedReceivedUpdates.js'
+import { WorkerScaler } from './lib/workerScaler.js'
+import { WorkInProgressTracker } from './lib/workInProgressTracker.js'
 
 /**
  * The ExpectationTracker is responsible for tracking and updating the state of the Expectations

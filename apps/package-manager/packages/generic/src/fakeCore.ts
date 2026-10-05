@@ -1,7 +1,7 @@
-/* eslint-disable node/no-extraneous-import */
+import { LoggerInstance } from '@sofie-package-manager/api'
+
 import { ExternalPeripheralDeviceAPI } from '@sofie-automation/server-core-integration'
 import { ExpectedPackageId } from '@sofie-automation/shared-lib/dist/core/model/Ids'
-import { LoggerInstance } from '@sofie-package-manager/api'
 
 /** A fake version of some of the Core APIs, used in troubleshooting */
 export class FakeCore {
@@ -15,17 +15,26 @@ export class FakeCore {
 		| 'updatePackageInfo'
 		| 'removePackageInfo'
 		| 'removeAllExpectedPackageWorkStatusOfDevice'
+		| 'removeAllExpectedPackageWorkStatusOfDeviceNotInList'
 		| 'removeAllPackageContainerPackageStatusesOfDevice'
+		| 'removeAllPackageContainerPackageStatusesOfDeviceNotInList'
 		| 'removeAllPackageContainerStatusesOfDevice'
+		| 'removeAllPackageContainerStatusesOfDeviceNotInList'
 	> {
 		return {
 			fetchPackageInfoMetadata: this.fetchPackageInfoMetadata.bind(this),
 			updatePackageInfo: this.updatePackageInfo.bind(this),
 			removePackageInfo: this.removePackageInfo.bind(this),
 			removeAllExpectedPackageWorkStatusOfDevice: this.removeAllExpectedPackageWorkStatusOfDevice.bind(this),
+			removeAllExpectedPackageWorkStatusOfDeviceNotInList:
+				this.removeAllExpectedPackageWorkStatusOfDeviceNotInList.bind(this),
 			removeAllPackageContainerPackageStatusesOfDevice:
 				this.removeAllPackageContainerPackageStatusesOfDevice.bind(this),
 			removeAllPackageContainerStatusesOfDevice: this.removeAllPackageContainerStatusesOfDevice.bind(this),
+			removeAllPackageContainerPackageStatusesOfDeviceNotInList:
+				this.removeAllPackageContainerPackageStatusesOfDeviceNotInList.bind(this),
+			removeAllPackageContainerStatusesOfDeviceNotInList:
+				this.removeAllPackageContainerStatusesOfDeviceNotInList.bind(this),
 		}
 	}
 
@@ -110,13 +119,28 @@ export class FakeCore {
 	> {
 		return // not implemented
 	}
+	private async removeAllExpectedPackageWorkStatusOfDeviceNotInList(): ReturnType<
+		ExternalPeripheralDeviceAPI['removeAllExpectedPackageWorkStatusOfDeviceNotInList']
+	> {
+		return // not implemented
+	}
 	private async removeAllPackageContainerPackageStatusesOfDevice(): ReturnType<
 		ExternalPeripheralDeviceAPI['removeAllPackageContainerPackageStatusesOfDevice']
 	> {
 		return // not implemented
 	}
+	private async removeAllPackageContainerPackageStatusesOfDeviceNotInList(): ReturnType<
+		ExternalPeripheralDeviceAPI['removeAllPackageContainerPackageStatusesOfDeviceNotInList']
+	> {
+		return // not implemented
+	}
 	private async removeAllPackageContainerStatusesOfDevice(): ReturnType<
 		ExternalPeripheralDeviceAPI['removeAllPackageContainerStatusesOfDevice']
+	> {
+		return // not implemented
+	}
+	private async removeAllPackageContainerStatusesOfDeviceNotInList(): ReturnType<
+		ExternalPeripheralDeviceAPI['removeAllPackageContainerStatusesOfDeviceNotInList']
 	> {
 		return // not implemented
 	}

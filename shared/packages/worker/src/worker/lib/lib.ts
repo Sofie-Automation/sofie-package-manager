@@ -2,9 +2,9 @@ import {
 	Accessor,
 	AccessorId,
 	AccessorOnPackage,
-	PackageContainerOnPackage,
 	assertNever,
 	objectEntries,
+	PackageContainerOnPackage,
 } from '@sofie-package-manager/api'
 
 // TODO: This should be changed at some point,

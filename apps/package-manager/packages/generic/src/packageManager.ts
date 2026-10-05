@@ -1,78 +1,77 @@
-import _ from 'underscore'
-import { CoreHandler } from './coreHandler'
-// eslint-disable-next-line node/no-extraneous-import
 import {
-	ExpectedPackageStatusAPI,
-	ExpectedPackage as ExpectedPackageOrg,
-} from '@sofie-automation/shared-lib/dist/package-manager/package'
+	Accessor,
+	AccessorId,
+	AccessorOnPackage,
+	AnyProtectedString,
+	AppId,
+	ClientConnectionOptions,
+	convProtectedString,
+	deepEqual,
+	Expectation,
+	ExpectationId,
+	ExpectationManagerId,
+	ExpectationManagerWorkerAgent,
+	ExpectedPackage,
+	ExpectedPackageId,
+	literal,
+	LoggerInstance,
+	mapToObject,
+	MonitorId,
+	objectEntries,
+	objectKeys,
+	objectSize,
+	objectValues,
+	PackageContainer,
+	PackageContainerExpectation,
+	PackageContainerId,
+	PackageContainerOnPackage,
+	PackageManagerConfig,
+	ProtectedString,
+	protectString,
+	Reason,
+	startTimer,
+	Status,
+	StatusCode,
+	Statuses,
+	stringifyError,
+	unprotectString,
+	URLMap,
+} from '@sofie-package-manager/api'
+import {
+	ExpectationManager,
+	ExpectationManagerCallbacks,
+	ExpectationManagerServerOptions,
+} from '@sofie-package-manager/expectation-manager'
+import deepExtend from 'deep-extend'
+import rfdc from 'rfdc'
+import _ from 'underscore'
+
+import {
+	Observer,
+	PeripheralDeviceId,
+	PeripheralDevicePubSubCollectionsNames,
+} from '@sofie-automation/server-core-integration'
 import {
 	ExpectedPackageId as CoreExpectedPackageId,
 	ExpectedPackageWorkStatusId,
 	RundownId,
 } from '@sofie-automation/shared-lib/dist/core/model/Ids'
 import {
+	ExpectedPackage as ExpectedPackageOrg,
+	ExpectedPackageStatusAPI,
+} from '@sofie-automation/shared-lib/dist/package-manager/package'
+import {
 	PackageManagerActivePlaylist,
 	PackageManagerActiveRundown,
-	// eslint-disable-next-line node/no-extraneous-import
 } from '@sofie-automation/shared-lib/dist/package-manager/publications'
-import {
-	Observer,
-	PeripheralDeviceId,
-	PeripheralDevicePubSubCollectionsNames,
-} from '@sofie-automation/server-core-integration'
-// eslint-disable-next-line node/no-extraneous-import
 import { UpdateExpectedPackageWorkStatusesChanges } from '@sofie-automation/shared-lib/dist/peripheralDevice/methodsAPI'
-// eslint-disable-next-line node/no-extraneous-import
-import {
-	ExpectationManager,
-	ExpectationManagerCallbacks,
-	ExpectationManagerServerOptions,
-} from '@sofie-package-manager/expectation-manager'
-import {
-	ExpectedPackage,
-	PackageContainer,
-	PackageContainerOnPackage,
-	StatusCode,
-	ClientConnectionOptions,
-	Expectation,
-	ExpectationManagerWorkerAgent,
-	PackageManagerConfig,
-	LoggerInstance,
-	PackageContainerExpectation,
-	literal,
-	Reason,
-	deepEqual,
-	stringifyError,
-	Accessor,
-	AccessorOnPackage,
-	Statuses,
-	Status,
-	ExpectationManagerId,
-	PackageContainerId,
-	ExpectedPackageId,
-	ExpectationId,
-	MonitorId,
-	AppId,
-	AccessorId,
-	AnyProtectedString,
-	objectEntries,
-	objectSize,
-	ProtectedString,
-	protectString,
-	unprotectString,
-	convProtectedString,
-	objectKeys,
-	objectValues,
-	mapToObject,
-	URLMap,
-} from '@sofie-package-manager/api'
-import deepExtend from 'deep-extend'
-import clone = require('fast-clone')
-import { GenerateExpectationApi } from './generateExpectations/api'
-import { PackageManagerSettings } from './generated/options'
 
-import * as NRK from './generateExpectations/nrk'
-import { startTimer } from '@sofie-package-manager/api'
+import { CoreHandler } from './coreHandler.js'
+import { PackageManagerSettings } from './generated/options.js'
+import { GenerateExpectationApi } from './generateExpectations/api.js'
+import * as NRK from './generateExpectations/nrk/index.js'
+
+const clone = rfdc()
 
 export class PackageManagerHandler {
 	public coreHandler!: CoreHandler
@@ -153,16 +152,15 @@ export class PackageManagerHandler {
 			// Trigger a send of status updates:
 			this.callbacksHandler.onCoreConnected()
 		})
+
+		// this flag will cause the ExpectationManagerCallbacksHandler.triggerReportUpdatedStatuses() method to clean up
+		// any orphaned reported statuses, when it eventually runs as a result of the triggerUpdatedExpectedPackages()
+		this.callbacksHandler.needsOrphanedReportedStatusesCleanup = true
+
 		this.setupObservers()
 		this.onSettingsChanged()
 		this.triggerUpdatedExpectedPackages()
 
-		try {
-			await this.callbacksHandler.cleanReportedStatuses()
-		} catch (e) {
-			this.logger.error(`Error during cleanReportedStatuses()`)
-			throw e
-		}
 		try {
 			await this.expectationManager.init()
 		} catch (e) {
@@ -501,6 +499,8 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 
 	private increment = 1
 
+	public needsOrphanedReportedStatusesCleanup = true
+
 	private toReportExpectationStatuses: ReportStatuses<
 		ExpectationId,
 		ExpectedPackageStatusAPI.WorkStatus | null,
@@ -534,7 +534,10 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 	/** unix timestamp */
 	private lastTimeRemovedInvalidStatuses = 0
 
-	constructor(logger: LoggerInstance, private packageManager: PackageManagerHandler) {
+	constructor(
+		logger: LoggerInstance,
+		private packageManager: PackageManagerHandler
+	) {
 		this.logger = logger.category('ExpectationManagerCallbacksHandler')
 	}
 
@@ -718,18 +721,18 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 				throw new Error(`Unsupported message type "${message.type}"`)
 		}
 	}
-	public async cleanReportedStatuses() {
-		// Clean out all reported statuses, this is an easy way to sync a clean state with core
+	// public async cleanReportedStatuses() {
+	// 	// Clean out all reported statuses, this is an easy way to sync a clean state with core
 
-		this.reportedExpectationStatuses = new Map()
-		await this.getCoreMethods().removeAllExpectedPackageWorkStatusOfDevice()
+	// 	this.reportedExpectationStatuses = new Map()
+	// 	await this.getCoreMethods().removeAllExpectedPackageWorkStatusOfDevice()
 
-		this.reportedPackageContainerStatuses = new Map()
-		await this.getCoreMethods().removeAllPackageContainerPackageStatusesOfDevice()
+	// 	this.reportedPackageContainerStatuses = new Map()
+	// 	await this.getCoreMethods().removeAllPackageContainerPackageStatusesOfDevice()
 
-		this.reportedPackageStatuses = new Map()
-		await this.getCoreMethods().removeAllPackageContainerStatusesOfDevice()
-	}
+	// 	this.reportedPackageStatuses = new Map()
+	// 	await this.getCoreMethods().removeAllPackageContainerStatusesOfDevice()
+	// }
 	public onCoreConnected() {
 		this.triggerReportUpdatedStatuses()
 	}
@@ -802,6 +805,16 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 						await this.reportUpdatePackageContainerPackageStatus()
 						await this.reportUpdatePackageContainerStatus()
 
+						// Run the orphaned cleanup at the end, so that we know what we have processed and
+						// can safely remove the rest.
+						if (this.needsOrphanedReportedStatusesCleanup) {
+							await this.removeOrphanedExpectationStatus()
+							await this.removeOrphanedPackageContainerPackageStatus()
+							await this.removeOrphanedPackageContainerStatus()
+
+							this.needsOrphanedReportedStatusesCleanup = false
+						}
+
 						await this.checkAndReportPackageManagerStatus()
 					})
 					.catch((err) => {
@@ -816,6 +829,43 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 					})
 			}, WAIT_TIME)
 		}
+	}
+	private async removeOrphanedExpectationStatus(): Promise<void> {
+		// We can just look at the packageManager dataSnapshot - `reportUpdateExpectationStatus`
+		// uses the expectationId as workStatus id, and if it's not here, we want it gone
+		const knownWorkStatusIds = objectKeys(this.packageManager.dataSnapshot.expectations).map((expectationId) =>
+			convProtectedString<ExpectationId, ExpectedPackageWorkStatusId>(expectationId)
+		)
+		await this.getCoreMethods().removeAllExpectedPackageWorkStatusOfDeviceNotInList(knownWorkStatusIds)
+	}
+
+	private async removeOrphanedPackageContainerPackageStatus(): Promise<void> {
+		const knownPackageContainerPackagePairs = Array.from(this.reportedPackageStatuses.values()).map((status) => ({
+			packageId: status.ids.packageId,
+			containerId: status.ids.containerId,
+		}))
+		// this.reportedPackageStatuses may not contain all the statuses that are about to be reported in this.toReportPackageStatus
+		// Therefore, we also include the statuses that are about to be reported in this.toReportPackageStatus
+		this.toReportPackageStatus.forEach((value) => {
+			if (value.status === null) {
+				// This status is marked for removal, skip it
+				return
+			}
+
+			knownPackageContainerPackagePairs.push({
+				packageId: value.ids.packageId,
+				containerId: value.ids.containerId,
+			})
+		})
+		await this.getCoreMethods().removeAllPackageContainerPackageStatusesOfDeviceNotInList(
+			knownPackageContainerPackagePairs
+		)
+	}
+	private async removeOrphanedPackageContainerStatus(): Promise<void> {
+		// We can just look at the packageManager dataSnapshot for packageContainers: if it's not in the data from Core
+		// we want it gone.
+		const knownPackageContainerIds = Array.from(objectKeys(this.packageManager.dataSnapshot.packageContainers))
+		await this.getCoreMethods().removeAllPackageContainerStatusesOfDeviceNotInList(knownPackageContainerIds)
 	}
 	private async removeInvalidExpectationStatus(): Promise<void> {
 		// Go through the previously reported expectations, and check if they are still valid:
@@ -1062,7 +1112,7 @@ class ExpectationManagerCallbacksHandler implements ExpectationManagerCallbacks 
 				? {
 						statusCode: container.status?.status,
 						message: container.status?.statusReason.user,
-				  }
+					}
 				: null
 		}
 
@@ -1141,7 +1191,7 @@ export function wrapExpectedPackage(
 				} else if (packageAccessor) {
 					combinedSource.accessors[accessorId] = clone<AccessorOnPackage.Any>(packageAccessor)
 				} else if (sourceAccessor) {
-					combinedSource.accessors[accessorId] = clone<Accessor.Any>(sourceAccessor) as AccessorOnPackage.Any
+					combinedSource.accessors[accessorId] = clone<Accessor.Any>(sourceAccessor)
 				}
 			}
 			combinedSources.push(combinedSource)
@@ -1169,7 +1219,7 @@ export function wrapExpectedPackage(
 	if (combinedSources.length) {
 		if (combinedTargets.length) {
 			return {
-				expectedPackage: expectedPackage as any,
+				expectedPackage: expectedPackage,
 				priority: 999, // Default: lowest priority
 				sources: combinedSources,
 				targets: combinedTargets,

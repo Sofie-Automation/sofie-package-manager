@@ -1,8 +1,6 @@
 import EventEmitter from 'events'
 
-/* eslint-disable no-console */
-
-const child_process: any = jest.createMockFromModule('child_process')
+const mock_child_process: any = {}
 
 async function pExec(_commandString: string, _options: any): Promise<{ stdout: string; stderr: string }> {
 	const NOOP = { stdout: '', stderr: '' }
@@ -21,7 +19,7 @@ function exec(
 		.then((result) => cb?.(null, result))
 		.catch((err) => cb?.(err, null))
 }
-child_process.exec = exec
+mock_child_process.exec = exec
 
 const allProcesses: SpawnedProcess[] = []
 let mockOnNewProcessClb: null | ((process: SpawnedProcess) => void) = null
@@ -36,29 +34,32 @@ function spawn(command: string, args: string[] = []) {
 	})
 	return spawned
 }
-child_process.spawn = spawn
+mock_child_process.spawn = spawn
 
 function mockOnNewProcess(clb: (process: SpawnedProcess) => void) {
 	mockOnNewProcessClb = clb
 }
-child_process.mockOnNewProcess = mockOnNewProcess
+mock_child_process.mockOnNewProcess = mockOnNewProcess
 
 function mockListAllProcesses(): SpawnedProcess[] {
 	return allProcesses
 }
-child_process.mockListAllProcesses = mockListAllProcesses
+mock_child_process.mockListAllProcesses = mockListAllProcesses
 
 function mockClearAllProcesses(): void {
 	allProcesses.length = 0
 }
-child_process.mockClearAllProcesses = mockClearAllProcesses
+mock_child_process.mockClearAllProcesses = mockClearAllProcesses
 
 class SpawnedProcess extends EventEmitter {
 	public stdout = new EventEmitter()
 	public stderr = new EventEmitter()
 	public pid: number
 
-	constructor(public command: string, public args: string[]) {
+	constructor(
+		public command: string,
+		public args: string[]
+	) {
 		super()
 		this.pid = Date.now()
 	}
@@ -71,4 +72,5 @@ class SpawnedProcess extends EventEmitter {
 	}
 }
 
-module.exports = child_process
+export { exec, spawn, mockOnNewProcess, mockListAllProcesses, mockClearAllProcesses }
+export default mock_child_process

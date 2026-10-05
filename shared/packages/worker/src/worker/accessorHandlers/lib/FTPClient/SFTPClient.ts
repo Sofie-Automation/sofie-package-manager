@@ -1,8 +1,10 @@
-import * as path from 'path'
-import { PassThrough, Readable } from 'stream'
-import SFTP from 'ssh2-sftp-client'
+import * as path from 'node:path'
+import { PassThrough, Readable } from 'node:stream'
+
 import { LoggerInstance } from '@sofie-package-manager/api'
-import { FileDownloadReturnType, FileExistsReturnType, FileInfoReturnType, FTPClientBase, FTPOptions } from './base'
+import SFTP from 'ssh2-sftp-client'
+
+import { FileDownloadReturnType, FileExistsReturnType, FileInfoReturnType, FTPClientBase, FTPOptions } from './base.js'
 
 /** A SFTP Client that supports SFTP (FTP/SSH) connections. */
 export class SFTPClient extends FTPClientBase {

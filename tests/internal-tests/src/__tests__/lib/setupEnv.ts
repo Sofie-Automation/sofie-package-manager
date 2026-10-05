@@ -35,8 +35,8 @@ import {
 	ExpectationManagerCallbacks,
 	ExpectationManagerOptions,
 } from '@sofie-package-manager/expectation-manager'
-import { CoreMockAPI } from './coreMockAPI'
-// eslint-disable-next-line node/no-extraneous-import
+import { CoreMockAPI } from './coreMockAPI.js'
+
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 
 export const defaultTestConfig: SingleAppConfig = {
@@ -239,7 +239,15 @@ export async function prepareTestEnvironment(debugLogging: boolean): Promise<Tes
 			logLevel: debugLogging ? LogLevel.DEBUG : LogLevel.INFO,
 		},
 	}
-	initializeLogger(config)
+	try {
+		initializeLogger(config)
+	} catch (error) {
+		// In internal-tests we can create multiple environments within one process.
+		// The logger is process-global, so re-initialization is expected and safe to ignore.
+		if (!(error instanceof Error) || !error.message.includes('Logging is already setup!')) {
+			throw error
+		}
+	}
 
 	let logFilterFunctionInner: (level: string, ...args: any[]) => boolean = () => {
 		return true // Default behavior: no filtering

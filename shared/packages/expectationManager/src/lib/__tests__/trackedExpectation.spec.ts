@@ -1,6 +1,8 @@
+import { test, expect } from 'vitest'
+
 import { Expectation, ExpectationId, protectString } from '@sofie-package-manager/api'
-import { getDefaultConstants } from '../constants'
-import { TrackedExpectation, getDefaultTrackedExpectation, sortTrackedExpectations } from '../trackedExpectation'
+import { getDefaultConstants } from '../constants.js'
+import { TrackedExpectation, getDefaultTrackedExpectation, sortTrackedExpectations } from '../trackedExpectation.js'
 
 test('sortTrackedExpectations', () => {
 	// ensure that sort order is correct

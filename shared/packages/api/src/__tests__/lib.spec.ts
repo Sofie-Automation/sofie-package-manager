@@ -1,4 +1,6 @@
-import * as path from 'path'
+import { describe, expect, test } from 'vitest'
+
+import * as path from 'node:path'
 import {
 	betterPathIsAbsolute,
 	betterPathJoin,
@@ -9,7 +11,7 @@ import {
 	stringMaxLength,
 	stringifyError,
 	waitTime,
-} from '../lib'
+} from '../lib.js'
 
 describe('lib', () => {
 	test('diff', () => {

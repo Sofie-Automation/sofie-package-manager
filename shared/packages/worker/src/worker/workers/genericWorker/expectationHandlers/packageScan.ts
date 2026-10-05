@@ -1,24 +1,33 @@
-import { getStandardCost } from '../lib/lib'
-import { BaseWorker } from '../../../worker'
 import {
 	Accessor,
-	hashObj,
 	Expectation,
+	hashObj,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	stringifyError,
 	startTimer,
+	stringifyError,
 } from '@sofie-package-manager/api'
-import { isCorePackageInfoAccessorHandle } from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { CancelablePromise } from '../../../lib/cancelablePromise'
-import { isAnFFMpegSupportedSourceAccessor, isAnFFMpegSupportedSourceAccessorHandle, scanWithFFProbe } from './lib/scan'
-import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker'
-import { PackageInfoType } from './lib/coreApi'
+
+import { isCorePackageInfoAccessorHandle } from '../../../accessorHandlers/accessor.js'
+import { CancelablePromise } from '../../../lib/cancelablePromise.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker, GenericWorker } from '../genericWorker.js'
+import { getStandardCost } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
+import { PackageInfoType } from './lib/coreApi.js'
+import {
+	isAnFFMpegSupportedSourceAccessor,
+	isAnFFMpegSupportedSourceAccessorHandle,
+	scanWithFFProbe,
+} from './lib/scan.js'
 
 /**
  * Scans the source package and saves the result file into the target PackageContainer (a Sofie Core collection)

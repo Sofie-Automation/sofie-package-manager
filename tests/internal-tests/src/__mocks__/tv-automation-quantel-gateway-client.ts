@@ -1,13 +1,11 @@
 import EventEmitter from 'events'
-// eslint-disable-next-line node/no-unpublished-import
-import { Q, ClipSearchQuery } from 'tv-automation-quantel-gateway-client' // note: this is a mocked module
-
 import { Agent as HTTPAgent } from 'http'
 import { Agent as HTTPSAgent } from 'https'
 
-/* eslint-disable no-console */
+// eslint-disable-next-line node/no-unpublished-import
+import { ClipSearchQuery, Q } from 'tv-automation-quantel-gateway-client' // note: this is a mocked module
 
-const client: any = jest.createMockFromModule('tv-automation-quantel-gateway-client')
+const client: any = {}
 const DEBUG_LOG = false
 function debugLog(...args: any[]): void {
 	if (DEBUG_LOG) console.log(...args)
@@ -108,7 +106,7 @@ export function getClip(clipId: number): MockClip | undefined {
 	}
 	return undefined
 }
-client.getClip = resetMock
+client.getClip = getClip
 interface SearchResult {
 	server: MockServer
 	pool: MockPool
@@ -157,7 +155,7 @@ client.updateClip = updateClip
 export const QuantelGatewayInstances: QuantelGateway[] = []
 client.QuantelGatewayInstances = QuantelGatewayInstances
 
-class QuantelGateway extends EventEmitter {
+export class QuantelGateway extends EventEmitter {
 	public mockCopyCount = 0
 
 	private _gatewayUrl?: string
@@ -273,7 +271,7 @@ class QuantelGateway extends EventEmitter {
 		if (!toPool) throw new Error(`Mock: Pool ${poolID} not found on server`)
 
 		const existingClip = toPool.clips.find((c) => {
-			return c.CloneId === clip.CloneId || clip.ClipID
+			return c.CloneId === clip.CloneId || c.ClipID === clip.ClipID
 		})
 		if (existingClip) {
 			debugLog('copyClip: already there')
@@ -316,13 +314,18 @@ class QuantelGateway extends EventEmitter {
 
 		return searchClip((clip) => {
 			for (const [key, value] of Object.entries<string | number | undefined>(searchQuery)) {
+				const normalizedValue = String(value ?? '').replace(/^"(.*)"$/, '$1')
 				if (
 					// @ts-expect-error no index
 					clip[key] === value ||
 					// @ts-expect-error no index
-					(clip[key] + '').match(new RegExp(value)) ||
+					clip[key] === normalizedValue ||
 					// @ts-expect-error no index
-					`"${clip[key]}"` === value
+					(clip[key] + '').match(new RegExp(normalizedValue)) ||
+					// @ts-expect-error no index
+					`"${clip[key]}"` === value ||
+					// @ts-expect-error no index
+					`"${clip[key]}"` === normalizedValue
 				) {
 					return true
 				}
@@ -352,8 +355,7 @@ class QuantelGateway extends EventEmitter {
 	}
 }
 client.QuantelGateway = QuantelGateway
-
 // Finally, do a call to resetMock
 resetMock()
 
-module.exports = client
+export default client

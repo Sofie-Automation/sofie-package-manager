@@ -1,3 +1,5 @@
+import { test, expect, vi, beforeEach, afterEach } from 'vitest'
+
 import { PartialDeep } from 'type-fest'
 import {
 	ExpectationId,
@@ -9,11 +11,11 @@ import {
 	protectString,
 	setupLogger,
 } from '@sofie-package-manager/api'
-import { WorkerScaler } from '../workerScaler'
-import { InternalManager } from '../../../internalManager/internalManager'
-import { TrackedWorkerAgent } from '../../../internalManager/lib/trackedWorkerAgents'
-import { ExpectationTracker } from '../../expectationTracker'
-import { TrackedExpectation } from '../../../lib/trackedExpectation'
+import { WorkerScaler } from '../workerScaler.js'
+import { InternalManager } from '../../../internalManager/internalManager.js'
+import { TrackedWorkerAgent } from '../../../internalManager/lib/trackedWorkerAgents.js'
+import { ExpectationTracker } from '../../expectationTracker.js'
+import { TrackedExpectation } from '../../../lib/trackedExpectation.js'
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
 
 // ---------------------------------------------------------
@@ -33,10 +35,10 @@ const config = {
 }
 initializeLogger(config)
 const logger = setupLogger(config, '', undefined, undefined, logLevel)
-logger.warn = jest.fn(logger.warn) as any
-logger.error = jest.fn(logger.error) as any
+const warnSpy = vi.spyOn(logger, 'warn')
+const errorSpy = vi.spyOn(logger, 'error')
 
-const requestResourcesForExpectation = jest.fn(async () => false)
+const requestResourcesForExpectation = vi.fn(async () => false)
 
 const fakeManager = literal<PartialDeep<InternalManager>>({
 	workforceConnection: {
@@ -109,8 +111,8 @@ beforeEach(() => {
 	requestResourcesForExpectation.mockClear()
 })
 afterEach(() => {
-	expect(logger.warn).toHaveBeenCalledTimes(0)
-	expect(logger.error).toHaveBeenCalledTimes(0)
+	expect(warnSpy).toHaveBeenCalledTimes(0)
+	expect(errorSpy).toHaveBeenCalledTimes(0)
 })
 
 test('no expectations', async () => {

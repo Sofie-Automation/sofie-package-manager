@@ -1,8 +1,10 @@
 import path from 'path'
-import xml from 'xml-js'
+
 import { stringifyError } from '@sofie-package-manager/api'
-import { CancelablePromise } from '../../../lib/cancelablePromise'
-import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch'
+import xml from 'xml-js'
+
+import { fetchWithTimeout } from '../../../accessorHandlers/lib/fetch.js'
+import { CancelablePromise } from '../../../lib/cancelablePromise.js'
 
 const DEFAULT_XML_JS_OPTIONS = {
 	compact: true,
@@ -27,11 +29,11 @@ enum QuantelFileFlowStatus {
 async function getJobStatus(
 	fileFlowBaseUrl: string,
 	jobId: string
-): Promise<{ status: string; progress: number } | null> {
+): Promise<{ status: QuantelFileFlowStatus; progress: number } | null> {
 	const requestResponse = await fetchWithTimeout(`${fileFlowBaseUrl}/fileflowqueue/ffq/jobs/${jobId}`)
 	if (requestResponse.ok) {
 		const body = xml.xml2js(await requestResponse.text(), DEFAULT_XML_JS_OPTIONS) as xml.ElementCompact
-		const status = body.QJobResponse?.QJob?.status?._text as string
+		const status = body.QJobResponse?.QJob?.status?._text as QuantelFileFlowStatus
 		const progress = Number.parseFloat(body.QJobResponse?.QJob?.progress?._text)
 		return {
 			status,
@@ -100,8 +102,7 @@ export function quantelFileFlowCopy(
 				if (requestResponse.ok) {
 					const body = xml.xml2js(await requestResponse.text(), DEFAULT_XML_JS_OPTIONS) as xml.ElementCompact
 					const jobId = body.QJobResponse?.QJob?.id?._text as string
-					let status = body.QJobResponse?.QJob?.status?._text as string
-					let progress = Number.parseFloat(body.QJobResponse?.QJob?.progress?._text)
+					let status = body.QJobResponse?.QJob?.status?._text as QuantelFileFlowStatus
 
 					onCancel(() => {
 						const cancelJobRequest = {
@@ -144,7 +145,7 @@ export function quantelFileFlowCopy(
 						const statusResult = await getJobStatus(fileFlowBaseUrl, jobId)
 						if (statusResult) {
 							status = statusResult.status
-							progress = statusResult.progress
+							const progress = statusResult.progress
 
 							if (progressClb) progressClb(progress)
 

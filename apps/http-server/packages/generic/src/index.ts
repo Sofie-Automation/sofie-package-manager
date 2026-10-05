@@ -1,13 +1,14 @@
-import { PackageProxyServer } from './server'
 import {
 	getHTTPServerConfig,
+	HealthEndpoints,
+	initializeLogger,
 	ProcessHandler,
 	setupLogger,
-	initializeLogger,
-	stringifyError,
-	HealthEndpoints,
 	StatusCode,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
+import { PackageProxyServer } from './server.js'
 
 export { PackageProxyServer }
 export async function startProcess(): Promise<void> {

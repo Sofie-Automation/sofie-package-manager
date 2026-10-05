@@ -1,6 +1,7 @@
+import { Readable, Writable } from 'node:stream'
+
 import type { RouterContext } from '@koa/router'
 import type { DefaultContext, DefaultState } from 'koa'
-import { Readable, Writable } from 'stream'
 
 export type CTX = RouterContext<DefaultState, DefaultContext>
 export type CTXPost = RouterContext<DefaultState, DefaultContext>

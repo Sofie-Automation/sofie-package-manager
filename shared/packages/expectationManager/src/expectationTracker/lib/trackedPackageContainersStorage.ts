@@ -1,5 +1,6 @@
 import { PackageContainerId } from '@sofie-package-manager/api'
-import { TrackedPackageContainerExpectation } from '../../lib/trackedPackageContainerExpectation'
+
+import { TrackedPackageContainerExpectation } from '../../lib/trackedPackageContainerExpectation.js'
 
 /** Storage for Tracked PackageContainerExpectations*/
 export class TrackedPackageContainersStorage {

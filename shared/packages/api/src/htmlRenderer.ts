@@ -1,7 +1,8 @@
-import { spawn, ChildProcessWithoutNullStreams, SpawnOptionsWithoutStdio } from 'child_process'
+import { ChildProcessWithoutNullStreams, spawn, SpawnOptionsWithoutStdio } from 'child_process'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { isRunningInDevelopment, stringifyError } from './lib'
+
+import { isRunningInDevelopment, stringifyError } from './lib.js'
 
 let overriddenHTMLRendererPath: string | null = null
 /**

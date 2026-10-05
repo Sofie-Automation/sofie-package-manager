@@ -1,7 +1,8 @@
 import { Accessor, assertNever, LoggerInstance } from '@sofie-package-manager/api'
-import { FTPClientBase, FTPOptions } from './base'
-import { FTPClient } from './FTPClient'
-import { SFTPClient } from './SFTPClient'
+
+import { FTPClientBase, FTPOptions } from './base.js'
+import { FTPClient } from './FTPClient.js'
+import { SFTPClient } from './SFTPClient.js'
 
 export { FTPClientBase, FTPOptions }
 

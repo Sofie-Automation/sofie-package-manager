@@ -1,9 +1,11 @@
-import Koa from 'koa'
 import Router from '@koa/router'
-import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
+import Koa from 'koa'
+
 import { assertNever } from '@sofie-automation/shared-lib/dist/lib/lib'
-import { getPrometheusMetricsString, PrometheusHTTPContentType, setupPrometheusMetrics } from './prometheus'
-import type { HealthConfig } from './config'
+import { StatusCode } from '@sofie-automation/shared-lib/dist/lib/status'
+
+import { getPrometheusMetricsString, PrometheusHTTPContentType, setupPrometheusMetrics } from './prometheus.js'
+import type { HealthConfig } from './config.js'
 
 export interface HealthCallbacks {
 	getStatus?: () => { statusCode: StatusCode; messages: string[] }
@@ -18,7 +20,10 @@ export interface HealthCallbacks {
 export class HealthEndpoints {
 	private app = new Koa()
 
-	constructor(private config: HealthConfig, private callbacks?: HealthCallbacks) {
+	constructor(
+		private config: HealthConfig,
+		private callbacks?: HealthCallbacks
+	) {
 		if (!config.port) return // disabled
 
 		// Setup default prometheus metrics when endpoints are enabled

@@ -1,22 +1,21 @@
-import { BaseWorker } from '../../../worker'
-import { UniversalVersion, makeUniversalVersion, getStandardCost } from '../lib/lib'
 import {
 	Accessor,
+	AccessorId,
 	AccessorOnPackage,
-	PackageContainerOnPackage,
-	hashObj,
 	Expectation,
+	hashObj,
+	KnownReason,
+	PackageContainerOnPackage,
+	Reason,
 	ReturnTypeDoYouSupportExpectation,
 	ReturnTypeGetCostFortExpectation,
 	ReturnTypeIsExpectationFulfilled,
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
-	Reason,
-	stringifyError,
-	AccessorId,
 	startTimer,
-	KnownReason,
+	stringifyError,
 } from '@sofie-package-manager/api'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
@@ -24,18 +23,20 @@ import {
 	isLocalFolderAccessorHandle,
 	isQuantelClipAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
+} from '../../../accessorHandlers/accessor.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker } from '../genericWorker.js'
+import { getStandardCost, makeUniversalVersion, UniversalVersion } from '../lib/lib.js'
 import {
 	checkWorkerHasAccessToPackageContainersOnPackage,
 	lookupAccessorHandles,
 	LookupPackageContainer,
 	proxyFFMpegArguments,
-} from './lib'
-import { doFileCopyExpectation, isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file'
-import { getSourceHTTPHandle } from './lib/quantel'
-import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg'
-import { ExpectationHandlerGenericWorker } from '../genericWorker'
+} from './lib.js'
+import { FFMpegProcess, spawnFFMpeg } from './lib/ffmpeg.js'
+import { doFileCopyExpectation, isFileFulfilled, isFileReadyToStartWorkingOn } from './lib/file.js'
+import { getSourceHTTPHandle } from './lib/quantel.js'
 
 /**
  * Copies a file from one of the sources and into the target PackageContainer.

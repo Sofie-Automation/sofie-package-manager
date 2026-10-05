@@ -1,1 +1,1 @@
-export * from './workforce'
+export * from './workforce.js'

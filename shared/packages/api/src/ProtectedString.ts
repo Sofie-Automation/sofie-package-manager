@@ -1,4 +1,5 @@
 import { ProtectedString as CoreProtectedString } from '@sofie-automation/shared-lib/dist/lib/protectedString'
+
 export { CoreProtectedString }
 
 /**
@@ -22,7 +23,7 @@ export function unprotectString<T extends AnyProtectedString>(str: T): string
 export function unprotectString<T extends AnyProtectedString>(str: T | undefined): string | undefined
 export function unprotectString<T extends AnyProtectedString>(str: T | null): string | null
 export function unprotectString<T extends AnyProtectedString>(str: T | undefined | null): string | undefined | null {
-	return str as any
+	return str
 }
 export function isProtectedString(str: unknown): str is AnyProtectedString {
 	return typeof str === 'string'

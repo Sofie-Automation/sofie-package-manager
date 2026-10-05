@@ -1,10 +1,11 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { AccessorOnPackage, Accessor } from '@sofie-automation/shared-lib/dist/package-manager/package'
 import { AccessorId, Expectation, literal, protectString } from '@sofie-package-manager/api'
-import { getAccessorHandle, isHTTPProxyAccessorHandle } from '../../../../accessorHandlers/accessor'
-import { GenericAccessorHandle } from '../../../../accessorHandlers/genericHandle'
-import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy'
-import { BaseWorker } from '../../../../worker'
+
+import { Accessor, AccessorOnPackage } from '@sofie-automation/shared-lib/dist/package-manager/package'
+
+import { getAccessorHandle, isHTTPProxyAccessorHandle } from '../../../../accessorHandlers/accessor.js'
+import { GenericAccessorHandle } from '../../../../accessorHandlers/genericHandle.js'
+import { HTTPProxyAccessorHandle } from '../../../../accessorHandlers/httpProxy.js'
+import { BaseWorker } from '../../../../worker.js'
 
 export function getSourceHTTPHandle(
 	worker: BaseWorker,

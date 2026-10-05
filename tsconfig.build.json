@@ -1,4 +1,5 @@
 {
+	"extends": "@sofie-automation/code-standard-preset/ts/tsconfig.bin",
 	"compilerOptions": {
 		"module": "node20",
 		"target": "es2024",
@@ -15,19 +16,17 @@
 			"es2023" // This should be es2024, but eslint doesn't like that
 		],
 		"types": [
-			"node",
-			"jest"
+			"node"
 		],
 		"skipLibCheck": true,
 		"strict": true,
-		"alwaysStrict": false,
 		"forceConsistentCasingInFileNames": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
+		"rootDir": "./",
 		"outDir": "./dist",
-		"baseUrl": "./",
 		"esModuleInterop": true,
 		"resolveJsonModule": true
 	},

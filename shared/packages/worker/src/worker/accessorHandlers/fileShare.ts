@@ -1,5 +1,32 @@
+import { exec } from 'child_process'
+import fs from 'node:fs'
+import * as path from 'node:path'
+import { PassThrough } from 'node:stream'
 import { promisify } from 'util'
-import fs from 'fs'
+
+import {
+	Accessor,
+	AccessorOnPackage,
+	assertNever,
+	betterPathIsAbsolute,
+	betterPathResolve,
+	DataId,
+	Expectation,
+	INNER_ACTION_TIMEOUT,
+	isRunningInTest,
+	MonitorId,
+	PackageContainerExpectation,
+	promiseTimeout,
+	protectString,
+	Reason,
+	stringifyError,
+} from '@sofie-package-manager/api'
+import networkDrive from 'windows-network-drive'
+
+import { MAX_EXEC_BUFFER } from '../lib/lib.js'
+import { MonitorInProgress } from '../lib/monitorInProgress.js'
+import { BaseWorker } from '../worker.js'
+import { GenericWorker } from '../workers/genericWorker/genericWorker.js'
 import {
 	AccessorConstructorProps,
 	AccessorHandlerCheckHandleBasicResult,
@@ -15,34 +42,9 @@ import {
 	PackageReadInfo,
 	PutPackageHandler,
 	SetupPackageContainerMonitorsResult,
-} from './genericHandle'
-import {
-	Accessor,
-	AccessorOnPackage,
-	Expectation,
-	PackageContainerExpectation,
-	assertNever,
-	Reason,
-	stringifyError,
-	promiseTimeout,
-	INNER_ACTION_TIMEOUT,
-	protectString,
-	DataId,
-	MonitorId,
-	betterPathResolve,
-	betterPathIsAbsolute,
-	isRunningInTest,
-} from '@sofie-package-manager/api'
-import { BaseWorker } from '../worker'
-import { GenericWorker } from '../workers/genericWorker/genericWorker'
-import networkDrive from 'windows-network-drive'
-import { exec } from 'child_process'
-import { FileShareAccessorHandleType, GenericFileAccessorHandle } from './lib/FileHandler'
-import { MonitorInProgress } from '../lib/monitorInProgress'
-import { MAX_EXEC_BUFFER } from '../lib/lib'
-import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib'
-import * as path from 'path'
-import { PassThrough } from 'stream'
+} from './genericHandle.js'
+import { FileShareAccessorHandleType, GenericFileAccessorHandle } from './lib/FileHandler.js'
+import { defaultCheckHandleRead, defaultCheckHandleWrite, defaultDoYouSupportAccess } from './lib/lib.js'
 
 const fsStat = promisify(fs.stat)
 const fsAccess = promisify(fs.access)
@@ -433,7 +435,7 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 				encoding: 'utf-8',
 			})
 			return JSON.parse(text)
-		} catch (err) {
+		} catch {
 			// File doesn't exist
 			return undefined
 		}
@@ -506,9 +508,8 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 		for (const monitorIdStr of monitorIds) {
 			if (monitorIdStr === 'packages') {
 				// setup file monitor:
-				resultingMonitors[protectString<MonitorId>(monitorIdStr)] = await this.setupPackagesMonitor(
-					packageContainerExp
-				)
+				resultingMonitors[protectString<MonitorId>(monitorIdStr)] =
+					await this.setupPackagesMonitor(packageContainerExp)
 			} else {
 				// Assert that cronjob is of type "never", to ensure that all types of monitors are handled:
 				assertNever(monitorIdStr)
@@ -683,14 +684,14 @@ export class FileShareAccessorHandle<Metadata> extends GenericFileAccessorHandle
 												`Mapped drives: ${Object.keys(mappedDrives).join(',')}`
 											)
 											this.worker.logger.warn(
-												`${freeDriveLetter} is currently mapped to ${mappedDrives[freeDriveLetter]}`
+												`${freeDriveLetter} is currently mapped to ${mappedDrives[freeDriveLetter].path}`
 											)
 										} else {
 											this.worker.logger.warn(
 												`Mapped drives: ${Object.keys(mappedDrives).join(',')}`
 											)
 											this.worker.logger.warn(
-												`${freeDriveLetter} is currently mapped to ${mappedDrives[freeDriveLetter]}`
+												`${freeDriveLetter} is currently mapped to ${mappedDrives[freeDriveLetter].path}`
 											)
 											throw e
 										}

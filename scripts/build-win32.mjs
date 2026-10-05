@@ -1,15 +1,14 @@
-/* eslint-disable node/no-unpublished-import, node/no-extraneous-import, no-console */
-
-import { promisify } from 'util'
 import cp from 'child_process'
 import fs from 'fs/promises'
-import path from 'path'
-import pkg from '@yao-pkg/pkg'
-import { glob } from 'glob'
-import fse from 'fs-extra'
 import { createRequire } from 'module'
+import path from 'path'
+import { promisify } from 'util'
+
+import fse from 'fs-extra'
+import { glob } from 'glob'
 
 const exec = promisify(cp.exec)
+// eslint-disable-next-line no-redeclare
 const require = createRequire(import.meta.url)
 
 /*
@@ -64,7 +63,7 @@ if (!executableName) {
 	}
 
 	await Promise.all(ps)
-	ps = []
+	ps.length = 0
 
 	{
 		// Fix an issue where some packages aren't compiled properly:
@@ -104,7 +103,7 @@ if (!executableName) {
 		}
 	}
 	await Promise.all(ps)
-	ps = []
+	ps.length = 0
 
 	log(`Compiling using pkg...`)
 
@@ -119,29 +118,32 @@ if (!executableName) {
 		if (e.code !== 'ENOENT') throw e // ignore if file does not exist
 	}
 
-	const extraArgs = []
+	// const extraArgs = []
 
-	const assets = []
+	// const assets = []
 
-	if (packageJson.name === '@single-app/app') {
-		assets.push(path.join(basePath, './node_modules/@sofie-automation/server-core-integration/package.json'))
-		assets.push(path.join(basePath, './package.json'))
-	}
+	// if (packageJson.name === '@single-app/app') {
+	// 	assets.push(path.join(basePath, './node_modules/@sofie-automation/server-core-integration/package.json'))
+	// 	assets.push(path.join(basePath, './package.json'))
+	// }
 
-	if (assets.length > 0) {
-		extraArgs.push('--assets', assets.join(','))
-	}
+	// if (assets.length > 0) {
+	// 	extraArgs.push('--assets', assets.join(','))
+	// }
 
-	// If this is modified, make sure to update the `prepare-for-build32.js` too.
-	await pkg.exec([
-		path.join(basePath, './dist/index.js'),
-		// '--debug',
-		'--targets',
-		'node24-win-x64',
-		'--output',
-		binaryOutputPath,
-		...extraArgs,
-	])
+	// If this is modified, make sure to update the `prepare-for-build32.mjs` too.
+	// await pkg.exec([
+	// 	path.join(basePath, './dist/index.js'),
+	// 	// '--debug',
+	// 	'--targets',
+	// 	'node24-win-x64',
+	// 	'--output',
+	// 	binaryOutputPath,
+	// 	...extraArgs,
+	// ])
+	const { stdout, stderr } = await exec(`yarn run -T pkg . -o ${binaryOutputPath}`)
+	console.log(stdout)
+	console.log(stderr)
 
 	log(`Cleaning up...`)
 	// Clean up after ourselves:
@@ -152,12 +154,12 @@ if (!executableName) {
 	log(`...done!`)
 })().catch((err) => {
 	log(err)
-	// eslint-disable-next-line no-process-exit
+
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(1)
 })
 
 function log(...args) {
-	// eslint-disable-next-line no-console
 	console.log(...args)
 }
 async function editJSON(filePath, cb) {

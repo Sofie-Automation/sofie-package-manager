@@ -1,10 +1,11 @@
-import { PassThrough, Readable } from 'stream'
-import * as path from 'path'
-import * as FTP from 'basic-ftp'
-// eslint-disable-next-line node/no-missing-import
-import PQueue from 'p-queue'
+import * as path from 'node:path'
+import { PassThrough, Readable } from 'node:stream'
+
 import { LoggerInstance } from '@sofie-package-manager/api'
-import { FileDownloadReturnType, FileExistsReturnType, FileInfoReturnType, FTPClientBase, FTPOptions } from './base'
+import * as FTP from 'basic-ftp'
+import PQueue from 'p-queue'
+
+import { FileDownloadReturnType, FileExistsReturnType, FileInfoReturnType, FTPClientBase, FTPOptions } from './base.js'
 
 /** A FTP Client that supports FTP & FTPS (FTP over TLS) connections. */
 export class FTPClient extends FTPClientBase {
@@ -45,8 +46,8 @@ export class FTPClient extends FTPClientBase {
 						this.options.serverType === 'ftp'
 							? false
 							: this.options.serverType === 'ftp-ssl'
-							? 'implicit'
-							: true, // 'sftp'
+								? 'implicit'
+								: true, // 'sftp'
 					secureOptions: {
 						rejectUnauthorized: !this.options.allowAnyCertificate, // Allow self-signed certificates
 					},

@@ -1,5 +1,3 @@
-import { BaseWorker } from '../../../worker'
-import { UniversalVersion, getStandardCost, compareActualExpectVersions } from '../lib/lib'
 import {
 	Accessor,
 	Expectation,
@@ -10,16 +8,23 @@ import {
 	ReturnTypeIsExpectationReadyToStartWorkingOn,
 	ReturnTypeRemoveExpectation,
 } from '@sofie-package-manager/api'
+
 import {
 	isFileShareAccessorHandle,
 	isFTPAccessorHandle,
 	isHTTPProxyAccessorHandle,
 	isLocalFolderAccessorHandle,
 	isS3AccessorHandle,
-} from '../../../accessorHandlers/accessor'
-import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress'
-import { checkWorkerHasAccessToPackageContainersOnPackage, lookupAccessorHandles, LookupPackageContainer } from './lib'
-import { ExpectationHandlerGenericWorker } from '../genericWorker'
+} from '../../../accessorHandlers/accessor.js'
+import { IWorkInProgress, WorkInProgress } from '../../../lib/workInProgress.js'
+import { BaseWorker } from '../../../worker.js'
+import { ExpectationHandlerGenericWorker } from '../genericWorker.js'
+import { compareActualExpectVersions, getStandardCost, UniversalVersion } from '../lib/lib.js'
+import {
+	checkWorkerHasAccessToPackageContainersOnPackage,
+	lookupAccessorHandles,
+	LookupPackageContainer,
+} from './lib.js'
 
 /**
  * Verifies that a file exists on the target. Doesn't actually perform any work, just verifies that the file exists on the target,

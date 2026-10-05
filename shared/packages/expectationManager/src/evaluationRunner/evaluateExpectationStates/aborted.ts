@@ -1,6 +1,6 @@
-// eslint-disable-next-line node/no-extraneous-import
 import { ExpectedPackageStatusAPI } from '@sofie-automation/shared-lib/dist/package-manager/package'
-import { assertState, EvaluateContext } from '../lib'
+
+import { assertState, EvaluateContext } from '../lib.js'
 
 /**
  * Evaluate a TrackedExpectation which is in the ABORTED state.

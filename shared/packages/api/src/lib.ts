@@ -1,7 +1,9 @@
-import crypto from 'crypto'
-import path from 'path'
+import crypto from 'node:crypto'
+import path from 'node:path'
+
 import { compact } from 'underscore'
-import { AnyProtectedString } from './ProtectedString'
+
+import { AnyProtectedString } from './ProtectedString.js'
 
 /** Helper function to force the input to be of a certain type. */
 export function literal<T>(o: T): T {
@@ -36,6 +38,7 @@ export function hashObj(obj: unknown): string {
 		}
 		return hash(strs.join('|'))
 	} else {
+		// eslint-disable-next-line @typescript-eslint/no-base-to-string
 		return obj + ''
 	}
 }
@@ -63,6 +66,7 @@ export async function promiseTimeout<T>(
 		const timeout = setTimeout(() => {
 			const duration = timer.get()
 			const msg = typeof timeoutMessage === 'function' ? timeoutMessage(duration) : timeoutMessage
+			// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 			reject(msg || 'Timeout')
 		}, timeoutTime)
 
@@ -125,7 +129,7 @@ export function stringifyError(error: unknown, noStack = false): string {
 			if (str.length > 200) {
 				str = str.slice(0, 200) + '...'
 			}
-		} catch (e) {
+		} catch {
 			str = '[Error in stringifyError: Failed to stringify]'
 		}
 	}
@@ -203,6 +207,7 @@ function diffInner(
 
 	if (typeofA === 'object' && typeofB === 'object') {
 		if (a === null && b === null) return null
+		// eslint-disable-next-line @typescript-eslint/no-base-to-string
 		if (a === null || b === null) return [`${a} !== ${b}`, []]
 
 		const isArrayA = Array.isArray(a)
@@ -217,7 +222,7 @@ function diffInner(
 		}
 
 		const checkedKeys: { [key: string]: true } = {}
-		for (const key of Object.keys(a as any).concat(Object.keys(b as any))) {
+		for (const key of Object.keys(a).concat(Object.keys(b))) {
 			if (checkedKeys[key]) continue // already checked this key
 			if (omitKeysMap && omitKeysMap[key]) continue // ignore this key
 
@@ -254,6 +259,7 @@ function diffInner(
 		// if (keys.length !== Object.keys(b).length) return 'different number of keys'
 		return null
 	}
+	// eslint-disable-next-line @typescript-eslint/no-base-to-string
 	return [`${a} !== ${b}`, []]
 }
 
@@ -433,8 +439,12 @@ export function betterPathIsAbsolute(p: string): boolean {
 
 /** Returns true if we're running tests (in Jest) */
 export function isRunningInTest(): boolean {
-	// Note: JEST_WORKER_ID is set when running in unit tests
-	return process.env.JEST_WORKER_ID !== undefined
+	// JEST_WORKER_ID is set by Jest, VITEST/VITEST_WORKER_ID by Vitest.
+	return (
+		process.env.JEST_WORKER_ID !== undefined ||
+		process.env.VITEST_WORKER_ID !== undefined ||
+		process.env.VITEST === 'true'
+	)
 }
 /**
  * Returns true if the process is running in development mode.

@@ -5,13 +5,13 @@
  * and puts them into `.ffmpeg/` at the root of the repository.
  */
 
-import fs from 'fs/promises'
-import { pipeline } from 'node:stream'
-import { promisify } from 'node:util'
-import { createWriteStream } from 'node:fs'
-import path from 'path'
 import cp from 'child_process'
-import fetch from 'node-fetch'
+import fs from 'fs/promises'
+import { createWriteStream } from 'node:fs'
+import { pipeline } from 'node:stream'
+import { setTimeout as sleep } from 'node:timers/promises'
+import { promisify } from 'node:util'
+import path from 'path'
 
 console.log(`Preparing for tests...`)
 
@@ -46,10 +46,13 @@ if (platformVersions) {
 			console.log(`Fetching ${version.url}`)
 			// Download it
 
-			const fileExtension = version.url.endsWith('.tar.xz') ? '.tar.xz' : version.url.endsWith('.zip') ? '.zip' : ''
+			const fileExtension = version.url.endsWith('.tar.xz')
+				? '.tar.xz'
+				: version.url.endsWith('.zip')
+					? '.zip'
+					: ''
 			const tmpPath = path.resolve(path.join(ffmpegRootDir, 'tmp' + fileExtension))
 
-			// eslint-disable-next-line no-undef
 			const response = await fetch(version.url)
 			if (!response.ok) throw new Error(`unexpected response ${response.statusText}`)
 			await streamPipeline(response.body, createWriteStream(tmpPath))
@@ -69,6 +72,7 @@ if (platformVersions) {
 						.split('\n')[0]
 						.trim() // "ffmpeg-4.3.1-win64-static/"
 						.replace(/[\/\\]*$/, '') // remove trailing slash
+					await sleep(100)
 					await fs.rename(path.join(ffmpegRootDir, mainFolder), versionPath)
 				} else {
 					cp.execSync(`unzip ${toPosix(tmpPath)} -d ${toPosix(ffmpegRootDir)}`)
