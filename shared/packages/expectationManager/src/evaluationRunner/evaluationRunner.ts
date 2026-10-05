@@ -576,6 +576,7 @@ export class EvaluationRunner {
 							// Lost connection to the worker & monitor
 						}
 						trackedPackageContainer.currentWorker = null
+						trackedPackageContainer.monitorIsSetup = false
 					}
 					trackedPackageContainer.isUpdated = false
 				}
@@ -584,6 +585,7 @@ export class EvaluationRunner {
 					// Check that the worker still exists:
 					if (!this.manager.workerAgents.get(trackedPackageContainer.currentWorker)) {
 						trackedPackageContainer.currentWorker = null
+						trackedPackageContainer.monitorIsSetup = false
 					}
 				}
 				if (!trackedPackageContainer.currentWorker) {
@@ -599,12 +601,13 @@ export class EvaluationRunner {
 							const support = await workerAgent.api.doYouSupportPackageContainer(
 								trackedPackageContainer.packageContainer
 							)
-							if (!trackedPackageContainer.currentWorker) {
-								if (support.support) {
+							if (support.support) {
+								if (!trackedPackageContainer.currentWorker) {
 									trackedPackageContainer.currentWorker = workerId
-								} else {
-									notSupportReason = support.reason
 								}
+								notSupportReason = null
+							} else if (!trackedPackageContainer.currentWorker) {
+								notSupportReason = support.reason
 							}
 						})
 					)
@@ -651,6 +654,8 @@ export class EvaluationRunner {
 								)
 								continue // Break further execution, leaving the status untouched
 							}
+						} else {
+							trackedPackageContainer.noWorkerSince = null
 						}
 
 						this.tracker.trackedPackageContainerAPI.updateTrackedPackageContainerStatus(
