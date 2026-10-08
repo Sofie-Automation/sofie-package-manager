@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"@html-renderer/generic": "1.53.0",
-		"@sofie-automation/shared-lib": "26.3.0-nightly-main-20261005-101207-3ec1d8e.0",
+		"@sofie-automation/shared-lib": "26.9.2",
 		"@sofie-package-manager/api": "1.53.0",
 		"portfinder": "^1.0.38",
 		"tslib": "^2.8.1",
