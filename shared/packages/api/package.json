@@ -1,6 +1,6 @@
 {
     "name": "@sofie-package-manager/api",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "type": "module",
     "main": "dist/index.js",
     "exports": {

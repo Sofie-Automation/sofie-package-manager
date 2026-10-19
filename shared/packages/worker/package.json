@@ -1,6 +1,6 @@
 {
 	"name": "@sofie-package-manager/worker",
-	"version": "1.53.0",
+	"version": "26.9.0",
 	"type": "module",
 	"main": "dist/index.js",
 	"exports": {
@@ -34,7 +34,7 @@
 		"@aws-sdk/client-s3": "^3.1010.0",
 		"@aws-sdk/lib-storage": "^3.1010.0",
 		"@parcel/watcher": "^2.5.6",
-		"@sofie-package-manager/api": "1.53.0",
+		"@sofie-package-manager/api": "26.9.0",
 		"atem-connection": "^3.9.0",
 		"basic-ftp": "^6.2.1",
 		"csv-parser": "^3.2.0",

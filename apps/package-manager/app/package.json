@@ -1,6 +1,6 @@
 {
     "name": "@package-manager/app",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "bin": "./dist/index.js",
     "type": "module",
     "private": true,
@@ -17,7 +17,7 @@
         "typescript": "*"
     },
     "dependencies": {
-        "@package-manager/generic": "1.53.0"
+        "@package-manager/generic": "26.9.0"
     },
     "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {

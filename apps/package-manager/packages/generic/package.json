@@ -1,6 +1,6 @@
 {
     "name": "@package-manager/generic",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "type": "module",
     "private": true,
     "main": "dist/index.js",
@@ -17,9 +17,9 @@
     },
     "dependencies": {
         "@parcel/watcher": "^2.5.6",
-        "@sofie-package-manager/api": "1.53.0",
-        "@sofie-package-manager/expectation-manager": "1.53.0",
-        "@sofie-package-manager/worker": "1.53.0",
+        "@sofie-package-manager/api": "26.9.0",
+        "@sofie-package-manager/expectation-manager": "26.9.0",
+        "@sofie-package-manager/worker": "26.9.0",
         "configstore": "^8.0.0",
         "deep-extend": "^0.6.0",
         "rfdc": "^1.4.1",

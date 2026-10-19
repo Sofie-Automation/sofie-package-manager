@@ -1,6 +1,6 @@
 {
     "name": "@worker/generic",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "type": "module",
     "private": true,
     "main": "dist/index.js",
@@ -11,8 +11,8 @@
         "__test": "vitest run"
     },
     "dependencies": {
-        "@sofie-package-manager/api": "1.53.0",
-        "@sofie-package-manager/worker": "1.53.0"
+        "@sofie-package-manager/api": "26.9.0",
+        "@sofie-package-manager/worker": "26.9.0"
     },
     "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {

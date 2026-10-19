@@ -3,295 +3,245 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
 
-* better handling of streams in putPackageStream ([19b5732](https://github.com/Sofie-Automation/sofie-package-manager/commit/19b57324758bcf4fc6fd7a7c3fd5b7c0b4ca0c20))
-* bug fix in HTTP-Proxy, handle unlinking of file that had already been removed ([1dac69d](https://github.com/Sofie-Automation/sofie-package-manager/commit/1dac69d42cbe7d82cf87174c9134152d11191d8c))
-* expand config documentation for `accessURL` ([04504e8](https://github.com/Sofie-Automation/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
-* ffmpeg 7.0+ ([1c00553](https://github.com/Sofie-Automation/sofie-package-manager/commit/1c005532784df5cb3741fce6a26bcd38508c8e2c))
-* handle thrown error when testing executables ([ba38287](https://github.com/Sofie-Automation/sofie-package-manager/commit/ba382874d969ee3e26ae1b89d17ee9f491ef67b2))
-* HTTP-Proxy use `JSONWriteFilesNoLockHandler` to better align with previous (working) functionality and still alighn with the other accessorHandlers that uses the GenericFileOperationsHandler ([2622cf6](https://github.com/Sofie-Automation/sofie-package-manager/commit/2622cf6d28cdcb6e4c85e2b2be46eedbe48aa902))
-* improve network-scoped URLs parsing ([39a27e3](https://github.com/Sofie-Automation/sofie-package-manager/commit/39a27e39c74c47907c18a19434c160184aa9b56b))
-* issue where allowedExpectationTypes became [''] by default, thus disallowing any jobs on any worker ([0e35c53](https://github.com/Sofie-Automation/sofie-package-manager/commit/0e35c538b88ce448282084984c95ef3f54067460))
-* issue where the access url to expectationManager did not include port ([85d3e5a](https://github.com/Sofie-Automation/sofie-package-manager/commit/85d3e5a4f7b190f5509e748512084c252a986a32))
-* minor fixes after code review ([38fdef7](https://github.com/Sofie-Automation/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
-* networks-scoped URLs with authentication part are incorrectly parsed ([9ac4a4d](https://github.com/Sofie-Automation/sofie-package-manager/commit/9ac4a4ddc46baaae340e5330da06d94d73131ec7))
-* remove invalid reported statuses ([bfffb57](https://github.com/Sofie-Automation/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
-* revert use of delayRemove-json-writer for HTTP-Proxy ([203251d](https://github.com/Sofie-Automation/sofie-package-manager/commit/203251d9a2d80a488873b7a59a007aa2847dc0b0))
-* rework how Workforce announces expectationManagers to workers ([5627ef6](https://github.com/Sofie-Automation/sofie-package-manager/commit/5627ef67cdc2cf60afb6d3e3a2ef3ea49dfd877f))
-* use correct url in thrown error string ([3be1751](https://github.com/Sofie-Automation/sofie-package-manager/commit/3be17517e2a41ec3717163bb197dd5fea7a6d2f6))
-* **worker:** clarify empty allowedExpectationTypes means "all allowed" ([30e4766](https://github.com/Sofie-Automation/sofie-package-manager/commit/30e4766065f2b7532e47b4d4703673964860975d))
-
+- a few minor ftp fixes & optimizations ([c7f32d3](https://github.com/Sofie-Automation/sofie-package-manager/commit/c7f32d32955377dbe445387b465b0533703f3e69))
+- activeRundown handling ([#310](https://github.com/Sofie-Automation/sofie-package-manager/issues/310)) ([8f62711](https://github.com/Sofie-Automation/sofie-package-manager/commit/8f627113a1743f6b174d56b6645c67aa73bdffa0))
+- add worker and expectationManager configuration to troubleshoot data. ([7714f89](https://github.com/Sofie-Automation/sofie-package-manager/commit/7714f8970a8039411568baa0c92cb29aab15ca20))
+- AppContainer forward `matchFilenamesWithoutExtension` arg properly ([1e51f1a](https://github.com/Sofie-Automation/sofie-package-manager/commit/1e51f1af9f612d837c481a2004690d72c651dfa9))
+- bug in lookupAccessorHandles ([5909da4](https://github.com/Sofie-Automation/sofie-package-manager/commit/5909da4ecc93bb012b914f2a2b9072e81eb62784))
+- check resourceId / networdIds early, to discard use of accessors ([88a6820](https://github.com/Sofie-Automation/sofie-package-manager/commit/88a68206e30336da9793b6bcd9752f17007149d6))
+- clear state when RESTARTING expectations ([83f0c2d](https://github.com/Sofie-Automation/sofie-package-manager/commit/83f0c2df0bb249fba6923bff8228df98992654a1))
+- correctly match files with extensions or without any ([3daca56](https://github.com/Sofie-Automation/sofie-package-manager/commit/3daca56bf18311e9abe0e854728f730265ed34de))
+- ensure all config arguments are available as env vars ([#275](https://github.com/Sofie-Automation/sofie-package-manager/issues/275)) ([6755853](https://github.com/Sofie-Automation/sofie-package-manager/commit/675585362b4e38653e488a34fb56c7bc3abca298))
+- handle ENOENT error in resolveFileWithoutExtension when directory doesnt exist ([#274](https://github.com/Sofie-Automation/sofie-package-manager/issues/274)) ([c3d31b1](https://github.com/Sofie-Automation/sofie-package-manager/commit/c3d31b1bbd5f353ef60f5ff5966909b99ebf561c))
+- html renderer can block worker launch ([#296](https://github.com/Sofie-Automation/sofie-package-manager/issues/296)) ([d59957f](https://github.com/Sofie-Automation/sofie-package-manager/commit/d59957f1ab326478d82192318f845f40f83285af))
+- improve error message thrown from fetch ([31c9f59](https://github.com/Sofie-Automation/sofie-package-manager/commit/31c9f59441d70d2ff0f04c3a8be5bc7065647456))
+- improve reported reason for unsupported accessor ([6e01906](https://github.com/Sofie-Automation/sofie-package-manager/commit/6e01906a26fbdca6fee7bf10e9675a5c9b76015e))
+- improve tracking of reasons why a worker does not support an expectation. ([0599314](https://github.com/Sofie-Automation/sofie-package-manager/commit/05993141885f7b97238cb8b5b7b585aaa0311f65))
+- Issue with thrown error ([e3fde76](https://github.com/Sofie-Automation/sofie-package-manager/commit/e3fde76d42a5d21aaba7c71d00e3d1f854a3b0a3))
+- make resourceId a strict requirement, when set ([24c356a](https://github.com/Sofie-Automation/sofie-package-manager/commit/24c356a5d76447928a28bddb8dd5d509e7877fda))
+- mark job as cancelled before performing cancel ([#333](https://github.com/Sofie-Automation/sofie-package-manager/issues/333)) ([ec431e7](https://github.com/Sofie-Automation/sofie-package-manager/commit/ec431e7a71316dc28ebaed51695e9a1f582f8f07))
+- media-convert: add required/forbidden keywords, used to ensure that a conversion step is successful. ([c757e87](https://github.com/Sofie-Automation/sofie-package-manager/commit/c757e87643176191acc5952f07a83955c8d364b7))
+- nrk-blueprints: only wait for previous expectation if it is a copy_proxy ([b038cd9](https://github.com/Sofie-Automation/sofie-package-manager/commit/b038cd91b59444c50a4bbff3a7a2de2553b71749))
+- refactor FTPClient to avoid future footguns. Run some operations in batches to increase reliability ([f435656](https://github.com/Sofie-Automation/sofie-package-manager/commit/f43565607dc3ca8580e6cc2005f38c892764c19f))
+- remove file discover cache ([d3b391d](https://github.com/Sofie-Automation/sofie-package-manager/commit/d3b391d94d86f62da339b84edaa002426d1d8837))
+- reset RegExp lastIndex in cache clear loop ([bfca09a](https://github.com/Sofie-Automation/sofie-package-manager/commit/bfca09a30a065de0f459dfb08807e831f697da0e))
+- return ALL technical reasons why an accessor handle isn't supported ([5d95fb9](https://github.com/Sofie-Automation/sofie-package-manager/commit/5d95fb97ad6ca8e25683611c7603b85723175fc0))
+- rework cache for getResolvedFullPath ([e307310](https://github.com/Sofie-Automation/sofie-package-manager/commit/e30731049201808d6b5aedcbbb06e7a5dca88062))
+- server endpoints ([a799043](https://github.com/Sofie-Automation/sofie-package-manager/commit/a7990432bd9e5c26259744435a0070c93899ce58))
+- track all reasons why a worker does not support an expectation. ([cee6aa4](https://github.com/Sofie-Automation/sofie-package-manager/commit/cee6aa4a18522c86a2cc880c430c9edade89846a))
+- typo in config.ts: WORKER_NETWORK_ID -> WORKER_RESOURCE_ID ([468e800](https://github.com/Sofie-Automation/sofie-package-manager/commit/468e8007b2abdada8a06a4f180210679dee322c9))
+- update deps to latest sofie-core ([9e67a0d](https://github.com/Sofie-Automation/sofie-package-manager/commit/9e67a0d28f282fdbfb6f349f4a619a0a1336d2a7))
 
 ### Features
 
-* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/Sofie-Automation/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
-* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/Sofie-Automation/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
-* Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/Sofie-Automation/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
-* alternative URLs for expectationManager ([5bc1ac7](https://github.com/Sofie-Automation/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
-* Implement getResolvedFullPath method for LocalFolder and FileShare accessors ([0e0dc26](https://github.com/Sofie-Automation/sofie-package-manager/commit/0e0dc266d2f69d4f537392fc4bf8eac78d8b20a0))
-* Match Extension-less filenames in getFileInfo ([97c48a6](https://github.com/Sofie-Automation/sofie-package-manager/commit/97c48a6b79147027e443e7b36d73b176de16aefb))
-* Match Extension-less filenames when deleting ([0c5d82b](https://github.com/Sofie-Automation/sofie-package-manager/commit/0c5d82bb86699760bd59bcc0f4a7531004be2b5b))
-* Move config to process and make it available more widely ([4a2ff70](https://github.com/Sofie-Automation/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
-* Move extensionless filename detection to utility ([cc33a01](https://github.com/Sofie-Automation/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
-* Pass parameter correctly ([78b131f](https://github.com/Sofie-Automation/sofie-package-manager/commit/78b131f0a44c008ba4a16d038c6c3f6c4f8e7a1d))
-* Support correct file paths in scan.ts ([3b3d0af](https://github.com/Sofie-Automation/sofie-package-manager/commit/3b3d0af587d26fb655ca0404094e77a53735724e))
-* Support extensionless filePaths in copy operations ([13ffb11](https://github.com/Sofie-Automation/sofie-package-manager/commit/13ffb11df654ea4296d194a306489a42803ac70f))
-* Support extensionless paths in localFolder.ts ([3585a48](https://github.com/Sofie-Automation/sofie-package-manager/commit/3585a48cec815cda896ac172ed0c4e605e86b515))
-* Support matchFilenamesWithoutExtension in fileShare ([5ae48de](https://github.com/Sofie-Automation/sofie-package-manager/commit/5ae48de3cefb82739ea62a709c954a36f0299d90))
-* **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/Sofie-Automation/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
-* **worker:** list out allowed types for allowedExpectationTypes ([ca0ea70](https://github.com/Sofie-Automation/sofie-package-manager/commit/ca0ea70afa1d52ddf56e680fe0d9384f62fc5a7e))
+- expose health/metrics for all processes ([#286](https://github.com/Sofie-Automation/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/Sofie-Automation/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
+- **PackageManager:** allow a graceful reboot procedure that will keep work status from previous runs, but remove anything PM doesn't know about ([b311513](https://github.com/Sofie-Automation/sofie-package-manager/commit/b311513519e16b5a61c978a6891e98f4f64f3261))
 
+# [1.53.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
+### Bug Fixes
 
+- better handling of streams in putPackageStream ([19b5732](https://github.com/Sofie-Automation/sofie-package-manager/commit/19b57324758bcf4fc6fd7a7c3fd5b7c0b4ca0c20))
+- bug fix in HTTP-Proxy, handle unlinking of file that had already been removed ([1dac69d](https://github.com/Sofie-Automation/sofie-package-manager/commit/1dac69d42cbe7d82cf87174c9134152d11191d8c))
+- expand config documentation for `accessURL` ([04504e8](https://github.com/Sofie-Automation/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+- ffmpeg 7.0+ ([1c00553](https://github.com/Sofie-Automation/sofie-package-manager/commit/1c005532784df5cb3741fce6a26bcd38508c8e2c))
+- handle thrown error when testing executables ([ba38287](https://github.com/Sofie-Automation/sofie-package-manager/commit/ba382874d969ee3e26ae1b89d17ee9f491ef67b2))
+- HTTP-Proxy use `JSONWriteFilesNoLockHandler` to better align with previous (working) functionality and still alighn with the other accessorHandlers that uses the GenericFileOperationsHandler ([2622cf6](https://github.com/Sofie-Automation/sofie-package-manager/commit/2622cf6d28cdcb6e4c85e2b2be46eedbe48aa902))
+- improve network-scoped URLs parsing ([39a27e3](https://github.com/Sofie-Automation/sofie-package-manager/commit/39a27e39c74c47907c18a19434c160184aa9b56b))
+- issue where allowedExpectationTypes became [''] by default, thus disallowing any jobs on any worker ([0e35c53](https://github.com/Sofie-Automation/sofie-package-manager/commit/0e35c538b88ce448282084984c95ef3f54067460))
+- issue where the access url to expectationManager did not include port ([85d3e5a](https://github.com/Sofie-Automation/sofie-package-manager/commit/85d3e5a4f7b190f5509e748512084c252a986a32))
+- minor fixes after code review ([38fdef7](https://github.com/Sofie-Automation/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
+- networks-scoped URLs with authentication part are incorrectly parsed ([9ac4a4d](https://github.com/Sofie-Automation/sofie-package-manager/commit/9ac4a4ddc46baaae340e5330da06d94d73131ec7))
+- remove invalid reported statuses ([bfffb57](https://github.com/Sofie-Automation/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
+- revert use of delayRemove-json-writer for HTTP-Proxy ([203251d](https://github.com/Sofie-Automation/sofie-package-manager/commit/203251d9a2d80a488873b7a59a007aa2847dc0b0))
+- rework how Workforce announces expectationManagers to workers ([5627ef6](https://github.com/Sofie-Automation/sofie-package-manager/commit/5627ef67cdc2cf60afb6d3e3a2ef3ea49dfd877f))
+- use correct url in thrown error string ([3be1751](https://github.com/Sofie-Automation/sofie-package-manager/commit/3be17517e2a41ec3717163bb197dd5fea7a6d2f6))
+- **worker:** clarify empty allowedExpectationTypes means "all allowed" ([30e4766](https://github.com/Sofie-Automation/sofie-package-manager/commit/30e4766065f2b7532e47b4d4703673964860975d))
 
+### Features
+
+- Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/Sofie-Automation/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+- add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/Sofie-Automation/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+- Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/Sofie-Automation/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/Sofie-Automation/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- Implement getResolvedFullPath method for LocalFolder and FileShare accessors ([0e0dc26](https://github.com/Sofie-Automation/sofie-package-manager/commit/0e0dc266d2f69d4f537392fc4bf8eac78d8b20a0))
+- Match Extension-less filenames in getFileInfo ([97c48a6](https://github.com/Sofie-Automation/sofie-package-manager/commit/97c48a6b79147027e443e7b36d73b176de16aefb))
+- Match Extension-less filenames when deleting ([0c5d82b](https://github.com/Sofie-Automation/sofie-package-manager/commit/0c5d82bb86699760bd59bcc0f4a7531004be2b5b))
+- Move config to process and make it available more widely ([4a2ff70](https://github.com/Sofie-Automation/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+- Move extensionless filename detection to utility ([cc33a01](https://github.com/Sofie-Automation/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
+- Pass parameter correctly ([78b131f](https://github.com/Sofie-Automation/sofie-package-manager/commit/78b131f0a44c008ba4a16d038c6c3f6c4f8e7a1d))
+- Support correct file paths in scan.ts ([3b3d0af](https://github.com/Sofie-Automation/sofie-package-manager/commit/3b3d0af587d26fb655ca0404094e77a53735724e))
+- Support extensionless filePaths in copy operations ([13ffb11](https://github.com/Sofie-Automation/sofie-package-manager/commit/13ffb11df654ea4296d194a306489a42803ac70f))
+- Support extensionless paths in localFolder.ts ([3585a48](https://github.com/Sofie-Automation/sofie-package-manager/commit/3585a48cec815cda896ac172ed0c4e605e86b515))
+- Support matchFilenamesWithoutExtension in fileShare ([5ae48de](https://github.com/Sofie-Automation/sofie-package-manager/commit/5ae48de3cefb82739ea62a709c954a36f0299d90))
+- **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/Sofie-Automation/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
+- **worker:** list out allowed types for allowedExpectationTypes ([ca0ea70](https://github.com/Sofie-Automation/sofie-package-manager/commit/ca0ea70afa1d52ddf56e680fe0d9384f62fc5a7e))
 
 # [1.53.0-alpha.4](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
-
 ### Bug Fixes
 
-* bug when determining dev vs prod ([9669903](https://github.com/Sofie-Automation/sofie-package-manager/commit/96699035035b9619686ae1b1127831cc49909879))
-* bug when reading an empty "__removePackages.json" file ([3976215](https://github.com/Sofie-Automation/sofie-package-manager/commit/39762157cb4cf82df86451a1cad7b0e6b24fc861))
-* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/Sofie-Automation/sofie-package-manager/issues/219)) ([#235](https://github.com/Sofie-Automation/sofie-package-manager/issues/235)) ([6d62e95](https://github.com/Sofie-Automation/sofie-package-manager/commit/6d62e950f83c4a503ce164700863e89ee59d1650))
-* ftp-upload: fix a bug where the ftp-client cd:ed to different working directories, making our commands weird ([1dbc41a](https://github.com/Sofie-Automation/sofie-package-manager/commit/1dbc41a1030ab061af0123832a561f1ecbc81109))
-* ftp-upload: handle a case where ftp-server doesn't support ftp-upload ([b50bd59](https://github.com/Sofie-Automation/sofie-package-manager/commit/b50bd5930ded8456a24e69a47a0dbd07c9e060c3))
-* json-write-file: Don't store json-file (typically removePackages.json) at all if its content is an empty array ([ae65275](https://github.com/Sofie-Automation/sofie-package-manager/commit/ae65275278cbedfc5655147001dc3d759981a2ef))
-
+- bug when determining dev vs prod ([9669903](https://github.com/Sofie-Automation/sofie-package-manager/commit/96699035035b9619686ae1b1127831cc49909879))
+- bug when reading an empty "__removePackages.json" file ([3976215](https://github.com/Sofie-Automation/sofie-package-manager/commit/39762157cb4cf82df86451a1cad7b0e6b24fc861))
+- docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/Sofie-Automation/sofie-package-manager/issues/219)) ([#235](https://github.com/Sofie-Automation/sofie-package-manager/issues/235)) ([6d62e95](https://github.com/Sofie-Automation/sofie-package-manager/commit/6d62e950f83c4a503ce164700863e89ee59d1650))
+- ftp-upload: fix a bug where the ftp-client cd:ed to different working directories, making our commands weird ([1dbc41a](https://github.com/Sofie-Automation/sofie-package-manager/commit/1dbc41a1030ab061af0123832a561f1ecbc81109))
+- ftp-upload: handle a case where ftp-server doesn't support ftp-upload ([b50bd59](https://github.com/Sofie-Automation/sofie-package-manager/commit/b50bd5930ded8456a24e69a47a0dbd07c9e060c3))
+- json-write-file: Don't store json-file (typically removePackages.json) at all if its content is an empty array ([ae65275](https://github.com/Sofie-Automation/sofie-package-manager/commit/ae65275278cbedfc5655147001dc3d759981a2ef))
 
 ### Features
 
-* add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/Sofie-Automation/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
-* add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/Sofie-Automation/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
-* support workers in docker SOFIE-4071 ([#236](https://github.com/Sofie-Automation/sofie-package-manager/issues/236)) ([681c62f](https://github.com/Sofie-Automation/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
-
-
-
-
+- add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/Sofie-Automation/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+- add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/Sofie-Automation/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/Sofie-Automation/sofie-package-manager/issues/236)) ([681c62f](https://github.com/Sofie-Automation/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
 
 # [1.53.0-alpha.3](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
-
 ### Bug Fixes
 
-* issue with Accessor ([7d4d30f](https://github.com/Sofie-Automation/sofie-package-manager/commit/7d4d30fac33c66a0eebade28d5666b3bc0e1875f))
-
-
-
-
+- issue with Accessor ([7d4d30f](https://github.com/Sofie-Automation/sofie-package-manager/commit/7d4d30fac33c66a0eebade28d5666b3bc0e1875f))
 
 # [1.53.0-alpha.2](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
 
-
 ### Bug Fixes
 
-* take into account that exp.content can be null ([f0749e0](https://github.com/Sofie-Automation/sofie-package-manager/commit/f0749e0ffdf0ef2169d4cad8bc239e300e0c9499))
-
-
-
-
+- take into account that exp.content can be null ([f0749e0](https://github.com/Sofie-Automation/sofie-package-manager/commit/f0749e0ffdf0ef2169d4cad8bc239e300e0c9499))
 
 # [1.53.0-alpha.1](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
 
-
 ### Bug Fixes
 
-* take unto account that exp.content can be null ([d108f89](https://github.com/Sofie-Automation/sofie-package-manager/commit/d108f89e5251ac9a5117d504e96deb9282959a13))
-
-
-
-
+- take unto account that exp.content can be null ([d108f89](https://github.com/Sofie-Automation/sofie-package-manager/commit/d108f89e5251ac9a5117d504e96deb9282959a13))
 
 # [1.53.0-alpha.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
-
 ### Bug Fixes
 
-* add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/Sofie-Automation/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
-* add support for streaming input data into ffmpeg ([c34c006](https://github.com/Sofie-Automation/sofie-package-manager/commit/c34c006c18977db6707d358ddcb2965047963e7b))
-* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/Sofie-Automation/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/Sofie-Automation/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
-* ensure the same FTP client is not used for download & upload ([8776cff](https://github.com/Sofie-Automation/sofie-package-manager/commit/8776cffe2cf664e3124600f5576d3a214bb74517))
-* ftp support ([f919631](https://github.com/Sofie-Automation/sofie-package-manager/commit/f919631f132a4b3df8eeae81c5436bfa0ae96583))
-* refactoring & fixes after code review ([2981d38](https://github.com/Sofie-Automation/sofie-package-manager/commit/2981d388ad13bd15776f53fb57502b0a7c285ea6))
-
+- add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/Sofie-Automation/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
+- add support for streaming input data into ffmpeg ([c34c006](https://github.com/Sofie-Automation/sofie-package-manager/commit/c34c006c18977db6707d358ddcb2965047963e7b))
+- docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/Sofie-Automation/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/Sofie-Automation/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
+- ensure the same FTP client is not used for download & upload ([8776cff](https://github.com/Sofie-Automation/sofie-package-manager/commit/8776cffe2cf664e3124600f5576d3a214bb74517))
+- ftp support ([f919631](https://github.com/Sofie-Automation/sofie-package-manager/commit/f919631f132a4b3df8eeae81c5436bfa0ae96583))
+- refactoring & fixes after code review ([2981d38](https://github.com/Sofie-Automation/sofie-package-manager/commit/2981d388ad13bd15776f53fb57502b0a7c285ea6))
 
 ### Features
 
-* add FTP accessor ([9d087f1](https://github.com/Sofie-Automation/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
-
-
-
-
+- add FTP accessor ([9d087f1](https://github.com/Sofie-Automation/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package package-manager-monorepo
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package package-manager-monorepo
 
-
-
-
-
 # [1.52.0-alpha.4](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
-
 
 ### Bug Fixes
 
-* add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/tv-automation-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
-* clean up logging ([9a5fc59](https://github.com/nrkno/tv-automation-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
-* patch windows-drive-letter, replace wmic with fsutil ([bf1c016](https://github.com/nrkno/tv-automation-package-manager/commit/bf1c016c1de6a2037a91876db0051f2bfef44878))
-* replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/tv-automation-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
-
-
-
-
+- add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/tv-automation-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
+- clean up logging ([9a5fc59](https://github.com/nrkno/tv-automation-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+- patch windows-drive-letter, replace wmic with fsutil ([bf1c016](https://github.com/nrkno/tv-automation-package-manager/commit/bf1c016c1de6a2037a91876db0051f2bfef44878))
+- replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/tv-automation-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
 
 # [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
 
-
 ### Bug Fixes
 
-* worker on linux ([e25b172](https://github.com/nrkno/tv-automation-package-manager/commit/e25b17271a53cdaad199aa89143f535d52ed3356))
-
-
-
-
+- worker on linux ([e25b172](https://github.com/nrkno/tv-automation-package-manager/commit/e25b17271a53cdaad199aa89143f535d52ed3356))
 
 # [1.52.0-alpha.2](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
 
-
 ### Bug Fixes
 
-* update koa to 2.16.1 to resolve CVE-2025-25200 ([7b4cf05](https://github.com/nrkno/tv-automation-package-manager/commit/7b4cf0527db46eb516b65ecb74845b3a8441811e))
-
+- update koa to 2.16.1 to resolve CVE-2025-25200 ([7b4cf05](https://github.com/nrkno/tv-automation-package-manager/commit/7b4cf0527db46eb516b65ecb74845b3a8441811e))
 
 ### Features
 
-* **worker:** when appContainerURL is not specified, run standalone, for external management ([7feb156](https://github.com/nrkno/tv-automation-package-manager/commit/7feb1569d1a3898186811731ff27c4bea209bc33))
-
-
-
-
+- **worker:** when appContainerURL is not specified, run standalone, for external management ([7feb156](https://github.com/nrkno/tv-automation-package-manager/commit/7feb1569d1a3898186811731ff27c4bea209bc33))
 
 # [1.52.0-alpha.1](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
 
-
 ### Bug Fixes
 
-* add .skipEvaluationCount property ([1b0246b](https://github.com/nrkno/tv-automation-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
-* add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/tv-automation-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
-* allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/tv-automation-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
-
+- add .skipEvaluationCount property ([1b0246b](https://github.com/nrkno/tv-automation-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
+- add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/tv-automation-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
+- allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/tv-automation-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
 
 ### Reverts
 
-* Revert "chore: modify MESSAGE_TIMEOUT to 30s, tor troubleshooting" ([61bf908](https://github.com/nrkno/tv-automation-package-manager/commit/61bf908d9031614a2e101ca6ae372aaaddfad3af))
-
-
+- Revert "chore: modify MESSAGE_TIMEOUT to 30s, tor troubleshooting" ([61bf908](https://github.com/nrkno/tv-automation-package-manager/commit/61bf908d9031614a2e101ca6ae372aaaddfad3af))
 
 # [1.52.0-alpha.0](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
-
 ### Bug Fixes
 
-* compatibility with Sofie Core R52 ([8864bfd](https://github.com/nrkno/tv-automation-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
-* package manager not following publication rules ([92c306c](https://github.com/nrkno/tv-automation-package-manager/commit/92c306c06d49e8d5debc423e49123306ee4dfa6b))
-
+- compatibility with Sofie Core R52 ([8864bfd](https://github.com/nrkno/tv-automation-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
+- package manager not following publication rules ([92c306c](https://github.com/nrkno/tv-automation-package-manager/commit/92c306c06d49e8d5debc423e49123306ee4dfa6b))
 
 ### Features
 
-* add more dockerfiles ([46d34ff](https://github.com/nrkno/tv-automation-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
-* rework ci building to build additional packages and rely on build matrix ([420bb70](https://github.com/nrkno/tv-automation-package-manager/commit/420bb70c7d9b6b2ce5d4a7a3df63f119578d5b11))
-
-
-
-
+- add more dockerfiles ([46d34ff](https://github.com/nrkno/tv-automation-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
+- rework ci building to build additional packages and rely on build matrix ([420bb70](https://github.com/nrkno/tv-automation-package-manager/commit/420bb70c7d9b6b2ce5d4a7a3df63f119578d5b11))
 
 # [1.51.0-alpha.2](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
-
 ### Bug Fixes
 
-* An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/nrkno/tv-automation-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
-* Check that Quantel source clips exist earlier, to avoid crashing out of a WorkInProgress. ([4c244b1](https://github.com/nrkno/tv-automation-package-manager/commit/4c244b12713c3b3011e105e10c623424a41e2a9d))
-* log reason why no worker can handle expectation ([8e7f57d](https://github.com/nrkno/tv-automation-package-manager/commit/8e7f57d35fa3f5fc2daf58b247acbadb0451a64d))
-
-
-
-
+- An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/nrkno/tv-automation-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
+- Check that Quantel source clips exist earlier, to avoid crashing out of a WorkInProgress. ([4c244b1](https://github.com/nrkno/tv-automation-package-manager/commit/4c244b12713c3b3011e105e10c623424a41e2a9d))
+- log reason why no worker can handle expectation ([8e7f57d](https://github.com/nrkno/tv-automation-package-manager/commit/8e7f57d35fa3f5fc2daf58b247acbadb0451a64d))
 
 # [1.51.0-alpha.1](https://github.com/nrkno/tv-automation-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
-
 ### Bug Fixes
 
-* resolve HTMLRenderer build issues ([e3da508](https://github.com/nrkno/tv-automation-package-manager/commit/e3da508120f43c9d32b88eed9cb2114ff809f73b))
-
-
-
-
+- resolve HTMLRenderer build issues ([e3da508](https://github.com/nrkno/tv-automation-package-manager/commit/e3da508120f43c9d32b88eed9cb2114ff809f73b))
 
 # [1.51.0-alpha.0](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
 
-
 ### Bug Fixes
 
-* add a `force` parameter to appcontainer.requestSpinDown() ([3255189](https://github.com/nrkno/tv-automation-package-manager/commit/3255189663d06d91e90d812bfc9a705589c5ba0d))
-* add option to HTTP Accessor to either send a HEAD or GET to retrieve initial info ([e98854c](https://github.com/nrkno/tv-automation-package-manager/commit/e98854c32955c122aa6bf68a2ac47aa121448f40))
-* allow baseUrl to be optional for HTTP Accessor ([92c575f](https://github.com/nrkno/tv-automation-package-manager/commit/92c575fa767cb3adba649619c16ca312b0253065))
-* allow stringified JSON object as storeObject value. Also add some error handling ([0e589bf](https://github.com/nrkno/tv-automation-package-manager/commit/0e589bfb1809cc68f3ef6bf14a95ef02953966ce))
-* change default `minRunningApps` to 1 ([8694b77](https://github.com/nrkno/tv-automation-package-manager/commit/8694b77f34242445430d84ebe1badc6baa93c704))
-* change how render width, height and scale works for html_template expectedPackages ([7fcdf70](https://github.com/nrkno/tv-automation-package-manager/commit/7fcdf700fda413b94f39e7fb6107e26ee7dd9713))
-* **Config:** Add unit to description of config field ([de0f43b](https://github.com/nrkno/tv-automation-package-manager/commit/de0f43b0090dd59293c98dc6ee59206675a7c09e))
-* default to png as screenshot ([9bc6a52](https://github.com/nrkno/tv-automation-package-manager/commit/9bc6a52482486d65ba674cf800c002101cc5701d))
-* escape paths in args ([6c17eae](https://github.com/nrkno/tv-automation-package-manager/commit/6c17eae206bf548167e121ed2e429cdca46daa84))
-* fix issue in HelpfulEventEmitter where it logged false errors ([7d36627](https://github.com/nrkno/tv-automation-package-manager/commit/7d36627323faa030d6bec0506ab4a416b3e49d5d))
-* handle bad http respnse codes better ([1ad7b2d](https://github.com/nrkno/tv-automation-package-manager/commit/1ad7b2dd6b0828c49b54cc4613ddd0ae92b9fddc))
-* html-renderer lookup paths on linux ([40e12d3](https://github.com/nrkno/tv-automation-package-manager/commit/40e12d3083b385a2cddf8ea93cdaa522fbed7073))
-* html-renderer: add support for transparent backgrounds ([c3775a7](https://github.com/nrkno/tv-automation-package-manager/commit/c3775a71783e3ca915d950cb44055ed7e3f4f60e))
-* html-renderer: bug in background color and cropping ([e3e0242](https://github.com/nrkno/tv-automation-package-manager/commit/e3e024264f05e433dee6c6d3878201d4950536cd))
-* make failureLimit to be passed through into appContainer ([f03434a](https://github.com/nrkno/tv-automation-package-manager/commit/f03434abfc909a0cdc04d8bea753d805163a6bad))
-* no need to re-throw in the catch ([8331ef4](https://github.com/nrkno/tv-automation-package-manager/commit/8331ef4c9b89fca091ccaf0f5176fedc21f0bcbf))
-* pin electron version. fix build of html-renderer on linux ([1b06fbb](https://github.com/nrkno/tv-automation-package-manager/commit/1b06fbbda9144524f37b4f542427963dbcd3507a))
-* reject absolute file paths ([cf207e6](https://github.com/nrkno/tv-automation-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
-* remove outputPrefix for html-template expectations ([43e9887](https://github.com/nrkno/tv-automation-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
-* rename supperHEAD to useGETinsteadOfHead ([c75757e](https://github.com/nrkno/tv-automation-package-manager/commit/c75757e9c65ec0babf080652c20d0af50895a767))
-* run HTMLRenderer using `yarn start` script when in development mode ([f3164b4](https://github.com/nrkno/tv-automation-package-manager/commit/f3164b48616710f5cd043475f4f0c9963400782e))
-* update default config and change severity of warning ([b567535](https://github.com/nrkno/tv-automation-package-manager/commit/b567535927cbd2cfed32773ffaa39cb631d7ad41))
-
+- add a `force` parameter to appcontainer.requestSpinDown() ([3255189](https://github.com/nrkno/tv-automation-package-manager/commit/3255189663d06d91e90d812bfc9a705589c5ba0d))
+- add option to HTTP Accessor to either send a HEAD or GET to retrieve initial info ([e98854c](https://github.com/nrkno/tv-automation-package-manager/commit/e98854c32955c122aa6bf68a2ac47aa121448f40))
+- allow baseUrl to be optional for HTTP Accessor ([92c575f](https://github.com/nrkno/tv-automation-package-manager/commit/92c575fa767cb3adba649619c16ca312b0253065))
+- allow stringified JSON object as storeObject value. Also add some error handling ([0e589bf](https://github.com/nrkno/tv-automation-package-manager/commit/0e589bfb1809cc68f3ef6bf14a95ef02953966ce))
+- change default `minRunningApps` to 1 ([8694b77](https://github.com/nrkno/tv-automation-package-manager/commit/8694b77f34242445430d84ebe1badc6baa93c704))
+- change how render width, height and scale works for html_template expectedPackages ([7fcdf70](https://github.com/nrkno/tv-automation-package-manager/commit/7fcdf700fda413b94f39e7fb6107e26ee7dd9713))
+- **Config:** Add unit to description of config field ([de0f43b](https://github.com/nrkno/tv-automation-package-manager/commit/de0f43b0090dd59293c98dc6ee59206675a7c09e))
+- default to png as screenshot ([9bc6a52](https://github.com/nrkno/tv-automation-package-manager/commit/9bc6a52482486d65ba674cf800c002101cc5701d))
+- escape paths in args ([6c17eae](https://github.com/nrkno/tv-automation-package-manager/commit/6c17eae206bf548167e121ed2e429cdca46daa84))
+- fix issue in HelpfulEventEmitter where it logged false errors ([7d36627](https://github.com/nrkno/tv-automation-package-manager/commit/7d36627323faa030d6bec0506ab4a416b3e49d5d))
+- handle bad http respnse codes better ([1ad7b2d](https://github.com/nrkno/tv-automation-package-manager/commit/1ad7b2dd6b0828c49b54cc4613ddd0ae92b9fddc))
+- html-renderer lookup paths on linux ([40e12d3](https://github.com/nrkno/tv-automation-package-manager/commit/40e12d3083b385a2cddf8ea93cdaa522fbed7073))
+- html-renderer: add support for transparent backgrounds ([c3775a7](https://github.com/nrkno/tv-automation-package-manager/commit/c3775a71783e3ca915d950cb44055ed7e3f4f60e))
+- html-renderer: bug in background color and cropping ([e3e0242](https://github.com/nrkno/tv-automation-package-manager/commit/e3e024264f05e433dee6c6d3878201d4950536cd))
+- make failureLimit to be passed through into appContainer ([f03434a](https://github.com/nrkno/tv-automation-package-manager/commit/f03434abfc909a0cdc04d8bea753d805163a6bad))
+- no need to re-throw in the catch ([8331ef4](https://github.com/nrkno/tv-automation-package-manager/commit/8331ef4c9b89fca091ccaf0f5176fedc21f0bcbf))
+- pin electron version. fix build of html-renderer on linux ([1b06fbb](https://github.com/nrkno/tv-automation-package-manager/commit/1b06fbbda9144524f37b4f542427963dbcd3507a))
+- reject absolute file paths ([cf207e6](https://github.com/nrkno/tv-automation-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
+- remove outputPrefix for html-template expectations ([43e9887](https://github.com/nrkno/tv-automation-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
+- rename supperHEAD to useGETinsteadOfHead ([c75757e](https://github.com/nrkno/tv-automation-package-manager/commit/c75757e9c65ec0babf080652c20d0af50895a767))
+- run HTMLRenderer using `yarn start` script when in development mode ([f3164b4](https://github.com/nrkno/tv-automation-package-manager/commit/f3164b48616710f5cd043475f4f0c9963400782e))
+- update default config and change severity of warning ([b567535](https://github.com/nrkno/tv-automation-package-manager/commit/b567535927cbd2cfed32773ffaa39cb631d7ad41))
 
 ### Features
 
-* add HTML Renderer ([8610b6e](https://github.com/nrkno/tv-automation-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
-* refactor the failure tracking to track periods of time with failures within them ([d33f973](https://github.com/nrkno/tv-automation-package-manager/commit/d33f973fb5d7c67f442365dd29778e24766b0466))
-* track failures in Workers in a time period (SOFIE-3355) ([732fa19](https://github.com/nrkno/tv-automation-package-manager/commit/732fa19fad801ae3be5600645fb5899d81aa11a0))
-
-
-
-
+- add HTML Renderer ([8610b6e](https://github.com/nrkno/tv-automation-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
+- refactor the failure tracking to track periods of time with failures within them ([d33f973](https://github.com/nrkno/tv-automation-package-manager/commit/d33f973fb5d7c67f442365dd29778e24766b0466))
+- track failures in Workers in a time period (SOFIE-3355) ([732fa19](https://github.com/nrkno/tv-automation-package-manager/commit/732fa19fad801ae3be5600645fb5899d81aa11a0))
 
 ## [1.50.7](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.6...v1.50.7) (2024-07-04)
 
-
 ### Bug Fixes
 
-* http-server: add '/list' endpoint, that displays a HTML page with a list of the packages ([1acfb0c](https://github.com/nrkno/tv-automation-package-manager/commit/1acfb0c21d0b4a0cbf76a959cff83ea2a8cdd102))
-* improve the info message at '/' and refactor ([d5ac4a1](https://github.com/nrkno/tv-automation-package-manager/commit/d5ac4a15468f568a27d2d8704559fd4ded7e36f3))
-* the path need to be relative to account for when the http-server is proxied ([79e67b4](https://github.com/nrkno/tv-automation-package-manager/commit/79e67b4d1c189a643b6ac8ed8b2c190db2cecf84))
-
-
-
-
+- http-server: add '/list' endpoint, that displays a HTML page with a list of the packages ([1acfb0c](https://github.com/nrkno/tv-automation-package-manager/commit/1acfb0c21d0b4a0cbf76a959cff83ea2a8cdd102))
+- improve the info message at '/' and refactor ([d5ac4a1](https://github.com/nrkno/tv-automation-package-manager/commit/d5ac4a15468f568a27d2d8704559fd4ded7e36f3))
+- the path need to be relative to account for when the http-server is proxied ([79e67b4](https://github.com/nrkno/tv-automation-package-manager/commit/79e67b4d1c189a643b6ac8ed8b2c190db2cecf84))
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

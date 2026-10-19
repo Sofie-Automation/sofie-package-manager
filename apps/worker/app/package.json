@@ -1,6 +1,6 @@
 {
     "name": "@worker/app",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "bin": "./dist/index.js",
     "type": "module",
     "description": "Boilerplace",
@@ -14,7 +14,7 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
-        "@worker/generic": "1.53.0"
+        "@worker/generic": "26.9.0"
     },
     "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {

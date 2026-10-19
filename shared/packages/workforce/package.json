@@ -1,6 +1,6 @@
 {
     "name": "@sofie-package-manager/workforce",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "type": "module",
     "main": "dist/index.js",
     "exports": {
@@ -17,7 +17,7 @@
         "__test": "vitest run"
     },
     "dependencies": {
-        "@sofie-package-manager/api": "1.53.0"
+        "@sofie-package-manager/api": "26.9.0"
     },
     "devDependencies": {
         "rimraf": "^6.1.3"

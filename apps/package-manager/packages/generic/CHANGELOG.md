@@ -3,160 +3,103 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
 
-* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
-* remove invalid reported statuses ([bfffb57](https://github.com/nrkno/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
-
+- activeRundown handling ([#310](https://github.com/Sofie-Automation/sofie-package-manager/issues/310)) ([8f62711](https://github.com/Sofie-Automation/sofie-package-manager/commit/8f627113a1743f6b174d56b6645c67aa73bdffa0))
+- add worker and expectationManager configuration to troubleshoot data. ([7714f89](https://github.com/Sofie-Automation/sofie-package-manager/commit/7714f8970a8039411568baa0c92cb29aab15ca20))
+- nrk-blueprints: only wait for previous expectation if it is a copy_proxy ([b038cd9](https://github.com/Sofie-Automation/sofie-package-manager/commit/b038cd91b59444c50a4bbff3a7a2de2553b71749))
 
 ### Features
 
-* Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
-* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- expose health/metrics for all processes ([#286](https://github.com/Sofie-Automation/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/Sofie-Automation/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
+- **PackageManager:** allow a graceful reboot procedure that will keep work status from previous runs, but remove anything PM doesn't know about ([b311513](https://github.com/Sofie-Automation/sofie-package-manager/commit/b311513519e16b5a61c978a6891e98f4f64f3261))
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
+### Bug Fixes
 
+- expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+- remove invalid reported statuses ([bfffb57](https://github.com/nrkno/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
 
+### Features
+
+- Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
 
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
-
 ### Features
 
-* add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/nrkno/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
-
-
-
-
+- add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/nrkno/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
 
 # [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
 
 **Note:** Version bump only for package @package-manager/generic
-
-
-
-
 
 # [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
-
 
 ### Bug Fixes
 
-* add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/nrkno/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
-
-
-
-
+- add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/nrkno/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
-
 
 ### Bug Fixes
 
-* add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/sofie-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
-* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
-
-
-
-
+- add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/nrkno/sofie-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
+- clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
 
 # [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
-
-
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
-
 ### Bug Fixes
 
-* compatibility with Sofie Core R52 ([8864bfd](https://github.com/nrkno/sofie-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
-
-
-
-
+- compatibility with Sofie Core R52 ([8864bfd](https://github.com/nrkno/sofie-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
 
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
 **Note:** Version bump only for package @package-manager/generic
 
-
-
-
-
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
-
 
 ### Bug Fixes
 
-* remove outputPrefix for html-template expectations ([43e9887](https://github.com/nrkno/sofie-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
-
+- remove outputPrefix for html-template expectations ([43e9887](https://github.com/nrkno/sofie-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
 
 ### Features
 
-* add HTML Renderer ([8610b6e](https://github.com/nrkno/sofie-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
-
-
-
-
+- add HTML Renderer ([8610b6e](https://github.com/nrkno/sofie-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

@@ -1,6 +1,6 @@
 {
     "name": "@boilerplate/app",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "bin": "./dist/index.js",
     "type": "module",
     "description": "Boilerplate",
@@ -13,7 +13,7 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
-        "@boilerplate/generic": "1.53.0"
+        "@boilerplate/generic": "26.9.0"
     },
     "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {

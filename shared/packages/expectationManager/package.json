@@ -1,6 +1,6 @@
 {
     "name": "@sofie-package-manager/expectation-manager",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "type": "module",
     "main": "dist/index.js",
     "exports": {
@@ -22,8 +22,8 @@
         "vitest": "^4.1.11"
     },
     "dependencies": {
-        "@sofie-package-manager/api": "1.53.0",
-        "@sofie-package-manager/worker": "1.53.0",
+        "@sofie-package-manager/api": "26.9.0",
+        "@sofie-package-manager/worker": "26.9.0",
         "@supercharge/promise-pool": "^3.3.0",
         "underscore": "^1.13.8"
     },

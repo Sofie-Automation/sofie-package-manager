@@ -1,6 +1,6 @@
 {
     "name": "@single-app/app",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "bin": "./dist/index.js",
     "type": "module",
     "description": "Package Manager, http-proxy etc.. all in one application",
@@ -18,13 +18,13 @@
         "typescript": "*"
     },
     "dependencies": {
-        "@appcontainer-node/generic": "1.53.0",
-        "@http-server/generic": "1.53.0",
-        "@package-manager/generic": "1.53.0",
-        "@quantel-http-transformer-proxy/generic": "1.53.0",
-        "@sofie-package-manager/api": "1.53.0",
-        "@sofie-package-manager/worker": "1.53.0",
-        "@sofie-package-manager/workforce": "1.53.0",
+        "@appcontainer-node/generic": "26.9.0",
+        "@http-server/generic": "26.9.0",
+        "@package-manager/generic": "26.9.0",
+        "@quantel-http-transformer-proxy/generic": "26.9.0",
+        "@sofie-package-manager/api": "26.9.0",
+        "@sofie-package-manager/worker": "26.9.0",
+        "@sofie-package-manager/workforce": "26.9.0",
         "underscore": "^1.13.8"
     },
     "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",

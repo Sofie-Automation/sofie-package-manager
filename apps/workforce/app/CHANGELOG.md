@@ -3,98 +3,57 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
+
+**Note:** Version bump only for package @workforce/app
+
 # [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
 **Note:** Version bump only for package @workforce/app
 
-
-
-
-
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
-
 
 ### Bug Fixes
 
-* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/nrkno/sofie-package-manager/issues/219)) ([#235](https://github.com/nrkno/sofie-package-manager/issues/235)) ([6d62e95](https://github.com/nrkno/sofie-package-manager/commit/6d62e950f83c4a503ce164700863e89ee59d1650))
-
-
-
-
+- docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/nrkno/sofie-package-manager/issues/219)) ([#235](https://github.com/nrkno/sofie-package-manager/issues/235)) ([6d62e95](https://github.com/nrkno/sofie-package-manager/commit/6d62e950f83c4a503ce164700863e89ee59d1650))
 
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
-
 ### Bug Fixes
 
-* docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/nrkno/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/nrkno/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
-
-
-
-
+- docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/nrkno/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/nrkno/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @workforce/app
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @workforce/app
-
-
-
-
 
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
 
 **Note:** Version bump only for package @workforce/app
 
-
-
-
-
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
-
-
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
-
 ### Features
 
-* add more dockerfiles ([46d34ff](https://github.com/nrkno/sofie-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
-
-
-
-
+- add more dockerfiles ([46d34ff](https://github.com/nrkno/sofie-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
 
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 **Note:** Version bump only for package @workforce/app
 
-
-
-
-
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
 **Note:** Version bump only for package @workforce/app
 
-
-
-
-
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
 
 **Note:** Version bump only for package @workforce/app
-
-
-
-
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

@@ -1,6 +1,6 @@
 {
     "name": "@appcontainer-node/generic",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "private": true,
     "type": "module",
     "main": "dist/index.js",
@@ -15,8 +15,8 @@
         "typescript": "*"
     },
     "dependencies": {
-        "@sofie-package-manager/api": "1.53.0",
-        "@sofie-package-manager/worker": "1.53.0",
+        "@sofie-package-manager/api": "26.9.0",
+        "@sofie-package-manager/worker": "26.9.0",
         "underscore": "^1.13.8",
         "vitest": "^4.1.11"
     },

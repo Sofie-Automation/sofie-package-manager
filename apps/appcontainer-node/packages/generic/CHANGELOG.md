@@ -3,166 +3,106 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
 
-* minor fixes after code review ([38fdef7](https://github.com/nrkno/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
-
+- AppContainer forward `matchFilenamesWithoutExtension` arg properly ([1e51f1a](https://github.com/Sofie-Automation/sofie-package-manager/commit/1e51f1af9f612d837c481a2004690d72c651dfa9))
 
 ### Features
 
-* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
-* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
-* Pass parameter correctly ([78b131f](https://github.com/nrkno/sofie-package-manager/commit/78b131f0a44c008ba4a16d038c6c3f6c4f8e7a1d))
-* **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
+- expose health/metrics for all processes ([#286](https://github.com/Sofie-Automation/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/Sofie-Automation/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
+### Bug Fixes
 
+- minor fixes after code review ([38fdef7](https://github.com/nrkno/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
 
+### Features
+
+- add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+- Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+- Pass parameter correctly ([78b131f](https://github.com/nrkno/sofie-package-manager/commit/78b131f0a44c008ba4a16d038c6c3f6c4f8e7a1d))
+- **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
 
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
-
 ### Bug Fixes
 
-* bug when determining dev vs prod ([9669903](https://github.com/nrkno/sofie-package-manager/commit/96699035035b9619686ae1b1127831cc49909879))
-
+- bug when determining dev vs prod ([9669903](https://github.com/nrkno/sofie-package-manager/commit/96699035035b9619686ae1b1127831cc49909879))
 
 ### Features
 
-* add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
-* support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
-
-
-
-
+- add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
 
 # [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
 
 **Note:** Version bump only for package @appcontainer-node/generic
-
-
-
-
 
 # [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
 **Note:** Version bump only for package @appcontainer-node/generic
-
-
-
-
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
-
 
 ### Bug Fixes
 
-* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
-* replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/sofie-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
-
-
-
-
+- clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+- replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/sofie-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
 
 # [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
-
-
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
-
 
 ### Bug Fixes
 
-* log reason why no worker can handle expectation ([8e7f57d](https://github.com/nrkno/sofie-package-manager/commit/8e7f57d35fa3f5fc2daf58b247acbadb0451a64d))
-
-
-
-
+- log reason why no worker can handle expectation ([8e7f57d](https://github.com/nrkno/sofie-package-manager/commit/8e7f57d35fa3f5fc2daf58b247acbadb0451a64d))
 
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
 **Note:** Version bump only for package @appcontainer-node/generic
 
-
-
-
-
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
-
 
 ### Bug Fixes
 
-* add a `force` parameter to appcontainer.requestSpinDown() ([3255189](https://github.com/nrkno/sofie-package-manager/commit/3255189663d06d91e90d812bfc9a705589c5ba0d))
-* html-renderer lookup paths on linux ([40e12d3](https://github.com/nrkno/sofie-package-manager/commit/40e12d3083b385a2cddf8ea93cdaa522fbed7073))
-* make failureLimit to be passed through into appContainer ([f03434a](https://github.com/nrkno/sofie-package-manager/commit/f03434abfc909a0cdc04d8bea753d805163a6bad))
-
+- add a `force` parameter to appcontainer.requestSpinDown() ([3255189](https://github.com/nrkno/sofie-package-manager/commit/3255189663d06d91e90d812bfc9a705589c5ba0d))
+- html-renderer lookup paths on linux ([40e12d3](https://github.com/nrkno/sofie-package-manager/commit/40e12d3083b385a2cddf8ea93cdaa522fbed7073))
+- make failureLimit to be passed through into appContainer ([f03434a](https://github.com/nrkno/sofie-package-manager/commit/f03434abfc909a0cdc04d8bea753d805163a6bad))
 
 ### Features
 
-* refactor the failure tracking to track periods of time with failures within them ([d33f973](https://github.com/nrkno/sofie-package-manager/commit/d33f973fb5d7c67f442365dd29778e24766b0466))
-
-
-
-
+- refactor the failure tracking to track periods of time with failures within them ([d33f973](https://github.com/nrkno/sofie-package-manager/commit/d33f973fb5d7c67f442365dd29778e24766b0466))
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

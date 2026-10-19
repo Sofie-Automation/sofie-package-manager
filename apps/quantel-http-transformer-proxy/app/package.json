@@ -1,6 +1,6 @@
 {
     "name": "@quantel-http-transformer-proxy/app",
-    "version": "1.53.0",
+    "version": "26.9.0",
     "bin": "./dist/index.js",
     "type": "module",
     "description": "Proxy for a Quantel HTTP Transformer",
@@ -12,7 +12,7 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
-        "@quantel-http-transformer-proxy/generic": "1.53.0"
+        "@quantel-http-transformer-proxy/generic": "26.9.0"
     },
     "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
     "engines": {

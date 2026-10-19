@@ -3,160 +3,94 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Features
 
-* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
-* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
-* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
-* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+- expose health/metrics for all processes ([#286](https://github.com/Sofie-Automation/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/Sofie-Automation/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
+### Features
 
-
+- Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+- add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
 
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
-
 ### Features
 
-* add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
-* support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
-
-
-
-
+- add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
 
 # [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
 
 **Note:** Version bump only for package @tests/internal-tests
-
-
-
-
 
 # [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
 **Note:** Version bump only for package @tests/internal-tests
-
-
-
-
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
-
 
 ### Bug Fixes
 
-* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
-
-
-
-
+- clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
 
 # [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
-
 
 ### Features
 
-* **worker:** when appContainerURL is not specified, run standalone, for external management ([7feb156](https://github.com/nrkno/sofie-package-manager/commit/7feb1569d1a3898186811731ff27c4bea209bc33))
-
-
-
-
+- **worker:** when appContainerURL is not specified, run standalone, for external management ([7feb156](https://github.com/nrkno/sofie-package-manager/commit/7feb1569d1a3898186811731ff27c4bea209bc33))
 
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
 
-
 ### Bug Fixes
 
-* add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/sofie-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
-* allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
-
-
+- add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/sofie-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
+- allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
-
-
-
-
 
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
 **Note:** Version bump only for package @tests/internal-tests
 
-
-
-
-
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
-
 
 ### Bug Fixes
 
-* reject absolute file paths ([cf207e6](https://github.com/nrkno/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
-
-
-
-
+- reject absolute file paths ([cf207e6](https://github.com/nrkno/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
 
 ## [1.50.7](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.6...v1.50.7) (2024-07-04)
 
 **Note:** Version bump only for package @tests/internal-tests
-
-
-
-
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

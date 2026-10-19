@@ -3,172 +3,135 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
 
-* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
-* handle thrown error when testing executables ([ba38287](https://github.com/nrkno/sofie-package-manager/commit/ba382874d969ee3e26ae1b89d17ee9f491ef67b2))
-* improve network-scoped URLs parsing ([39a27e3](https://github.com/nrkno/sofie-package-manager/commit/39a27e39c74c47907c18a19434c160184aa9b56b))
-* issue where allowedExpectationTypes became [''] by default, thus disallowing any jobs on any worker ([0e35c53](https://github.com/nrkno/sofie-package-manager/commit/0e35c538b88ce448282084984c95ef3f54067460))
-* minor fixes after code review ([38fdef7](https://github.com/nrkno/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
-* networks-scoped URLs with authentication part are incorrectly parsed ([9ac4a4d](https://github.com/nrkno/sofie-package-manager/commit/9ac4a4ddc46baaae340e5330da06d94d73131ec7))
-* **worker:** clarify empty allowedExpectationTypes means "all allowed" ([30e4766](https://github.com/nrkno/sofie-package-manager/commit/30e4766065f2b7532e47b4d4703673964860975d))
-
+- add worker and expectationManager configuration to troubleshoot data. ([7714f89](https://github.com/Sofie-Automation/sofie-package-manager/commit/7714f8970a8039411568baa0c92cb29aab15ca20))
+- correctly match files with extensions or without any ([3daca56](https://github.com/Sofie-Automation/sofie-package-manager/commit/3daca56bf18311e9abe0e854728f730265ed34de))
+- ensure all config arguments are available as env vars ([#275](https://github.com/Sofie-Automation/sofie-package-manager/issues/275)) ([6755853](https://github.com/Sofie-Automation/sofie-package-manager/commit/675585362b4e38653e488a34fb56c7bc3abca298))
+- handle ENOENT error in resolveFileWithoutExtension when directory doesnt exist ([#274](https://github.com/Sofie-Automation/sofie-package-manager/issues/274)) ([c3d31b1](https://github.com/Sofie-Automation/sofie-package-manager/commit/c3d31b1bbd5f353ef60f5ff5966909b99ebf561c))
+- html renderer can block worker launch ([#296](https://github.com/Sofie-Automation/sofie-package-manager/issues/296)) ([d59957f](https://github.com/Sofie-Automation/sofie-package-manager/commit/d59957f1ab326478d82192318f845f40f83285af))
+- Issue with thrown error ([e3fde76](https://github.com/Sofie-Automation/sofie-package-manager/commit/e3fde76d42a5d21aaba7c71d00e3d1f854a3b0a3))
+- media-convert: add required/forbidden keywords, used to ensure that a conversion step is successful. ([c757e87](https://github.com/Sofie-Automation/sofie-package-manager/commit/c757e87643176191acc5952f07a83955c8d364b7))
+- rework cache for getResolvedFullPath ([e307310](https://github.com/Sofie-Automation/sofie-package-manager/commit/e30731049201808d6b5aedcbbb06e7a5dca88062))
+- typo in config.ts: WORKER_NETWORK_ID -> WORKER_RESOURCE_ID ([468e800](https://github.com/Sofie-Automation/sofie-package-manager/commit/468e8007b2abdada8a06a4f180210679dee322c9))
 
 ### Features
 
-* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
-* add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
-* Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
-* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
-* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
-* Move extensionless filename detection to utility ([cc33a01](https://github.com/nrkno/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
-* **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
-* **worker:** list out allowed types for allowedExpectationTypes ([ca0ea70](https://github.com/nrkno/sofie-package-manager/commit/ca0ea70afa1d52ddf56e680fe0d9384f62fc5a7e))
+- expose health/metrics for all processes ([#286](https://github.com/Sofie-Automation/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/Sofie-Automation/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
+### Bug Fixes
 
+- expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+- handle thrown error when testing executables ([ba38287](https://github.com/nrkno/sofie-package-manager/commit/ba382874d969ee3e26ae1b89d17ee9f491ef67b2))
+- improve network-scoped URLs parsing ([39a27e3](https://github.com/nrkno/sofie-package-manager/commit/39a27e39c74c47907c18a19434c160184aa9b56b))
+- issue where allowedExpectationTypes became [''] by default, thus disallowing any jobs on any worker ([0e35c53](https://github.com/nrkno/sofie-package-manager/commit/0e35c538b88ce448282084984c95ef3f54067460))
+- minor fixes after code review ([38fdef7](https://github.com/nrkno/sofie-package-manager/commit/38fdef76314fa356847eaa6cdc57c152d141c7ee))
+- networks-scoped URLs with authentication part are incorrectly parsed ([9ac4a4d](https://github.com/nrkno/sofie-package-manager/commit/9ac4a4ddc46baaae340e5330da06d94d73131ec7))
+- **worker:** clarify empty allowedExpectationTypes means "all allowed" ([30e4766](https://github.com/nrkno/sofie-package-manager/commit/30e4766065f2b7532e47b4d4703673964860975d))
 
+### Features
+
+- Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+- add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/nrkno/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+- Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/nrkno/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+- Move extensionless filename detection to utility ([cc33a01](https://github.com/nrkno/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
+- **worker:** add allowedExpectationTypes to be set for workers ([2489622](https://github.com/nrkno/sofie-package-manager/commit/2489622d02579d665cdc7f4f411bdebf7e7ff589))
+- **worker:** list out allowed types for allowedExpectationTypes ([ca0ea70](https://github.com/nrkno/sofie-package-manager/commit/ca0ea70afa1d52ddf56e680fe0d9384f62fc5a7e))
 
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
-
 ### Features
 
-* add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
-* add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/nrkno/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
-* support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
-
-
-
-
+- add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/nrkno/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+- add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/nrkno/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
 
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
-
 ### Bug Fixes
 
-* ftp support ([f919631](https://github.com/nrkno/sofie-package-manager/commit/f919631f132a4b3df8eeae81c5436bfa0ae96583))
-* refactoring & fixes after code review ([2981d38](https://github.com/nrkno/sofie-package-manager/commit/2981d388ad13bd15776f53fb57502b0a7c285ea6))
-
+- ftp support ([f919631](https://github.com/nrkno/sofie-package-manager/commit/f919631f132a4b3df8eeae81c5436bfa0ae96583))
+- refactoring & fixes after code review ([2981d38](https://github.com/nrkno/sofie-package-manager/commit/2981d388ad13bd15776f53fb57502b0a7c285ea6))
 
 ### Features
 
-* add FTP accessor ([9d087f1](https://github.com/nrkno/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
-
-
-
-
+- add FTP accessor ([9d087f1](https://github.com/nrkno/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @sofie-package-manager/api
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @sofie-package-manager/api
 
-
-
-
-
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
-
 
 ### Bug Fixes
 
-* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
-* replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/sofie-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
-
-
-
-
+- clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+- replace Winston logger with a lightweight one, becuase the Winstom.Logger has a memory leakage ([b2a7bde](https://github.com/nrkno/sofie-package-manager/commit/b2a7bdefff0cdf8451514ac1108c598f84e02edf))
 
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
 
-
 ### Bug Fixes
 
-* add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/sofie-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
-
+- add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/nrkno/sofie-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
 
 ### Reverts
 
-* Revert "chore: modify MESSAGE_TIMEOUT to 30s, tor troubleshooting" ([61bf908](https://github.com/nrkno/sofie-package-manager/commit/61bf908d9031614a2e101ca6ae372aaaddfad3af))
-
-
+- Revert "chore: modify MESSAGE_TIMEOUT to 30s, tor troubleshooting" ([61bf908](https://github.com/nrkno/sofie-package-manager/commit/61bf908d9031614a2e101ca6ae372aaaddfad3af))
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
-
 ### Features
 
-* add more dockerfiles ([46d34ff](https://github.com/nrkno/sofie-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
-
-
-
-
+- add more dockerfiles ([46d34ff](https://github.com/nrkno/sofie-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
 
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
-
 ### Bug Fixes
 
-* An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/nrkno/sofie-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
-
-
-
-
+- An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/nrkno/sofie-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
 
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
-
 ### Bug Fixes
 
-* resolve HTMLRenderer build issues ([e3da508](https://github.com/nrkno/sofie-package-manager/commit/e3da508120f43c9d32b88eed9cb2114ff809f73b))
-
-
-
-
+- resolve HTMLRenderer build issues ([e3da508](https://github.com/nrkno/sofie-package-manager/commit/e3da508120f43c9d32b88eed9cb2114ff809f73b))
 
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
 
-
 ### Bug Fixes
 
-* add a `force` parameter to appcontainer.requestSpinDown() ([3255189](https://github.com/nrkno/sofie-package-manager/commit/3255189663d06d91e90d812bfc9a705589c5ba0d))
-* add option to HTTP Accessor to either send a HEAD or GET to retrieve initial info ([e98854c](https://github.com/nrkno/sofie-package-manager/commit/e98854c32955c122aa6bf68a2ac47aa121448f40))
-* allow baseUrl to be optional for HTTP Accessor ([92c575f](https://github.com/nrkno/sofie-package-manager/commit/92c575fa767cb3adba649619c16ca312b0253065))
-* allow stringified JSON object as storeObject value. Also add some error handling ([0e589bf](https://github.com/nrkno/sofie-package-manager/commit/0e589bfb1809cc68f3ef6bf14a95ef02953966ce))
-* change default `minRunningApps` to 1 ([8694b77](https://github.com/nrkno/sofie-package-manager/commit/8694b77f34242445430d84ebe1badc6baa93c704))
-* change how render width, height and scale works for html_template expectedPackages ([7fcdf70](https://github.com/nrkno/sofie-package-manager/commit/7fcdf700fda413b94f39e7fb6107e26ee7dd9713))
-* **Config:** Add unit to description of config field ([de0f43b](https://github.com/nrkno/sofie-package-manager/commit/de0f43b0090dd59293c98dc6ee59206675a7c09e))
-* fix issue in HelpfulEventEmitter where it logged false errors ([7d36627](https://github.com/nrkno/sofie-package-manager/commit/7d36627323faa030d6bec0506ab4a416b3e49d5d))
-* html-renderer lookup paths on linux ([40e12d3](https://github.com/nrkno/sofie-package-manager/commit/40e12d3083b385a2cddf8ea93cdaa522fbed7073))
-* html-renderer: add support for transparent backgrounds ([c3775a7](https://github.com/nrkno/sofie-package-manager/commit/c3775a71783e3ca915d950cb44055ed7e3f4f60e))
-* make failureLimit to be passed through into appContainer ([f03434a](https://github.com/nrkno/sofie-package-manager/commit/f03434abfc909a0cdc04d8bea753d805163a6bad))
-* reject absolute file paths ([cf207e6](https://github.com/nrkno/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
-* remove outputPrefix for html-template expectations ([43e9887](https://github.com/nrkno/sofie-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
-* rename supperHEAD to useGETinsteadOfHead ([c75757e](https://github.com/nrkno/sofie-package-manager/commit/c75757e9c65ec0babf080652c20d0af50895a767))
-* run HTMLRenderer using `yarn start` script when in development mode ([f3164b4](https://github.com/nrkno/sofie-package-manager/commit/f3164b48616710f5cd043475f4f0c9963400782e))
-* update default config and change severity of warning ([b567535](https://github.com/nrkno/sofie-package-manager/commit/b567535927cbd2cfed32773ffaa39cb631d7ad41))
-
+- add a `force` parameter to appcontainer.requestSpinDown() ([3255189](https://github.com/nrkno/sofie-package-manager/commit/3255189663d06d91e90d812bfc9a705589c5ba0d))
+- add option to HTTP Accessor to either send a HEAD or GET to retrieve initial info ([e98854c](https://github.com/nrkno/sofie-package-manager/commit/e98854c32955c122aa6bf68a2ac47aa121448f40))
+- allow baseUrl to be optional for HTTP Accessor ([92c575f](https://github.com/nrkno/sofie-package-manager/commit/92c575fa767cb3adba649619c16ca312b0253065))
+- allow stringified JSON object as storeObject value. Also add some error handling ([0e589bf](https://github.com/nrkno/sofie-package-manager/commit/0e589bfb1809cc68f3ef6bf14a95ef02953966ce))
+- change default `minRunningApps` to 1 ([8694b77](https://github.com/nrkno/sofie-package-manager/commit/8694b77f34242445430d84ebe1badc6baa93c704))
+- change how render width, height and scale works for html_template expectedPackages ([7fcdf70](https://github.com/nrkno/sofie-package-manager/commit/7fcdf700fda413b94f39e7fb6107e26ee7dd9713))
+- **Config:** Add unit to description of config field ([de0f43b](https://github.com/nrkno/sofie-package-manager/commit/de0f43b0090dd59293c98dc6ee59206675a7c09e))
+- fix issue in HelpfulEventEmitter where it logged false errors ([7d36627](https://github.com/nrkno/sofie-package-manager/commit/7d36627323faa030d6bec0506ab4a416b3e49d5d))
+- html-renderer lookup paths on linux ([40e12d3](https://github.com/nrkno/sofie-package-manager/commit/40e12d3083b385a2cddf8ea93cdaa522fbed7073))
+- html-renderer: add support for transparent backgrounds ([c3775a7](https://github.com/nrkno/sofie-package-manager/commit/c3775a71783e3ca915d950cb44055ed7e3f4f60e))
+- make failureLimit to be passed through into appContainer ([f03434a](https://github.com/nrkno/sofie-package-manager/commit/f03434abfc909a0cdc04d8bea753d805163a6bad))
+- reject absolute file paths ([cf207e6](https://github.com/nrkno/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
+- remove outputPrefix for html-template expectations ([43e9887](https://github.com/nrkno/sofie-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
+- rename supperHEAD to useGETinsteadOfHead ([c75757e](https://github.com/nrkno/sofie-package-manager/commit/c75757e9c65ec0babf080652c20d0af50895a767))
+- run HTMLRenderer using `yarn start` script when in development mode ([f3164b4](https://github.com/nrkno/sofie-package-manager/commit/f3164b48616710f5cd043475f4f0c9963400782e))
+- update default config and change severity of warning ([b567535](https://github.com/nrkno/sofie-package-manager/commit/b567535927cbd2cfed32773ffaa39cb631d7ad41))
 
 ### Features
 
-* add HTML Renderer ([8610b6e](https://github.com/nrkno/sofie-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
-* refactor the failure tracking to track periods of time with failures within them ([d33f973](https://github.com/nrkno/sofie-package-manager/commit/d33f973fb5d7c67f442365dd29778e24766b0466))
-* track failures in Workers in a time period (SOFIE-3355) ([732fa19](https://github.com/nrkno/sofie-package-manager/commit/732fa19fad801ae3be5600645fb5899d81aa11a0))
-
-
-
-
+- add HTML Renderer ([8610b6e](https://github.com/nrkno/sofie-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
+- refactor the failure tracking to track periods of time with failures within them ([d33f973](https://github.com/nrkno/sofie-package-manager/commit/d33f973fb5d7c67f442365dd29778e24766b0466))
+- track failures in Workers in a time period (SOFIE-3355) ([732fa19](https://github.com/nrkno/sofie-package-manager/commit/732fa19fad801ae3be5600645fb5899d81aa11a0))
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

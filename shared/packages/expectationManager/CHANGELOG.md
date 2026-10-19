@@ -3,152 +3,95 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
 
-* expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
-* issue where the access url to expectationManager did not include port ([85d3e5a](https://github.com/nrkno/sofie-package-manager/commit/85d3e5a4f7b190f5509e748512084c252a986a32))
-* remove invalid reported statuses ([bfffb57](https://github.com/nrkno/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
+- add worker and expectationManager configuration to troubleshoot data. ([7714f89](https://github.com/Sofie-Automation/sofie-package-manager/commit/7714f8970a8039411568baa0c92cb29aab15ca20))
+- clear state when RESTARTING expectations ([83f0c2d](https://github.com/Sofie-Automation/sofie-package-manager/commit/83f0c2df0bb249fba6923bff8228df98992654a1))
+- improve reported reason for unsupported accessor ([6e01906](https://github.com/Sofie-Automation/sofie-package-manager/commit/6e01906a26fbdca6fee7bf10e9675a5c9b76015e))
+- improve tracking of reasons why a worker does not support an expectation. ([0599314](https://github.com/Sofie-Automation/sofie-package-manager/commit/05993141885f7b97238cb8b5b7b585aaa0311f65))
+- mark job as cancelled before performing cancel ([#333](https://github.com/Sofie-Automation/sofie-package-manager/issues/333)) ([ec431e7](https://github.com/Sofie-Automation/sofie-package-manager/commit/ec431e7a71316dc28ebaed51695e9a1f582f8f07))
+- track all reasons why a worker does not support an expectation. ([cee6aa4](https://github.com/Sofie-Automation/sofie-package-manager/commit/cee6aa4a18522c86a2cc880c430c9edade89846a))
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
+
+### Bug Fixes
+
+- expand config documentation for `accessURL` ([04504e8](https://github.com/nrkno/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+- issue where the access url to expectationManager did not include port ([85d3e5a](https://github.com/nrkno/sofie-package-manager/commit/85d3e5a4f7b190f5509e748512084c252a986a32))
+- remove invalid reported statuses ([bfffb57](https://github.com/nrkno/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
 
 ### Features
 
-* alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
-
-
-
-
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/nrkno/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
 
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
-
 ### Features
 
-* support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
-
-
-
-
+- support workers in docker SOFIE-4071 ([#236](https://github.com/nrkno/sofie-package-manager/issues/236)) ([681c62f](https://github.com/nrkno/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
 
 # [1.53.0-alpha.3](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.2...v1.53.0-alpha.3) (2025-09-22)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.53.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.1...v1.53.0-alpha.2) (2025-09-22)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
-
-
-
-
 
 # [1.53.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.0...v1.53.0-alpha.1) (2025-09-22)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
-
-
-
-
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
-
 
 ### Bug Fixes
 
-* clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
-
-
-
-
+- clean up logging ([9a5fc59](https://github.com/nrkno/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
 
 # [1.52.0-alpha.3](https://github.com/nrkno/tv-automation-package-manager/compare/v1.52.0-alpha.2...v1.52.0-alpha.3) (2025-05-07)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
-
 
 ### Bug Fixes
 
-* add .skipEvaluationCount property ([1b0246b](https://github.com/nrkno/sofie-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
-* allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
-
-
+- add .skipEvaluationCount property ([1b0246b](https://github.com/nrkno/sofie-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
+- allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/nrkno/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
-
-
-
-
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
-
 
 ### Bug Fixes
 
-* An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/nrkno/sofie-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
-
-
-
-
+- An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/nrkno/sofie-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
 
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
 
-
-
-
-
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
 
 **Note:** Version bump only for package @sofie-package-manager/expectation-manager
-
-
-
-
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

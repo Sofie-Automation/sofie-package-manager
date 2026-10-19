@@ -3,128 +3,84 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
-
+# [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
 
-* bug fix in HTTP-Proxy, handle unlinking of file that had already been removed ([1dac69d](https://github.com/nrkno/sofie-package-manager/commit/1dac69d42cbe7d82cf87174c9134152d11191d8c))
-
+- handle ENOENT error in resolveFileWithoutExtension when directory doesnt exist ([#274](https://github.com/Sofie-Automation/sofie-package-manager/issues/274)) ([c3d31b1](https://github.com/Sofie-Automation/sofie-package-manager/commit/c3d31b1bbd5f353ef60f5ff5966909b99ebf561c))
+- server endpoints ([a799043](https://github.com/Sofie-Automation/sofie-package-manager/commit/a7990432bd9e5c26259744435a0070c93899ce58))
 
 ### Features
 
-* Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
-* Match Extension-less filenames in getFileInfo ([97c48a6](https://github.com/nrkno/sofie-package-manager/commit/97c48a6b79147027e443e7b36d73b176de16aefb))
-* Match Extension-less filenames when deleting ([0c5d82b](https://github.com/nrkno/sofie-package-manager/commit/0c5d82bb86699760bd59bcc0f4a7531004be2b5b))
-* Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
-* Move extensionless filename detection to utility ([cc33a01](https://github.com/nrkno/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
+- expose health/metrics for all processes ([#286](https://github.com/Sofie-Automation/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/Sofie-Automation/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
 
+# [1.53.0](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.4...v1.53.0) (2026-02-10)
 
+### Bug Fixes
 
+- bug fix in HTTP-Proxy, handle unlinking of file that had already been removed ([1dac69d](https://github.com/nrkno/sofie-package-manager/commit/1dac69d42cbe7d82cf87174c9134152d11191d8c))
 
+### Features
+
+- Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/nrkno/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+- Match Extension-less filenames in getFileInfo ([97c48a6](https://github.com/nrkno/sofie-package-manager/commit/97c48a6b79147027e443e7b36d73b176de16aefb))
+- Match Extension-less filenames when deleting ([0c5d82b](https://github.com/nrkno/sofie-package-manager/commit/0c5d82bb86699760bd59bcc0f4a7531004be2b5b))
+- Move config to process and make it available more widely ([4a2ff70](https://github.com/nrkno/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+- Move extensionless filename detection to utility ([cc33a01](https://github.com/nrkno/sofie-package-manager/commit/cc33a010e766ae0243de73ad742d56b9032dc6dc))
 
 # [1.53.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.53.0-alpha.3...v1.53.0-alpha.4) (2025-10-22)
 
 **Note:** Version bump only for package @http-server/generic
 
-
-
-
-
 # [1.53.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0...v1.53.0-alpha.0) (2025-09-22)
 
 **Note:** Version bump only for package @http-server/generic
-
-
-
-
 
 # [1.52.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.5...v1.52.0) (2025-07-01)
 
 **Note:** Version bump only for package @http-server/generic
 
-
-
-
-
 # [1.52.0-alpha.5](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.52.0-alpha.4...v1.52.0-alpha.5) (2025-06-24)
 
 **Note:** Version bump only for package @http-server/generic
-
-
-
-
 
 # [1.52.0-alpha.4](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.3...v1.52.0-alpha.4) (2025-05-12)
 
 **Note:** Version bump only for package @http-server/generic
 
-
-
-
-
 # [1.52.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.52.0-alpha.1...v1.52.0-alpha.2) (2025-05-06)
-
 
 ### Bug Fixes
 
-* update koa to 2.16.1 to resolve CVE-2025-25200 ([7b4cf05](https://github.com/nrkno/sofie-package-manager/commit/7b4cf0527db46eb516b65ecb74845b3a8441811e))
-
-
-
-
+- update koa to 2.16.1 to resolve CVE-2025-25200 ([7b4cf05](https://github.com/nrkno/sofie-package-manager/commit/7b4cf0527db46eb516b65ecb74845b3a8441811e))
 
 # [1.52.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.2...v1.52.0-alpha.1) (2025-05-05)
-
-
 
 # [1.52.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.52.0-alpha.0) (2025-01-20)
 
 **Note:** Version bump only for package @http-server/generic
 
-
-
-
-
 # [1.51.0-alpha.2](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.1...v1.51.0-alpha.2) (2025-02-10)
 
 **Note:** Version bump only for package @http-server/generic
-
-
-
-
 
 # [1.51.0-alpha.1](https://github.com/nrkno/sofie-package-manager/compare/v1.51.0-alpha.0...v1.51.0-alpha.1) (2025-01-08)
 
 **Note:** Version bump only for package @http-server/generic
 
-
-
-
-
 # [1.51.0-alpha.0](https://github.com/nrkno/sofie-package-manager/compare/v1.50.7...v1.51.0-alpha.0) (2025-01-08)
-
 
 ### Bug Fixes
 
-* reject absolute file paths ([cf207e6](https://github.com/nrkno/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
-
-
-
-
+- reject absolute file paths ([cf207e6](https://github.com/nrkno/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
 
 ## [1.50.7](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.6...v1.50.7) (2024-07-04)
 
-
 ### Bug Fixes
 
-* http-server: add '/list' endpoint, that displays a HTML page with a list of the packages ([1acfb0c](https://github.com/nrkno/tv-automation-package-manager/commit/1acfb0c21d0b4a0cbf76a959cff83ea2a8cdd102))
-* improve the info message at '/' and refactor ([d5ac4a1](https://github.com/nrkno/tv-automation-package-manager/commit/d5ac4a15468f568a27d2d8704559fd4ded7e36f3))
-* the path need to be relative to account for when the http-server is proxied ([79e67b4](https://github.com/nrkno/tv-automation-package-manager/commit/79e67b4d1c189a643b6ac8ed8b2c190db2cecf84))
-
-
-
-
+- http-server: add '/list' endpoint, that displays a HTML page with a list of the packages ([1acfb0c](https://github.com/nrkno/tv-automation-package-manager/commit/1acfb0c21d0b4a0cbf76a959cff83ea2a8cdd102))
+- improve the info message at '/' and refactor ([d5ac4a1](https://github.com/nrkno/tv-automation-package-manager/commit/d5ac4a15468f568a27d2d8704559fd4ded7e36f3))
+- the path need to be relative to account for when the http-server is proxied ([79e67b4](https://github.com/nrkno/tv-automation-package-manager/commit/79e67b4d1c189a643b6ac8ed8b2c190db2cecf84))
 
 # [1.50.5](https://github.com/nrkno/tv-automation-package-manager/compare/v1.50.4...v1.50.5) (2024-04-09)
 

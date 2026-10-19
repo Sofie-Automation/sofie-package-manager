@@ -1,6 +1,6 @@
 {
 	"name": "@quantel-http-transformer-proxy/generic",
-	"version": "1.53.0",
+	"version": "26.9.0",
 	"type": "module",
 	"private": true,
 	"main": "dist/index.js",
@@ -14,7 +14,7 @@
 		"@koa/bodyparser": "^6.1.0",
 		"@koa/cors": "^5.0.0",
 		"@koa/router": "^15.4.0",
-		"@sofie-package-manager/api": "1.53.0",
+		"@sofie-package-manager/api": "26.9.0",
 		"koa": "^3.1.2",
 		"koa-range": "^0.3.0",
 		"koa-ratelimit": "^6.0.0",
