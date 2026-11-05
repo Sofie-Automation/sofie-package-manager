@@ -3767,6 +3767,7 @@ __metadata:
     "@types/node": "npm:^24.12.0"
     "@types/underscore": "npm:^1.13.0"
     "@types/ws": "npm:^8.18.1"
+    "@types/yargs": "npm:^17.0.35"
     kairos-lib: "npm:^1.0.0"
     koa: "npm:^3.1.1"
     prom-client: "npm:^15.1.3"
