@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Features
+
+- expose health/metrics for all processes ([#286](https://github.com/bbc/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/bbc/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Features

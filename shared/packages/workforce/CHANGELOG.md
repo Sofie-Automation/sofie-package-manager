@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Bug Fixes
+
+- don't use infinite numbers, because they are not json-serializeable ([a237fea](https://github.com/bbc/sofie-package-manager/commit/a237fea28e2fb60cba3fdb4264f5f14aaaabd223))
+- rework how Workforce announces expectationManagers to workers ([5627ef6](https://github.com/bbc/sofie-package-manager/commit/5627ef67cdc2cf60afb6d3e3a2ef3ea49dfd877f))
+- update default config and change severity of warning ([b567535](https://github.com/bbc/sofie-package-manager/commit/b567535927cbd2cfed32773ffaa39cb631d7ad41))
+
+### Features
+
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/bbc/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- expose health/metrics for all processes ([#286](https://github.com/bbc/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/bbc/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/bbc/sofie-package-manager/issues/236)) ([681c62f](https://github.com/bbc/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Features

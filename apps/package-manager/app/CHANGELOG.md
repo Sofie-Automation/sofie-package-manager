@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Bug Fixes
+
+- docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/bbc/sofie-package-manager/issues/219)) ([af7afe3](https://github.com/bbc/sofie-package-manager/commit/af7afe319824557b8639f089c45d9811fbb711e7))
+- docker images using CMD instead of ENTRYPOINT ([#219](https://github.com/bbc/sofie-package-manager/issues/219)) ([#235](https://github.com/bbc/sofie-package-manager/issues/235)) ([6d62e95](https://github.com/bbc/sofie-package-manager/commit/6d62e950f83c4a503ce164700863e89ee59d1650))
+
+### Features
+
+- add more dockerfiles ([46d34ff](https://github.com/bbc/sofie-package-manager/commit/46d34ff1dbe9a828b13a468f692ab9f37364340d))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 **Note:** Version bump only for package @package-manager/app

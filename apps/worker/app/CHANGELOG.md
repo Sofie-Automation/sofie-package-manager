@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Features
+
+- support workers in docker SOFIE-4071 ([#236](https://github.com/bbc/sofie-package-manager/issues/236)) ([681c62f](https://github.com/bbc/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 **Note:** Version bump only for package @worker/app

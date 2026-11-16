@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Bug Fixes
+
+- ensure initial log levels are set (ie in workers too) ([403efd8](https://github.com/bbc/sofie-package-manager/commit/403efd8c1617f0bbb03c3156ec02de23a04d1035))
+- issue with Accessor ([7d4d30f](https://github.com/bbc/sofie-package-manager/commit/7d4d30fac33c66a0eebade28d5666b3bc0e1875f))
+- remove outputPrefix for html-template expectations ([43e9887](https://github.com/bbc/sofie-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
+
+### Features
+
+- add FTP accessor ([9d087f1](https://github.com/bbc/sofie-package-manager/commit/9d087f16010abe858d849d5451d976dadce53cdc))
+- add HTML Renderer ([8610b6e](https://github.com/bbc/sofie-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/bbc/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- **EAV-220:** scan video files for I-frames ([a9a214a](https://github.com/bbc/sofie-package-manager/commit/a9a214ad1e94eb4afd9c64d2eae2564dc71f7eaa))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 **Note:** Version bump only for package @single-app/app

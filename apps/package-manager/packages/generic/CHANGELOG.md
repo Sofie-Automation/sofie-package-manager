@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Bug Fixes
+
+- activeRundown handling ([#310](https://github.com/bbc/sofie-package-manager/issues/310)) ([8f62711](https://github.com/bbc/sofie-package-manager/commit/8f627113a1743f6b174d56b6645c67aa73bdffa0))
+- add a `checkCompatibilityWithAccessor` accessor method, which allows PM to make an early pick of an accessor combination, and exclude certain accessor combination that ar unviable. ([acb1bb3](https://github.com/bbc/sofie-package-manager/commit/acb1bb34eb9761e4e9ca0c561753e725d2b20bf9))
+- add expectationId to logOperation & logWorkOperation ([73908ba](https://github.com/bbc/sofie-package-manager/commit/73908ba34fb4e54ab23f97bab1558ab657aed3a9))
+- Add option to skip deep scanning of expectations ([32f2c79](https://github.com/bbc/sofie-package-manager/commit/32f2c79c589414837111013b470ef7903626501f))
+- add worker and expectationManager configuration to troubleshoot data. ([7714f89](https://github.com/bbc/sofie-package-manager/commit/7714f8970a8039411568baa0c92cb29aab15ca20))
+- clean up logging ([9a5fc59](https://github.com/bbc/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+- compatibility with Sofie Core R52 ([8864bfd](https://github.com/bbc/sofie-package-manager/commit/8864bfdff92d7d915c7e65817480c9e51b5eb44f))
+- expand config documentation for `accessURL` ([04504e8](https://github.com/bbc/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+- make IFRAMES_SCAN more important as it may affect playback ([748a596](https://github.com/bbc/sofie-package-manager/commit/748a59664677c42e6b431a0f9241cc878ccaec38))
+- make loudness scan higher priority than thumbnails & preview ([ad31809](https://github.com/bbc/sofie-package-manager/commit/ad3180904546b3c14f30ee54267037ada590c69a))
+- move the critical worker functionality into appContainer/workerAgent ([2fd7143](https://github.com/bbc/sofie-package-manager/commit/2fd7143d292dafe139a93fc0b8915f38f9b7d9da))
+- nrk-blueprints: only wait for previous expectation if it is a copy_proxy ([b038cd9](https://github.com/bbc/sofie-package-manager/commit/b038cd91b59444c50a4bbff3a7a2de2553b71749))
+- remove invalid reported statuses ([bfffb57](https://github.com/bbc/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
+- remove outputPrefix for html-template expectations ([43e9887](https://github.com/bbc/sofie-package-manager/commit/43e9887445c117dc6935960a0d881fd19c3d34dd))
+
+### Features
+
+- add a configurable criticalWorkerPoolSize ([c0c0617](https://github.com/bbc/sofie-package-manager/commit/c0c061703f7e8f0f10262295ff8fa822350a31dc))
+- add HTML Renderer ([8610b6e](https://github.com/bbc/sofie-package-manager/commit/8610b6ebdb4bef441f9e56a3b3be512f3ccbcfad))
+- Add support for loading Kairos clips/stills into RAM ([081a88b](https://github.com/bbc/sofie-package-manager/commit/081a88bc934ed9b40fcab055c558378884df33be))
+- add support for multi-step convsion of media files, allowing a user to specify an external application to use for converting a media file, using arbitrary arguments. ([b6c1e42](https://github.com/bbc/sofie-package-manager/commit/b6c1e42621f30b22005d82fadc86522a1391cbe7))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/bbc/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- **EAV-220:** scan video files for I-frames ([a9a214a](https://github.com/bbc/sofie-package-manager/commit/a9a214ad1e94eb4afd9c64d2eae2564dc71f7eaa))
+- expose health/metrics for all processes ([#286](https://github.com/bbc/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/bbc/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
+- **PackageManager:** allow a graceful reboot procedure that will keep work status from previous runs, but remove anything PM doesn't know about ([b311513](https://github.com/bbc/sofie-package-manager/commit/b311513519e16b5a61c978a6891e98f4f64f3261))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes

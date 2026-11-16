@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Bug Fixes
+
+- add `knownReason` to the accessorHandle/expectationHandler method responses. ([f6a9f37](https://github.com/bbc/sofie-package-manager/commit/f6a9f3708f0d8effcb5c2121ccd5964c44583dba))
+- allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/bbc/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
+- clean up logging ([9a5fc59](https://github.com/bbc/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+- reject absolute file paths ([cf207e6](https://github.com/bbc/sofie-package-manager/commit/cf207e602a7b8c6b9efeca740e8c5bf657569a8c))
+- tests ([e13f8c5](https://github.com/bbc/sofie-package-manager/commit/e13f8c5083afcb78887eb0871149e36efc1c685a))
+
+### Features
+
+- Add command line option to matchFilenamesWithoutExtension ([2959f69](https://github.com/bbc/sofie-package-manager/commit/2959f6961c8d87c82ca3d0c07c56ae4d320bc993))
+- add optioal CLI option for setting a temporary file path ([c01ec30](https://github.com/bbc/sofie-package-manager/commit/c01ec30bac208df5363350a5519347d0406ce310))
+- add preChecks to mediaConvert, add executableAliases CLI ([d39b18e](https://github.com/bbc/sofie-package-manager/commit/d39b18ea5045c904552a502e1d758f6bd20c70fe))
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/bbc/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- expose health/metrics for all processes ([#286](https://github.com/bbc/sofie-package-manager/issues/286)) ([95d6c02](https://github.com/bbc/sofie-package-manager/commit/95d6c029b19fe31dd397c6bacb11991a4e97ee36))
+- Move config to process and make it available more widely ([4a2ff70](https://github.com/bbc/sofie-package-manager/commit/4a2ff70ff5be91c4f7ab97b2937ea35e2b6ef432))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/bbc/sofie-package-manager/issues/236)) ([681c62f](https://github.com/bbc/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
+- **worker:** when appContainerURL is not specified, run standalone, for external management ([7feb156](https://github.com/bbc/sofie-package-manager/commit/7feb1569d1a3898186811731ff27c4bea209bc33))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Features

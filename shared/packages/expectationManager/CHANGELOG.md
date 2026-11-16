@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.10.0](https://github.com/bbc/sofie-package-manager/compare/v1.50.0-alpha.9...v26.10.0) (2026-11-16)
+
+### Bug Fixes
+
+- (scaling); PM should not always scale up for all NEW or WAITING, only READY ([653adde](https://github.com/bbc/sofie-package-manager/commit/653addebb087068ef568a0db46228ed11c4fdb5b))
+- add .skipEvaluationCount property ([1b0246b](https://github.com/bbc/sofie-package-manager/commit/1b0246b2a5881bbdb0145ae0a3d113f00e1ed6cd))
+- add worker and expectationManager configuration to troubleshoot data. ([7714f89](https://github.com/bbc/sofie-package-manager/commit/7714f8970a8039411568baa0c92cb29aab15ca20))
+- allow expectationManager to skip ahead in state processing ([e215d1f](https://github.com/bbc/sofie-package-manager/commit/e215d1fd907f416348b2dbe06aaf7354be4ab947))
+- An issue where expectations that are fulfilled but waiting on other expectation, loop through fullfilled->new->waiting->fullfilled statuses. ([bad15df](https://github.com/bbc/sofie-package-manager/commit/bad15dff0ec08e7b3873b961ff387bec5d1f2318))
+- clean up logging ([9a5fc59](https://github.com/bbc/sofie-package-manager/commit/9a5fc59896f8da0656e3ef94dfe1d94b9a560e65))
+- clear state when RESTARTING expectations ([83f0c2d](https://github.com/bbc/sofie-package-manager/commit/83f0c2df0bb249fba6923bff8228df98992654a1))
+- don't use infinite numbers, because they are not json-serializeable ([a237fea](https://github.com/bbc/sofie-package-manager/commit/a237fea28e2fb60cba3fdb4264f5f14aaaabd223))
+- ensure noWorkerAssignedTime is reset when there is an assigned worker ([c8266d6](https://github.com/bbc/sofie-package-manager/commit/c8266d63939d21d57cde6f08f6e37e6435543c3e))
+- ensure that expectations can be picked up by newly spun up workers ([1a9874b](https://github.com/bbc/sofie-package-manager/commit/1a9874b09ff6ed576e47b49daea2206052d252d1))
+- expand config documentation for `accessURL` ([04504e8](https://github.com/bbc/sofie-package-manager/commit/04504e8283348889e8562f6d5c72833d31248b8c))
+- fix an issue where workers wheren't scaled up properly when expectations where waiting ([81f354c](https://github.com/bbc/sofie-package-manager/commit/81f354c301e587eba6f80b4f33b7fe3ebe14bf49))
+- improve reported reason for unsupported accessor ([6e01906](https://github.com/bbc/sofie-package-manager/commit/6e01906a26fbdca6fee7bf10e9675a5c9b76015e))
+- improve tracking of reasons why a worker does not support an expectation. ([0599314](https://github.com/bbc/sofie-package-manager/commit/05993141885f7b97238cb8b5b7b585aaa0311f65))
+- issue where the access url to expectationManager did not include port ([85d3e5a](https://github.com/bbc/sofie-package-manager/commit/85d3e5a4f7b190f5509e748512084c252a986a32))
+- logic change: don't return from WAITING to NEW when the expectation isn't ready to be worked on. ([0b1036c](https://github.com/bbc/sofie-package-manager/commit/0b1036cf920b11a9b553abec63d015e6c2d59b99))
+- mark job as cancelled before performing cancel ([#333](https://github.com/bbc/sofie-package-manager/issues/333)) ([ec431e7](https://github.com/bbc/sofie-package-manager/commit/ec431e7a71316dc28ebaed51695e9a1f582f8f07))
+- remove invalid reported statuses ([bfffb57](https://github.com/bbc/sofie-package-manager/commit/bfffb579562aebfdc2e08859626a675afd1b1f8e))
+- remove non-existant workers from the tracked availableWorkers & queriedWorkers ([49770d3](https://github.com/bbc/sofie-package-manager/commit/49770d370aac4ac6adf24cf5b7fe1d650dcbf1da))
+- track all reasons why a worker does not support an expectation. ([cee6aa4](https://github.com/bbc/sofie-package-manager/commit/cee6aa4a18522c86a2cc880c430c9edade89846a))
+- update lastEvaluationTime in FULFILLED, so that we wait a bit longer before checking again. ([4a72b61](https://github.com/bbc/sofie-package-manager/commit/4a72b6177c573bf6b7731e4e01708988d86a60c9))
+
+### Features
+
+- alternative URLs for expectationManager ([5bc1ac7](https://github.com/bbc/sofie-package-manager/commit/5bc1ac741691d9355932eb50cd40b30527efe142))
+- support workers in docker SOFIE-4071 ([#236](https://github.com/bbc/sofie-package-manager/issues/236)) ([681c62f](https://github.com/bbc/sofie-package-manager/commit/681c62f70abc7932e2252ac51e27732662fba17f))
+
 # [26.9.0](https://github.com/Sofie-Automation/sofie-package-manager/compare/v1.53.0...v26.9.0) (2026-10-19)
 
 ### Bug Fixes
